@@ -16,5 +16,10 @@ python example.py
 
 # TODO:
 
-- [ ] Triangulation: https://www.geometrictools.com/Documentation/TriangulationByEarClipping.pdf
-- [ ] Check if all points of a wall are coplanar
+- [x] Check if all points of a wall are coplanar
+- [ ] Triangulation:
+    - https://www.geometrictools.com/Documentation/TriangulationByEarClipping.pdf
+    - https://nils-olovsson.se/articles/ear_clipping_triangulation/
+- [ ] Accurate center of weight for Wall
+- [ ] Accurate center of weight for Space
+- [ ] Triangle area: https://en.wikipedia.org/wiki/Heron%27s_formula
