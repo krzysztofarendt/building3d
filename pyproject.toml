@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "building3d"
+authors = [
+    {name = "Krzysztof Arendt", email = "16005748+krzysztofarendt@users.noreply.github.com"},
+]
+description = "Playground for 3d drawing primitives"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "pandas",
+    "matplotlib"
+]
+version = "0.0.1"
+
+[project.optional-dependencies]
+dev = ["pytest", "black", "isort"]
+
+[project.scripts]
+building3d = "building3d:main"
