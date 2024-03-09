@@ -5,11 +5,18 @@ from .point import Point
 
 
 class Wall:
+    """A wall is composed of a number of points.
+
+    The points should be ordered based on the right-hand rule,
+    so that the vector normal to the wall points outwards the space
+    that the wall is attached to.
+    """
     def __init__(self, name: str, points: list[Point]):
         self.name = name
         self.points = points
 
     def center_of_weight(self) -> np.ndarray:
+        """This is not a true center of weight, but a mean position of all points."""
         center = np.array([0.0, 0.0, 0.0])
         for p in self.points:
             center += p.vector()
@@ -17,6 +24,10 @@ class Wall:
         return center
 
     def normal(self) -> tuple[Point, Point]:
+        """Calculate a unit normal vector for this wall.
+
+        The vector origin is at the center of weight.
+        """
         ctr = self.center_of_weight()
         v1 = self.points[0].vector() - self.points[1].vector()
         v2 = self.points[0].vector() - self.points[-1].vector()
@@ -29,8 +40,8 @@ class Wall:
 
         return (normal_beg, normal_end)
 
-    def line_segments(self) -> list[tuple[Point, Point]]:
-        """Return a list of line segments composing this wall."""
+    def edges(self) -> list[tuple[Point, Point]]:
+        """Return a list of edges of this wall."""
         wall_line_segments = []
         segment = []
 

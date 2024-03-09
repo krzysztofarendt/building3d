@@ -8,7 +8,7 @@ def plot_space(space: Space):
 
     # Plot walls
     for wall in space.walls:
-        segments = wall.line_segments()
+        segments = wall.edges()
         for line in segments:
             x0, y0, z0 = line[0].x, line[0].y, line[0].z
             x1, y1, z1 = line[1].x, line[1].y, line[1].z
