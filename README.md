@@ -1,6 +1,6 @@
 # building3d
 
-I don't now where this project heading, so there's no documentation yet.
+I don't now where this project is heading, so there's no documentation yet.
 
 # Installation
 ```
