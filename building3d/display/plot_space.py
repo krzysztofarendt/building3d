@@ -8,8 +8,8 @@ def plot_space(space: Space):
 
     # Plot walls
     for wall in space.walls:
-        segments = wall.edges()
-        for line in segments:
+        edges = wall.edges()
+        for line in edges:
             x0, y0, z0 = line[0].x, line[0].y, line[0].z
             x1, y1, z1 = line[1].x, line[1].y, line[1].z
             ax.plot([x0, x1], [y0, y1], zs=[z0, z1], color="k")

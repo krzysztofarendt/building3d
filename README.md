@@ -13,3 +13,8 @@ pip install -e .[dev]
 ```
 python example.py
 ```
+
+# TODO:
+
+- [ ] Triangulation: https://www.geometrictools.com/Documentation/TriangulationByEarClipping.pdf
+- [ ] Check if all points of a wall are coplanar

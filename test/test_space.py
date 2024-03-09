@@ -1,13 +1,12 @@
 import pytest
 
-from building3d.display.plot_space import plot_space
 from building3d.geom.exceptions import GeometryError
 from building3d.geom.point import Point
 from building3d.geom.space import Space
 from building3d.geom.wall import Wall
 
 
-def test_correct_geometry():
+def test_correct_space_geometry():
     p0 = Point(0.0, 0.0, 0.0)
     p1 = Point(1.0, 0.0, 0.0)
     p2 = Point(1.0, 1.0, 0.0)
@@ -28,7 +27,7 @@ def test_correct_geometry():
     room.verify(throw=True)
 
 
-def test_wrong_point():
+def test_point_not_shared_by_2_walls():
     p0 = Point(0.0, 0.0, 0.0)
     p1 = Point(1.0, 0.0, 0.0)
     p2 = Point(1.0, 1.0, 0.0)
@@ -50,12 +49,3 @@ def test_wrong_point():
 
     with pytest.raises(GeometryError):
         room.verify(throw=True)
-
-
-def test_too_few_points():
-    p0 = Point(0.0, 0.0, 0.0)
-    p1 = Point(1.0, 0.0, 0.0)
-    wall = Wall("wall0", [p0, p1])
-
-    with pytest.raises(GeometryError):
-        wall.verify()

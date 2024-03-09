@@ -7,7 +7,7 @@ from building3d.geom.wall import Wall
 def example():
     p0 = Point(0.0, 0.0, 0.0)
     p1 = Point(1.0, 0.0, 0.0)
-    p2 = Point(1.0, 1.0, 0.0)
+    p2 = Point(1.0, 2.0, 0.0)
     p3 = Point(0.0, 1.0, 0.0)
     p4 = Point(0.0, 0.0, 1.0)
     p5 = Point(1.0, 0.0, 1.0)
