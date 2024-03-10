@@ -108,11 +108,11 @@ class Polygon:
         """Verify geometry correctness."""
         # At least 3 points
         if len(self.points) < 3:
-            raise GeometryError(f"Wall {self.name} has only {len(self.points)} points")
+            raise GeometryError(f"Polygon has only {len(self.points)} points")
 
         # Check if all points are coplanar
         if not self._are_points_coplanar():
-            raise GeometryError(f"Points of wall {self.name} aren't coplanar")
+            raise GeometryError(f"Points of polygon aren't coplanar")
 
     def _triangulate(self) -> list:
         """Return a list of triangles (i, j, k) using the ear clipping algorithm.
