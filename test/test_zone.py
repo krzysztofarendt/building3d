@@ -2,8 +2,8 @@ import pytest
 
 from building3d.geom.exceptions import GeometryError
 from building3d.geom.point import Point
-from building3d.geom.space import Space
 from building3d.geom.wall import Wall
+from building3d.geom.zone import Zone
 
 
 def test_correct_space_geometry():
@@ -23,7 +23,7 @@ def test_correct_space_geometry():
     wall3 = Wall("wall3", [p0, p4, p7, p3])
     ceiling = Wall("ceiling", [p4, p5, p6, p7])
 
-    room = Space("room", [floor, wall0, wall1, wall2, wall3, ceiling])
+    room = Zone("room", [floor, wall0, wall1, wall2, wall3, ceiling])
     room.verify(throw=True)
 
 
@@ -45,7 +45,7 @@ def test_point_not_shared_by_2_walls():
     wall3 = Wall("wall3", [p0, p4, p7, p3])
     ceiling = Wall("ceiling", [p4, p5, p6, perr])
 
-    room = Space("room", [floor, wall0, wall1, wall2, wall3, ceiling])
+    room = Zone("room", [floor, wall0, wall1, wall2, wall3, ceiling])
 
     with pytest.raises(GeometryError):
         room.verify(throw=True)

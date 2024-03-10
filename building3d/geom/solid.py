@@ -1,13 +1,14 @@
+from typing import Sequence
+
 import numpy as np
 
 from .exceptions import GeometryError
-from .wall import Wall
+from .polygon import Polygon
 
 
-class Space:
-    def __init__(self, name: str, walls: list[Wall]):
-        self.name = name
-        self.walls = walls
+class Solid:
+    def __init__(self, boundary: Sequence[Polygon]):
+        self.boundary = boundary
 
     def verify(self, throw: bool = False) -> None:
         """Verify geometry correctness.
@@ -23,7 +24,7 @@ class Space:
         points = []
 
         # Verify each wall
-        for wall in self.walls:
+        for wall in self.boundary:
             try:
                 wall.verify()
             except GeometryError as e:
