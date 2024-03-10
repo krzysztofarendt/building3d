@@ -1,5 +1,5 @@
-import pytest
 import numpy as np
+import pytest
 
 from building3d.geom.exceptions import GeometryError
 from building3d.geom.point import Point
@@ -62,3 +62,15 @@ def test_centroid():
     wall = Wall("wall", [p1, p3, p7, p5])
     expected_centroid = np.array([0.5, 0.5, 0.5])
     assert np.sum(wall.centroid - expected_centroid) < eps
+
+
+def test_triangulation():
+    p0 = Point(0.0, 0.0, 0.0)
+    p1 = Point(2.0, 0.0, 0.0)
+    p2 = Point(2.0, 1.0, 0.0)
+    p3 = Point(1.0, 1.0, 0.0)
+    p4 = Point(1.0, 2.0, 0.0)
+    p5 = Point(0.0, 2.0, 0.0)
+    wall = Wall("L-shaped_wall", [p0, p1, p2, p3, p4, p5])
+    triangles = [{i, j, k} for i, j, k in wall.triangles]
+    assert {2, 3, 4} not in triangles

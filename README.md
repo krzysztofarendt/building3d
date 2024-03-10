@@ -22,5 +22,6 @@ python example.py
     - https://www.geometrictools.com/Documentation/TriangulationByEarClipping.pdf
     - https://nils-olovsson.se/articles/ear_clipping_triangulation/
 - [x] Accurate center of weight for Wall
+- [ ] Calculate Space volume
 - [ ] Accurate center of weight for Space
 - [ ] Use mayavi instead of matplotlib: https://docs.enthought.com/mayavi/mayavi/index.html

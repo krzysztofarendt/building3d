@@ -6,6 +6,7 @@ from .vector import to_vector
 from .vector import angle
 from .triangle import triangle_area
 from .triangle import triangle_centroid
+from .triangle import is_point_inside
 
 
 class Wall:
@@ -123,11 +124,10 @@ class Wall:
     def _triangulate(self) -> list:
         """Return a list of triangles (i, j, k) using the ear clipping algorithm.
 
-        (i, j, k) are the indices of points in self.points.
+        (i, j, k) are the indices of the points in self.points.
         """
-
         def is_convex(p0, p1, p2):
-            """Check if the angle between the edges p1->p0 and p1->p2 is less than 180 degress."""
+            """Check if the angle between p1->p0 and p1->p2 is less than 180 degress."""
             v1 = to_vector(p1, p0)
             v2 = to_vector(p1, p2)
             if angle(v1, v2) < np.pi:
@@ -141,6 +141,8 @@ class Wall:
 
         while len(vertices) > 2:
 
+            if pos > len(vertices) - 1:
+                pos = 0
             prev_pos = pos - 1 if pos > 0 else len(vertices) - 1
             next_pos = pos + 1 if pos < len(vertices) - 1 else 0
 
@@ -151,13 +153,29 @@ class Wall:
             if is_convex(prev_pt, curr_pt, next_pt):
                 # Check if no other point is within this triangle
                 # Needed for non-convex polygons
-                pass  # TODO
+                any_point_inside = False
 
-                # Add triangle
-                triangles.append((prev_id, curr_id, next_id))
+                for i in range(0, len(vertices)):
+                    test_id = vertices[i][0]
+                    if test_id not in (prev_id, curr_id, next_id):
+                        any_point_inside = is_point_inside(
+                            self.points[test_id],
+                            self.points[prev_id],
+                            self.points[curr_id],
+                            self.points[next_id],
+                        )
 
-                # Remove pos from index
-                vertices.pop(pos)
+                if not any_point_inside:
+                    # Add triangle
+                    triangles.append((prev_id, curr_id, next_id))
+
+                    # Remove pos from index
+                    vertices.pop(pos)
+
+                else:
+                    # Some point inside this triangle
+                    # It is not an ear
+                    pass
 
             pos += 1
 
@@ -168,6 +186,8 @@ class Wall:
 
         The centroid is calculated using a weighted average of
         the triangle centroids. The weights are the triangle areas.
+
+        Uses self.triangles (the output of self.triangulate()).
         """
         tri_ctr = []
         weights = []
