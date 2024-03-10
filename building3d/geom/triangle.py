@@ -46,8 +46,11 @@ def _is_on_correct_side(ptest: Point, p1: Point, p2: Point, pref: Point) -> bool
         # Wrong reference point chosen (colinear with p1 and p2)
         raise GeometryError("Wrong reference point chosen (colinear with p1 and p2)")
     elif len_vtest < eps:
-        # This point lies exactly on the boundary of the triangle
-        return True
+        # This point lies on the edge connecting p1 and p2
+        # Add jitter (move ptest a bit)
+        jitter = (np.random.random(3) - 0.5) * eps
+        ptest_jitter = Point(ptest.x + jitter[0], ptest.y + jitter[1], ptest.z + jitter[2])
+        return _is_on_correct_side(ptest_jitter, p1 ,p2, pref)
     else:
         vtest /= len_vtest
         vref /= len_vref
