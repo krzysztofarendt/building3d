@@ -3,6 +3,9 @@ import numpy as np
 from .exceptions import GeometryError
 from .point import Point
 from .vector import to_vector
+from .vector import angle
+from .triangle import triangle_area
+from .triangle import triangle_centroid
 
 
 class Wall:
@@ -15,14 +18,8 @@ class Wall:
     def __init__(self, name: str, points: list[Point]):
         self.name = name
         self.points = points
-
-    def center_of_weight(self) -> np.ndarray:
-        """This is not a true center of weight, but a mean position of all points."""
-        center = np.array([0.0, 0.0, 0.0])
-        for p in self.points:
-            center += p.vector()
-        center /= len(self.points)
-        return center
+        self.triangles = self._triangulate()
+        self.centroid = self._centroid()
 
     def normal(self) -> tuple[Point, Point]:
         """Calculate a unit normal vector for this wall.
@@ -33,7 +30,7 @@ class Wall:
         - A: 0 -> 1 (first and second point)
         - B: 0 -> -1 (first and last point)
         """
-        ctr = self.center_of_weight()
+        ctr = self.centroid
         vec_a = self.points[0].vector() - self.points[1].vector()
         vec_b = self.points[0].vector() - self.points[-1].vector()
         norm = np.cross(vec_a, vec_b)
@@ -61,6 +58,38 @@ class Wall:
                 i -= 1
 
         return wall_line_segments
+
+    def area(self):
+        """Calculate the area of the wall.
+
+        Calculated using the Stoke's theorem:
+        https://en.wikipedia.org/wiki/Stokes%27_theorem
+
+        Code based on:
+        https://stackoverflow.com/questions/12642256/find-area-of-polygon-from-xyz-coordinates
+        """
+        poly = [(p.x, p.y, p.z) for p in self.points]
+
+        if len(poly) < 3: # not a plane - no area
+            return 0
+
+        total = [0, 0, 0]
+        N = len(poly)
+        for i in range(N):
+            vi1 = poly[i]
+            if i == N - 1:
+                vi2 = poly[0]
+            else:
+                vi2 = poly[i+1]
+            prod = np.cross(vi1, vi2)
+            total[0] += prod[0]
+            total[1] += prod[1]
+            total[2] += prod[2]
+
+        normal_beg, normal_end = self.normal()
+        result = np.dot(total, to_vector(normal_beg, normal_end))
+
+        return abs(result / 2)
 
     def are_points_coplanar(self) -> bool:
         vec_n = to_vector(*self.normal())
@@ -90,3 +119,73 @@ class Wall:
         # Check if all points are coplanar
         if not self.are_points_coplanar():
             raise GeometryError(f"Points of wall {self.name} aren't coplanar")
+
+    def _triangulate(self) -> list:
+        """Return a list of triangles (i, j, k) using the ear clipping algorithm.
+
+        (i, j, k) are the indices of points in self.points.
+        """
+
+        def is_convex(p0, p1, p2):
+            """Check if the angle between the edges p1->p0 and p1->p2 is less than 180 degress."""
+            v1 = to_vector(p1, p0)
+            v2 = to_vector(p1, p2)
+            if angle(v1, v2) < np.pi:
+                return True
+            else:
+                return False
+
+        vertices = [(i, p) for i, p in enumerate(self.points)]
+        triangles = []
+        pos = 0
+
+        while len(vertices) > 2:
+
+            prev_pos = pos - 1 if pos > 0 else len(vertices) - 1
+            next_pos = pos + 1 if pos < len(vertices) - 1 else 0
+
+            prev_id, prev_pt = vertices[prev_pos]
+            curr_id, curr_pt = vertices[pos]
+            next_id, next_pt = vertices[next_pos]
+
+            if is_convex(prev_pt, curr_pt, next_pt):
+                # Check if no other point is within this triangle
+                # Needed for non-convex polygons
+                pass  # TODO
+
+                # Add triangle
+                triangles.append((prev_id, curr_id, next_id))
+
+                # Remove pos from index
+                vertices.pop(pos)
+
+            pos += 1
+
+        return triangles
+
+    def _centroid(self) -> np.ndarray:
+        """Calculate the center of mass.
+
+        The centroid is calculated using a weighted average of
+        the triangle centroids. The weights are the triangle areas.
+        """
+        tri_ctr = []
+        weights = []
+
+        for tri in self.triangles:
+            tri_ctr.append(
+                triangle_centroid(
+                    self.points[tri[0]], self.points[tri[1]], self.points[tri[2]]
+                )
+            )
+            weights.append(
+                triangle_area(
+                    self.points[tri[0]], self.points[tri[1]], self.points[tri[2]]
+                )
+            )
+        tri_ctr_arr = np.array([(p.x, p.y, p.z) for p in tri_ctr])
+        weights_arr = np.array(weights).reshape((-1, 1))
+
+        weighted_centroids = tri_ctr_arr * weights_arr
+
+        return weighted_centroids.sum(axis=0) / weights_arr.sum()

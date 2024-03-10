@@ -10,9 +10,9 @@ def example():
     p2 = Point(1.0, 1.0, 0.0)
     p3 = Point(0.0, 1.0, 0.0)
     p4 = Point(0.0, 0.0, 1.0)
-    p5 = Point(1.0, 0.0, 1.0)
+    p5 = Point(1.0, 0.0, 0.5)
     p6 = Point(1.0, 1.0, 1.0)
-    p7 = Point(0.0, 1.0, 1.0)
+    p7 = Point(0.0, 1.0, 1.5)
 
     floor = Wall("floor", [p0, p3, p2, p1])
     wall0 = Wall("wall0", [p0, p1, p5, p4])

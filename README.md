@@ -17,9 +17,10 @@ python example.py
 # TODO:
 
 - [x] Check if all points of a wall are coplanar
-- [ ] Triangulation:
+- [x] Triangle area: https://en.wikipedia.org/wiki/Heron%27s_formula
+- [x] Triangulation:
     - https://www.geometrictools.com/Documentation/TriangulationByEarClipping.pdf
     - https://nils-olovsson.se/articles/ear_clipping_triangulation/
-- [ ] Accurate center of weight for Wall
+- [x] Accurate center of weight for Wall
 - [ ] Accurate center of weight for Space
-- [ ] Triangle area: https://en.wikipedia.org/wiki/Heron%27s_formula
+- [ ] Use mayavi instead of matplotlib: https://docs.enthought.com/mayavi/mayavi/index.html
