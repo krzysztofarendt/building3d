@@ -2,8 +2,7 @@ import numpy as np
 
 from .exceptions import GeometryError
 from .point import Point
-from .vector import to_vector
-from .vector import angle
+from .vector import Vector
 from .triangle import triangle_centroid
 from .triangle import triangle_area
 from .triangle import is_point_inside
@@ -82,12 +81,12 @@ class Polygon:
             total[2] += prod[2]
 
         normal_beg, normal_end = self.normal()
-        result = np.dot(total, to_vector(normal_beg, normal_end))
+        result = np.dot(total, Vector(normal_beg, normal_end).v)
 
         return abs(result / 2)
 
     def _are_points_coplanar(self) -> bool:
-        vec_n = to_vector(*self.normal())
+        vec_n = Vector(*self.normal()).v
 
         # Plane equation:
         # ax + by + cz + d = 0
@@ -122,9 +121,9 @@ class Polygon:
         """
         def is_convex(p0, p1, p2):
             """Check if the angle between p1->p0 and p1->p2 is less than 180 degress."""
-            v1 = to_vector(p1, p0)
-            v2 = to_vector(p1, p2)
-            if angle(v1, v2) < np.pi:
+            v1 = Vector(p1, p0)
+            v2 = Vector(p1, p2)
+            if v1.angle(v2) < np.pi:
                 return True
             else:
                 return False

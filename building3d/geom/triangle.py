@@ -1,8 +1,7 @@
 import numpy as np
 
 from .point import Point
-from .vector import to_vector
-from .vector import length
+from .vector import Vector
 from .exceptions import GeometryError
 
 
@@ -11,12 +10,12 @@ def triangle_area(p1: Point, p2: Point, p3: Point) -> float:
 
     Reference: https://en.wikipedia.org/wiki/Heron%27s_formula
     """
-    vec_a = to_vector(p1, p2)
-    vec_b = to_vector(p2, p3)
-    vec_c = to_vector(p3, p1)
-    a = length(vec_a)
-    b = length(vec_b)
-    c = length(vec_c)
+    vec_a = Vector(p1, p2)
+    vec_b = Vector(p2, p3)
+    vec_c = Vector(p3, p1)
+    a = vec_a.length()
+    b = vec_b.length()
+    c = vec_c.length()
 
     s = 0.5 * (a + b + c)
     area = np.sqrt(s * (s - a) * (s - b) * (s - c))
@@ -32,14 +31,14 @@ def triangle_centroid(p1: Point, p2: Point, p3: Point) -> Point:
     return Point(cx, cy, cz)
 
 
-def _is_on_correct_side(ptest: Point, p1: Point, p2: Point, pref: Point) -> bool:
+def is_point_on_correct_side(ptest: Point, p1: Point, p2: Point, pref: Point) -> bool:
     """Test if ptest is on the same side of p1->p2 as pref."""
 
-    vtest = np.cross(to_vector(p1, p2), to_vector(p1, ptest))
-    vref = np.cross(to_vector(p1, p2), to_vector(p1, pref))
+    vtest = np.cross(Vector(p1, p2).v, Vector(p1, ptest).v)
+    vref = np.cross(Vector(p1, p2).v, Vector(p1, pref).v)
 
-    len_vtest = length(vtest)
-    len_vref = length(vref)
+    len_vtest = Vector._length(vtest)
+    len_vref = Vector._length(vref)
 
     eps = 1e-6
     if len_vref < eps:
@@ -50,7 +49,7 @@ def _is_on_correct_side(ptest: Point, p1: Point, p2: Point, pref: Point) -> bool
         # Add jitter (move ptest a bit)
         jitter = (np.random.random(3) - 0.5) * eps
         ptest_jitter = Point(ptest.x + jitter[0], ptest.y + jitter[1], ptest.z + jitter[2])
-        return _is_on_correct_side(ptest_jitter, p1 ,p2, pref)
+        return is_point_on_correct_side(ptest_jitter, p1 ,p2, pref)
     else:
         vtest /= len_vtest
         vref /= len_vref
@@ -63,8 +62,8 @@ def is_point_inside(ptest: Point, p1: Point, p2: Point, p3: Point) -> bool:
     Using the "same side technique" described at:
     https://blackpawn.com/texts/pointinpoly/
     """
-    side1 = _is_on_correct_side(ptest, p1, p2, p3)
-    side2 = _is_on_correct_side(ptest, p2, p3, p1)
-    side3 = _is_on_correct_side(ptest, p3, p1, p2)
+    side1 = is_point_on_correct_side(ptest, p1, p2, p3)
+    side2 = is_point_on_correct_side(ptest, p2, p3, p1)
+    side3 = is_point_on_correct_side(ptest, p3, p1, p2)
 
     return side1 and side2 and side3
