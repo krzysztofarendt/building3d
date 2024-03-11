@@ -61,9 +61,27 @@ def is_point_inside(ptest: Point, p1: Point, p2: Point, p3: Point) -> bool:
 
     Using the "same side technique" described at:
     https://blackpawn.com/texts/pointinpoly/
+
+    This function does not test if the point is coplanar with the triangle.
     """
+    # Test if the point is at any of the three vertices
+    if ptest == p1 or ptest == p2 or ptest == p3:
+        return True
+
+    # Test if it's at any of the edges
+    for pair in [(p1, p2), (p2, p3), (p3, p1)]:
+        v = Vector(pair[0], pair[1])
+        if v.is_point_colinear(ptest):
+            return True
+
+    # Test if it's inside
     side1 = is_point_on_correct_side(ptest, p1, p2, p3)
     side2 = is_point_on_correct_side(ptest, p2, p3, p1)
     side3 = is_point_on_correct_side(ptest, p3, p1, p2)
 
-    return side1 and side2 and side3
+    is_inside = side1 and side2 and side3
+    if is_inside:
+        return True
+
+    # It must be outside
+    return False

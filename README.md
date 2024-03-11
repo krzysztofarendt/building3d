@@ -22,6 +22,7 @@ python example.py
     - https://www.geometrictools.com/Documentation/TriangulationByEarClipping.pdf
     - https://nils-olovsson.se/articles/ear_clipping_triangulation/
 - [x] Accurate center of weight for Wall
+- [ ] TESTS ARE FAILING
 - [ ] Check wheter a point is inside a Solid
 - [ ] Delaunay triangulation of a solid
 - [ ] Calculate Zone volume

@@ -5,7 +5,7 @@ from .point import Point
 from .vector import Vector
 from .triangle import triangle_centroid
 from .triangle import triangle_area
-from .triangle import is_point_inside
+from .triangle import is_point_inside as is_point_inside_triangle
 
 
 class Polygon:
@@ -16,11 +16,37 @@ class Polygon:
         if len(self.points) < 3:
             raise GeometryError(f"Polygon has only {len(self.points)} points")
 
+        self.normal = self._normal()
         self.triangles = self._triangulate()
         self.centroid = self._centroid()
-        self.normal = self._normal()
+        self.normal.attach(self.centroid)
         self.edges = self._edges()
         self.area = self._area()
+
+    def is_point_coplanar(self, p: Point) -> bool:
+        """Checks whether the point p is coplanar with the polygon."""
+        # Temporarily add the test point to self.points
+        self.points.append(p)
+        is_coplanar = self._are_points_coplanar()
+        # Remove the test point from self.points
+        self.points = self.points[:-1]
+
+        return is_coplanar
+
+    def is_point_inside(self, p: Point) -> bool:
+        """Checks wheter a point lies on the surface of the polygon."""
+
+
+        if not self.is_point_coplanar(p):
+            return False
+
+        for triangle_indices in self.triangles:
+            tri = [self.points[i] for i in triangle_indices]
+
+            if is_point_inside_triangle(p, tri[0], tri[1], tri[2]):
+                return True
+
+        return False
 
     def _triangulate(self) -> list:
         """Return a list of triangles (i, j, k) using the ear clipping algorithm.
@@ -31,7 +57,7 @@ class Polygon:
             """Check if the angle between p1->p0 and p1->p2 is less than 180 degress."""
             v1 = Vector(p1, p0)
             v2 = Vector(p1, p2)
-            if v1.angle(v2) < np.pi:
+            if v2.angle_ccw(v1, self.normal) < np.pi:
                 return True
             else:
                 return False
@@ -40,7 +66,12 @@ class Polygon:
         triangles = []
         pos = 0
 
+        number_failed = 0
+
         while len(vertices) > 2:
+
+            if number_failed > len(vertices):
+                raise RuntimeError("Triangulation failed")
 
             if pos > len(vertices) - 1:
                 pos = 0
@@ -59,7 +90,7 @@ class Polygon:
                 for i in range(0, len(vertices)):
                     test_id = vertices[i][0]
                     if test_id not in (prev_id, curr_id, next_id):
-                        any_point_inside = is_point_inside(
+                        any_point_inside = is_point_inside_triangle(
                             self.points[test_id],
                             self.points[prev_id],
                             self.points[curr_id],
@@ -74,15 +105,19 @@ class Polygon:
                     vertices.pop(pos)
 
                 else:
-                    # Some point inside this triangle
-                    # It is not an ear
-                    pass
+                    # There is some point inside this triangle
+                    # So it is not not an ear
+                    number_failed += 1
+
+            else:
+                # Non-convex corner
+                number_failed += 1
 
             pos += 1
 
         return triangles
 
-    def _normal(self) -> tuple[Point, Point]:
+    def _normal(self, start_at_centroid=False) -> Vector:
         """Calculate a unit normal vector for this wall.
 
         The vector origin is at the center of weight.
@@ -91,17 +126,21 @@ class Polygon:
         - A: 0 -> 1 (first and second point)
         - B: 0 -> -1 (first and last point)
         """
-        ctr = self.centroid
-        vec_a = self.points[0].vector() - self.points[1].vector()
-        vec_b = self.points[0].vector() - self.points[-1].vector()
+        vec_a = self.points[0].vector() - self.points[-1].vector()
+        vec_b = self.points[1].vector() - self.points[0].vector()
         norm = np.cross(vec_a, vec_b)
         norm /= np.sqrt(norm[0] ** 2 + norm[1] ** 2 + norm[2] ** 2)
-        norm += ctr
 
-        normal_beg = Point(x=ctr[0], y=ctr[1], z=ctr[2])
+        if start_at_centroid:
+            ctr = self.centroid.vector()
+            norm += ctr
+            normal_beg = Point(x=ctr[0], y=ctr[1], z=ctr[2])
+        else:
+            normal_beg = Point(x=0., y=0., z=0.)
+
         normal_end = Point(x=norm[0], y=norm[1], z=norm[2])
 
-        return (normal_beg, normal_end)
+        return Vector(normal_beg, normal_end)
 
     def _edges(self) -> list[tuple[Point, Point]]:
         """Return a list of edges of this wall."""
@@ -147,13 +186,12 @@ class Polygon:
             total[1] += prod[1]
             total[2] += prod[2]
 
-        normal_beg, normal_end = self.normal
-        result = np.dot(total, Vector(normal_beg, normal_end).v)
+        result = np.dot(total, self.normal.v)
 
         return abs(result / 2)
 
     def _are_points_coplanar(self) -> bool:
-        vec_n = Vector(*self.normal).v
+        vec_n = self.normal.v
 
         # Plane equation:
         # ax + by + cz + d = 0
@@ -181,7 +219,7 @@ class Polygon:
         if not self._are_points_coplanar():
             raise GeometryError(f"Points of polygon aren't coplanar")
 
-    def _centroid(self) -> np.ndarray:
+    def _centroid(self) -> Point:
         """Calculate the center of mass.
 
         The centroid is calculated using a weighted average of
@@ -210,4 +248,7 @@ class Polygon:
 
         weighted_centroids = tri_ctr_arr * weights_arr
 
-        return weighted_centroids.sum(axis=0) / weights_arr.sum()
+        vec = weighted_centroids.sum(axis=0) / weights_arr.sum()
+        ctr = Point(vec[0], vec[1], vec[2])
+
+        return ctr
