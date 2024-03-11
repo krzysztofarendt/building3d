@@ -12,107 +12,15 @@ class Polygon:
 
     def __init__(self, points: list[Point]):
         self.points = points
-        self.triangles = self._triangulate()
-        self.centroid = self._centroid()
 
-    def normal(self) -> tuple[Point, Point]:
-        """Calculate a unit normal vector for this wall.
-
-        The vector origin is at the center of weight.
-        The normal vector is calculated using the cross product
-        of two vectors A and B spanning between points:
-        - A: 0 -> 1 (first and second point)
-        - B: 0 -> -1 (first and last point)
-        """
-        ctr = self.centroid
-        vec_a = self.points[0].vector() - self.points[1].vector()
-        vec_b = self.points[0].vector() - self.points[-1].vector()
-        norm = np.cross(vec_a, vec_b)
-        norm /= np.sqrt(norm[0] ** 2 + norm[1] ** 2 + norm[2] ** 2)
-        norm += ctr
-
-        normal_beg = Point(x=ctr[0], y=ctr[1], z=ctr[2])
-        normal_end = Point(x=norm[0], y=norm[1], z=norm[2])
-
-        return (normal_beg, normal_end)
-
-    def edges(self) -> list[tuple[Point, Point]]:
-        """Return a list of edges of this wall."""
-        wall_line_segments = []
-        segment = []
-
-        i = 0
-        while i < len(self.points):
-            segment.append(self.points[i])
-            i += 1
-
-            if len(segment) == 2:
-                wall_line_segments.append(tuple(segment))
-                segment = []
-                i -= 1
-
-        return wall_line_segments
-
-    def area(self):
-        """Calculate the area of the wall.
-
-        Calculated using the Stoke's theorem:
-        https://en.wikipedia.org/wiki/Stokes%27_theorem
-
-        Code based on:
-        https://stackoverflow.com/questions/12642256/find-area-of-polygon-from-xyz-coordinates
-        """
-        poly = [(p.x, p.y, p.z) for p in self.points]
-
-        if len(poly) < 3: # not a plane - no area
-            return 0
-
-        total = [0, 0, 0]
-        N = len(poly)
-        for i in range(N):
-            vi1 = poly[i]
-            if i == N - 1:
-                vi2 = poly[0]
-            else:
-                vi2 = poly[i+1]
-            prod = np.cross(vi1, vi2)
-            total[0] += prod[0]
-            total[1] += prod[1]
-            total[2] += prod[2]
-
-        normal_beg, normal_end = self.normal()
-        result = np.dot(total, Vector(normal_beg, normal_end).v)
-
-        return abs(result / 2)
-
-    def _are_points_coplanar(self) -> bool:
-        vec_n = Vector(*self.normal()).v
-
-        # Plane equation:
-        # ax + by + cz + d = 0
-        # (a, b, c) are taken from the normal vector
-        # d is calculated by substituting one of the points
-        ref = 0  # reference point index
-        ref_pt = self.points[ref]
-        d = -1 * (vec_n[0] * ref_pt.x + vec_n[1] * ref_pt.y + vec_n[2] * ref_pt.z)
-
-        # Check if all points lay on the same plane
-        eps = 1e-6
-        for pt in self.points:
-            coplanar = np.abs(vec_n[0] * pt.x + vec_n[1] * pt.y + vec_n[2] * pt.z + d) < eps
-            if not coplanar:
-                return False
-        return True
-
-    def verify(self):
-        """Verify geometry correctness."""
-        # At least 3 points
         if len(self.points) < 3:
             raise GeometryError(f"Polygon has only {len(self.points)} points")
 
-        # Check if all points are coplanar
-        if not self._are_points_coplanar():
-            raise GeometryError(f"Points of polygon aren't coplanar")
+        self.triangles = self._triangulate()
+        self.centroid = self._centroid()
+        self.normal = self._normal()
+        self.edges = self._edges()
+        self.area = self._area()
 
     def _triangulate(self) -> list:
         """Return a list of triangles (i, j, k) using the ear clipping algorithm.
@@ -174,6 +82,105 @@ class Polygon:
 
         return triangles
 
+    def _normal(self) -> tuple[Point, Point]:
+        """Calculate a unit normal vector for this wall.
+
+        The vector origin is at the center of weight.
+        The normal vector is calculated using the cross product
+        of two vectors A and B spanning between points:
+        - A: 0 -> 1 (first and second point)
+        - B: 0 -> -1 (first and last point)
+        """
+        ctr = self.centroid
+        vec_a = self.points[0].vector() - self.points[1].vector()
+        vec_b = self.points[0].vector() - self.points[-1].vector()
+        norm = np.cross(vec_a, vec_b)
+        norm /= np.sqrt(norm[0] ** 2 + norm[1] ** 2 + norm[2] ** 2)
+        norm += ctr
+
+        normal_beg = Point(x=ctr[0], y=ctr[1], z=ctr[2])
+        normal_end = Point(x=norm[0], y=norm[1], z=norm[2])
+
+        return (normal_beg, normal_end)
+
+    def _edges(self) -> list[tuple[Point, Point]]:
+        """Return a list of edges of this wall."""
+        wall_line_segments = []
+        segment = []
+
+        i = 0
+        while i < len(self.points):
+            segment.append(self.points[i])
+            i += 1
+
+            if len(segment) == 2:
+                wall_line_segments.append(tuple(segment))
+                segment = []
+                i -= 1
+
+        return wall_line_segments
+
+    def _area(self):
+        """Calculate the area of the wall.
+
+        Calculated using the Stoke's theorem:
+        https://en.wikipedia.org/wiki/Stokes%27_theorem
+
+        Code based on:
+        https://stackoverflow.com/questions/12642256/find-area-of-polygon-from-xyz-coordinates
+        """
+        poly = [(p.x, p.y, p.z) for p in self.points]
+
+        if len(poly) < 3: # not a plane - no area
+            return 0
+
+        total = [0, 0, 0]
+        N = len(poly)
+        for i in range(N):
+            vi1 = poly[i]
+            if i == N - 1:
+                vi2 = poly[0]
+            else:
+                vi2 = poly[i+1]
+            prod = np.cross(vi1, vi2)
+            total[0] += prod[0]
+            total[1] += prod[1]
+            total[2] += prod[2]
+
+        normal_beg, normal_end = self.normal
+        result = np.dot(total, Vector(normal_beg, normal_end).v)
+
+        return abs(result / 2)
+
+    def _are_points_coplanar(self) -> bool:
+        vec_n = Vector(*self.normal).v
+
+        # Plane equation:
+        # ax + by + cz + d = 0
+        # (a, b, c) are taken from the normal vector
+        # d is calculated by substituting one of the points
+        ref = 0  # reference point index
+        ref_pt = self.points[ref]
+        d = -1 * (vec_n[0] * ref_pt.x + vec_n[1] * ref_pt.y + vec_n[2] * ref_pt.z)
+
+        # Check if all points lay on the same plane
+        eps = 1e-6
+        for pt in self.points:
+            coplanar = np.abs(vec_n[0] * pt.x + vec_n[1] * pt.y + vec_n[2] * pt.z + d) < eps
+            if not coplanar:
+                return False
+        return True
+
+    def verify(self):
+        """Verify geometry correctness."""
+        # At least 3 points
+        if len(self.points) < 3:
+            raise GeometryError(f"Polygon has only {len(self.points)} points")
+
+        # Check if all points are coplanar
+        if not self._are_points_coplanar():
+            raise GeometryError(f"Points of polygon aren't coplanar")
+
     def _centroid(self) -> np.ndarray:
         """Calculate the center of mass.
 
@@ -184,6 +191,8 @@ class Polygon:
         """
         tri_ctr = []
         weights = []
+
+        assert len(self.triangles) > 0, "No triangles after ear clipping?"
 
         for tri in self.triangles:
             tri_ctr.append(
