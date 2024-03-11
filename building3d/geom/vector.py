@@ -5,19 +5,21 @@ from .point import Point
 
 class Vector:
     def __init__(self, p1: Point, p2: Point):
+        self.p1 = None
+        self.p2 = None
+        self.v = np.array([])
+        self.update(p1, p2)
+
+    def update(self, p1, p2):
         self.p1 = p1
         self.p2 = p2
-        self.v = self.points_to_vector(p1, p2)
-
-    def points_to_vector(self, p1, p2):
-        vec = np.array([p2.x - p1.x, p2.y - p1.y, p2.z - p1.z])
-        return vec
+        self.v = np.array([p2.x - p1.x, p2.y - p1.y, p2.z - p1.z])
 
     def length(self):
         return Vector._length(self.v)
 
     @staticmethod
-    def _length(v) -> float:
+    def _length(v: np.ndarray) -> float:
         """Calculate the length of the vector."""
         return np.sqrt(v[0] ** 2 + v[1] ** 2 + v[2] ** 2)
 

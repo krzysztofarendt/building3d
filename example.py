@@ -1,6 +1,6 @@
-from building3d.display.plot_space import plot_space
+from building3d.display.plot_zone import plot_zone
 from building3d.geom.point import Point
-from building3d.geom.space import Space
+from building3d.geom.zone import Zone
 from building3d.geom.wall import Wall
 
 
@@ -21,10 +21,10 @@ def example():
     wall3 = Wall("wall3", [p0, p4, p7, p3])
     ceiling = Wall("ceiling", [p4, p5, p6, p7])
 
-    room = Space("room", [floor, wall0, wall1, wall2, wall3, ceiling])
+    room = Zone("room", [floor, wall0, wall1, wall2, wall3, ceiling])
     room.verify()
 
-    plot_space(room)
+    plot_zone(room)
 
     return 0
 
