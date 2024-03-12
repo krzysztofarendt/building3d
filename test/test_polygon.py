@@ -73,7 +73,7 @@ def test_triangulation_l_shape():
     assert {2, 3, 4} not in triangles
 
 
-def test_triangulation_cross_shape():
+def test_triangulation_cross_shape_on_xy_plane():
     p0 = Point(-1.0, -1.0, 0.0)
     p1 = Point(-1.0, -2.0, 0.0)
     p2 = Point(1.0, -2.0, 0.0)
@@ -86,6 +86,27 @@ def test_triangulation_cross_shape():
     p9 = Point(-1.0, 1.0, 0.0)
     p10 = Point(-2.0, 1.0, 0.0)
     p11 = Point(-2.0, -1.0, 0.0)
+    poly = Polygon([p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p0])
+    triangles = [{i, j, k} for i, j, k in poly.triangles]
+    assert {10, 11, 0} not in triangles
+    assert {1, 2, 3} not in triangles
+    assert {4, 5, 6} not in triangles
+    assert {7, 8, 9} not in triangles
+
+
+def test_triangulation_cross_shape_on_yz_plane():
+    p0 = Point(0.0, -1.0, -1.0)
+    p1 = Point(0.0, -1.0, -2.0)
+    p2 = Point(0.0, 1.0, -2.0)
+    p3 = Point(0.0, 1.0, -1.0)
+    p4 = Point(0.0, 2.0, -1.0)
+    p5 = Point(0.0, 2.0, 1.0)
+    p6 = Point(0.0, 1.0, 1.0)
+    p7 = Point(0.0, 1.0, 2.0)
+    p8 = Point(0.0, -1.0, 2.0)
+    p9 = Point(0.0, -1.0, 1.0)
+    p10 = Point(0.0, -2.0, 1.0)
+    p11 = Point(0.0, -2.0, -1.0)
     poly = Polygon([p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p0])
     triangles = [{i, j, k} for i, j, k in poly.triangles]
     assert {10, 11, 0} not in triangles
