@@ -62,8 +62,7 @@ def test_centroid():
 
 
 def test_triangulation():
-    # TODO: Failing because CCW angle is sometimes calculated incorrectly
-    #       probably because the orientation of the normal vector is wrong
+    # TODO: Failing because CCW angle is sometimes calculated incorrectly (but why?)
     p0 = Point(0.0, 0.0, 0.0)
     p1 = Point(2.0, 0.0, 0.0)
     p2 = Point(2.0, 1.0, 0.0)

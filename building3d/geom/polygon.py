@@ -69,7 +69,7 @@ class Polygon:
         while len(vertices) > 2:
 
             if number_failed > len(vertices):
-                raise RuntimeError("Triangulation failed")
+                raise RuntimeError("Triangulation failed, reason unknown (TODO)")
 
             if pos > len(vertices) - 1:
                 pos = 0
