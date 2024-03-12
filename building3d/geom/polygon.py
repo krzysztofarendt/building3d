@@ -2,10 +2,11 @@ import numpy as np
 
 from .exceptions import GeometryError
 from .point import Point
-from .vector import Vector
+from .vector import vector
 from .triangle import triangle_centroid
 from .triangle import triangle_area
 from .triangle import is_point_inside as is_point_inside_triangle
+from .triangle import triangulate
 
 
 class Polygon:
@@ -14,10 +15,8 @@ class Polygon:
         self.points = points
         self.normal = self._normal()
         self._verify()
-
         self.triangles = self._triangulate()
         self.centroid = self._centroid()
-        self.normal.attach(self.centroid)
         self.edges = self._edges()
         self.area = self._area()
 
@@ -51,71 +50,9 @@ class Polygon:
 
         (i, j, k) are the indices of the points in self.points.
         """
-        def is_convex(p0, p1, p2):
-            """Check if the angle between p1->p0 and p1->p2 is less than 180 degress."""
-            v1 = Vector(p1, p0)
-            v2 = Vector(p1, p2)
-            if v2.angle_ccw(v1, self.normal) < np.pi:
-                return True
-            else:
-                return False
+        return triangulate(self.points, self.normal)
 
-        vertices = [(i, p) for i, p in enumerate(self.points)]
-        triangles = []
-        pos = 0
-
-        number_failed = 0
-
-        while len(vertices) > 2:
-
-            if number_failed > len(vertices):
-                raise RuntimeError("Triangulation failed, reason unknown (TODO)")
-
-            if pos > len(vertices) - 1:
-                pos = 0
-            prev_pos = pos - 1 if pos > 0 else len(vertices) - 1
-            next_pos = pos + 1 if pos < len(vertices) - 1 else 0
-
-            prev_id, prev_pt = vertices[prev_pos]
-            curr_id, curr_pt = vertices[pos]
-            next_id, next_pt = vertices[next_pos]
-
-            if is_convex(prev_pt, curr_pt, next_pt):
-                # Check if no other point is within this triangle
-                # Needed for non-convex polygons
-                any_point_inside = False
-
-                for i in range(0, len(vertices)):
-                    test_id = vertices[i][0]
-                    if test_id not in (prev_id, curr_id, next_id):
-                        any_point_inside = is_point_inside_triangle(
-                            self.points[test_id],
-                            self.points[prev_id],
-                            self.points[curr_id],
-                            self.points[next_id],
-                        )
-
-                if not any_point_inside:
-                    # Add triangle
-                    triangles.append((prev_id, curr_id, next_id))
-
-                    # Remove pos from index
-                    vertices.pop(pos)
-
-                else:
-                    # There is some point inside this triangle
-                    # So it is not not an ear
-                    number_failed += 1
-
-            else:
-                # Non-convex corner
-                number_failed += 1
-
-            pos += 1
-
-        return triangles
-
-    def _normal(self, start_at_centroid=False) -> Vector:
+    def _normal(self) -> np.ndarray:
         """Calculate a unit normal vector for this wall.
 
         The vector origin is at the center of weight.
@@ -129,16 +66,10 @@ class Polygon:
         norm = np.cross(vec_a, vec_b)
         norm /= np.sqrt(norm[0] ** 2 + norm[1] ** 2 + norm[2] ** 2)
 
-        if start_at_centroid:
-            ctr = self.centroid.vector()
-            norm += ctr
-            normal_beg = Point(x=ctr[0], y=ctr[1], z=ctr[2])
-        else:
-            normal_beg = Point(x=0., y=0., z=0.)
-
+        normal_beg = Point(x=0., y=0., z=0.)
         normal_end = Point(x=norm[0], y=norm[1], z=norm[2])
 
-        return Vector(normal_beg, normal_end)
+        return vector(normal_beg, normal_end)
 
     def _edges(self) -> list[tuple[Point, Point]]:
         """Return a list of edges of this wall."""
@@ -184,12 +115,12 @@ class Polygon:
             total[1] += prod[1]
             total[2] += prod[2]
 
-        result = np.dot(total, self.normal.v)
+        result = np.dot(total, self.normal)
 
         return abs(result / 2)
 
     def _are_points_coplanar(self) -> bool:
-        vec_n = self.normal.v
+        vec_n = self.normal
 
         # Plane equation:
         # ax + by + cz + d = 0

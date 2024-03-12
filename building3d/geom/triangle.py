@@ -1,7 +1,10 @@
 import numpy as np
 
 from .point import Point
-from .vector import Vector
+from .vector import vector
+from .vector import length
+from .vector import angle_ccw
+from .vector import is_point_colinear
 from .exceptions import GeometryError
 
 
@@ -10,12 +13,12 @@ def triangle_area(p1: Point, p2: Point, p3: Point) -> float:
 
     Reference: https://en.wikipedia.org/wiki/Heron%27s_formula
     """
-    vec_a = Vector(p1, p2)
-    vec_b = Vector(p2, p3)
-    vec_c = Vector(p3, p1)
-    a = vec_a.length()
-    b = vec_b.length()
-    c = vec_c.length()
+    vec_a = vector(p1, p2)
+    vec_b = vector(p2, p3)
+    vec_c = vector(p3, p1)
+    a = length(vec_a)
+    b = length(vec_b)
+    c = length(vec_c)
 
     s = 0.5 * (a + b + c)
     area = np.sqrt(s * (s - a) * (s - b) * (s - c))
@@ -34,11 +37,11 @@ def triangle_centroid(p1: Point, p2: Point, p3: Point) -> Point:
 def is_point_on_correct_side(ptest: Point, p1: Point, p2: Point, pref: Point) -> bool:
     """Test if ptest is on the same side of p1->p2 as pref."""
 
-    vtest = np.cross(Vector(p1, p2).v, Vector(p1, ptest).v)
-    vref = np.cross(Vector(p1, p2).v, Vector(p1, pref).v)
+    vtest = np.cross(vector(p1, p2), vector(p1, ptest))
+    vref = np.cross(vector(p1, p2), vector(p1, pref))
 
-    len_vtest = Vector._length(vtest)
-    len_vref = Vector._length(vref)
+    len_vtest = length(vtest)
+    len_vref = length(vref)
 
     eps = 1e-6
     if len_vref < eps:
@@ -70,8 +73,8 @@ def is_point_inside(ptest: Point, p1: Point, p2: Point, p3: Point) -> bool:
 
     # Test if it's at any of the edges
     for pair in [(p1, p2), (p2, p3), (p3, p1)]:
-        v = Vector(pair[0], pair[1])
-        if v.is_point_colinear(ptest):
+        v = vector(pair[0], pair[1])
+        if is_point_colinear(v, ptest):
             return True
 
     # Test if it's inside
@@ -85,3 +88,73 @@ def is_point_inside(ptest: Point, p1: Point, p2: Point, p3: Point) -> bool:
 
     # It must be outside
     return False
+
+
+def triangulate(points: list[Point], normal: np.ndarray) -> list:
+    """Return a list of triangles (i, j, k) using the ear clipping algorithm.
+
+    (i, j, k) are the indices of the points in self.points.
+    """
+    def is_convex(p0, p1, p2):
+        """Check if the angle between p1->p0 and p1->p2 is less than 180 degress."""
+        v1 = vector(p1, p0)
+        v2 = vector(p1, p2)
+        if angle_ccw(v2, v1, normal) < np.pi:
+            return True
+        else:
+            return False
+
+    vertices = [(i, p) for i, p in enumerate(points)]
+    triangles = []
+    pos = 0
+
+    number_failed = 0
+
+    while len(vertices) > 2:
+
+        if number_failed > len(vertices):
+            raise RuntimeError("Triangulation failed, reason unknown (TODO)")
+
+        if pos > len(vertices) - 1:
+            pos = 0
+        prev_pos = pos - 1 if pos > 0 else len(vertices) - 1
+        next_pos = pos + 1 if pos < len(vertices) - 1 else 0
+
+        prev_id, prev_pt = vertices[prev_pos]
+        curr_id, curr_pt = vertices[pos]
+        next_id, next_pt = vertices[next_pos]
+
+        if is_convex(prev_pt, curr_pt, next_pt):
+            # Check if no other point is within this triangle
+            # Needed for non-convex polygons
+            any_point_inside = False
+
+            for i in range(0, len(vertices)):
+                test_id = vertices[i][0]
+                if test_id not in (prev_id, curr_id, next_id):
+                    any_point_inside = is_point_inside(
+                        points[test_id],
+                        points[prev_id],
+                        points[curr_id],
+                        points[next_id],
+                    )
+
+            if not any_point_inside:
+                # Add triangle
+                triangles.append((prev_id, curr_id, next_id))
+
+                # Remove pos from index
+                vertices.pop(pos)
+
+            else:
+                # There is some point inside this triangle
+                # So it is not not an ear
+                number_failed += 1
+
+        else:
+            # Non-convex corner
+            number_failed += 1
+
+        pos += 1
+
+    return triangles
