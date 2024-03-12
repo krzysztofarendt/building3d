@@ -11,7 +11,6 @@ def test_too_few_points():
     p1 = Point(1.0, 0.0, 0.0)
     with pytest.raises(GeometryError):
         poly = Polygon([p0, p1])
-        poly.verify()
 
 
 def test_points_not_coplanar():
@@ -19,9 +18,8 @@ def test_points_not_coplanar():
     p1 = Point(1.0, 0.0, 0.0)
     p2 = Point(1.0, 1.0, 0.0)
     p3 = Point(6.0, 6.0, 6.0)
-    poly = Polygon([p0, p1, p2, p3])
     with pytest.raises(GeometryError):
-        poly.verify()
+        poly = Polygon([p0, p1, p2, p3])
 
 
 def test_area():
@@ -64,6 +62,8 @@ def test_centroid():
 
 
 def test_triangulation():
+    # TODO: Failing because CCW angle is sometimes calculated incorrectly
+    #       probably because the orientation of the normal vector is wrong
     p0 = Point(0.0, 0.0, 0.0)
     p1 = Point(2.0, 0.0, 0.0)
     p2 = Point(2.0, 1.0, 0.0)

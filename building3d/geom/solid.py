@@ -25,10 +25,6 @@ class Solid:
 
         # Verify each wall
         for wall in self.boundary:
-            try:
-                wall.verify()
-            except GeometryError as e:
-                errors.append(e)
             points.extend([p.vector() for p in wall.points])
 
         # Check if all points are attached to at least 2 walls

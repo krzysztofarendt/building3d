@@ -12,11 +12,9 @@ class Polygon:
 
     def __init__(self, points: list[Point]):
         self.points = points
-
-        if len(self.points) < 3:
-            raise GeometryError(f"Polygon has only {len(self.points)} points")
-
         self.normal = self._normal()
+        self._verify()
+
         self.triangles = self._triangulate()
         self.centroid = self._centroid()
         self.normal.attach(self.centroid)
@@ -209,7 +207,7 @@ class Polygon:
                 return False
         return True
 
-    def verify(self):
+    def _verify(self):
         """Verify geometry correctness."""
         # At least 3 points
         if len(self.points) < 3:
