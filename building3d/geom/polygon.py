@@ -11,6 +11,13 @@ from .triangle import triangulate
 
 
 class Polygon:
+    """Polygon defined by its vertices (Point instances).
+
+    Notes:
+    - The first point must lay in the convex corner!
+    - If used as a wall, the points should be ordered counter-clockwise w.r.t.
+      to the zone that this wall belongs to.
+    """
 
     def __init__(self, points: list[Point]):
         self.points = points

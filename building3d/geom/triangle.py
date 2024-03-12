@@ -51,7 +51,7 @@ def is_point_on_correct_side(ptest: Point, p1: Point, p2: Point, pref: Point) ->
         # Add jitter (move ptest a bit)
         jitter = (np.random.random(3) - 0.5) * eps
         ptest_jitter = Point(ptest.x + jitter[0], ptest.y + jitter[1], ptest.z + jitter[2])
-        return is_point_on_correct_side(ptest_jitter, p1 ,p2, pref)
+        return is_point_on_correct_side(ptest_jitter, p1, p2, pref)
     else:
         vtest /= len_vtest
         vref /= len_vref
@@ -73,7 +73,18 @@ def is_point_inside(ptest: Point, p1: Point, p2: Point, p3: Point) -> bool:
     # Test if it's at any of the edges
     for pair in [(p1, p2), (p2, p3), (p3, p1)]:
         if is_point_colinear(pair[0], pair[1], ptest):
-            return True
+            # Is colinear, but is it on the edge or outside the triangle?
+            if (
+                ptest.x > max(pair[0].x, pair[1].x) or \
+                ptest.y > max(pair[0].y, pair[1].y) or \
+                ptest.z > max(pair[0].z, pair[1].z) or \
+                ptest.x < min(pair[0].x, pair[1].x) or \
+                ptest.y < min(pair[0].y, pair[1].y) or \
+                ptest.z < min(pair[0].z, pair[1].z)
+            ):
+                return False
+            else:
+                return True
 
     # Test if it's inside
     side1 = is_point_on_correct_side(ptest, p1, p2, p3)
@@ -105,11 +116,18 @@ def triangulate(points: list[Point], normal: np.ndarray) -> list:
         It is done by comparing the normal vectors for the polygon
         and for the vectors p1->p2, p1->p0.
         """
+        eps = 1e-6
+        assert np.abs(length(n) - 1.) < eps
         v1 = vector(p1, p2)
         v2 = vector(p1, p0)
         v1_v2_normal = np.cross(v1, v2)
-        v1_v2_normal /= length(v1_v2_normal)
-
+        len_v1_v2 = length(v1_v2_normal)
+        if len_v1_v2 < eps:
+            # Colinear points p0, p1, p2
+            return False
+        else:
+            # Normalize before comparing to n
+            v1_v2_normal /= length(v1_v2_normal)
         if np.isclose(v1_v2_normal, n).all():
             # Convex vertex
             return True
@@ -139,7 +157,9 @@ def triangulate(points: list[Point], normal: np.ndarray) -> list:
         curr_id, curr_pt = vertices[pos]
         next_id, next_pt = vertices[next_pos]
 
-        if is_convex(prev_pt, curr_pt, next_pt, normal):
+        convex_corner = is_convex(prev_pt, curr_pt, next_pt, normal)
+
+        if convex_corner:
             # Check if no other point is within this triangle
             # Needed for non-convex polygons
             any_point_inside = False
@@ -155,7 +175,7 @@ def triangulate(points: list[Point], normal: np.ndarray) -> list:
                     )
                     if point_inside:
                         any_point_inside = True
-                        break
+                        # break
 
             if not any_point_inside:
                 # Add triangle
