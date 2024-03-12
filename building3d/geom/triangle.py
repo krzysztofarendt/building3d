@@ -93,9 +93,17 @@ def triangulate(points: list[Point], normal: np.ndarray) -> list:
     """Return a list of triangles (i, j, k) using the ear clipping algorithm.
 
     (i, j, k) are the indices of the points.
+
+    Args:
+        points: list of points defining the polygon
+        normal: vector normal to the polygon
     """
     def is_convex(p0, p1, p2, n):
-        """Check if the angle between p1->p0 and p1->p2 is less than 180 degress."""
+        """Check if the angle between p1->p0 and p1->p2 is less than 180 degress.
+
+        It is done by comparing the normal vectors for the polygon
+        and for the vectors p1->p2, p1->p0.
+        """
         v1 = vector(p1, p2)
         v2 = vector(p1, p0)
         v1_v2_normal = np.cross(v1, v2)
