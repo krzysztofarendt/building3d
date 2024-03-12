@@ -62,7 +62,6 @@ def test_centroid():
 
 
 def test_triangulation():
-    # TODO: Failing because CCW angle is sometimes calculated incorrectly (but why?)
     p0 = Point(0.0, 0.0, 0.0)
     p1 = Point(2.0, 0.0, 0.0)
     p2 = Point(2.0, 1.0, 0.0)
@@ -76,13 +75,13 @@ def test_triangulation():
 
 def test_is_point_inside():
     # Test 1
-    # p1 = Point(1.0, 0.0, 0.0)
-    # p3 = Point(0.0, 1.0, 0.0)
-    # p5 = Point(1.0, 0.0, 1.0)
-    # p7 = Point(0.0, 1.0, 1.0)
-    # poly = Polygon([p1, p3, p7, p5])
-    # p = Point(0.5, 0.5, 0.5)
-    # assert poly.is_point_inside(p)
+    p1 = Point(1.0, 0.0, 0.0)
+    p3 = Point(0.0, 1.0, 0.0)
+    p5 = Point(1.0, 0.0, 1.0)
+    p7 = Point(0.0, 1.0, 1.0)
+    poly = Polygon([p1, p3, p7, p5])
+    p = Point(0.5, 0.5, 0.5)
+    assert poly.is_point_inside(p)
 
     # Test 2
     p1 = Point(0.0, 0.0, 0.0)
@@ -94,13 +93,13 @@ def test_is_point_inside():
     assert poly.is_point_inside(p)
 
     # Test 2
-    # p1 = Point(0.0, 0.0, 0.0)
-    # p2 = Point(1.0, 0.0, 0.0)
-    # p3 = Point(1.0, 1.0, 0.0)
-    # p4 = Point(0.0, 1.0, 0.0)
-    # poly = Polygon([p1, p2, p3, p4])
-    # p = Point(0.5, 0.5, 0.0)
-    # assert poly.is_point_inside(p)
+    p1 = Point(0.0, 0.0, 0.0)
+    p2 = Point(1.0, 0.0, 0.0)
+    p3 = Point(1.0, 1.0, 0.0)
+    p4 = Point(0.0, 1.0, 0.0)
+    poly = Polygon([p1, p2, p3, p4])
+    p = Point(0.5, 0.5, 0.0)
+    assert poly.is_point_inside(p)
 
 
 if __name__ == "__main__":

@@ -93,6 +93,8 @@ def triangulate(points: list[Point], normal: np.ndarray) -> list:
     """Return a list of triangles (i, j, k) using the ear clipping algorithm.
 
     (i, j, k) are the indices of the points.
+    The polygon must not have any holes.
+    The polygon can be non-convex.
 
     Args:
         points: list of points defining the polygon
