@@ -1,11 +1,11 @@
-import numpy as np
+"""Wall class"""
 
 from .point import Point
 from .polygon import Polygon
 
 
 class Wall(Polygon):
-    """A wall is composed of a number of points.
+    """A wall is a subclass of Polygon with additional attributes and methods.
 
     The points should be ordered counter-clockwise w.r.t. to the
     zone to which this wall belongs.

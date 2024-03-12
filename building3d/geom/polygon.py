@@ -1,3 +1,4 @@
+"""Polygon class"""
 import numpy as np
 
 from .exceptions import GeometryError

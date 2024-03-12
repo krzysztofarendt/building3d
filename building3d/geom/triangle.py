@@ -1,3 +1,4 @@
+"""Functions related to triangles."""
 import numpy as np
 
 from .point import Point
@@ -99,7 +100,7 @@ def is_point_inside(ptest: Point, p1: Point, p2: Point, p3: Point) -> bool:
     return False
 
 
-def triangulate(points: list[Point], normal: np.ndarray) -> list:
+def triangulate(points: list[Point], normal: np.ndarray) -> list[int]:
     """Return a list of triangles (i, j, k) using the ear clipping algorithm.
 
     (i, j, k) are the indices of the points.
@@ -110,11 +111,11 @@ def triangulate(points: list[Point], normal: np.ndarray) -> list:
         points: list of points defining the polygon
         normal: vector normal to the polygon
     """
-    def is_convex(p0, p1, p2, n):
+    def is_convex(p0: Point, p1: Point, p2: Point, n: np.ndarray) -> bool:
         """Check if the angle between p1->p0 and p1->p2 is less than 180 degress.
 
-        It is done by comparing the normal vectors for the polygon
-        and for the vectors p1->p2, p1->p0.
+        It is done by comparing the polygon normal vector with the
+        cross product p1->p2 x p1->p0.
         """
         eps = 1e-6
         assert np.abs(length(n) - 1.) < eps

@@ -7,6 +7,8 @@ from .polygon import Polygon
 
 
 class Solid:
+    """Solid is a space enclosed by polygons."""
+
     def __init__(self, boundary: Sequence[Polygon]):
         self.boundary = boundary
 
