@@ -3,7 +3,6 @@ import numpy as np
 from .point import Point
 from .vector import vector
 from .vector import length
-from .vector import angle_ccw
 from .vector import is_point_colinear
 from .exceptions import GeometryError
 
