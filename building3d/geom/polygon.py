@@ -3,6 +3,7 @@ import numpy as np
 from .exceptions import GeometryError
 from .point import Point
 from .vector import vector
+from .vector import length
 from .triangle import triangle_centroid
 from .triangle import triangle_area
 from .triangle import is_point_inside as is_point_inside_triangle
@@ -61,15 +62,18 @@ class Polygon:
         - A: 0 -> 1 (first and second point)
         - B: 0 -> -1 (first and last point)
         """
-        vec_a = self.points[0].vector() - self.points[-1].vector()
-        vec_b = self.points[1].vector() - self.points[0].vector()
+        vec_a = vector(self.points[0], self.points[1])
+        vec_b = vector(self.points[0], self.points[-1])
         norm = np.cross(vec_a, vec_b)
-        norm /= np.sqrt(norm[0] ** 2 + norm[1] ** 2 + norm[2] ** 2)
 
-        normal_beg = Point(x=0., y=0., z=0.)
-        normal_end = Point(x=norm[0], y=norm[1], z=norm[2])
+        eps = 1e-6
+        len_norm = length(norm)
+        if len_norm < eps:
+            raise GeometryError("Normal vector has zero length")
+        else:
+            norm /= len_norm
 
-        return vector(normal_beg, normal_end)
+        return norm
 
     def _edges(self) -> list[tuple[Point, Point]]:
         """Return a list of edges of this wall."""

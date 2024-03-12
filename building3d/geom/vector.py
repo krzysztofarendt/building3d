@@ -46,18 +46,14 @@ def angle_ccw(v1: np.ndarray, v2: np.ndarray, n: np.ndarray) -> float:
     return rad
 
 
-def is_point_colinear(v: np.ndarray, p: Point) -> bool:
-    origin = Point(0., 0., 0.)
-    v1 = vector(origin, p)
-    v2 = np.copy(v)
+def is_point_colinear(p1: Point, p2: Point, ptest: Point) -> bool:
+    v1 = vector(p1, p2)
+    v2 = vector(p1, ptest)
+
     v1 /= length(v1)
     v2 /= length(v2)
-    eps = 1e-6
-    if (np.abs(v1 - v2) < eps).all():
-        # Test for vectors with the same direction
-        return True
-    elif (np.abs(v1 + v2) < eps).all():
-        # Test for vectors directed opposite
+
+    if np.isclose(v1, v2).all() or np.isclose(v1, v2 * -1).all():
         return True
     else:
         return False
