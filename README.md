@@ -22,8 +22,10 @@ python example.py
     - https://www.geometrictools.com/Documentation/TriangulationByEarClipping.pdf
     - https://nils-olovsson.se/articles/ear_clipping_triangulation/
 - [x] Accurate center of weight for Wall
-- [ ] TESTS ARE FAILING
-- [ ] Check wheter a point is inside a Solid
+- [x] Tests are failing
+- [ ] Check whether a point lays on the surface of a polygon
+- [ ] Check whether a point is inside a Solid
+- [ ] Delaunay triangulation of a polygon
 - [ ] Delaunay triangulation of a solid
 - [ ] Calculate Zone volume
 - [ ] Accurate center of weight for Solid
