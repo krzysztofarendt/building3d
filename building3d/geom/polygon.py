@@ -88,11 +88,11 @@ class Polygon:
 
         return False
 
-    def is_point_inside_projection(self, p: Point) -> bool:
-        """Checks whether a point lies within the projection of the polygon.
+    def is_point_inside_ortho_projection(self, p: Point) -> bool:
+        """Checks whether an orthogonally projected point hits the surface.
 
-        The projection is defined as an infinite set if polygons
-        translated along the vector normal to the polygon.
+        The point is projected orthogonally to the polygon's plane.
+        If the projected point is inside the polygon, return True.
         """
         # Translate polygon's to the point p
         a, b, c, d = self.plane_equation_coefficients()
@@ -116,6 +116,49 @@ class Polygon:
         is_inside = poly_at_p.is_point_inside(p)
 
         return is_inside
+
+    def is_point_inside_projection(
+        self,
+        p: Point,
+        vec: np.ndarray,
+        fwd_only: bool = True
+    ) -> bool:
+        """Checks whether a projected point hits the surface.
+
+        The point is projected along the vector vec.
+        It is possible to consider both positive and negative directions of vec,
+        or only the positive.
+
+        Args:
+            p: tested point
+            vec: projection vector
+            fwd_only: if True, only the forward (positive) direction of vec is considered
+
+        Return:
+            True if the projected point hits the surface
+        """
+        # Get coefficients of the plane equation
+        a, b, c, d = self.plane_equation_coefficients()
+
+        # Find the point projection alogn vec to the plane of the polygon
+        denom = (a * vec[0] + b * vec[1] + c * vec[2])
+        eps = 1e-8
+
+        if np.abs(denom) < eps:
+            # Vector vec is perpendicular to the plane
+            return False
+        else:
+            # Projection crosses the surface of the plane
+            s = (-d - a * p.x - b * p.y - c * p.z) / (a * vec[0] + b * vec[1] + c * vec[2])
+
+            if fwd_only and s < 0:
+                # The plane is in the other direction than the one pointed by vec
+                return False
+
+            p = p.copy()
+            p += s * vec
+            is_inside = self.is_point_inside(p)
+            return is_inside
 
     def is_point_behind(self, p: Point) -> bool:
         """Checks if the point p is behind the polygon.

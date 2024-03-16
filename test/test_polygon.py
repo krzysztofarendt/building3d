@@ -144,7 +144,7 @@ def test_is_point_inside():
     assert poly.is_point_inside(p)
 
 
-def test_is_point_inside_projection():
+def test_is_point_inside_ortho_projection():
     p1 = Point(1.0, 0.0, 0.0)
     p2 = Point(1.0, 1.0, 0.0)
     p3 = Point(1.0, 1.0, 1.0)
@@ -152,19 +152,40 @@ def test_is_point_inside_projection():
     poly = Polygon([p1, p2, p3, p4])
 
     ptest = Point(1.0, 0.5, 0.5)
-    assert poly.is_point_inside_projection(ptest) is True
+    assert poly.is_point_inside_ortho_projection(ptest) is True
     ptest = Point(2.0, 0.99, 0.90)
-    assert poly.is_point_inside_projection(ptest) is True
+    assert poly.is_point_inside_ortho_projection(ptest) is True
     ptest = Point(2.0, 0.01, 0.01)
-    assert poly.is_point_inside_projection(ptest) is True
+    assert poly.is_point_inside_ortho_projection(ptest) is True
     ptest = Point(-1.0, 0.01, 0.90)
-    assert poly.is_point_inside_projection(ptest) is True
+    assert poly.is_point_inside_ortho_projection(ptest) is True
     ptest = Point(-1.0, 0.99, 0.01)
-    assert poly.is_point_inside_projection(ptest) is True
+    assert poly.is_point_inside_ortho_projection(ptest) is True
     ptest = Point(-1.0, 1.01, 0.99)
-    assert poly.is_point_inside_projection(ptest) is False
+    assert poly.is_point_inside_ortho_projection(ptest) is False
     ptest = Point(1.0, -0.001, -0.001)
-    assert poly.is_point_inside_projection(ptest) is False
+    assert poly.is_point_inside_ortho_projection(ptest) is False
+
+
+def test_is_point_inside_ortho_projection():
+    p1 = Point(1.0, 0.0, 0.0)
+    p2 = Point(1.0, 1.0, 0.0)
+    p3 = Point(1.0, 1.0, 1.0)
+    p4 = Point(1.0, 0.0, 1.0)
+    poly = Polygon([p1, p2, p3, p4])
+
+    ptest = Point(2.0, 0.5, 0.5)
+    vec = np.array([1.0, 0.0, 0.0])
+    fwd_only = False
+    assert poly.is_point_inside_projection(ptest, vec, fwd_only) is True
+    ptest = Point(2.0, 0.5, 0.5)
+    vec = np.array([1.0, 0.0, 0.0])
+    fwd_only = True
+    assert poly.is_point_inside_projection(ptest, vec, fwd_only) is False
+    ptest = Point(2.0, 0.5, 0.5)
+    vec = np.array([0.0, 0.0, 1.0])
+    fwd_only = False
+    assert poly.is_point_inside_projection(ptest, vec, fwd_only) is False
 
 
 def test_is_point_behind():
@@ -217,3 +238,7 @@ def test_copy():
         assert not (poly_a.points[i] is poly_b.points[i])
 
     assert not (poly_a is poly_b)
+
+
+if __name__ == "__main__":
+    test_is_point_inside_ortho_projection()

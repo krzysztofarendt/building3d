@@ -35,3 +35,11 @@ def test_multiply_vector_with_a_point():
     p1 = Point(2.0, 3.0, 4.0)
     p2 = p1 * p0.vector()
     assert np.isclose(p2.x, 4.0) and np.isclose(p2.y, 6.0) and np.isclose(p2.z, 8.0)
+
+
+def test_copy():
+    p1 = Point(2.0, 3.0, 4.0)
+    p2 = p1.copy()
+    assert p1 == p2
+    assert not (p1 is p2)
+

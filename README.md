@@ -24,7 +24,7 @@ python example.py
 - [x] Accurate center of weight for Wall
 - [x] Tests are failing
 - [x] Check whether a point lays on the surface of a polygon
-- [ ] Check whether a point is inside a Solid
+- [x] Check whether a point is inside a Solid
 - [ ] Delaunay triangulation of a polygon
 - [ ] Delaunay triangulation of a solid
 - [ ] Calculate Zone volume

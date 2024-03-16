@@ -13,6 +13,14 @@ class Point:
         self.y = y
         self.z = z
 
+    def copy(self):
+        """Return a copy of itself.
+
+        Return:
+            Point
+        """
+        return Point(self.x, self.y, self.z)
+
     def vector(self) -> np.ndarray:
         return np.array([self.x, self.y, self.z])
 

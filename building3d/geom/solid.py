@@ -1,3 +1,4 @@
+"""Solid class"""
 from typing import Sequence
 
 import numpy as np
@@ -12,11 +13,50 @@ class Solid:
 
     def __init__(self, boundary: Sequence[Polygon]):
         self.boundary = boundary
+        self._verify(throw=True)
 
-    def is_point_inside(p: Point) -> bool:
-        pass  # TODO
+    def vertices(self):
+        points = []
+        for poly in self.boundary:
+            points.extend(poly.points)
+        return points
 
-    def verify(self, throw: bool = False) -> None:
+    def is_point_inside(self, p: Point) -> bool:
+        """Checks whether the point p is inside the solid.
+
+        Uses the ray casting algorithm:
+        draw a horizontal line in a chosen direction from the point
+        and count how many times it intersects with the edges of the
+        solid; if the number of intersections is odd, it is inside.
+        """
+        vertices = self.vertices()
+        max_x = max([p.x for p in vertices])
+        max_y = max([p.y for p in vertices])
+        max_z = max([p.z for p in vertices])
+        min_x = min([p.x for p in vertices])
+        min_y = min([p.y for p in vertices])
+        min_z = min([p.z for p in vertices])
+
+        # Check if it is possible that the point is inside the solid
+        if p.x > max_x or p.y > max_y or p.z > max_z:
+            return False
+        if p.x < min_x or p.y < min_y or p.z < min_z:
+            return False
+
+        # It is possible, so we proceed with the ray casting algorithm
+        vec = np.array([1.0, 0.0, 0.0])
+        num_crossings = 0
+        for poly in self.boundary:
+            p_crosses_polygon = poly.is_point_inside_projection(p, vec)
+            if p_crosses_polygon:
+                num_crossings += 1
+
+        if num_crossings % 2 == 1:
+            return True
+        else:
+            return False
+
+    def _verify(self, throw: bool = False) -> None:
         """Verify geometry correctness.
 
         Tests:
