@@ -42,4 +42,3 @@ def test_copy():
     p2 = p1.copy()
     assert p1 == p2
     assert not (p1 is p2)
-
