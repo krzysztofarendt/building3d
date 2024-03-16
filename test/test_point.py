@@ -13,3 +13,8 @@ def test_add_vector_to_a_point():
     p1 = Point(0.0, 0.0, 0.0)
     p2 = p1 + vector
     assert np.isclose(p2.x, -1.0) and np.isclose(p2.y, -1.0) and np.isclose(p2.z, -1.0)
+
+    p0 = Point(2.0, 2.0, 2.0)
+    p1 = Point(0.0, 0.0, 0.0)
+    p2 = p1 + p0.vector()
+    assert np.isclose(p2.x, p0.x) and np.isclose(p2.y, p0.y) and np.isclose(p2.z, p0.z)
