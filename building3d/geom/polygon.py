@@ -29,6 +29,27 @@ class Polygon:
         self.edges = self._edges()
         self.area = self._area()
 
+    def plane_equation_coefficients(self) -> tuple:
+        """Returns [a, b, c, d] from the equation ax + by + cz + d = 0.
+
+        This equation describes the plane that this polygon is on.
+        """
+        return self.projection_coefficients(self.points[0])
+
+    def projection_coefficients(self, p: Point) -> tuple:
+        """Returns [a, b, c, d] from the equation ax + by + cz + d = 0.
+
+        Uses the vector normal to this polygon and the point p
+        to calculate the coefficients of the plane equation
+        with the same slope as this polygon, but translated to the point p.
+        """
+        a = self.normal[0]
+        b = self.normal[1]
+        c = self.normal[2]
+
+        d = -1 * (a * p.x + b * p.y + c * p.z)
+        return (a, b, c, d)
+
     def is_point_coplanar(self, p: Point) -> bool:
         """Checks whether the point p is coplanar with the polygon."""
         # Temporarily add the test point to self.points
@@ -40,7 +61,7 @@ class Polygon:
         return is_coplanar
 
     def is_point_inside(self, p: Point) -> bool:
-        """Checks wheter a point lies on the surface of the polygon."""
+        """Checks whether a point lies on the surface of the polygon."""
 
 
         if not self.is_point_coplanar(p):
@@ -53,6 +74,14 @@ class Polygon:
                 return True
 
         return False
+
+    def is_point_inside_projection(self, p: Point) -> bool:
+        """Checks whether a point lies within the projection of the polygon.
+
+        The projection is defined as an infinite set if polygons
+        translated along the vector normal to the polygon.
+        """
+        pass  # TODO
 
     def _triangulate(self) -> list:
         """Return a list of triangles (i, j, k) using the ear clipping algorithm.

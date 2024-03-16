@@ -144,5 +144,26 @@ def test_is_point_inside():
     assert poly.is_point_inside(p)
 
 
-if __name__ == "__main__":
-    test_triangulation_cross_shape()
+def test_plane_equation_coefficients():
+    p1 = Point(0.0, 4.0, -1.0)
+    p2 = Point(1.0, -1.0, 2.0)
+    p3 = Point(0.0, -2.0, 3.0)
+    poly = Polygon([p1, p2, p3])
+    a, b, c, d = poly.plane_equation_coefficients()
+
+    # Equation 1*x + 2*y + 3*z - 5 = 0
+    # a = 1
+    # b = 2
+    # c = 3
+    # d = -5
+    # However, the coefficients might be scaled linearly
+    # so we need to compare how they are w.r.t. to each other
+    # rather than checking the absolute values
+    a_exp = 1.0
+    b_exp = 2.0
+    c_exp = 3.0
+    d_exp = -5.0
+
+    assert np.isclose(a / b, a_exp / b_exp)
+    assert np.isclose(a / c, a_exp / c_exp)
+    assert np.isclose(a / d, a_exp / d_exp)

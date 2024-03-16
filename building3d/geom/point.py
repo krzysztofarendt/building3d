@@ -37,3 +37,12 @@ class Point:
             return Point(self.x + other[0], self.y + other[1], self.z + other[2])
         else:
             raise TypeError("Point can be added only with a vector of length 3")
+
+    def __mul__(self, other):
+        if len(other) == 3:
+            return Point(self.x * other[0], self.y * other[1], self.z * other[2])
+        else:
+            raise TypeError("Point can be multiplied only with a vector of length 3")
+
+    def __rmul__(self, other):
+        return self.__mul__(other)

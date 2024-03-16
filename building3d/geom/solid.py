@@ -4,6 +4,7 @@ import numpy as np
 
 from .exceptions import GeometryError
 from .polygon import Polygon
+from .point import Point
 
 
 class Solid:
@@ -11,6 +12,9 @@ class Solid:
 
     def __init__(self, boundary: Sequence[Polygon]):
         self.boundary = boundary
+
+    def is_point_inside(p: Point) -> bool:
+        pass  # TODO
 
     def verify(self, throw: bool = False) -> None:
         """Verify geometry correctness.
