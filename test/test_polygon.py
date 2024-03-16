@@ -144,6 +144,42 @@ def test_is_point_inside():
     assert poly.is_point_inside(p)
 
 
+def test_is_point_inside_projection():
+    p1 = Point(1.0, 0.0, 0.0)
+    p2 = Point(1.0, 1.0, 0.0)
+    p3 = Point(1.0, 1.0, 1.0)
+    p4 = Point(1.0, 0.0, 1.0)
+    poly = Polygon([p1, p2, p3, p4])
+
+    ptest = Point(1.0, 0.5, 0.5)
+    assert poly.is_point_inside_projection(ptest) is True
+    ptest = Point(2.0, 0.99, 0.90)
+    assert poly.is_point_inside_projection(ptest) is True
+    ptest = Point(2.0, 0.01, 0.01)
+    assert poly.is_point_inside_projection(ptest) is True
+    ptest = Point(-1.0, 0.01, 0.90)
+    assert poly.is_point_inside_projection(ptest) is True
+    ptest = Point(-1.0, 0.99, 0.01)
+    assert poly.is_point_inside_projection(ptest) is True
+    ptest = Point(-1.0, 1.01, 0.99)
+    assert poly.is_point_inside_projection(ptest) is False
+    ptest = Point(1.0, -0.001, -0.001)
+    assert poly.is_point_inside_projection(ptest) is False
+
+
+def test_is_point_behind():
+    p1 = Point(1.0, 0.0, 0.0)
+    p2 = Point(1.0, 1.0, 0.0)
+    p3 = Point(1.0, 1.0, 1.0)
+    p4 = Point(1.0, 0.0, 1.0)
+    poly = Polygon([p1, p2, p3, p4])
+
+    ptest = Point(0.99, 0.5, 0.5)
+    assert poly.is_point_behind(ptest) is True
+    ptest = Point(1.01, 0.5, 0.5)
+    assert poly.is_point_behind(ptest) is False
+
+
 def test_plane_equation_coefficients():
     p1 = Point(0.0, 4.0, -1.0)
     p2 = Point(1.0, -1.0, 2.0)
@@ -167,3 +203,17 @@ def test_plane_equation_coefficients():
     assert np.isclose(a / b, a_exp / b_exp)
     assert np.isclose(a / c, a_exp / c_exp)
     assert np.isclose(a / d, a_exp / d_exp)
+
+
+def test_copy():
+    p1 = Point(0.0, 4.0, -1.0)
+    p2 = Point(1.0, -1.0, 2.0)
+    p3 = Point(0.0, -2.0, 3.0)
+    poly_a = Polygon([p1, p2, p3])
+    poly_b = poly_a.copy()
+
+    for i in range(3):
+        assert poly_a.points[i] == poly_b.points[i]
+        assert not (poly_a.points[i] is poly_b.points[i])
+
+    assert not (poly_a is poly_b)

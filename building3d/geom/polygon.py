@@ -29,6 +29,19 @@ class Polygon:
         self.edges = self._edges()
         self.area = self._area()
 
+    def copy(self):
+        """Return a deep copy of itself.
+
+        Return:
+            Polygon
+        """
+        return Polygon([Point(p.x, p.y, p.z) for p in self.points])
+
+    def move_orthogonal(self, d: float) -> None:
+        vec = self.normal * d
+        for i in range(len(self.points)):
+            self.points[i] += vec
+
     def plane_equation_coefficients(self) -> tuple:
         """Returns [a, b, c, d] from the equation ax + by + cz + d = 0.
 
@@ -81,7 +94,48 @@ class Polygon:
         The projection is defined as an infinite set if polygons
         translated along the vector normal to the polygon.
         """
-        pass  # TODO
+        # Translate polygon's to the point p
+        a, b, c, d = self.plane_equation_coefficients()
+        ap, bp, cp, dp = self.projection_coefficients(p)
+
+        assert np.isclose(a, ap), "If a and ap are not equal, d should be normalized"
+        assert np.isclose(b, bp), "If b and bp are not equal, d should be normalized"
+        assert np.isclose(c, cp), "If c and cp are not equal, d should be normalized"
+
+        # Distance
+        # Negative distance -> point behind the polygon
+        # Positive distance -> point in front of the polygon
+        dist = d - dp
+
+        # Make a copy of the polygon and move it to the point p
+        poly_at_p = self.copy()
+        poly_at_p.move_orthogonal(dist)
+        assert poly_at_p.is_point_coplanar(p)
+
+        # Check if the point lays inside the polygon
+        is_inside = poly_at_p.is_point_inside(p)
+
+        return is_inside
+
+    def is_point_behind(self, p: Point) -> bool:
+        """Checks if the point p is behind the polygon.
+
+        A point is behind the polygon if the polygon's normal vector
+        is directed in the opposite direction to the point.
+        """
+        # Translate polygon's to the point p
+        _, _, _, d = self.plane_equation_coefficients()
+        _, _, _, dp = self.projection_coefficients(p)
+
+        # Distance
+        # Negative distance -> point behind the polygon
+        # Positive distance -> point in front of the polygon
+        dist = d - dp
+
+        if dist >= 0:
+            return False
+        if dist < 0:
+            return True
 
     def _triangulate(self) -> list:
         """Return a list of triangles (i, j, k) using the ear clipping algorithm.
