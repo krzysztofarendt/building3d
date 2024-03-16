@@ -22,7 +22,6 @@ def example():
     ceiling = Wall("ceiling", [p4, p5, p6, p7])
 
     room = Zone("room", [floor, wall0, wall1, wall2, wall3, ceiling])
-    room.verify()
 
     plot_zone(room)
 
