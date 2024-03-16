@@ -132,10 +132,10 @@ class Polygon:
         # Positive distance -> point in front of the polygon
         dist = d - dp
 
-        if dist >= 0:
-            return False
         if dist < 0:
             return True
+        else:
+            return False
 
     def _triangulate(self) -> list:
         """Return a list of triangles (i, j, k) using the ear clipping algorithm.
