@@ -25,12 +25,12 @@ class Point:
     def vector(self) -> np.ndarray:
         return np.array([self.x, self.y, self.z])
 
-    def add(self, vec: Sequence):
+    def add(self, vec: Sequence | np.ndarray):
         if len(vec) != 3:
             raise TypeError("len(vec) must equal to 3")
         return Point(self.x + vec[0], self.y + vec[1], self.z + vec[2])
 
-    def multiply(self, vec: Sequence):
+    def multiply(self, vec: Sequence | np.ndarray):
         if len(vec) != 3:
             raise TypeError("len(vec) must equal to 3")
         return Point(self.x * vec[0], self.y * vec[1], self.z * vec[2])
@@ -51,19 +51,13 @@ class Point:
         else:
             return False
 
-    def __add__(self, other: Sequence):
+    def __add__(self, other: Sequence | np.ndarray):
         if (
                 type(other) is list or \
                 type(other) is tuple or \
                 type(other) is np.ndarray \
         ) and (len(other) == 3):
             return self.add(other)
-        elif type(other) is int or type(other) is float:
-            raise TypeError(
-                "float or int cannot be added to a Point. "
-                "If you're trying to add a numpy array to a point (array + point), "
-                "try reversing the order to (point + array) to avoid numpy's broadcasting."
-            )
         else:
             raise TypeError("Point can be added only with a vector of length 3")
 
@@ -79,19 +73,13 @@ class Point:
         else:
             raise TypeError("Point can be added only with a vector of length 3")
 
-    def __mul__(self, other: Sequence):
+    def __mul__(self, other: Sequence | np.ndarray):
         if (
                 type(other) is list or \
                 type(other) is tuple or \
                 type(other) is np.ndarray \
         ) and (len(other) == 3):
             return self.multiply(other)
-        elif type(other) is int or type(other) is float:
-            raise TypeError(
-                "float or int cannot be added to a Point. "
-                "If you're trying to multiply a numpy array with a point (array * point), "
-                "try reversing the order to (point * array) to avoid numpy's broadcasting."
-            )
         else:
             raise TypeError("Point can be added only with a vector of length 3")
 
