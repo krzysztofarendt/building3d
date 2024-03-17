@@ -203,7 +203,7 @@ def test_is_point_inside_ortho_projection():
     assert poly.is_point_inside_ortho_projection(ptest) is False
 
 
-def test_is_point_inside_ortho_projection():
+def test_is_point_inside_ortho_projection_fwd_only():
     p1 = Point(1.0, 0.0, 0.0)
     p2 = Point(1.0, 1.0, 0.0)
     p3 = Point(1.0, 1.0, 1.0)
