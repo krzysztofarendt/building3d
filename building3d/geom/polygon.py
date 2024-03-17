@@ -19,6 +19,7 @@ class Polygon:
     - If used as a wall, the points should be ordered counter-clockwise w.r.t.
       to the zone that this wall belongs to.
     """
+    epsilon = 1e-8
 
     def __init__(self, points: list[Point]):
         self.points = points
@@ -142,9 +143,9 @@ class Polygon:
 
         # Find the point projection alogn vec to the plane of the polygon
         denom = (a * vec[0] + b * vec[1] + c * vec[2])
-        eps = 1e-8
+        Polygon.epsilon = 1e-8
 
-        if np.abs(denom) < eps:
+        if np.abs(denom) < Polygon.epsilon:
             # Vector vec is perpendicular to the plane
             return False
         else:
@@ -199,9 +200,9 @@ class Polygon:
         vec_b = vector(self.points[0], self.points[-1])
         norm = np.cross(vec_a, vec_b)
 
-        eps = 1e-6
+        Polygon.epsilon = 1e-6
         len_norm = length(norm)
-        if len_norm < eps:
+        if len_norm < Polygon.epsilon:
             raise GeometryError("Normal vector has zero length")
         else:
             norm /= len_norm
@@ -268,9 +269,9 @@ class Polygon:
         d = -1 * (vec_n[0] * ref_pt.x + vec_n[1] * ref_pt.y + vec_n[2] * ref_pt.z)
 
         # Check if all points lay on the same plane
-        eps = 1e-6
+        Polygon.epsilon = 1e-6
         for pt in self.points:
-            coplanar = np.abs(vec_n[0] * pt.x + vec_n[1] * pt.y + vec_n[2] * pt.z + d) < eps
+            coplanar = np.abs(vec_n[0] * pt.x + vec_n[1] * pt.y + vec_n[2] * pt.z + d) < Polygon.epsilon
             if not coplanar:
                 return False
         return True
