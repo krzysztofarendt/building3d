@@ -8,6 +8,9 @@ from .vector import is_point_colinear
 from .exceptions import GeometryError
 
 
+TRIANGLE_EPSILON = 1e-8
+
+
 def triangle_area(p1: Point, p2: Point, p3: Point) -> float:
     """Calculate triangle area using the Heron's formula.
 
@@ -43,14 +46,13 @@ def is_point_on_correct_side(ptest: Point, p1: Point, p2: Point, pref: Point) ->
     len_vtest = length(vtest)
     len_vref = length(vref)
 
-    eps = 1e-6
-    if len_vref < eps:
+    if len_vref < TRIANGLE_EPSILON:
         # Wrong reference point chosen (colinear with p1 and p2)
         raise GeometryError("Wrong reference point chosen (colinear with p1 and p2)")
-    elif len_vtest < eps:
+    elif len_vtest < TRIANGLE_EPSILON:
         # This point lies on the edge connecting p1 and p2
         # Add jitter (move ptest a bit)
-        jitter = (np.random.random(3) - 0.5) * eps
+        jitter = (np.random.random(3) - 0.5) * TRIANGLE_EPSILON
         ptest_jitter = Point(ptest.x + jitter[0], ptest.y + jitter[1], ptest.z + jitter[2])
         return is_point_on_correct_side(ptest_jitter, p1, p2, pref)
     else:
@@ -117,13 +119,12 @@ def triangulate(points: list[Point], normal: np.ndarray) -> list[int]:
         It is done by comparing the polygon normal vector with the
         cross product p1->p2 x p1->p0.
         """
-        eps = 1e-6
-        assert np.abs(length(n) - 1.) < eps
+        assert np.abs(length(n) - 1.) < TRIANGLE_EPSILON
         v1 = vector(p1, p2)
         v2 = vector(p1, p0)
         v1_v2_normal = np.cross(v1, v2)
         len_v1_v2 = length(v1_v2_normal)
-        if len_v1_v2 < eps:
+        if len_v1_v2 < TRIANGLE_EPSILON:
             # Colinear points p0, p1, p2
             return False
         else:
