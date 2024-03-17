@@ -27,21 +27,6 @@ def example():
 
     room = Zone("room", [floor, wall0, wall1, wall2, wall3, roof])
 
-    # Verify roof's normal
-    print(roof.normal)
-    print(roof.centroid)
-    print(roof.centroid + roof.normal)
-    print(roof.points)
-    print(roof.points[1].vector() - roof.points[0].vector())
-    print(roof.points[-1].vector() - roof.points[0].vector())
-
-    normal_test = np.cross(
-        roof.points[1].vector() - roof.points[0].vector(),
-        roof.points[-1].vector() - roof.points[0].vector(),
-    )
-    normal_test /= length(normal_test)
-    print(normal_test)
-
     # Plot
     plot_zone(room)
 
