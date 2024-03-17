@@ -22,6 +22,15 @@ def test_points_not_coplanar():
         _ = Polygon([p0, p1, p2, p3])
 
 
+def test_triangular_polygon():
+    p0 = Point(0.0, 0.0, 0.0)
+    p1 = Point(1.0, 0.0, 0.0)
+    p2 = Point(0.0, 1.0, 0.0)
+    poly = Polygon([p0, p1, p2])
+    assert len(poly.triangles) == 1
+    assert set(poly.triangles[0]) == {0, 1, 2}
+
+
 def test_area():
     eps = 1e-8
 
