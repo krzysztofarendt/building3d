@@ -17,6 +17,9 @@ def example():
 
     floor = Wall("floor", [p0, p3, p2, p1])
     wall0 = Wall("wall0", [p0, p1, p5, p4])
+
+    wall0.delaunay_triangulation()
+
     wall1 = Wall("wall1", [p1, p2, p6, p5])
     wall2 = Wall("wall2", [p3, p7, p6, p2])
     wall3 = Wall("wall3", [p0, p4, p7, p3])

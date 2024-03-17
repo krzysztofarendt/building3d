@@ -1,8 +1,10 @@
 """Polygon class"""
 import numpy as np
+from scipy.spatial import Delaunay
 
 from .exceptions import GeometryError
 from .point import Point
+from .rotate import rotate_points_to_plane
 from .vector import vector
 from .vector import length
 from .triangle import triangle_centroid
@@ -38,6 +40,10 @@ class Polygon:
         """
         return Polygon([Point(p.x, p.y, p.z) for p in self.points])
 
+    def points_as_array(self) -> np.ndarray:
+        """Returns a copy of the points as a numpy array."""
+        return np.array([[p.x, p.y, p.z] for p in self.points])
+
     def move_orthogonal(self, d: float) -> None:
         vec = self.normal * d
         for i in range(len(self.points)):
@@ -63,6 +69,11 @@ class Polygon:
 
         d = -1 * (a * p.x + b * p.y + c * p.z)
         return (a, b, c, d)
+
+    def plane_normal_and_d(self) -> tuple[np.ndarray, float]:
+        """Return the normal vector and coefficient d describing the plane."""
+        _, _, _, d = self.plane_equation_coefficients()
+        return (self.normal, d)
 
     def is_point_coplanar(self, p: Point) -> bool:
         """Checks whether the point p is coplanar with the polygon."""
@@ -180,6 +191,18 @@ class Polygon:
             return True
         else:
             return False
+
+    def delaunay_triangulation(self) -> tuple[list[Point], list[int]]:
+        # Generate points inside the polygon
+        points = self.points_as_array()
+        normal_xy = np.array([0.0, 0.0, 1.0])
+        # points_xy = rotate_points_to_plane(points, normal_xy, d=1.0)
+        # TODO
+
+        # Use scipy.spatial.Delaunay to get triangle indices
+        pass
+
+        return None
 
     def _triangulate(self) -> list:
         """Return a list of triangles (i, j, k) using the ear clipping algorithm.
