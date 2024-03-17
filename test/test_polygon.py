@@ -23,7 +23,7 @@ def test_points_not_coplanar():
 
 
 def test_area():
-    eps = 1e-6
+    eps = 1e-8
 
     p0 = Point(0.0, 0.0, 0.0)
     p1 = Point(1.0, 0.0, 0.0)
@@ -77,7 +77,7 @@ def test_normal():
 
 
 def test_centroid():
-    eps = 1e-6
+    eps = 1e-8
 
     p1 = Point(1.0, 0.0, 0.0)
     p3 = Point(0.0, 1.0, 0.0)

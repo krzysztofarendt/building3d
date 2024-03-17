@@ -7,7 +7,7 @@ import numpy as np
 class Point:
     """Point is a simple class with three attributes: x, y, z."""
 
-    eps = 1e-6
+    eps = 1e-8
 
     def __init__(self, x: float, y: float, z: float):
         self.x = x
