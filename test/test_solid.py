@@ -79,5 +79,28 @@ def test_point_inside():
     assert sld.is_point_inside(ptest) is False
 
 
+def test_bounding_box():
+    p0 = Point(0.0, 0.0, 0.0)
+    p1 = Point(1.0, 0.0, 0.0)
+    p2 = Point(1.0, 1.0, 0.0)
+    p3 = Point(0.0, 1.0, 0.0)
+    p4 = Point(0.0, 0.0, 1.0)
+    p5 = Point(1.0, 0.0, 1.0)
+    p6 = Point(1.0, 1.0, 1.0)
+    p7 = Point(0.0, 1.0, 1.0)
+
+    floor = Polygon([p0, p3, p2, p1])
+    wall0 = Polygon([p0, p1, p5, p4])
+    wall1 = Polygon([p1, p2, p6, p5])
+    wall2 = Polygon([p3, p7, p6, p2])
+    wall3 = Polygon([p0, p4, p7, p3])
+    ceiling = Polygon([p4, p5, p6, p7])
+
+    sld = Solid([floor, wall0, wall1, wall2, wall3, ceiling])
+    pmin, pmax = sld.bounding_box()
+    assert pmin.x == 0.0 and pmin.y == 0.0 and pmin.z == 0.0
+    assert pmax.x == 1.0 and pmax.y == 1.0 and pmax.z == 1.0
+
+
 if __name__ == "__main__":
     test_point_inside()
