@@ -21,6 +21,16 @@ class Solid:
             points.extend(poly.points)
         return points
 
+    def bounding_box(self) -> tuple[Point, Point]:
+        """Return (Point(xmin, ymin, zmin), Point(xmax, ymax, zmax))"""
+        points = self.vertices()
+        xaxis = [p.x for p in points]
+        yaxis = [p.y for p in points]
+        zaxis = [p.z for p in points]
+        pmin = Point(min(xaxis), min(yaxis), min(zaxis))
+        pmax = Point(max(xaxis), max(yaxis), max(zaxis))
+        return (pmin, pmax)
+
     def is_point_inside(self, p: Point) -> bool:
         """Checks whether the point p is inside the solid.
 

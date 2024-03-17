@@ -1,6 +1,6 @@
 import numpy as np
 
-from building3d.display.plot_zone import plot_zone
+from building3d.display.pyplot_zone import plot_zone
 from building3d.geom.point import Point
 from building3d.geom.zone import Zone
 from building3d.geom.wall import Wall
@@ -8,7 +8,7 @@ from building3d.geom.vector import length
 
 
 def example():
-    vec = [1, 10, 5]
+    vec = [10, 8, 5]
     p0 = Point(0.0, 0.0, 0.0) * vec
     p1 = Point(1.0, 0.0, 0.0) * vec
     p2 = Point(1.0, 1.0, 0.0) * vec
