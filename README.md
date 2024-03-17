@@ -27,6 +27,6 @@ python example.py
 - [x] Check whether a point is inside a Solid
 - [ ] Delaunay triangulation of a polygon
 - [ ] Delaunay triangulation of a solid
-- [ ] Calculate Zone volume
+- [ ] Calculate solid volume
 - [ ] Accurate center of weight for Solid
 - [ ] Use mayavi instead of matplotlib: https://docs.enthought.com/mayavi/mayavi/index.html

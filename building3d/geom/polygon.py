@@ -190,7 +190,6 @@ class Polygon:
     def _normal(self) -> np.ndarray:
         """Calculate a unit normal vector for this wall.
 
-        The vector origin is at the center of weight.
         The normal vector is calculated using the cross product
         of two vectors A and B spanning between points:
         - A: 0 -> 1 (first and second point)
