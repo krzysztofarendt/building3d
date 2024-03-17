@@ -49,6 +49,33 @@ def test_area():
     assert np.abs(poly.area - expected_area) < eps
 
 
+def test_normal():
+    p0 = Point(0.0, 0.0, 0.0)
+    p1 = Point(1.0, 0.0, 0.0)
+    p2 = Point(1.0, 1.0, 0.0)
+    p3 = Point(0.0, 1.0, 0.0)
+    poly = Polygon([p0, p1, p2, p3])
+    assert np.isclose(poly.normal, [0, 0, 1]).all()
+
+    p0 = Point(0.0, 0.0, 0.0)
+    p1 = Point(1.0, 0.0, 1.0)
+    p2 = Point(1.0, 1.0, 1.0)
+    p3 = Point(0.0, 1.0, 0.0)
+    poly = Polygon([p0, p1, p2, p3])
+    expected = np.array([-1.0, 0.0, 1.0])
+    expected /= np.sqrt(expected[0] ** 2 + expected[1] ** 2 + expected[2] ** 2)
+    assert np.isclose(poly.normal, expected).all()
+
+    p0 = Point(0.0, 0.0, 0.0)
+    p1 = Point(1.0, 0.0, 5.0)
+    p2 = Point(1.0, 1.0, 5.0)
+    p3 = Point(0.0, 1.0, 0.0)
+    poly = Polygon([p0, p1, p2, p3])
+    expected = np.array([-5.0, 0.0, 1.0])
+    expected /= np.sqrt(expected[0] ** 2 + expected[1] ** 2 + expected[2] ** 2)
+    assert np.isclose(poly.normal, expected).all()
+
+
 def test_centroid():
     eps = 1e-6
 
