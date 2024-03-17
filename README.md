@@ -39,7 +39,7 @@ python example.py
 - [x] Check whether a point lays on the surface of a polygon
 - [x] Check whether a point is inside a Solid
 - [x] Use mayavi instead of matplotlib: https://docs.enthought.com/mayavi/mayavi/index.html
-- [ ] Delaunay triangulation of a polygon
+- [ ] Delaunay triangulation of a polygon -> Polygon.delaunay_triangulation()
 - [ ] Delaunay triangulation of a solid
 - [ ] Calculate solid volume
 - [ ] Accurate center of weight for Solid
