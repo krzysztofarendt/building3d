@@ -1,10 +1,7 @@
-import numpy as np
-
-from building3d.display.pyplot_zone import plot_zone
+from building3d.display.plot_zone import plot_zone
 from building3d.geom.point import Point
 from building3d.geom.zone import Zone
 from building3d.geom.wall import Wall
-from building3d.geom.vector import length
 
 
 def example():
@@ -29,8 +26,6 @@ def example():
 
     # Plot
     plot_zone(room)
-
-    return 0
 
 
 if __name__ == "__main__":

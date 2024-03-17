@@ -15,7 +15,7 @@ class Solid:
         self.boundary = boundary
         self._verify(throw=True)
 
-    def vertices(self):
+    def vertices(self) -> list[Point]:
         points = []
         for poly in self.boundary:
             points.extend(poly.points)
