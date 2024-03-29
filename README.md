@@ -7,6 +7,7 @@ I don't now where this project is heading, so there's no documentation yet.
 python3.10 -m venv venv
 source venv/bin/activate
 pip install -e .[dev]
+sudo apt install cloc  # for source code line counting
 ```
 
 If you see the following error when running `mayavi2`:

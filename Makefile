@@ -12,3 +12,7 @@ test:
 
 coverage:
 	pytest --cov=building3d tests/
+
+
+count:
+	cloc --by-file building3d/
