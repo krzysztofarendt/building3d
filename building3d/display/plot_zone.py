@@ -40,15 +40,15 @@ def plot_zone(
         )
 
         # Plot triangles
-        if show_triangulation:
-            _ = mlab.triangular_mesh(
-                x, y, z, tri,
-                name=name,
-                line_width=2.0,
-                opacity=1.0,
-                color=rgb_white,
-                representation="wireframe",
-            )
+        # if show_triangulation:
+        #     _ = mlab.triangular_mesh(
+        #         x, y, z, tri,
+        #         name=name,
+        #         line_width=2.0,
+        #         opacity=1.0,
+        #         color=rgb_white,
+        #         representation="wireframe",
+        #     )
 
         # Plot normals
         if show_normals:
@@ -81,7 +81,7 @@ def plot_zone(
         _ = mlab.triangular_mesh(
             x, y, z, tri,
             line_width=2.0,
-            opacity=1.0,
+            opacity=0.5,
             color=rgb_blue,
             representation="wireframe",
         )

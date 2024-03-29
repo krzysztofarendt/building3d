@@ -33,7 +33,7 @@ def test_rotate_points_to_plane_anchor_nonzero():
     rotated_points, _ = rotate_points_to_plane(
         points=[p0, p1, p2],
         anchor=p0,
-        normal=normal_target,
+        u=normal_target,
         d=target_plane_d,
     )
 
@@ -43,7 +43,7 @@ def test_rotate_points_to_plane_anchor_nonzero():
     # has been moved +1 in the X direction due to d=1.
     # So all points should have x=2.
     for i in range(3):
-        assert np.isclose(rotated_points[i].x, 2.0)
+        assert np.isclose(rotated_points[i].x, 1.0)
 
     normal_res = normal(*rotated_points)
     assert np.isclose(normal_res, normal_target).all()
@@ -60,7 +60,7 @@ def test_rotate_points_to_plane_anchor_origin():
     rotated_points, _ = rotate_points_to_plane(
         points=[p0, p1, p2],
         anchor=origin,
-        normal=normal_target,
+        u=normal_target,
         d=target_plane_d,
     )
 
@@ -70,7 +70,7 @@ def test_rotate_points_to_plane_anchor_origin():
     # has been moved +1 in the X direction due to d=1.
     # So all points should have x=1.0.
     for i in range(3):
-        assert np.isclose(rotated_points[i].x, 1.0)
+        assert np.isclose(rotated_points[i].x, 0.0)
 
     normal_res = normal(*rotated_points)
     assert np.isclose(normal_res, normal_target).all()
@@ -87,7 +87,7 @@ def test_rotate_points_to_plane_anchor_origin_d0():
     rotated_points, _ = rotate_points_to_plane(
         points=[p0, p1, p2],
         anchor=origin,
-        normal=normal_target,
+        u=normal_target,
         d=target_plane_d,
     )
 
@@ -116,7 +116,7 @@ def test_rotate_back():
     rotated_points, R = rotate_points_to_plane(
         points=[p0, p1, p2],
         anchor=origin,
-        normal=normal_target,
+        u=normal_target,
         d=target_plane_d,
     )
     # Inverse rotation is done by multiplying by a transposed rotation matrix

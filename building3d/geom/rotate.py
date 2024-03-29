@@ -3,6 +3,7 @@ import numpy as np
 
 from .point import Point
 from .vector import angle
+from .vector import normal
 
 
 def rotation_matrix(u: np.ndarray, phi: float) -> np.ndarray:
@@ -53,7 +54,7 @@ def rotate_points(points: list[Point], R: np.ndarray) -> list[Point]:
 def rotate_points_around_vector(
     points: list[Point], u: np.ndarray, phi: float
 ) -> tuple[list[Point], np.ndarray]:
-    """Rotate points to the unit vector u and angle phi (radians).
+    """Rotate points around the unit vector u with the angle phi (radians).
 
     Args:
         points: list of points to be rotated
@@ -74,7 +75,7 @@ def rotate_points_around_vector(
 
 
 def rotate_points_to_plane(
-    points: list[Point], anchor: Point, normal: np.ndarray, d: float,
+    points: list[Point], anchor: Point, u: np.ndarray, d: float,
 ) -> tuple[list[Point], np.ndarray]:
     """Rotate and translate points to a plane defined by a normal vec. and dist. from origin d.
 
@@ -83,7 +84,7 @@ def rotate_points_to_plane(
     Args:
         points: list of points to be rotated
         anchor: rotation center point
-        normal: normal vector of the new plane (rotation)
+        u: normal vector of the new plane (rotation)
         d: distance from origin (0,0,0) of the new plane (translation)
 
     Return:
@@ -91,10 +92,7 @@ def rotate_points_to_plane(
     """
 
     # Find normal to the points
-    vec1 = points[1].vector() - points[0].vector()
-    vec2 = points[-1].vector() - points[0].vector()
-    p_norm = np.cross(vec1, vec2)
-    p_norm /= np.linalg.norm(p_norm)
+    p_norm = normal(points[-1], points[0], points[1])
 
     # Convert to array
     pts_arr = np.array([p.vector() for p in points])
@@ -104,22 +102,22 @@ def rotate_points_to_plane(
         pts_arr -= anchor.vector()
 
     # Find rotation axis
-    u = np.cross(p_norm, normal)
+    u = np.cross(p_norm, u)
 
     # Find rotation angle
-    phi = angle(p_norm, normal)
+    phi = angle(p_norm, u)
 
     # Rotate the points
     R = rotation_matrix(u, phi)
     pts_arr = pts_arr.dot(R.T)
 
     # Move points back from anchor
-    pts_arr += anchor.vector()
+    if anchor != Point(0.0, 0.0, 0.0):
+        pts_arr += anchor.vector()
 
     # Move points to d (translation)
-    if d != 0.0:
-        p_dest = normal * d
-        pts_arr += p_dest
+    p_dest = u * d
+    pts_arr += p_dest
 
     rot_and_trans_pts = [Point(x, y, z) for (x, y, z) in pts_arr]
 
