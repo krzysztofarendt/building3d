@@ -7,12 +7,13 @@ import numpy as np
 class Point:
     """Point is a simple class with three attributes: x, y, z."""
 
-    eps = 1e-8
+    eps = 1e-5
+    round_num_dec = 5
 
     def __init__(self, x: float, y: float, z: float):
-        self.x = x
-        self.y = y
-        self.z = z
+        self.x = np.round(x, Point.round_num_dec)
+        self.y = np.round(y, Point.round_num_dec)
+        self.z = np.round(z, Point.round_num_dec)
 
     def copy(self):
         """Return a copy of itself.
@@ -94,3 +95,6 @@ class Point:
             )
         else:
             raise TypeError("Point can be added only with a vector of length 3")
+
+    def __hash__(self):
+        return hash((self.x, self.y, self.z))

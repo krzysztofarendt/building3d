@@ -1,10 +1,8 @@
 """Polygon class"""
 import numpy as np
-from scipy.spatial import Delaunay
 
 from .exceptions import GeometryError
 from .point import Point
-from .rotate import rotate_points_to_plane
 from .vector import vector
 from .vector import length
 from .triangle import triangle_centroid
@@ -24,7 +22,7 @@ class Polygon:
     epsilon = 1e-8
 
     def __init__(self, points: list[Point]):
-        self.points = points
+        self.points = list(points)
         self.normal = self._normal()
         self._verify()
         self.triangles = self._triangulate()
@@ -191,18 +189,6 @@ class Polygon:
             return True
         else:
             return False
-
-    def delaunay_triangulation(self) -> tuple[list[Point], list[int]]:
-        # Generate points inside the polygon
-        points = self.points_as_array()
-        normal_xy = np.array([0.0, 0.0, 1.0])
-        # points_xy = rotate_points_to_plane(points, normal_xy, d=1.0)
-        # TODO
-
-        # Use scipy.spatial.Delaunay to get triangle indices
-        pass
-
-        return None
 
     def _triangulate(self) -> list:
         """Return a list of triangles (i, j, k) using the ear clipping algorithm.

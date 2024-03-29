@@ -1,3 +1,4 @@
+"""Rotation functions."""
 import numpy as np
 
 from .point import Point
@@ -5,6 +6,12 @@ from .vector import angle
 
 
 def rotation_matrix(u: np.ndarray, phi: float) -> np.ndarray:
+    """Calculate rotation matrix for a unit vector u and angle phi.
+
+    A rotation in 3D can be described with an axis and angle around that axis.
+    The axis is described with a unit vector u (ux**2 + uy**2 + uz**2 == 1)
+    a vector phi (in radians).
+    """
     # Rotation matrix
     # Reference: https://en.wikipedia.org/wiki/Rotation_matrix#Basic_3D_rotations
     # Method 1 (less stable numerically):
@@ -36,26 +43,52 @@ def rotation_matrix(u: np.ndarray, phi: float) -> np.ndarray:
     return R
 
 
+def rotate_points(points: list[Point], R: np.ndarray) -> list[Point]:
+    pts_arr = np.array([p.vector() for p in points])
+    pts_arr = pts_arr.dot(R.T)
+    pts = [Point(x, y, z) for (x, y, z) in pts_arr]
+    return pts
+
+
 def rotate_points_around_vector(
     points: list[Point], u: np.ndarray, phi: float
-) -> list[Point]:
+) -> tuple[list[Point], np.ndarray]:
+    """Rotate points to the unit vector u and angle phi (radians).
 
-    # Convert points to array
-    pts_arr = np.array([p.vector() for p in points])
+    Args:
+        points: list of points to be rotated
+        u: normal vector of the rotation axis
+        phi: rotation angle in radians
 
+    Return:
+        (list of rotated points, rotation matrix)
+
+    """
     # Rotate the points
     R = rotation_matrix(u, phi)
-    pts_arr = pts_arr.dot(R.T)
 
     # Convert points to list of Points
-    rotated_points = [Point(x, y, z) for (x, y, z) in pts_arr]
+    rotated_points = rotate_points(points, R)
 
-    return rotated_points
+    return rotated_points, R
 
 
 def rotate_points_to_plane(
     points: list[Point], anchor: Point, normal: np.ndarray, d: float,
-) -> list[Point]:
+) -> tuple[list[Point], np.ndarray]:
+    """Rotate and translate points to a plane defined by a normal vec. and dist. from origin d.
+
+    If anchor is not Point(0.0, 0.0, 0.0) and d is not 0.0, then points are also translated!
+
+    Args:
+        points: list of points to be rotated
+        anchor: rotation center point
+        normal: normal vector of the new plane (rotation)
+        d: distance from origin (0,0,0) of the new plane (translation)
+
+    Return:
+        (list of rotated points, transformation matrix)
+    """
 
     # Find normal to the points
     vec1 = points[1].vector() - points[0].vector()
@@ -63,9 +96,12 @@ def rotate_points_to_plane(
     p_norm = np.cross(vec1, vec2)
     p_norm /= np.linalg.norm(p_norm)
 
-    # Move points to anchor
+    # Convert to array
     pts_arr = np.array([p.vector() for p in points])
-    pts_arr -= anchor.vector()
+
+    # Move points to anchor
+    if anchor != Point(0.0, 0.0, 0.0):
+        pts_arr -= anchor.vector()
 
     # Find rotation axis
     u = np.cross(p_norm, normal)
@@ -80,10 +116,11 @@ def rotate_points_to_plane(
     # Move points back from anchor
     pts_arr += anchor.vector()
 
-    # Move points to d
-    p_dest = normal * d
-    pts_arr += p_dest
+    # Move points to d (translation)
+    if d != 0.0:
+        p_dest = normal * d
+        pts_arr += p_dest
 
     rot_and_trans_pts = [Point(x, y, z) for (x, y, z) in pts_arr]
 
-    return rot_and_trans_pts
+    return rot_and_trans_pts, R

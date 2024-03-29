@@ -7,6 +7,8 @@ def plot_zone(
         zone: Zone,
         show_triangulation: bool = True,
         show_normals: bool = True,
+        mesh_points = [],
+        mesh_triangles = [],
 ):
     rgb_white = (1, 1, 1)
     rgb_red = (1, 0, 0)
@@ -59,5 +61,29 @@ def plot_zone(
                 mode="2darrow",
                 color=rgb_red,
             )
+
+    # Plot mesh
+    x = [p.x for p in mesh_points]
+    y = [p.y for p in mesh_points]
+    z = [p.z for p in mesh_points]
+    tri = mesh_triangles
+
+    # Plot surfaces
+    # _ = mlab.triangular_mesh(
+    #     x, y, z, tri,
+    #     opacity=0.5,
+    #     color=rgb_blue,
+    #     representation="surface",
+    # )
+
+    # Plot triangles
+    if show_triangulation:
+        _ = mlab.triangular_mesh(
+            x, y, z, tri,
+            line_width=2.0,
+            opacity=1.0,
+            color=rgb_blue,
+            representation="wireframe",
+        )
 
     mlab.show()

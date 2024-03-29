@@ -31,6 +31,16 @@ def test_triangular_polygon():
     assert set(poly.triangles[0]) == {0, 1, 2}
 
 
+def test_points_copied():
+    p0 = Point(0.0, 0.0, 0.0)
+    p1 = Point(1.0, 0.0, 0.0)
+    p2 = Point(0.0, 1.0, 0.0)
+    points = [p0, p1, p2]
+    poly = Polygon(points)
+    assert points is not poly.points
+    assert set(points) == set(poly.points)
+
+
 def test_area():
     eps = 1e-8
 
