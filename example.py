@@ -24,16 +24,17 @@ def example():
     wall3 = Wall("wall3", [p0, p4, p7, p3])
     roof = Wall("roof", [p4, p5, p6, p7])
 
-    mesh_points, mesh_triangles = delaunay_triangulation(
-        roof.points,
-        roof.centroid,
-    )
-    # import pdb;pdb.set_trace()
+    floor.mesh()
+    wall0.mesh()
+    wall1.mesh()
+    wall2.mesh()
+    wall3.mesh()
+    roof.mesh()
 
     room = Zone("room", [floor, wall0, wall1, wall2, wall3, roof])
 
     # Plot
-    plot_zone(room, mesh_points=mesh_points, mesh_triangles=mesh_triangles)
+    plot_zone(room)
 
 
 if __name__ == "__main__":

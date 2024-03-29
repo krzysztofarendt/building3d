@@ -152,5 +152,34 @@ def test_slanted_roof():
     assert rerot_p3 == p3
 
 
+def test_rotate_from_xy_to_xy():
+    p0 = Point(0.0, 0.0, 0.0)
+    p1 = Point(1.0, 0.0, 0.0)
+    p2 = Point(1.0, 1.0, 0.0)
+    p3 = Point(0.0, 1.0, 0.0)
+
+    # Rotate to XY plane
+    points = [p0, p1, p2, p3]
+
+    rotated_points, rotaxis, phi = rotate_points_to_plane(
+        points,
+        anchor=Point(0.0, 0.0, 0.0),
+        u=np.array([0.0, 0.0, 1.0]),
+        d=0.0,
+    )
+    rot_p0, rot_p1, rot_p2, rot_p3 = rotated_points
+    assert np.isclose(rot_p0.z, rot_p1.z)
+    assert np.isclose(rot_p0.z, rot_p2.z)
+    assert np.isclose(rot_p0.z, rot_p3.z)
+
+    # Rotate back
+    rerotated_points, _ = rotate_points_around_vector(rotated_points, rotaxis, -phi)
+    rerot_p0, rerot_p1, rerot_p2, rerot_p3 = rerotated_points
+    assert rerot_p0 == p0
+    assert rerot_p1 == p1
+    assert rerot_p2 == p2
+    assert rerot_p3 == p3
+
+
 if __name__ == "__main__":
-    test_slanted_roof()
+    test_rotate_from_xy_to_xy()

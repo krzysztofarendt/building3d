@@ -1,25 +1,33 @@
+from __future__ import annotations  # Needed for type hints to work (due to circular import)
+
 import numpy as np
 from scipy.spatial import Delaunay
 
-from ..geom.polygon import Polygon
+import building3d.geom.polygon as polygon  # Needed to break circular import
 from ..geom.point import Point
 from ..geom.rotate import rotate_points_to_plane
-from ..geom.rotate import rotate_points
 from ..geom.rotate import rotate_points_around_vector
 from ..geom.vector import length
-from ..geom.vector import normal
 from ..geom.line import create_points_between_2_points
 
 
-def delaunay_triangulation(points: list[Point], centroid: Point) -> tuple[list[Point], list[int]]:
+def delaunay_triangulation(poly: polygon.Polygon, delta: float = 0.5) -> tuple[list[Point], list[int]]:
+    """Delanuay triangulation for a polygon.
 
-    normal_original = normal(points[0], points[1], points[2])
+    Steps:
+      - rotate points to plane XY
+      - add points in 2D
+      - run triangulation in 2D
+      - rotate new points back to the original plane
 
-    # Steps:
-    #   - rotate points to plane XY
-    #   - add points in 2D
-    #   - run triangulation in 2D
-    #   - rotate new points back to the original plane
+    Args:
+        poly: polygon to be meshed
+        delta: approximate mesh size
+
+    Return:
+        (list of points used for mesh, list of triangle indices)
+    """
+    points = poly.points
 
     # Rotate points to XY
     origin = Point(0.0, 0.0, 0.0)
@@ -32,10 +40,7 @@ def delaunay_triangulation(points: list[Point], centroid: Point) -> tuple[list[P
 
     z = points_xy[0].z
     new_points_2d = [Point(p.x, p.y, z) for p in points_xy]
-    poly_2d = Polygon(new_points_2d)
-
-    # Mesh size
-    delta = 0.5
+    poly_2d = polygon.Polygon(new_points_2d)
 
     # Add new points on the edges
     edge_pts_2d = []
@@ -84,7 +89,6 @@ def delaunay_triangulation(points: list[Point], centroid: Point) -> tuple[list[P
     assert len(np.unique(triangles)) == len(final_points_2d)
 
     # Rotate back to 3D
-    # TODO: Mostly does not work
     new_points, _ = rotate_points_around_vector(
         final_points_2d,
         u=rotaxis,

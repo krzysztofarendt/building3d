@@ -7,6 +7,9 @@ from .vector import normal
 from .vector import length
 
 
+EPS = 1e-8
+
+
 def rotation_matrix(u: np.ndarray, phi: float) -> np.ndarray:
     """Calculate rotation matrix for a unit vector u and angle phi.
 
@@ -68,6 +71,10 @@ def rotate_points_around_vector(
         (list of rotated points, rotation matrix)
 
     """
+    if length(u) < EPS or abs(phi) < EPS:
+        # No need to rotate
+        return points, np.ones((3, 3))
+
     # Rotate the points
     R = rotation_matrix(u, phi)
 
@@ -106,6 +113,11 @@ def rotate_points_to_plane(
 
     # Find rotation axis
     rotaxis = np.cross(p_norm, u)
+    if (np.abs(rotaxis) < EPS).all():
+        # No need to rotate, the points are already at the correct plane
+        phi = 0.0
+        return points, rotaxis, phi
+
     rotaxis /= np.linalg.norm(rotaxis)
 
     # Find rotation angle

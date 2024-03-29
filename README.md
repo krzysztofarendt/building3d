@@ -53,7 +53,7 @@ python example.py
 - [x] Check whether a point is inside a Solid
 - [x] Use mayavi instead of matplotlib: https://docs.enthought.com/mayavi/mayavi/index.html
 - [x] Delaunay triangulation of a polygon -> Polygon.delaunay_triangulation()
-- [ ] Pretty mesh rendering
+- [x] Pretty mesh rendering
 - [ ] Fix highly skewed triangles in Delaunay triangulation
 - [ ] Delaunay triangulation of a solid
 - [ ] Calculate solid volume
