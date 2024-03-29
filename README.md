@@ -22,6 +22,18 @@ try updating `vtk` to the correct version:
 pip install -U vtk==9.2
 ```
 
+# Testing
+
+Run unit tests:
+```
+make test
+```
+
+Produce a coverage report:
+```
+make coverage
+```
+
 # Example
 ```
 python example.py
