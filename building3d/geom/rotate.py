@@ -4,6 +4,7 @@ import numpy as np
 from .point import Point
 from .vector import angle
 from .vector import normal
+from .vector import length
 
 
 def rotation_matrix(u: np.ndarray, phi: float) -> np.ndarray:
@@ -36,6 +37,8 @@ def rotation_matrix(u: np.ndarray, phi: float) -> np.ndarray:
     # Method 2 (more stable numerically):
     # https://en.wikipedia.org/wiki/Rodrigues%27_rotation_formula
     # https://math.stackexchange.com/questions/142821/matrix-for-rotation-around-a-vector
+    assert np.isclose(length(u), 1.0), "rotation_matrix() requires u to be a unit vector"
+
     W = np.array([[0, -u[2], u[1]],
                   [u[2], 0, -u[0]],
                   [-u[1], u[0], 0]])
@@ -103,6 +106,7 @@ def rotate_points_to_plane(
 
     # Find rotation axis
     rotaxis = np.cross(p_norm, u)
+    rotaxis /= np.linalg.norm(rotaxis)
 
     # Find rotation angle
     phi = angle(p_norm, u)
