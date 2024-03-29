@@ -76,7 +76,7 @@ def rotate_points_around_vector(
 
 def rotate_points_to_plane(
     points: list[Point], anchor: Point, u: np.ndarray, d: float,
-) -> tuple[list[Point], np.ndarray]:
+) -> tuple[list[Point], np.ndarray, float]:
     """Rotate and translate points to a plane defined by a normal vec. and dist. from origin d.
 
     If anchor is not Point(0.0, 0.0, 0.0) and d is not 0.0, then points are also translated!
@@ -88,7 +88,7 @@ def rotate_points_to_plane(
         d: distance from origin (0,0,0) of the new plane (translation)
 
     Return:
-        (list of rotated points, transformation matrix)
+        (list of rotated points, rotation axis, rotation angle)
     """
 
     # Find normal to the points
@@ -102,13 +102,13 @@ def rotate_points_to_plane(
         pts_arr -= anchor.vector()
 
     # Find rotation axis
-    u = np.cross(p_norm, u)
+    rotaxis = np.cross(p_norm, u)
 
     # Find rotation angle
     phi = angle(p_norm, u)
 
     # Rotate the points
-    R = rotation_matrix(u, phi)
+    R = rotation_matrix(rotaxis, phi)
     pts_arr = pts_arr.dot(R.T)
 
     # Move points back from anchor
@@ -121,4 +121,4 @@ def rotate_points_to_plane(
 
     rot_and_trans_pts = [Point(x, y, z) for (x, y, z) in pts_arr]
 
-    return rot_and_trans_pts, R
+    return rot_and_trans_pts, rotaxis, phi
