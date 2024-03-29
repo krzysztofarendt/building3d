@@ -24,7 +24,7 @@ def example():
     wall3 = Wall("wall3", [p0, p4, p7, p3])
     roof = Wall("roof", [p4, p5, p6, p7])
 
-    mesh_points, mesh_triangles = delaunay_triangulation(wall0.points, wall0.centroid)
+    mesh_points, mesh_triangles = delaunay_triangulation(wall2.points, wall2.centroid)
     # import pdb;pdb.set_trace()
 
     room = Zone("room", [floor, wall0, wall1, wall2, wall3, roof])

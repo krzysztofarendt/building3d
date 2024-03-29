@@ -24,11 +24,10 @@ def delaunay_triangulation(points: list[Point], centroid: Point) -> tuple[list[P
     # Rotate points to XY
     origin = Point(0.0, 0.0, 0.0)
     normal_xy = np.array([0.0, 0.0, 1.0])
-    points_xy, R = rotate_points_to_plane(
+    points_xy, rotaxis, phi = rotate_points_to_plane(
         points,
-        anchor=centroid,
+        anchor=origin,
         u=normal_xy,
-        d=0.0,
     )
 
     z = points_xy[0].z
@@ -86,11 +85,10 @@ def delaunay_triangulation(points: list[Point], centroid: Point) -> tuple[list[P
 
     # Rotate back to 3D
     # TODO: Mostly does not work
-    new_points, _ = rotate_points_to_plane(
+    new_points, _ = rotate_points_around_vector(
         final_points_2d,
-        anchor=centroid,
-        u=normal_original,
-        d=0.0,
+        u=rotaxis,
+        phi=-phi,
     )
 
     return new_points, triangles.tolist()
