@@ -80,6 +80,7 @@ def test_point_inside():
     assert sld.is_point_inside(ptest) is False
     ptest = Point(0.0, 0.0, 0.0)  # This point is in the corner of the solid...
     assert sld.is_point_inside(ptest) is False  # ...so it is not inside
+    assert sld.is_point_at_the_boundary(ptest) is True
 
 
 def test_bounding_box():

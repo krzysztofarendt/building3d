@@ -81,6 +81,13 @@ class Solid:
         else:
             return False
 
+    def is_point_at_the_boundary(self, p: Point) -> bool:
+        """Checks whether the point p lays on any of the boundary polygons."""
+        for poly in self.boundary:
+            if poly.is_point_inside(p):
+                return True
+        return False
+
     def _verify(self, throw: bool = False) -> None:
         """Verify geometry correctness.
 
