@@ -5,7 +5,7 @@ from building3d.geom.wall import Wall
 from building3d.mesh.mesh import Mesh
 
 
-def example():
+def test_plot_zone():
     stretch = [10, 8, 5]
     translate = [3.0, 3.0, 3.0]
     p0 = Point(0.0, 0.0, 0.0) * stretch + translate
@@ -36,8 +36,4 @@ def example():
     room = Zone("room", [floor, wall0, wall1, wall2, wall3, roof])
 
     # Plot
-    plot_zone(room, mesh)
-
-
-if __name__ == "__main__":
-    example()
+    plot_zone(room, mesh, test=True)

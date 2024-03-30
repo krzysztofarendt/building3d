@@ -9,7 +9,6 @@ from .triangle import triangle_centroid
 from .triangle import triangle_area
 from .triangle import is_point_inside as is_point_inside_triangle
 from .triangle import triangulate
-import building3d.mesh.polygon_mesh as polygon_mesh
 from building3d import random_id
 
 
@@ -36,10 +35,6 @@ class Polygon:
         self.centroid = self._centroid()
         self.edges = self._edges()
         self.area = self._area()
-
-        # Mesh is initialized wit the mesh() method
-        self.mesh_points = []
-        self.mesh_triangles = []
 
     @staticmethod
     def add_name(name: str):
@@ -215,9 +210,6 @@ class Polygon:
             return True
         else:
             return False
-
-    def mesh(self) -> None:
-        self.mesh_points, self.mesh_triangles = polygon_mesh.delaunay_triangulation(self)
 
     def _triangulate(self) -> list:
         """Return a list of triangles (i, j, k) using the ear clipping algorithm.

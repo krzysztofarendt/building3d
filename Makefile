@@ -16,3 +16,7 @@ coverage:
 
 count:
 	cloc --by-file building3d/
+
+
+example:
+	python example.py

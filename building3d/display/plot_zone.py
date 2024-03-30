@@ -1,13 +1,16 @@
 from mayavi import mlab
 
 from building3d.geom.zone import Zone
+from building3d.mesh.mesh import Mesh
 
 
 def plot_zone(
     zone: Zone,
+    mesh: Mesh,
     show_triangulation: bool = True,
     show_normals: bool = True,
     show_mesh: bool = True,
+    test: bool = False,
 ):
     rgb_white = (1, 1, 1)
     rgb_red = (1, 0, 0)
@@ -62,29 +65,31 @@ def plot_zone(
                 color=rgb_red,
             )
 
-        # Plot mesh
-        if show_mesh:
-            x = [p.x for p in wall.mesh_points]
-            y = [p.y for p in wall.mesh_points]
-            z = [p.z for p in wall.mesh_points]
-            tri = wall.mesh_triangles
+    # Plot mesh
+    if show_mesh:
+        x = [p.x for p in mesh.vertices]
+        y = [p.y for p in mesh.vertices]
+        z = [p.z for p in mesh.vertices]
+        tri = mesh.faces
 
-            # Plot triangles
-            if len(tri) > 0:
-                _ = mlab.triangular_mesh(
-                    x, y, z, tri,
-                    line_width=2.0,
-                    opacity=0.5,
-                    color=rgb_green,
-                    representation="wireframe",
-                )
-            # Plot surfaces
-            _ = mlab.triangular_mesh(
-                x, y, z, tri,
-                name=name,
-                opacity=0.5,
-                color=rgb_blue,
-                representation="surface",
-            )
+        # Plot triangles
+        _ = mlab.triangular_mesh(
+            x, y, z, tri,
+            line_width=2.0,
+            opacity=0.5,
+            color=rgb_green,
+            representation="wireframe",
+        )
+        # Plot surfaces
+        _ = mlab.triangular_mesh(
+            x, y, z, tri,
+            opacity=0.5,
+            color=rgb_blue,
+            representation="surface",
+        )
 
-    mlab.show()
+    if test:
+        return
+    else:
+        mlab.show()
+        return

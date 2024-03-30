@@ -59,3 +59,5 @@ python example.py
 - [ ] Delaunay triangulation of a solid
 - [ ] Calculate solid volume
 - [ ] Accurate center of weight for Solid
+- [ ] Wall could be a collection of Polygons instead of a Polygon subclass
+- [ ] Zone could be a collection of Solids instead of a Solid subclass
