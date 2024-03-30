@@ -33,6 +33,8 @@ def example():
     mesh.add_polygon(roof)
     mesh.generate()
 
+    mesh.collapse_points()
+
     room = Zone("room", [floor, wall0, wall1, wall2, wall3, roof])
 
     # Plot

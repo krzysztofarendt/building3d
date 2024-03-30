@@ -1,7 +1,7 @@
 from building3d.display.plot_zone import plot_zone
 from building3d.geom.point import Point
-from building3d.geom.zone import Zone
 from building3d.geom.wall import Wall
+from building3d.geom.zone import Zone
 from building3d.mesh.mesh import Mesh
 
 
