@@ -9,6 +9,7 @@ from ..geom.rotate import rotate_points_to_plane
 from ..geom.rotate import rotate_points_around_vector
 from ..geom.vector import length
 from ..geom.line import create_points_between_2_points
+from building3d import random_id
 
 
 def delaunay_triangulation(poly: polygon.Polygon, delta: float = 0.5) -> tuple[list[Point], list[int]]:
@@ -40,7 +41,7 @@ def delaunay_triangulation(poly: polygon.Polygon, delta: float = 0.5) -> tuple[l
 
     z = points_xy[0].z
     new_points_2d = [Point(p.x, p.y, z) for p in points_xy]
-    poly_2d = polygon.Polygon(new_points_2d)
+    poly_2d = polygon.Polygon(random_id(), new_points_2d)
 
     # Add new points on the edges
     edge_pts_2d = []
@@ -95,5 +96,6 @@ def delaunay_triangulation(poly: polygon.Polygon, delta: float = 0.5) -> tuple[l
         phi=-phi,
     )
 
+    del poly_2d
     return new_points, triangles.tolist()
 

@@ -11,7 +11,8 @@ from .point import Point
 class Solid:
     """Solid is a space enclosed by polygons."""
 
-    def __init__(self, boundary: Sequence[Polygon]):
+    def __init__(self, name:str, boundary: Sequence[Polygon]):
+        self.name = name
         self.boundary = boundary
         self._verify(throw=True)
 

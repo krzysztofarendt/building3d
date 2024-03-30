@@ -10,6 +10,7 @@ from .triangle import triangle_area
 from .triangle import is_point_inside as is_point_inside_triangle
 from .triangle import triangulate
 import building3d.mesh.polygon_mesh as polygon_mesh
+from building3d import random_id
 
 
 class Polygon:
@@ -21,8 +22,13 @@ class Polygon:
       to the zone that this wall belongs to.
     """
     epsilon = 1e-8
+    # List of names of all Polygon instances (names must be unique)
+    instance_names = set()
 
-    def __init__(self, points: list[Point]):
+    def __init__(self, name: str, points: list[Point]):
+        self.name = name
+        Polygon.add_name(name)
+
         self.points = list(points)
         self.normal = self._normal()
         self._verify()
@@ -35,13 +41,28 @@ class Polygon:
         self.mesh_points = []
         self.mesh_triangles = []
 
-    def copy(self):
+    @staticmethod
+    def add_name(name: str):
+        if name not in Polygon.instance_names:
+            Polygon.instance_names.add(name)
+        else:
+            raise ValueError(f"Polygon {name} already exists!")
+
+    @staticmethod
+    def remove_name(name: str):
+        if name in Polygon.instance_names:
+            Polygon.instance_names.remove(name)
+
+    def copy(self, new_name: str):
         """Return a deep copy of itself.
+
+        Args:
+            new_name: polygon name (must be unique)
 
         Return:
             Polygon
         """
-        return Polygon([Point(p.x, p.y, p.z) for p in self.points])
+        return Polygon(new_name, [Point(p.x, p.y, p.z) for p in self.points])
 
     def points_as_array(self) -> np.ndarray:
         """Returns a copy of the points as a numpy array."""
@@ -123,13 +144,14 @@ class Polygon:
         dist = d - dp
 
         # Make a copy of the polygon and move it to the point p
-        poly_at_p = self.copy()
+        poly_at_p = self.copy(random_id())
         poly_at_p.move_orthogonal(dist)
         assert poly_at_p.is_point_coplanar(p)
 
         # Check if the point lays inside the polygon
         is_inside = poly_at_p.is_point_inside(p)
 
+        del poly_at_p
         return is_inside
 
     def is_point_inside_projection(
@@ -336,3 +358,6 @@ class Polygon:
         ctr = Point(vec[0], vec[1], vec[2])
 
         return ctr
+
+    def __del__(self):
+        Polygon.remove_name(self.name)
