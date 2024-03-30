@@ -1,10 +1,10 @@
 import numpy as np
 import pytest
 
+from building3d import random_id
 from building3d.geom.exceptions import GeometryError
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
-from building3d import random_id
 
 
 def test_too_few_points():

@@ -112,7 +112,6 @@ class Polygon:
     def is_point_inside(self, p: Point) -> bool:
         """Checks whether a point lies on the surface of the polygon."""
 
-
         if not self.is_point_coplanar(p):
             return False
 

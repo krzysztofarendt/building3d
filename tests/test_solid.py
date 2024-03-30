@@ -1,10 +1,10 @@
 import pytest
 
+from building3d import random_id
 from building3d.geom.exceptions import GeometryError
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
 from building3d.geom.solid import Solid
-from building3d import random_id
 
 
 def test_correct_space_geometry():
@@ -78,6 +78,8 @@ def test_point_inside():
     assert sld.is_point_inside(ptest) is False
     ptest = Point(0.0, 0.0, -0.5)
     assert sld.is_point_inside(ptest) is False
+    ptest = Point(0.0, 0.0, 0.0)  # This point is in the corner of the solid...
+    assert sld.is_point_inside(ptest) is False  # ...so it is not inside
 
 
 def test_bounding_box():
