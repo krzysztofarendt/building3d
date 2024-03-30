@@ -25,7 +25,7 @@ def delaunay_triangulation(poly: polygon.Polygon, delta: float = 0.5) -> tuple[l
         delta: approximate mesh size
 
     Return:
-        (list of points used for mesh, list of triangle indices)
+        (list of mesh points, list of faces)
     """
     points = poly.points
 

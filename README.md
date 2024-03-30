@@ -54,6 +54,7 @@ python example.py
 - [x] Use mayavi instead of matplotlib: https://docs.enthought.com/mayavi/mayavi/index.html
 - [x] Delaunay triangulation of a polygon -> Polygon.delaunay_triangulation()
 - [x] Pretty mesh rendering
+- [ ] Mesh points on the edges should be shared across all connected polygons
 - [ ] Fix highly skewed triangles in Delaunay triangulation
 - [ ] Delaunay triangulation of a solid
 - [ ] Calculate solid volume
