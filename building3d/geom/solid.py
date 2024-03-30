@@ -10,11 +10,25 @@ from .point import Point
 
 class Solid:
     """Solid is a space enclosed by polygons."""
+    # List of names of all Solid instances (names must be unique)
+    instance_names = set()
 
     def __init__(self, name:str, boundary: Sequence[Polygon]):
         self.name = name
         self.boundary = boundary
         self._verify(throw=True)
+
+    @staticmethod
+    def add_name(name: str):
+        if name not in Solid.instance_names:
+            Solid.instance_names.add(name)
+        else:
+            raise ValueError(f"Solid {name} already exists!")
+
+    @staticmethod
+    def remove_name(name: str):
+        if name in Solid.instance_names:
+            Solid.instance_names.remove(name)
 
     def vertices(self) -> list[Point]:
         points = []
@@ -103,3 +117,6 @@ class Solid:
         # Raise the first exception
         if throw and len(errors) > 0:
             raise errors[0]
+
+    def __del__(self):
+        Solid.remove_name(self.name)
