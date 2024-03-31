@@ -1,5 +1,9 @@
+import numpy as np
+
 from building3d import random_id
+from building3d.config import GEOM_EPSILON
 from building3d.geom.point import Point
+from building3d.geom.vector import normal
 from building3d.geom.wall import Wall
 from building3d.mesh.mesh import Mesh
 
@@ -55,6 +59,18 @@ def test_collapse_points():
 
     diff_num_vertices = len(vertices) - len(new_vertices)
     assert max_f - diff_num_vertices == max_new_f
+
+    # Check if face normals are equal for each face attached to a given polygon
+    for i, face in enumerate(mesh.faces):
+        poly_name = mesh.face_owners[i]
+        poly = mesh.polygons[poly_name]
+        p0 = mesh.vertices[face[0]]
+        p1 = mesh.vertices[face[1]]
+        p2 = mesh.vertices[face[2]]
+        vnorm = normal(p0, p1, p2)
+        assert np.isclose(
+            vnorm, poly.normal, atol=GEOM_EPSILON
+        ).all()  # TODO: Should be same, but is not
 
 
 if __name__ == "__main__":

@@ -10,6 +10,7 @@ from .triangle import triangle_area
 from .triangle import is_point_inside as is_point_inside_triangle
 from .triangle import triangulate
 from building3d import random_id
+from building3d.config import GEOM_EPSILON
 
 
 class Polygon:
@@ -20,7 +21,6 @@ class Polygon:
     - If used as a wall, the points should be ordered counter-clockwise w.r.t.
       to the zone that this wall belongs to.
     """
-    epsilon = 1e-8
     # List of names of all Polygon instances (names must be unique)
     instance_names = set()
 
@@ -173,9 +173,8 @@ class Polygon:
 
         # Find the point projection alogn vec to the plane of the polygon
         denom = (a * vec[0] + b * vec[1] + c * vec[2])
-        Polygon.epsilon = 1e-8
 
-        if np.abs(denom) < Polygon.epsilon:
+        if np.abs(denom) < GEOM_EPSILON:
             # Vector vec is perpendicular to the plane
             return False
         else:
@@ -226,13 +225,13 @@ class Polygon:
         - A: 0 -> 1 (first and second point)
         - B: 0 -> -1 (first and last point)
         """
+        # TODO: use building3d.geom.vector.normal() instead
         vec_a = vector(self.points[0], self.points[1])
         vec_b = vector(self.points[0], self.points[-1])
         norm = np.cross(vec_a, vec_b)
 
-        Polygon.epsilon = 1e-6
         len_norm = length(norm)
-        if len_norm < Polygon.epsilon:
+        if len_norm < GEOM_EPSILON:
             raise GeometryError("Normal vector has zero length")
         else:
             norm /= len_norm
@@ -299,9 +298,8 @@ class Polygon:
         d = -1 * (vec_n[0] * ref_pt.x + vec_n[1] * ref_pt.y + vec_n[2] * ref_pt.z)
 
         # Check if all points lay on the same plane
-        Polygon.epsilon = 1e-6
         for pt in self.points:
-            coplanar = np.abs(vec_n[0] * pt.x + vec_n[1] * pt.y + vec_n[2] * pt.z + d) < Polygon.epsilon
+            coplanar = np.abs(vec_n[0] * pt.x + vec_n[1] * pt.y + vec_n[2] * pt.z + d) < GEOM_EPSILON
             if not coplanar:
                 return False
         return True

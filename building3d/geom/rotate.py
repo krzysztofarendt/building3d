@@ -5,9 +5,7 @@ from .point import Point
 from .vector import angle
 from .vector import normal
 from .vector import length
-
-
-EPS = 1e-8
+from building3d.config import GEOM_EPSILON
 
 
 def rotation_matrix(u: np.ndarray, phi: float) -> np.ndarray:
@@ -71,7 +69,7 @@ def rotate_points_around_vector(
         (list of rotated points, rotation matrix)
 
     """
-    if length(u) < EPS or abs(phi) < EPS:
+    if length(u) < GEOM_EPSILON or abs(phi) < GEOM_EPSILON:
         # No need to rotate
         return points, np.ones((3, 3))
 
@@ -113,7 +111,7 @@ def rotate_points_to_plane(
 
     # Find rotation axis
     rotaxis = np.cross(p_norm, u)
-    if (np.abs(rotaxis) < EPS).all():
+    if (np.abs(rotaxis) < GEOM_EPSILON).all():
         # No need to rotate, the points are already at the correct plane
         phi = 0.0
         return points, rotaxis, phi
