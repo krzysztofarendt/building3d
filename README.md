@@ -57,7 +57,7 @@ python example.py
 - [x] Mesh points on the edges should be shared across all connected polygons
 - [x] one config
 - [x] Mesh face polygons should have the same surface normals as the polygon
-- [ ] Add to PyPi to reserve the name
+- [x] Add to PyPi to reserve the name
 - [ ] Fix highly skewed triangles in Delaunay triangulation
 - [ ] Delaunay triangulation of a solid
 - [ ] Discretize solid with tetrahedra

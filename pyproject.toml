@@ -21,7 +21,7 @@ dependencies = [
 version = "0.0.1"
 
 [project.optional-dependencies]
-dev = ["pytest", "pytest-cov", "black", "isort"]
+dev = ["pytest", "pytest-cov", "black", "isort", "twine", "build"]
 
 [project.scripts]
 building3d = "building3d:main"
