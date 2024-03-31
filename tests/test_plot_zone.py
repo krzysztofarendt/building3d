@@ -36,4 +36,4 @@ def test_plot_zone():
     room = Zone("room", [floor, wall0, wall1, wall2, wall3, roof])
 
     # Plot
-    plot_zone(room, mesh, test=True)
+    plot_zone(room, mesh, show=False)

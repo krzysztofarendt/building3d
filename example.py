@@ -38,7 +38,7 @@ def example():
     room = Zone("room", [floor, wall0, wall1, wall2, wall3, roof])
 
     # Plot
-    plot_zone(room, mesh)
+    plot_zone(room, mesh, show=True)
 
 
 if __name__ == "__main__":
