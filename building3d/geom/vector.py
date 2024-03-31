@@ -34,7 +34,7 @@ def angle(v1: np.ndarray, v2: np.ndarray) -> float:
     return rad
 
 
-def angle_ccw(v1: np.ndarray, v2: np.ndarray, n: np.ndarray) -> float:
+def angle_ccw(v1: np.ndarray, v2: np.ndarray, n: np.ndarray) -> float:  # TODO: is it used anywhere?
     """Calculate counter-clockwise angle in radians between two vectors.
     """
     # In 3D space, determining whether an angle is
