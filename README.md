@@ -60,6 +60,7 @@ python example.py
 - [ ] Add to PyPi to reserve the name
 - [ ] Fix highly skewed triangles in Delaunay triangulation
 - [ ] Delaunay triangulation of a solid
+- [ ] Discretize solid with tetrahedra
 - [ ] Calculate solid volume
 - [ ] Accurate center of weight for Solid
 - [ ] Wall could be a collection of Polygons instead of a Polygon subclass
