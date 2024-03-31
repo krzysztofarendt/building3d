@@ -4,6 +4,7 @@ from building3d.geom.polygon import Polygon
 from building3d.geom.wall import Wall
 from building3d.mesh.mesh import Mesh
 import building3d.display.colors as colors
+from building3d.display.plot_mesh import plot_mesh
 
 
 def plot_polygons(
@@ -66,26 +67,7 @@ def plot_polygons(
 
     # Plot mesh
     if mesh is not None:
-        x = [p.x for p in mesh.vertices]
-        y = [p.y for p in mesh.vertices]
-        z = [p.z for p in mesh.vertices]
-        tri = mesh.faces
-
-        # Plot triangles
-        _ = mlab.triangular_mesh(
-            x, y, z, tri,
-            line_width=2.0,
-            opacity=0.5,
-            color=colors.RGB_GREEN,
-            representation="wireframe",
-        )
-        # Plot surfaces
-        _ = mlab.triangular_mesh(
-            x, y, z, tri,
-            opacity=0.5,
-            color=colors.RGB_BLUE,
-            representation="surface",
-        )
+        plot_mesh(mesh, show=False)
 
     if show:
         mlab.show()
