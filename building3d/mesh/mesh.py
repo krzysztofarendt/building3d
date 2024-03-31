@@ -5,6 +5,9 @@ import numpy as np
 import building3d.geom.solid
 import building3d.geom.polygon
 import building3d.geom.point
+from building3d.geom.triangle import triangle_area
+from building3d.geom.vector import length
+from building3d.geom.vector import vector
 from .polygon_mesh import delaunay_triangulation
 
 
@@ -30,6 +33,52 @@ class Mesh:
 
     def add_solid(self, sld: building3d.geom.solid.Solid):
         self.solids[sld.name] = sld
+
+    def mesh_statistics(self, show=False) -> dict:
+        """Print and return info about mesh quality."""
+        num_of_vertices = len(self.vertices)
+        num_of_faces = len(self.faces)
+
+        face_areas = []
+        edge_lengths = []
+        for i in range(num_of_faces):
+            p0 = self.vertices[self.faces[i][0]]
+            p1 = self.vertices[self.faces[i][1]]
+            p2 = self.vertices[self.faces[i][2]]
+            face_areas.append(triangle_area(p0, p1, p2))
+            edge_lengths.append(length(vector(p0, p1)))
+            edge_lengths.append(length(vector(p1, p2)))
+            edge_lengths.append(length(vector(p2, p0)))
+
+        max_face_area = np.max(face_areas)
+        avg_face_area = np.mean(face_areas)
+        min_face_area = np.min(face_areas)
+        max_edge_len = np.max(edge_lengths)
+        avg_edge_len = np.mean(edge_lengths)
+        min_edge_len = np.min(edge_lengths)
+
+        if show is True:
+            print("MESH STATISTICS:")
+            print(f"\t{num_of_vertices=}")
+            print(f"\t{num_of_faces=}")
+            print(f"\t{max_face_area=}")
+            print(f"\t{avg_face_area=}")
+            print(f"\t{min_face_area=}")
+            print(f"\t{max_edge_len=}")
+            print(f"\t{avg_edge_len=}")
+            print(f"\t{min_edge_len=}")
+
+        stats = {
+            "num_of_vertices": num_of_vertices,
+            "num_of_faces": num_of_faces,
+            "max_face_area": max_face_area,
+            "avg_face_area": avg_face_area,
+            "min_face_area": min_face_area,
+            "max_edge_len": max_edge_len,
+            "avg_edge_len": avg_edge_len,
+            "min_edge_len": min_edge_len,
+        }
+        return stats
 
     def generate(self):
         """Generate mesh for all added polygons and solids."""
@@ -96,3 +145,6 @@ class Mesh:
             for k in range(len(self.faces)):
                 self.faces[k] = [x - 1 if x > p_to_delete else x for x in self.faces[k]]
             self.vertices.pop(p_to_delete)
+
+    def fix_short_edges(self, min_length: float):  # TODO
+        pass
