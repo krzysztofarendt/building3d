@@ -3,11 +3,12 @@ from typing import Sequence
 
 import numpy as np
 
+from building3d.config import GEOM_EPSILON
+from building3d.config import POINT_NUM_DEC
+
 
 class Point:
     """Point is a simple class with three attributes: x, y, z."""
-
-    eps = 1e-8
 
     def __init__(self, x: float, y: float, z: float):
         self.x = x
@@ -42,9 +43,9 @@ class Point:
         return str(self)
 
     def __eq__(self, other):
-        x_eq = np.abs(self.x - other.x) < Point.eps
-        y_eq = np.abs(self.y - other.y) < Point.eps
-        z_eq = np.abs(self.z - other.z) < Point.eps
+        x_eq = np.abs(self.x - other.x) < GEOM_EPSILON
+        y_eq = np.abs(self.y - other.y) < GEOM_EPSILON
+        z_eq = np.abs(self.z - other.z) < GEOM_EPSILON
 
         if x_eq and y_eq and z_eq:
             return True
@@ -94,3 +95,9 @@ class Point:
             )
         else:
             raise TypeError("Point can be added only with a vector of length 3")
+
+    def __hash__(self):
+        x = np.round(self.x, POINT_NUM_DEC)
+        y = np.round(self.y, POINT_NUM_DEC)
+        z = np.round(self.z, POINT_NUM_DEC)
+        return hash((x, y, z))

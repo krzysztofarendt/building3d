@@ -13,6 +13,12 @@ def length(v: np.ndarray) -> float:
     return np.sqrt(v[0] ** 2 + v[1] ** 2 + v[2] ** 2)
 
 
+def normal(p0: Point, p1: Point, p2: Point) -> np.ndarray:
+    n = np.cross(p1.vector() - p0.vector(), p2.vector() - p0.vector())
+    n /= np.linalg.norm(n)
+    return n
+
+
 def angle(v1: np.ndarray, v2: np.ndarray) -> float:
     """Calculate angle in radians between two vectors.
     """

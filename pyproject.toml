@@ -7,7 +7,7 @@ name = "building3d"
 authors = [
     {name = "Krzysztof Arendt", email = "16005748+krzysztofarendt@users.noreply.github.com"},
 ]
-description = "Playground for 3d drawing primitives"
+description = "Towards 3D building physics modeling"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
@@ -21,7 +21,7 @@ dependencies = [
 version = "0.0.1"
 
 [project.optional-dependencies]
-dev = ["pytest", "black", "isort"]
+dev = ["pytest", "pytest-cov", "black", "isort"]
 
 [project.scripts]
 building3d = "building3d:main"

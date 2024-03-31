@@ -9,6 +9,8 @@ from .triangle import triangle_centroid
 from .triangle import triangle_area
 from .triangle import is_point_inside as is_point_inside_triangle
 from .triangle import triangulate
+from building3d import random_id
+from building3d.config import GEOM_EPSILON
 
 
 class Polygon:
@@ -19,10 +21,14 @@ class Polygon:
     - If used as a wall, the points should be ordered counter-clockwise w.r.t.
       to the zone that this wall belongs to.
     """
-    epsilon = 1e-8
+    # List of names of all Polygon instances (names must be unique)
+    instance_names = set()
 
-    def __init__(self, points: list[Point]):
-        self.points = points
+    def __init__(self, name: str, points: list[Point]):
+        self.name = name
+        Polygon.add_name(name)
+
+        self.points = list(points)
         self.normal = self._normal()
         self._verify()
         self.triangles = self._triangulate()
@@ -30,13 +36,32 @@ class Polygon:
         self.edges = self._edges()
         self.area = self._area()
 
-    def copy(self):
+    @staticmethod
+    def add_name(name: str):
+        if name not in Polygon.instance_names:
+            Polygon.instance_names.add(name)
+        else:
+            raise ValueError(f"Polygon {name} already exists!")
+
+    @staticmethod
+    def remove_name(name: str):
+        if name in Polygon.instance_names:
+            Polygon.instance_names.remove(name)
+
+    def copy(self, new_name: str):
         """Return a deep copy of itself.
+
+        Args:
+            new_name: polygon name (must be unique)
 
         Return:
             Polygon
         """
-        return Polygon([Point(p.x, p.y, p.z) for p in self.points])
+        return Polygon(new_name, [Point(p.x, p.y, p.z) for p in self.points])
+
+    def points_as_array(self) -> np.ndarray:
+        """Returns a copy of the points as a numpy array."""
+        return np.array([[p.x, p.y, p.z] for p in self.points])
 
     def move_orthogonal(self, d: float) -> None:
         vec = self.normal * d
@@ -64,6 +89,11 @@ class Polygon:
         d = -1 * (a * p.x + b * p.y + c * p.z)
         return (a, b, c, d)
 
+    def plane_normal_and_d(self) -> tuple[np.ndarray, float]:
+        """Return the normal vector and coefficient d describing the plane."""
+        _, _, _, d = self.plane_equation_coefficients()
+        return (self.normal, d)
+
     def is_point_coplanar(self, p: Point) -> bool:
         """Checks whether the point p is coplanar with the polygon."""
         # Temporarily add the test point to self.points
@@ -76,7 +106,6 @@ class Polygon:
 
     def is_point_inside(self, p: Point) -> bool:
         """Checks whether a point lies on the surface of the polygon."""
-
 
         if not self.is_point_coplanar(p):
             return False
@@ -109,13 +138,14 @@ class Polygon:
         dist = d - dp
 
         # Make a copy of the polygon and move it to the point p
-        poly_at_p = self.copy()
+        poly_at_p = self.copy(random_id())
         poly_at_p.move_orthogonal(dist)
         assert poly_at_p.is_point_coplanar(p)
 
         # Check if the point lays inside the polygon
         is_inside = poly_at_p.is_point_inside(p)
 
+        del poly_at_p
         return is_inside
 
     def is_point_inside_projection(
@@ -143,9 +173,8 @@ class Polygon:
 
         # Find the point projection alogn vec to the plane of the polygon
         denom = (a * vec[0] + b * vec[1] + c * vec[2])
-        Polygon.epsilon = 1e-8
 
-        if np.abs(denom) < Polygon.epsilon:
+        if np.abs(denom) < GEOM_EPSILON:
             # Vector vec is perpendicular to the plane
             return False
         else:
@@ -196,13 +225,13 @@ class Polygon:
         - A: 0 -> 1 (first and second point)
         - B: 0 -> -1 (first and last point)
         """
+        # TODO: use building3d.geom.vector.normal() instead
         vec_a = vector(self.points[0], self.points[1])
         vec_b = vector(self.points[0], self.points[-1])
         norm = np.cross(vec_a, vec_b)
 
-        Polygon.epsilon = 1e-6
         len_norm = length(norm)
-        if len_norm < Polygon.epsilon:
+        if len_norm < GEOM_EPSILON:
             raise GeometryError("Normal vector has zero length")
         else:
             norm /= len_norm
@@ -269,9 +298,8 @@ class Polygon:
         d = -1 * (vec_n[0] * ref_pt.x + vec_n[1] * ref_pt.y + vec_n[2] * ref_pt.z)
 
         # Check if all points lay on the same plane
-        Polygon.epsilon = 1e-6
         for pt in self.points:
-            coplanar = np.abs(vec_n[0] * pt.x + vec_n[1] * pt.y + vec_n[2] * pt.z + d) < Polygon.epsilon
+            coplanar = np.abs(vec_n[0] * pt.x + vec_n[1] * pt.y + vec_n[2] * pt.z + d) < GEOM_EPSILON
             if not coplanar:
                 return False
         return True
@@ -319,3 +347,6 @@ class Polygon:
         ctr = Point(vec[0], vec[1], vec[2])
 
         return ctr
+
+    def __del__(self):
+        Polygon.remove_name(self.name)

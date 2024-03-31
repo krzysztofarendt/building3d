@@ -10,10 +10,25 @@ from .point import Point
 
 class Solid:
     """Solid is a space enclosed by polygons."""
+    # List of names of all Solid instances (names must be unique)
+    instance_names = set()
 
-    def __init__(self, boundary: Sequence[Polygon]):
+    def __init__(self, name:str, boundary: Sequence[Polygon]):
+        self.name = name
         self.boundary = boundary
         self._verify(throw=True)
+
+    @staticmethod
+    def add_name(name: str):
+        if name not in Solid.instance_names:
+            Solid.instance_names.add(name)
+        else:
+            raise ValueError(f"Solid {name} already exists!")
+
+    @staticmethod
+    def remove_name(name: str):
+        if name in Solid.instance_names:
+            Solid.instance_names.remove(name)
 
     def vertices(self) -> list[Point]:
         points = []
@@ -66,6 +81,13 @@ class Solid:
         else:
             return False
 
+    def is_point_at_the_boundary(self, p: Point) -> bool:
+        """Checks whether the point p lays on any of the boundary polygons."""
+        for poly in self.boundary:
+            if poly.is_point_inside(p):
+                return True
+        return False
+
     def _verify(self, throw: bool = False) -> None:
         """Verify geometry correctness.
 
@@ -102,3 +124,6 @@ class Solid:
         # Raise the first exception
         if throw and len(errors) > 0:
             raise errors[0]
+
+    def __del__(self):
+        Solid.remove_name(self.name)

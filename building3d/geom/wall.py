@@ -11,5 +11,4 @@ class Wall(Polygon):
     zone to which this wall belongs.
     """
     def __init__(self, name: str, points: list[Point]):
-        super().__init__(points)
-        self.name = name
+        super().__init__(name, points)
