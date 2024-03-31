@@ -18,7 +18,7 @@ dependencies = [
     "mayavi",
     "PyQt5"
 ]
-version = "0.0.1"
+version = "0.0.2"
 
 [project.optional-dependencies]
 dev = ["pytest", "pytest-cov", "black", "isort", "twine", "build"]
