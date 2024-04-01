@@ -25,8 +25,6 @@ def plot_zone(
     # Plot walls
     plot_polygons(zone.walls, mesh=mesh, show=False)
 
-    # Plot tetrahedral wireframe
-
     if show:
         mlab.show()
         return
