@@ -93,7 +93,7 @@ def delaunay_triangulation(
     tri = Delaunay(pts_arr, incremental=False)
     triangles = tri.simplices
 
-    # Remove points not used in the triangulation and rerun triangulation
+    # Remove points not used in the triangulation
     unique_tri_indices = np.unique(triangles)
     final_points_2d = []
     for i, p in enumerate(new_points_2d):
