@@ -20,7 +20,7 @@ def delaunay_triangulation(
     delta: float = 0.5,
     init_vertices: None | list[Point] = None,
 ) -> tuple[list[Point], list[list[int]]]:
-    """Delanuay triangulation for a polygon.
+    """Delaunay triangulation of a polygon.
 
     Steps:
       - rotate points to plane XY
@@ -32,7 +32,7 @@ def delaunay_triangulation(
     Args:
         poly: polygon to be meshed
         delta: approximate mesh size
-        init_vertices: initial vertices to be used for trianulation
+        init_vertices: initial vertices to be used for triangulation
 
     Return:
         (list of mesh points, list of faces)
@@ -86,7 +86,7 @@ def delaunay_triangulation(
             for y in ygrid:
                 pt = Point(x, y, z)
                 if poly_2d.is_point_inside(pt):
-                    new_points_2d.append(Point(x, y, z))
+                    new_points_2d.append(pt)
 
     # Triangulation - first pass
     pts_arr = np.array([[p.x, p.y] for p in new_points_2d])

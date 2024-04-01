@@ -59,6 +59,7 @@ python example.py
 - [x] Mesh face polygons should have the same surface normals as the polygon
 - [x] Add to PyPi to reserve the name
 - [ ] Fix highly skewed triangles in Delaunay triangulation
+- [ ] Add logger
 - [ ] Delaunay triangulation of a solid
 - [ ] Discretize solid with tetrahedra
 - [ ] Calculate solid volume
