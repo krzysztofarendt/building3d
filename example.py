@@ -24,18 +24,22 @@ def example():
     wall3 = Wall("wall3", [p0, p4, p7, p3])
     roof = Wall("roof", [p4, p5, p6, p7])
 
+    room = Zone("room", [floor, wall0, wall1, wall2, wall3, roof])
+
     mesh = Mesh()
-    mesh.add_polygon(floor)
-    mesh.add_polygon(wall0)
-    mesh.add_polygon(wall1)
-    mesh.add_polygon(wall2)
-    mesh.add_polygon(wall3)
-    mesh.add_polygon(roof)
+    # Polygons do not need to be added manually, because
+    # they are taken from the room zone
+    # mesh.add_polygon(floor)
+    # mesh.add_polygon(wall0)
+    # mesh.add_polygon(wall1)
+    # mesh.add_polygon(wall2)
+    # mesh.add_polygon(wall3)
+    # mesh.add_polygon(roof)
+    mesh.add_solid(room)
     mesh.generate()
 
     mesh.collapse_points()
 
-    room = Zone("room", [floor, wall0, wall1, wall2, wall3, roof])
 
     # Plot
     plot_zone(room, mesh, show=True)

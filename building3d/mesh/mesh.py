@@ -9,6 +9,7 @@ from building3d.geom.triangle import triangle_area
 from building3d.geom.vector import length
 from building3d.geom.vector import vector
 from .polygon_mesh import delaunay_triangulation
+from .solid_mesh import delaunay_tetrahedralization
 
 
 class Mesh:
@@ -23,16 +24,27 @@ class Mesh:
 
         # Attributes filled with data by self.generate_mesh()
         self.vertices = []
-        self.vertex_owners = []  # solid names
+        self.vertex_solid_owners = []  # solid names
+        self.vertex_polygon_owners = []  # polygon names
 
         self.faces = []
         self.face_owners = []  # polygon names
+
+        self.elements = []
+        self.element_owners = []  # solid names
 
     def add_polygon(self, poly: building3d.geom.polygon.Polygon):
         self.polygons[poly.name] = poly
 
     def add_solid(self, sld: building3d.geom.solid.Solid):
+        """Add solid instance to the list of solids for this mesh.
+
+        All solid boundary polygons are also added (if they were not already added manually).
+        """
         self.solids[sld.name] = sld
+        for poly in sld.boundary:
+            if poly.name not in self.polygons:
+                self.polygons[poly.name] = poly
 
     def mesh_statistics(self, show=False) -> dict:
         """Print and return info about mesh quality."""
@@ -84,7 +96,7 @@ class Mesh:
         """Generate mesh for all added polygons and solids."""
         # Polygons
         for poly_name, poly in self.polygons.items():
-            vertices, faces = delaunay_triangulation(poly, self.delta)
+            vertices, faces = delaunay_triangulation(poly, delta=self.delta)
 
             # Increase face counter to include previously added vertices
             faces = np.array(faces)
@@ -92,15 +104,31 @@ class Mesh:
             faces = faces.tolist()
 
             self.vertices.extend(vertices)
-            vertex_owners = [None for _ in vertices]  # TODO: Should identify relevant solids
+            self.vertex_solid_owners = [None for _ in vertices]
+            self.vertex_polygon_owners = [poly_name for _ in vertices]
 
             self.faces.extend(faces)
             face_owners = [poly_name for _ in faces]
             self.face_owners.extend(face_owners)
 
-
         # Solids (should connect to vertices at adjacent polygons)
-        pass  # TODO
+        for sld_name, sld in self.solids.items():
+            boundary_vertices = {}
+            for poly in sld.boundary:
+                boundary_vertices[poly.name] = \
+                    [p for (p, owner) in zip(self.vertices, self.vertex_polygon_owners) \
+                     if owner == poly.name]
+
+            vertices, tetrahedra = delaunay_tetrahedralization(
+                sld=sld,
+                boundary_vertices=boundary_vertices,
+                delta=self.delta
+            )
+            self.vertices.extend(vertices)
+            self.vertex_solid_owners.extend([sld.name for _ in vertices])
+            self.vertex_polygon_owners.extend([None for _ in vertices])
+            self.elements.extend(tetrahedra)
+            self.element_owners.extend([sld.name for _ in tetrahedra])
 
     def collapse_points(self):
         """Merge overlapping points.
