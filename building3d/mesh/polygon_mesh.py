@@ -15,7 +15,11 @@ from building3d import random_id
 from building3d.config import GEOM_EPSILON
 
 
-def delaunay_triangulation(poly: polygon.Polygon, delta: float = 0.5) -> tuple[list[Point], list[int]]:
+def delaunay_triangulation(
+    poly: polygon.Polygon,
+    delta: float = 0.5,
+    init_vertices: None | list[Point] = None,
+) -> tuple[list[Point], list[list[int]]]:
     """Delanuay triangulation for a polygon.
 
     Steps:
@@ -27,6 +31,7 @@ def delaunay_triangulation(poly: polygon.Polygon, delta: float = 0.5) -> tuple[l
 
     Args:
         poly: polygon to be meshed
+        init_vertices: initial vertices to be used for trianulation
         delta: approximate mesh size
 
     Return:
@@ -34,7 +39,7 @@ def delaunay_triangulation(poly: polygon.Polygon, delta: float = 0.5) -> tuple[l
     """
     points = poly.points
 
-    # Rotate points to XY
+    # Rotate polygon points to XY
     origin = Point(0.0, 0.0, 0.0)
     normal_xy = np.array([0.0, 0.0, 1.0])
     points_xy, rotaxis, phi = rotate_points_to_plane(
@@ -45,37 +50,45 @@ def delaunay_triangulation(poly: polygon.Polygon, delta: float = 0.5) -> tuple[l
 
     z = points_xy[0].z
     new_points_2d = [Point(p.x, p.y, z) for p in points_xy]
+
+    # Create a 2D polygon instance (used for checking if a point lies inside it)
     poly_2d = polygon.Polygon(random_id(), new_points_2d)
 
-    # Add new points on the edges
-    edge_pts_2d = []
-    for i in range(len(new_points_2d)):
-        cur = i
-        nxt = i + 1 if i + 1 < len(new_points_2d) else 0
-        pt1 = new_points_2d[cur]
-        pt2 = new_points_2d[nxt]
+    if init_vertices is not None:
+        # Rotate initial vertices to XY
+        init_vertices_xy, _ = rotate_points_around_vector(init_vertices, rotaxis, phi)
+        new_points_2d.extend(init_vertices_xy)
+    else:
+        # Add new points on the edges
+        edge_pts_2d = []
+        for i in range(len(new_points_2d)):
+            cur = i
+            nxt = i + 1 if i + 1 < len(new_points_2d) else 0
+            pt1 = new_points_2d[cur]
+            pt2 = new_points_2d[nxt]
 
-        edge_len = length(pt2.vector() - pt1.vector())
-        num_segments = int(edge_len // delta)
-        new_pts = create_points_between_2_points(pt1, pt2, num_segments)
-        edge_pts_2d.extend(new_pts)
+            edge_len = length(pt2.vector() - pt1.vector())
+            num_segments = int(edge_len // delta)
+            new_pts = create_points_between_2_points(pt1, pt2, num_segments)
+            edge_pts_2d.extend(new_pts)
 
-    new_points_2d.extend(edge_pts_2d)
+        new_points_2d.extend(edge_pts_2d)
 
-    # Add new points inside the polygon
-    xaxis = [p.x for p in new_points_2d]
-    yaxis = [p.y for p in new_points_2d]
-    xmin, xmax = min(xaxis), max(xaxis)
-    ymin, ymax = min(yaxis), max(yaxis)
+        # Add new points inside the polygon
+        xaxis = [p.x for p in new_points_2d]
+        yaxis = [p.y for p in new_points_2d]
+        xmin, xmax = min(xaxis), max(xaxis)
+        ymin, ymax = min(yaxis), max(yaxis)
 
-    xgrid = np.arange(xmin, xmax, delta)
-    ygrid = np.arange(ymin, ymax, delta)
-    for x in xgrid:
-        for y in ygrid:
-            pt = Point(x, y, z)
-            if poly_2d.is_point_inside(pt):
-                new_points_2d.append(Point(x, y, z))
+        xgrid = np.arange(xmin, xmax, delta)
+        ygrid = np.arange(ymin, ymax, delta)
+        for x in xgrid:
+            for y in ygrid:
+                pt = Point(x, y, z)
+                if poly_2d.is_point_inside(pt):
+                    new_points_2d.append(Point(x, y, z))
 
+    # Triangulation - first pass
     pts_arr = np.array([[p.x, p.y] for p in new_points_2d])
     tri = Delaunay(pts_arr, incremental=False)
     triangles = tri.simplices
@@ -87,7 +100,7 @@ def delaunay_triangulation(poly: polygon.Polygon, delta: float = 0.5) -> tuple[l
         if i in unique_tri_indices:
             final_points_2d.append(p)
 
-    # TODO: Inefficient code, using Delaunay twice!
+    # Triangulation - second pass (TODO: can it be done in a single pass?)
     pts_arr = np.array([[p.x, p.y] for p in final_points_2d])
     tri = Delaunay(pts_arr, incremental=False)
     triangles = tri.simplices
@@ -102,7 +115,7 @@ def delaunay_triangulation(poly: polygon.Polygon, delta: float = 0.5) -> tuple[l
         phi=-phi,
     )
 
-    # Fix surface normal direction (TODO: doesn't work)
+    # Fix surface normal direction
     face_num = 0
 
     def face_normal(face_num):
