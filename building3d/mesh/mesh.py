@@ -147,4 +147,5 @@ class Mesh:
             self.vertices.pop(p_to_delete)
 
     def fix_short_edges(self, min_length: float):  # TODO
+        """Delete vertices connected to short edges."""
         pass

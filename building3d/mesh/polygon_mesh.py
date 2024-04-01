@@ -31,8 +31,8 @@ def delaunay_triangulation(
 
     Args:
         poly: polygon to be meshed
-        init_vertices: initial vertices to be used for trianulation
         delta: approximate mesh size
+        init_vertices: initial vertices to be used for trianulation
 
     Return:
         (list of mesh points, list of faces)
