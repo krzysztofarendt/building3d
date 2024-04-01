@@ -78,24 +78,27 @@ def delaunay_tetrahedralization(
     pts_arr = np.array([[p.x, p.y, p.z] for p in final_vertices])
     tri = Delaunay(pts_arr, incremental=False)
     tetrahedra = tri.simplices
-    assert len(np.unique(tetrahedra)) == len(final_vertices)
-
-    # Make sure all boundary vertices are in the final_vertices
-    # and that the number of returned vertices is higher than the sum of polygon mesh vertices
-    num_of_boundary_vertices = 0
-    for poly_name, poly_points in boundary_vertices.items():
-        for pt in poly_points:
-            num_of_boundary_vertices += 1
-            assert pt in final_vertices, \
-                f"{pt} (from mesh of {poly_name} polygon) not in the solid mesh"
-
-    assert len(final_vertices) > num_of_boundary_vertices, \
-        "Solid mesh has less vertices than boundary mesh"
 
     # Prepare outputs
     elements = tetrahedra.tolist()
     vertices = final_vertices
 
+    # SANITY CHECKS
+    # Make sure all boundary vertices are in the final_vertices
+    # and that the number of returned vertices is higher than the sum of polygon mesh vertices
+    num_of_boundary_vertices = 0
+    unique_points = [vertices[i] for i in np.unique(np.array(elements))]
+    assert len(unique_points) == len(vertices), "Not all points unique"
+
+    for poly_name, poly_points in boundary_vertices.items():
+        for pt in poly_points:
+            num_of_boundary_vertices += 1
+            assert pt in vertices, \
+                f"{pt} (from mesh of {poly_name} polygon) not in the solid mesh"
+            assert pt in unique_points, "Not all points used for mesh vertices"
+
+    assert len(vertices) > num_of_boundary_vertices, \
+        "Solid mesh has less vertices than boundary mesh"
     assert np.max(np.array(elements)) == len(vertices) - 1, \
         "Number of vertices is different than max index used in tetrahedra"
 
