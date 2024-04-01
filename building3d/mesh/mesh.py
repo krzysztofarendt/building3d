@@ -125,10 +125,10 @@ class Mesh:
                 delta=self.delta
             )
             self.vertices.extend(vertices)
-            self.vertex_solid_owners.extend([sld.name for _ in vertices])
+            self.vertex_solid_owners.extend([sld_name for _ in vertices])
             self.vertex_polygon_owners.extend([None for _ in vertices])
             self.elements.extend(tetrahedra)
-            self.element_owners.extend([sld.name for _ in tetrahedra])
+            self.element_owners.extend([sld_name for _ in tetrahedra])
 
     def collapse_points(self):
         """Merge overlapping points.
