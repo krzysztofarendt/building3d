@@ -5,6 +5,7 @@ import numpy as np
 import building3d.geom.solid
 import building3d.geom.polygon
 import building3d.geom.point
+from building3d.geom.exceptions import GeometryError
 from building3d.geom.triangle import triangle_area
 from building3d.geom.vector import length
 from building3d.geom.vector import vector
@@ -22,16 +23,16 @@ class Mesh:
         self.polygons = {}
         self.solids = {}
 
-        # Attributes filled with data by self.generate_mesh()
-        self.vertices = []
-        self.vertex_solid_owners = []  # solid names
-        self.vertex_polygon_owners = []  # polygon names
+        # Attributes filled with data by self.generate()
+        self.poly_mesh_vertices = []
+        self.poly_mesh_vertex_owners = []  # polygon names
+        self.poly_mesh_faces = []
+        self.poly_mesh_face_owners = []  # polygon names
 
-        self.faces = []
-        self.face_owners = []  # polygon names
-
-        self.elements = []
-        self.element_owners = []  # solid names
+        self.sld_mesh_vertices = []
+        self.sld_mesh_vertex_owners = []  # solid names
+        self.sld_mesh_elements = []
+        self.sld_mesh_element_owners = []  # solid names
 
     def add_polygon(self, poly: building3d.geom.polygon.Polygon):
         self.polygons[poly.name] = poly
@@ -48,15 +49,15 @@ class Mesh:
 
     def mesh_statistics(self, show=False) -> dict:
         """Print and return info about mesh quality."""
-        num_of_vertices = len(self.vertices)
-        num_of_faces = len(self.faces)
+        num_of_vertices = len(self.poly_mesh_vertices)  # TODO: Add solid mesh
+        num_of_faces = len(self.poly_mesh_faces)
 
         face_areas = []
         edge_lengths = []
         for i in range(num_of_faces):
-            p0 = self.vertices[self.faces[i][0]]
-            p1 = self.vertices[self.faces[i][1]]
-            p2 = self.vertices[self.faces[i][2]]
+            p0 = self.poly_mesh_vertices[self.poly_mesh_faces[i][0]]
+            p1 = self.poly_mesh_vertices[self.poly_mesh_faces[i][1]]
+            p2 = self.poly_mesh_vertices[self.poly_mesh_faces[i][2]]
             face_areas.append(triangle_area(p0, p1, p2))
             edge_lengths.append(length(vector(p0, p1)))
             edge_lengths.append(length(vector(p1, p2)))
@@ -100,23 +101,23 @@ class Mesh:
 
             # Increase face counter to include previously added vertices
             faces = np.array(faces)
-            faces += len(self.vertices)
+            faces += len(self.poly_mesh_vertices)
             faces = faces.tolist()
 
-            self.vertices.extend(vertices)
-            self.vertex_solid_owners = [None for _ in vertices]
-            self.vertex_polygon_owners = [poly_name for _ in vertices]
+            self.poly_mesh_vertices.extend(vertices)
+            self.poly_mesh_vertex_owners = [poly_name for _ in vertices]
 
-            self.faces.extend(faces)
+            self.poly_mesh_faces.extend(faces)
             face_owners = [poly_name for _ in faces]
-            self.face_owners.extend(face_owners)
+            self.poly_mesh_face_owners.extend(face_owners)
 
         # Solids (should connect to vertices at adjacent polygons)
         for sld_name, sld in self.solids.items():
             boundary_vertices = {}
             for poly in sld.boundary:
                 boundary_vertices[poly.name] = \
-                    [p for (p, owner) in zip(self.vertices, self.vertex_polygon_owners) \
+                    [p for (p, owner) in \
+                     zip(self.poly_mesh_vertices, self.poly_mesh_vertex_owners) \
                      if owner == poly.name]
 
             vertices, tetrahedra = delaunay_tetrahedralization(
@@ -124,13 +125,25 @@ class Mesh:
                 boundary_vertices=boundary_vertices,
                 delta=self.delta
             )
-            self.vertices.extend(vertices)
-            self.vertex_solid_owners.extend([sld_name for _ in vertices])
-            self.vertex_polygon_owners.extend([None for _ in vertices])
-            self.elements.extend(tetrahedra)
-            self.element_owners.extend([sld_name for _ in tetrahedra])
+            self.sld_mesh_vertices.extend(vertices)
+            self.sld_mesh_vertex_owners.extend([sld_name for _ in vertices])
+            self.sld_mesh_elements.extend(tetrahedra)
+            self.sld_mesh_element_owners.extend([sld_name for _ in tetrahedra])
 
-    def collapse_points(self):
+        # if len(self.solids) > 0:
+        #     # Make sure all vertices are used in the solid mesh
+        #     if np.array(self.sld_mesh_elements).max() < len(self.sld_mesh_vertices):
+        #         # element_unique_vertices = np.unique(np.array(self.elements))
+        #         # unused = []
+        #         # for i, pt in enumerate(self.vertices):
+        #         #     if i not in element_unique_vertices:
+        #         #         unused.append(i)
+
+        #         # print(f"{unused=}")
+        #         raise GeometryError("solid mesh is broken")  # TODO: should be MeshError
+        #         # import pdb; pdb.set_trace()
+
+    def collapse_points(self):  # TODO: Add solid mesh. Currently works on polygon meshes only.
         """Merge overlapping points.
 
         Checks if there are points which are equal to one another.
@@ -146,7 +159,7 @@ class Mesh:
 
         # Identify identical points
         same_points = {}
-        for i, p in enumerate(self.vertices):
+        for i, p in enumerate(self.poly_mesh_vertices):
             if p in same_points.keys():
                 same_points[p].append(i)
             else:
@@ -155,24 +168,25 @@ class Mesh:
         # Merge same points
         for_deletion = set()
 
-        for i in range(len(self.vertices)):
-            p = self.vertices[i]
+        for i in range(len(self.poly_mesh_vertices)):
+            p = self.poly_mesh_vertices[i]
             p_to_keep = same_points[p][0]
             for j in range(1, len(same_points[p])):
                 p_to_delete = same_points[p][j]
                 for_deletion.add(p_to_delete)
 
                 # Replace point to be deleted with the one to keep in each face
-                for k in range(len(self.faces)):
-                    if p_to_delete in self.faces[k]:
-                        self.faces[k] = [x if x != p_to_delete else p_to_keep for x in self.faces[k]]
+                for k in range(len(self.poly_mesh_faces)):
+                    if p_to_delete in self.poly_mesh_faces[k]:
+                        self.poly_mesh_faces[k] = \
+                            [x if x != p_to_delete else p_to_keep for x in self.poly_mesh_faces[k]]
 
         # Reindex
         for_deletion = sorted(list(for_deletion), reverse=True)
         for p_to_delete in for_deletion:
-            for k in range(len(self.faces)):
-                self.faces[k] = [x - 1 if x > p_to_delete else x for x in self.faces[k]]
-            self.vertices.pop(p_to_delete)
+            for k in range(len(self.poly_mesh_faces)):
+                self.poly_mesh_faces[k] = [x - 1 if x > p_to_delete else x for x in self.poly_mesh_faces[k]]
+            self.poly_mesh_vertices.pop(p_to_delete)
 
     def fix_short_edges(self, min_length: float):  # TODO
         """Delete vertices connected to short edges."""

@@ -34,13 +34,13 @@ def test_collapse_points():
     mesh.add_polygon(roof)
     mesh.generate()
 
-    vertices = [v for v in mesh.vertices]
-    faces = [f for f in mesh.faces]
+    vertices = [v for v in mesh.poly_mesh_vertices]
+    faces = [f for f in mesh.poly_mesh_faces]
 
     mesh.collapse_points()
 
-    new_vertices = [v for v in mesh.vertices]
-    new_faces = [f for f in mesh.faces]
+    new_vertices = [v for v in mesh.poly_mesh_vertices]
+    new_faces = [f for f in mesh.poly_mesh_faces]
 
     for v in new_vertices:
         assert v is not None
@@ -61,16 +61,16 @@ def test_collapse_points():
     assert max_f - diff_num_vertices == max_new_f
 
     # Check if face normals are equal for each face attached to a given polygon
-    for i, face in enumerate(mesh.faces):
-        poly_name = mesh.face_owners[i]
+    for i, face in enumerate(mesh.poly_mesh_faces):
+        poly_name = mesh.poly_mesh_face_owners[i]
         poly = mesh.polygons[poly_name]
-        p0 = mesh.vertices[face[0]]
-        p1 = mesh.vertices[face[1]]
-        p2 = mesh.vertices[face[2]]
+        p0 = mesh.poly_mesh_vertices[face[0]]
+        p1 = mesh.poly_mesh_vertices[face[1]]
+        p2 = mesh.poly_mesh_vertices[face[2]]
         vnorm = normal(p0, p1, p2)
         assert np.isclose(
             vnorm, poly.normal, atol=GEOM_EPSILON
-        ).all()  # TODO: Should be same, but is not
+        ).all()
 
 
 if __name__ == "__main__":

@@ -74,6 +74,15 @@ def test_solid_mesh():
         init_vertices=None,
     )
 
+    assert len(np.unique(tetrahedra)) == len(vertices), \
+        "More points used in tetrahedra than available vertices"
+    assert np.max(np.array(tetrahedra)) == len(vertices) - 1, "Not all vertices used in the solid mesh"
+
+    # Make sure points are not duplicated
+    for i in range(len(vertices) - 1):
+        for j in range(i + 1, len(vertices)):
+            assert vertices[i] != vertices[j]
+
     boundary_vertices = (
         floor_vertices
         + wall0_vertices

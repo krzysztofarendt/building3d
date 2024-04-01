@@ -38,7 +38,7 @@ def example():
     mesh.add_solid(room)
     mesh.generate()
 
-    mesh.collapse_points()
+    # mesh.collapse_points()  # TODO: Does it work with solid mesh?
 
 
     # Plot

@@ -28,12 +28,15 @@ def delaunay_tetrahedralization(
     vertices = []
 
     if init_vertices is not None:
-        pass  # TODO: Add logic for init_vertices in solid_mesh.py
+        pass  # TODO: Add logic for init_vertices in solid_mesh.py (to be used for mesh refinement)
     else:
         # Collect meshes from the boundary polygons
         # -> boundary_vertices, boundary_faces
         for poly_name, poly_points in boundary_vertices.items():
-            vertices.extend(poly_points)
+            for pt in poly_points:
+                # Do not add duplicate points
+                if pt not in vertices:
+                    vertices.append(pt)
 
         # Add new points inside the solid
         bbox_pmin, bbox_pmax = sld.bounding_box()
@@ -56,7 +59,8 @@ def delaunay_tetrahedralization(
                 for z in zgrid:
                     pt = Point(x, y, z)
                     if sld.is_point_inside(pt):
-                        vertices.append(pt)
+                        if pt not in vertices:
+                            vertices.append(pt)
 
     # Tetrahedralization - first pass
     pts_arr = np.array([[p.x, p.y, p.z] for p in vertices])
@@ -91,5 +95,8 @@ def delaunay_tetrahedralization(
     # Prepare outputs
     elements = tetrahedra.tolist()
     vertices = final_vertices
+
+    assert np.max(np.array(elements)) == len(vertices) - 1, \
+        "Number of vertices is different than max index used in tetrahedra"
 
     return vertices, elements

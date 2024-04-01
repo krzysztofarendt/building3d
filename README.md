@@ -37,7 +37,7 @@ make coverage
 
 # Example
 ```
-python example.py
+make example
 ```
 
 # TODO:
