@@ -58,10 +58,10 @@ python example.py
 - [x] one config
 - [x] Mesh face polygons should have the same surface normals as the polygon
 - [x] Add to PyPi to reserve the name
+- [x] Discretize solid with tetrahedra
+- [ ] Plot solid mesh
 - [ ] Fix highly skewed triangles in Delaunay triangulation
 - [ ] Add logger
-- [ ] Delaunay triangulation of a solid
-- [ ] Discretize solid with tetrahedra
 - [ ] Calculate solid volume
 - [ ] Accurate center of weight for Solid
 - [ ] Wall could be a collection of Polygons instead of a Polygon subclass
