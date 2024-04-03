@@ -86,18 +86,21 @@ def delaunay_tetrahedralization(
     # SANITY CHECKS
     # Make sure all boundary vertices are in the final_vertices
     # and that the number of returned vertices is higher than the sum of polygon mesh vertices
-    num_of_boundary_vertices = 0
+    unique_boundary_vertices = []
+
     unique_points = [vertices[i] for i in np.unique(np.array(elements))]
     assert len(unique_points) == len(vertices), "Not all points unique"
 
     for poly_name, poly_points in boundary_vertices.items():
         for pt in poly_points:
-            num_of_boundary_vertices += 1
+            if pt not in unique_boundary_vertices:
+                unique_boundary_vertices.append(pt)
             assert pt in vertices, \
                 f"{pt} (from mesh of {poly_name} polygon) not in the solid mesh"
             assert pt in unique_points, "Not all points used for mesh vertices"
 
-    assert len(vertices) > num_of_boundary_vertices, \
+    # import pdb; pdb.set_trace()
+    assert len(vertices) > len(unique_boundary_vertices), \
         "Solid mesh has less vertices than boundary mesh"
     assert np.max(np.array(elements)) == len(vertices) - 1, \
         "Number of vertices is different than max index used in tetrahedra"

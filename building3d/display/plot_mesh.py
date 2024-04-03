@@ -22,6 +22,7 @@ def plot_mesh(
         color=colors.RGB_GREEN,
         representation="wireframe",
     )
+
     # Plot surfaces
     _ = mlab.triangular_mesh(
         x, y, z, tri,
@@ -31,21 +32,30 @@ def plot_mesh(
     )
 
     # Plot tetrahedral wireframe  # TODO: The mesh does not look correct
+    # Vertices: a, b, c, d
+    # Edges:
+    # 1. a -> b
+    # 2. b -> c
+    # 3. c -> a
+    # 4. a -> d
+    # 5. d -> b
+    # 6. c -> d
     if len(mesh.solids) > 0:
         print("Plotting solid mesh wireframe...")
         print(f"{np.array(mesh.sld_mesh_elements).max()=}")
         print(f"{len(mesh.sld_mesh_vertices)=}")
         print(f"{len(mesh.sld_mesh_elements)=}")
-        # import pdb; pdb.set_trace()
         for i, el in enumerate(mesh.sld_mesh_elements):
-            pfirst = mesh.sld_mesh_vertices[el[0]]
-            x = [p.x for (i, p) in enumerate(mesh.sld_mesh_vertices) if i in el]
-            x.append(pfirst.x)
-            y = [p.y for (i, p) in enumerate(mesh.sld_mesh_vertices) if i in el]
-            y.append(pfirst.y)
-            z = [p.z for (i, p) in enumerate(mesh.sld_mesh_vertices) if i in el]
-            z.append(pfirst.z)
-            _ = mlab.plot3d(x, y, z)
+            a = mesh.sld_mesh_vertices[el[0]]
+            b = mesh.sld_mesh_vertices[el[1]]
+            c = mesh.sld_mesh_vertices[el[2]]
+            d = mesh.sld_mesh_vertices[el[3]]
+            edges = [(a, b), (b, c), (c, a), (a, d), (d, b), (c, d)]
+            for pair in edges:
+                x = [p.x for p in pair]
+                y = [p.y for p in pair]
+                z = [p.z for p in pair]
+                _ = mlab.plot3d(x, y, z)
             print(f"\r{100.0 * (i + 1) / len(mesh.sld_mesh_elements):.2f}%", end="")
         print()
 

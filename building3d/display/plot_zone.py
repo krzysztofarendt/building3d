@@ -23,7 +23,13 @@ def plot_zone(
     _ = mlab.points3d(x, y, z, color=colors.RGB_BLUE, scale_factor=0.1)
 
     # Plot walls
-    plot_polygons(zone.walls, mesh=mesh, show=False)
+    plot_polygons(
+        zone.walls,
+        mesh=mesh,
+        show_triangulation=show_triangulation,
+        show_normals=show_normals,
+        show=False,
+    )
 
     if show:
         mlab.show()

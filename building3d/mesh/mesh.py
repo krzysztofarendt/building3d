@@ -45,7 +45,7 @@ class Mesh:
         self.solids[sld.name] = sld
         for poly in sld.boundary:
             if poly.name not in self.polygons:
-                self.polygons[poly.name] = poly
+                self.add_polygon(poly)
 
     def mesh_statistics(self, show=False) -> dict:
         """Print and return info about mesh quality."""
@@ -105,7 +105,7 @@ class Mesh:
             faces = faces.tolist()
 
             self.poly_mesh_vertices.extend(vertices)
-            self.poly_mesh_vertex_owners = [poly_name for _ in vertices]
+            self.poly_mesh_vertex_owners.extend([poly_name for _ in vertices])
 
             self.poly_mesh_faces.extend(faces)
             face_owners = [poly_name for _ in faces]

@@ -40,9 +40,8 @@ def example():
 
     mesh.collapse_points()  # TODO: Does it work with solid mesh?
 
-
     # Plot
-    plot_zone(room, mesh, show=True)
+    plot_zone(room, mesh, show_triangulation=True, show_normals=True, show=True)
 
 
 if __name__ == "__main__":
