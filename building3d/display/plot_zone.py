@@ -1,17 +1,14 @@
 from mayavi import mlab
 
 from building3d.geom.zone import Zone
-from building3d.mesh.mesh import Mesh
 from building3d.display.plot_polygons import plot_polygons
 import building3d.display.colors as colors
 
 
 def plot_zone(
     zone: Zone,
-    mesh: Mesh,
     show_triangulation: bool = True,
     show_normals: bool = True,
-    show_mesh: bool = True,
     show: bool = False,
 ):
     # Plot vertices
@@ -23,7 +20,12 @@ def plot_zone(
     _ = mlab.points3d(x, y, z, color=colors.RGB_BLUE, scale_factor=0.1)
 
     # Plot walls
-    plot_polygons(zone.walls, mesh=mesh, show=False)
+    plot_polygons(
+        zone.walls,
+        show_triangulation=show_triangulation,
+        show_normals=show_normals,
+        show=False,
+    )
 
     if show:
         mlab.show()

@@ -37,7 +37,7 @@ make coverage
 
 # Example
 ```
-python example.py
+make example
 ```
 
 # TODO:
@@ -58,9 +58,10 @@ python example.py
 - [x] one config
 - [x] Mesh face polygons should have the same surface normals as the polygon
 - [x] Add to PyPi to reserve the name
-- [ ] Fix highly skewed triangles in Delaunay triangulation
-- [ ] Delaunay triangulation of a solid
-- [ ] Discretize solid with tetrahedra
+- [x] Discretize solid with tetrahedra (the mesh does not look correct)
+- [x] Plot solid mesh
+- [x] Fix highly skewed triangles in Delaunay triangulation
+- [ ] Add logger
 - [ ] Calculate solid volume
 - [ ] Accurate center of weight for Solid
 - [ ] Wall could be a collection of Polygons instead of a Polygon subclass

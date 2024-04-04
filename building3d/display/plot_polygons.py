@@ -2,14 +2,11 @@ from mayavi import mlab
 
 from building3d.geom.polygon import Polygon
 from building3d.geom.wall import Wall
-from building3d.mesh.mesh import Mesh
 import building3d.display.colors as colors
-from building3d.display.plot_mesh import plot_mesh
 
 
 def plot_polygons(
     polygons: list[Polygon] | list[Wall],
-    mesh: None | Mesh = None,
     show_triangulation: bool = True,
     show_normals: bool = True,
     show: bool = False,
@@ -64,10 +61,6 @@ def plot_polygons(
                 mode="2darrow",
                 color=colors.RGB_RED,
             )
-
-    # Plot mesh
-    if mesh is not None:
-        plot_mesh(mesh, show=False)
 
     if show:
         mlab.show()

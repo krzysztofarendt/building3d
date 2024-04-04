@@ -1,4 +1,5 @@
 from building3d.display.plot_zone import plot_zone
+from building3d.display.plot_mesh import plot_mesh
 from building3d.geom.point import Point
 from building3d.geom.zone import Zone
 from building3d.geom.wall import Wall
@@ -24,21 +25,25 @@ def example():
     wall3 = Wall("wall3", [p0, p4, p7, p3])
     roof = Wall("roof", [p4, p5, p6, p7])
 
-    mesh = Mesh()
-    mesh.add_polygon(floor)
-    mesh.add_polygon(wall0)
-    mesh.add_polygon(wall1)
-    mesh.add_polygon(wall2)
-    mesh.add_polygon(wall3)
-    mesh.add_polygon(roof)
-    mesh.generate()
-
-    mesh.collapse_points()
-
     room = Zone("room", [floor, wall0, wall1, wall2, wall3, roof])
 
+    mesh = Mesh(delta=2.5)
+    # Polygons do not need to be added manually, because
+    # they are taken from the room zone
+    # mesh.add_polygon(floor)
+    # mesh.add_polygon(wall0)
+    # mesh.add_polygon(wall1)
+    # mesh.add_polygon(wall2)
+    # mesh.add_polygon(wall3)
+    # mesh.add_polygon(roof)
+    mesh.add_solid(room)
+    mesh.generate()
+
+    mesh.collapse_points()  # TODO: Does it work with solid mesh?
+
     # Plot
-    plot_zone(room, mesh, show=True)
+    # plot_zone(room, show_triangulation=True, show_normals=True, show=True)
+    plot_mesh(mesh, boundary=False, interior=True, show=True)
 
 
 if __name__ == "__main__":
