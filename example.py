@@ -1,4 +1,5 @@
 from building3d.display.plot_zone import plot_zone
+from building3d.display.plot_mesh import plot_mesh
 from building3d.geom.point import Point
 from building3d.geom.zone import Zone
 from building3d.geom.wall import Wall
@@ -41,7 +42,8 @@ def example():
     mesh.collapse_points()  # TODO: Does it work with solid mesh?
 
     # Plot
-    plot_zone(room, mesh, show_triangulation=True, show_normals=True, show=True)
+    # plot_zone(room, show_triangulation=True, show_normals=True, show=True)
+    plot_mesh(mesh, boundary=False, interior=True, show=True)
 
 
 if __name__ == "__main__":

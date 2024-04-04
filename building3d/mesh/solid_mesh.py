@@ -6,6 +6,8 @@ from scipy.spatial import Delaunay
 from ..geom.exceptions import GeometryError
 from ..geom.point import Point
 from ..geom.solid import Solid
+from ..geom.tetrahedron import tetrahedron_volume
+from building3d.config import TETRAHEDRON_MIN_VOL
 
 
 def delaunay_tetrahedralization(
@@ -23,7 +25,7 @@ def delaunay_tetrahedralization(
         init_vertices: initial vertices to be used for tetrahedralization
 
     Return:
-        (list of mesh points, list of tetrahedral elements)
+        (list of mesh points, list of tetrahedral tetrahedra)
     """
     vertices = []
 
@@ -64,31 +66,27 @@ def delaunay_tetrahedralization(
 
     # Tetrahedralization - first pass
     pts_arr = np.array([[p.x, p.y, p.z] for p in vertices])
-    tri = Delaunay(pts_arr, incremental=False)
+    tri = Delaunay(pts_arr, qhull_options="Qt", incremental=False)
     tetrahedra = tri.simplices
 
-    # Remove points not used in the tetrahedralization
-    unique_tetra_indices = np.unique(tetrahedra)
-    final_vertices = []
-    for i, p in enumerate(vertices):
-        if i in unique_tetra_indices:
-            final_vertices.append(p)
-
-    # Tetrahedralization - second pass (TODO: can it be done in a single pass?)
-    pts_arr = np.array([[p.x, p.y, p.z] for p in final_vertices])
-    tri = Delaunay(pts_arr, incremental=False)
-    tetrahedra = tri.simplices
-
-    # Prepare outputs
-    elements = tetrahedra.tolist()
-    vertices = final_vertices
+    # Remove tetrahedra with zero volume
+    removed_el = []
+    for i, el in enumerate(tetrahedra):
+        p0 = vertices[el[0]]
+        p1 = vertices[el[1]]
+        p2 = vertices[el[2]]
+        p3 = vertices[el[3]]
+        vol = tetrahedron_volume(p0, p1, p2, p3)
+        if vol < TETRAHEDRON_MIN_VOL:
+            removed_el.append(i)
+    tetrahedra = [el for i, el in enumerate(tetrahedra) if i not in removed_el]
 
     # SANITY CHECKS
     # Make sure all boundary vertices are in the final_vertices
     # and that the number of returned vertices is higher than the sum of polygon mesh vertices
     unique_boundary_vertices = []
 
-    unique_points = [vertices[i] for i in np.unique(np.array(elements))]
+    unique_points = [vertices[i] for i in np.unique(np.array(tetrahedra))]
     assert len(unique_points) == len(vertices), "Not all points unique"
 
     for poly_name, poly_points in boundary_vertices.items():
@@ -99,10 +97,9 @@ def delaunay_tetrahedralization(
                 f"{pt} (from mesh of {poly_name} polygon) not in the solid mesh"
             assert pt in unique_points, "Not all points used for mesh vertices"
 
-    # import pdb; pdb.set_trace()
     assert len(vertices) > len(unique_boundary_vertices), \
         "Solid mesh has less vertices than boundary mesh"
-    assert np.max(np.array(elements)) == len(vertices) - 1, \
+    assert np.max(np.array(tetrahedra)) == len(vertices) - 1, \
         "Number of vertices is different than max index used in tetrahedra"
 
-    return vertices, elements
+    return vertices, tetrahedra

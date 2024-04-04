@@ -6,8 +6,10 @@ from building3d.geom.exceptions import GeometryError
 from building3d.geom.point import Point
 from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
+from building3d.geom.tetrahedron import tetrahedron_volume
 from building3d.mesh.polygon_mesh import delaunay_triangulation
 from building3d.mesh.solid_mesh import delaunay_tetrahedralization
+from building3d.config import TETRAHEDRON_MIN_VOL
 
 
 def test_solid_mesh():
@@ -93,6 +95,18 @@ def test_solid_mesh():
     )
 
     assert len(vertices) > len(boundary_vertices)
+
+    # Assert tetrahedra have non-zero volume
+    for i, el in enumerate(tetrahedra):
+        p0 = vertices[el[0]]
+        p1 = vertices[el[1]]
+        p2 = vertices[el[2]]
+        p3 = vertices[el[3]]
+        vol = tetrahedron_volume(p0, p1, p2, p3)
+        assert vol > TETRAHEDRON_MIN_VOL, f"Volume[{i}]={vol} < minimum ({TETRAHEDRON_MIN_VOL})"
+
+    # Assert tetrahedra vertices are not coplanar
+    pass
 
 
 if __name__ == "__main__":
