@@ -58,9 +58,9 @@ make example
 - [x] one config
 - [x] Mesh face polygons should have the same surface normals as the polygon
 - [x] Add to PyPi to reserve the name
-- [ ] Discretize solid with tetrahedra (the mesh does not look correct)
-- [ ] Plot solid mesh
-- [ ] Fix highly skewed triangles in Delaunay triangulation
+- [x] Discretize solid with tetrahedra (the mesh does not look correct)
+- [x] Plot solid mesh
+- [x] Fix highly skewed triangles in Delaunay triangulation
 - [ ] Add logger
 - [ ] Calculate solid volume
 - [ ] Accurate center of weight for Solid

@@ -1,9 +1,7 @@
-import numpy as np
 from mayavi import mlab
 
 from building3d.mesh.mesh import Mesh
 import building3d.display.colors as colors
-from building3d.geom.tetrahedron import tetrahedron_volume
 
 
 def plot_mesh(
