@@ -5,7 +5,7 @@ from building3d.config import GEOM_EPSILON
 from building3d.geom.point import Point
 from building3d.geom.vector import normal
 from building3d.geom.wall import Wall
-from building3d.mesh.mesh import Mesh
+from building3d.mesh.polymesh import PolyMesh
 
 
 def test_collapse_points():
@@ -25,7 +25,7 @@ def test_collapse_points():
     wall3 = Wall(random_id(), [p0, p4, p7, p3])
     roof = Wall(random_id(), [p4, p5, p6, p7])
 
-    mesh = Mesh()
+    mesh = PolyMesh()
     mesh.add_polygon(floor)
     mesh.add_polygon(wall0)
     mesh.add_polygon(wall1)
@@ -34,13 +34,13 @@ def test_collapse_points():
     mesh.add_polygon(roof)
     mesh.generate()
 
-    vertices = [v for v in mesh.poly_mesh_vertices]
-    faces = [f for f in mesh.poly_mesh_faces]
+    vertices = [v for v in mesh.mesh_vertices]
+    faces = [f for f in mesh.mesh_faces]
 
     mesh.collapse_points()
 
-    new_vertices = [v for v in mesh.poly_mesh_vertices]
-    new_faces = [f for f in mesh.poly_mesh_faces]
+    new_vertices = [v for v in mesh.mesh_vertices]
+    new_faces = [f for f in mesh.mesh_faces]
 
     for v in new_vertices:
         assert v is not None
@@ -61,12 +61,12 @@ def test_collapse_points():
     assert max_f - diff_num_vertices == max_new_f
 
     # Check if face normals are equal for each face attached to a given polygon
-    for i, face in enumerate(mesh.poly_mesh_faces):
-        poly_name = mesh.poly_mesh_face_owners[i]
-        poly = mesh.polygons[poly_name]
-        p0 = mesh.poly_mesh_vertices[face[0]]
-        p1 = mesh.poly_mesh_vertices[face[1]]
-        p2 = mesh.poly_mesh_vertices[face[2]]
+    for i, face in enumerate(mesh.mesh_faces):
+        name = mesh.mesh_face_owners[i]
+        poly = mesh.polygons[name]
+        p0 = mesh.mesh_vertices[face[0]]
+        p1 = mesh.mesh_vertices[face[1]]
+        p2 = mesh.mesh_vertices[face[2]]
         vnorm = normal(p0, p1, p2)
         assert np.isclose(
             vnorm, poly.normal, atol=GEOM_EPSILON

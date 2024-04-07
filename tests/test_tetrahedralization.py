@@ -7,12 +7,12 @@ from building3d.geom.point import Point
 from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
 from building3d.geom.tetrahedron import tetrahedron_volume
-from building3d.mesh.polygon_mesh import delaunay_triangulation
-from building3d.mesh.solid_mesh import delaunay_tetrahedralization
+from building3d.mesh.triangulation import delaunay_triangulation
+from building3d.mesh.tetrahedralization import delaunay_tetrahedralization
 from building3d.config import TETRAHEDRON_MIN_VOL
 
 
-def test_solid_mesh():
+def test_tetrahedralization():
     p0 = Point(0.0, 0.0, 0.0)
     p1 = Point(1.0, 0.0, 0.0)
     p2 = Point(1.0, 1.0, 0.0)

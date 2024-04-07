@@ -7,7 +7,7 @@ from building3d.display.plot_polygons import plot_polygons
 from building3d.geom.point import Point
 from building3d.geom.vector import normal
 from building3d.geom.wall import Wall
-from building3d.mesh.mesh import Mesh
+from building3d.mesh.polymesh import PolyMesh
 
 
 def test_fix_short_edges():
@@ -18,7 +18,7 @@ def test_fix_short_edges():
 
     wall = Wall(random_id(), [p0, p1, p2, p3])
 
-    mesh = Mesh()
+    mesh = PolyMesh()
     mesh.add_polygon(wall)
     mesh.generate()
     mesh.collapse_points()
@@ -28,13 +28,13 @@ def test_fix_short_edges():
 
     mesh_stats = mesh.mesh_statistics(show=True)
     initial_min_edge_len = mesh_stats["min_edge_len"]
-    # assert initial_min_edge_len < 0.03, "This test requires initial mesh to have some short edges"
+    assert initial_min_edge_len < 0.03, "This test requires initial mesh to have some short edges"
 
     mesh.fix_short_edges(min_length=0.1)  # TODO: This functions does nothing now
 
     mesh_stats = mesh.mesh_statistics(show=True)
-    min_edge_len = mesh_stats["min_edge_len"]
-    # assert min_edge_len > 0.1, "Fixing mesh edges didn't work"
+    # min_edge_len = mesh_stats["min_edge_len"]
+    # assert min_edge_len > 0.1, "Fixing mesh edges didn't work"  # TODO
 
     # import pdb; pdb.set_trace()
 

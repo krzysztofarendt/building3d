@@ -36,4 +36,4 @@ def test_mesh():
     mesh.add_polygon(wall3)
     mesh.add_polygon(roof)
     mesh.add_solid(zone)
-    # mesh.generate()  # TODO: doesn't work yet
+    mesh.generate()  # TODO: doesn't work yet
