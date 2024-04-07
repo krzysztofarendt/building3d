@@ -38,6 +38,8 @@ def delaunay_triangulation(
         (list of mesh points, list of faces)
     """
     points = poly.points
+    if len(init_vertices):
+        init_vertices = [p for p in init_vertices if p not in points]
 
     # Rotate polygon points to XY
     origin = Point(0.0, 0.0, 0.0)

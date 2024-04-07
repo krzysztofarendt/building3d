@@ -203,7 +203,10 @@ class PolyMesh:
                         pass  # Both points are the polygon vertices
 
             # Re-generate mesh
+            poly_vertices = [
+                p for p, own in zip(self.vertices, self.vertex_owners) if own == polyname
+            ]
             initial_vertices[polyname] = [
-                p for p in self.vertices if p not in points_to_delete
+                p for p in poly_vertices if p not in points_to_delete
             ]
         self.generate(initial_vertices)

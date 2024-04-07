@@ -24,7 +24,7 @@ def test_delaunay_triangulation_init_vertices_without_polygon_vertex():
     p3 = Point(0.0, 1.0, 0.0)
     floor = Wall(random_id(), [p0, p3, p2, p1])
 
-    vertices_1, faces_1 = delaunay_triangulation(floor, init_vertices=None)
+    vertices_1, faces_1 = delaunay_triangulation(floor)
 
     # Remove a corner vertex
     vertices_2 = vertices_1[1:]
