@@ -39,7 +39,10 @@ def example():
     mesh.add_solid(room)
     mesh.generate()
 
-    mesh.polymesh.collapse_points()  # TODO: will it work with solid mesh?
+    mesh.polymesh.collapse_points()
+    mesh.polymesh.mesh_statistics(show=True)
+    mesh.polymesh.fix_short_edges(min_length=0.1)  # TODO: Bug
+    mesh.polymesh.mesh_statistics(show=True)
 
     # Plot
     plot_zone(room, show_triangulation=True, show_normals=True, show=False)

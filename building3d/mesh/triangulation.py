@@ -18,7 +18,7 @@ from building3d.config import GEOM_EPSILON
 def delaunay_triangulation(
     poly: polygon.Polygon,
     delta: float = 0.5,
-    init_vertices: None | list[Point] = None,
+    init_vertices: list[Point] = [],
 ) -> tuple[list[Point], list[list[int]]]:
     """Delaunay triangulation of a polygon.
 
@@ -54,7 +54,7 @@ def delaunay_triangulation(
     # Create a 2D polygon instance (used for checking if a point lies inside it)
     poly_2d = polygon.Polygon(random_id(), new_points_2d)
 
-    if init_vertices is not None:
+    if init_vertices is not None and len(init_vertices) > 0:
         # Rotate initial vertices to XY
         init_vertices_xy, _ = rotate_points_around_vector(init_vertices, rotaxis, phi)
         new_points_2d.extend(init_vertices_xy)

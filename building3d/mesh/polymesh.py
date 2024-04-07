@@ -16,10 +16,16 @@ class PolyMesh:
         # Mesh settings
         self.delta = delta
 
-        # Polygons and solid to be meshed
+        # Polygons to be meshed
         self.polygons = {}
 
         # Attributes filled with data by self.generate()
+        self.mesh_vertices = []
+        self.mesh_vertex_owners = []  # polygon names
+        self.mesh_faces = []
+        self.mesh_face_owners = []  # polygon names
+
+    def reinit(self):
         self.mesh_vertices = []
         self.mesh_vertex_owners = []  # polygon names
         self.mesh_faces = []
@@ -85,11 +91,23 @@ class PolyMesh:
         }
         return stats
 
-    def generate(self):
+    def generate(self, initial_vertices: dict[str, list[Point]] = {}):
         """Generate mesh for all added polygons and solids."""
+
+        self.reinit()
+
         # Polygons
         for poly_name, poly in self.polygons.items():
-            vertices, faces = delaunay_triangulation(poly, delta=self.delta)
+
+            initial = []
+            if poly_name in initial_vertices.keys():
+                initial = initial_vertices[poly_name]
+
+            vertices, faces = delaunay_triangulation(
+                poly=poly,
+                delta=self.delta,
+                init_vertices=initial,
+            )
 
             # Increase face counter to include previously added vertices
             faces = np.array(faces)
@@ -148,6 +166,44 @@ class PolyMesh:
                 self.mesh_faces[k] = [x - 1 if x > p_to_delete else x for x in self.mesh_faces[k]]
             self.mesh_vertices.pop(p_to_delete)
 
-    def fix_short_edges(self, min_length: float):  # TODO
-        """Delete vertices connected to short edges."""
-        pass
+    def fix_short_edges(self, min_length: float):
+        """Delete vertices connected to short edges and regenerate mesh."""
+
+        initial_vertices = {}
+
+        for polyname in self.polygons.keys():
+
+            protected_points = self.polygons[polyname].points
+            num_of_faces = len(self.mesh_faces)
+
+            # Calculate edge lengths
+            edge_lengths = {}
+            for i in range(num_of_faces):
+                p_index_0 = self.mesh_faces[i][0]
+                p_index_1 = self.mesh_faces[i][1]
+                p_index_2 = self.mesh_faces[i][2]
+                p0 = self.mesh_vertices[p_index_0]
+                p1 = self.mesh_vertices[p_index_1]
+                p2 = self.mesh_vertices[p_index_2]
+                edge_lengths[(p_index_0, p_index_1)] = length(vector(p0, p1))
+                edge_lengths[(p_index_1, p_index_2)] = length(vector(p1, p2))
+                edge_lengths[(p_index_2, p_index_0)] = length(vector(p2, p0))
+
+            # Pick points designated for removal
+            points_to_delete = set()
+            for (p_index_a, p_index_b), elen in edge_lengths.items():
+                pa = self.mesh_vertices[p_index_a]
+                pb = self.mesh_vertices[p_index_b]
+                if elen < min_length:
+                    if pa not in protected_points:
+                        points_to_delete.add(pa)
+                    elif pb not in protected_points:
+                        points_to_delete.add(pb)
+                    else:
+                        pass  # Both points are the polygon vertices
+
+            # Re-generate mesh
+            initial_vertices[polyname] = [
+                p for p in self.mesh_vertices if p not in points_to_delete
+            ]
+            self.generate(initial_vertices)

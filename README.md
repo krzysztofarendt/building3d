@@ -58,8 +58,9 @@ make example
 - [x] Add to PyPi to reserve the name
 - [x] Discretize solid with tetrahedra (the mesh does not look correct)
 - [x] Plot solid mesh
-- [x] Fix highly skewed triangles in Delaunay triangulation
-- [ ] Fix short edges in PolyMesh and in SolidMesh
+- [-] Fix short edges in PolyMesh -> tests pass but example does not work
+- [ ] Solid mesh statistics
+- [ ] Fix short edges in SolidMesh
 - [ ] Export to STL
 - [ ] Polygon mesh faces should match solid mesh faces at the boundary
 - [ ] Add logger
