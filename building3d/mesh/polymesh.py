@@ -20,16 +20,16 @@ class PolyMesh:
         self.polygons = {}
 
         # Attributes filled with data by self.generate()
-        self.mesh_vertices = []
-        self.mesh_vertex_owners = []  # polygon names
-        self.mesh_faces = []
-        self.mesh_face_owners = []  # polygon names
+        self.vertices = []
+        self.vertex_owners = []  # polygon names
+        self.faces = []
+        self.face_owners = []  # polygon names
 
     def reinit(self):
-        self.mesh_vertices = []
-        self.mesh_vertex_owners = []  # polygon names
-        self.mesh_faces = []
-        self.mesh_face_owners = []  # polygon names
+        self.vertices = []
+        self.vertex_owners = []  # polygon names
+        self.faces = []
+        self.face_owners = []  # polygon names
 
     def add_polygon(self, poly: building3d.geom.polygon.Polygon):
         self.polygons[poly.name] = poly
@@ -39,23 +39,23 @@ class PolyMesh:
         vertices = {}
         for name in self.polygons.keys():
             vertices[name] = []
-            for i in range(len(self.mesh_vertices)):
-                if self.mesh_vertex_owners[i] == name:
-                    v = self.mesh_vertices[i]
+            for i in range(len(self.vertices)):
+                if self.vertex_owners[i] == name:
+                    v = self.vertices[i]
                     vertices[name].append(v)
         return vertices
 
     def mesh_statistics(self, show=False) -> dict:
         """Print and return info about mesh quality."""
-        num_of_vertices = len(self.mesh_vertices)
-        num_of_faces = len(self.mesh_faces)
+        num_of_vertices = len(self.vertices)
+        num_of_faces = len(self.faces)
 
         face_areas = []
         edge_lengths = []
         for i in range(num_of_faces):
-            p0 = self.mesh_vertices[self.mesh_faces[i][0]]
-            p1 = self.mesh_vertices[self.mesh_faces[i][1]]
-            p2 = self.mesh_vertices[self.mesh_faces[i][2]]
+            p0 = self.vertices[self.faces[i][0]]
+            p1 = self.vertices[self.faces[i][1]]
+            p2 = self.vertices[self.faces[i][2]]
             face_areas.append(triangle_area(p0, p1, p2))
             edge_lengths.append(length(vector(p0, p1)))
             edge_lengths.append(length(vector(p1, p2)))
@@ -111,15 +111,15 @@ class PolyMesh:
 
             # Increase face counter to include previously added vertices
             faces = np.array(faces)
-            faces += len(self.mesh_vertices)
+            faces += len(self.vertices)
             faces = faces.tolist()
 
-            self.mesh_vertices.extend(vertices)
-            self.mesh_vertex_owners.extend([poly_name for _ in vertices])
+            self.vertices.extend(vertices)
+            self.vertex_owners.extend([poly_name for _ in vertices])
 
-            self.mesh_faces.extend(faces)
+            self.faces.extend(faces)
             face_owners = [poly_name for _ in faces]
-            self.mesh_face_owners.extend(face_owners)
+            self.face_owners.extend(face_owners)
 
     def collapse_points(self):
         """Merge overlapping points.
@@ -137,7 +137,7 @@ class PolyMesh:
 
         # Identify identical points
         same_points = {}
-        for i, p in enumerate(self.mesh_vertices):
+        for i, p in enumerate(self.vertices):
             if p in same_points.keys():
                 same_points[p].append(i)
             else:
@@ -146,25 +146,25 @@ class PolyMesh:
         # Merge same points
         for_deletion = set()
 
-        for i in range(len(self.mesh_vertices)):
-            p = self.mesh_vertices[i]
+        for i in range(len(self.vertices)):
+            p = self.vertices[i]
             p_to_keep = same_points[p][0]
             for j in range(1, len(same_points[p])):
                 p_to_delete = same_points[p][j]
                 for_deletion.add(p_to_delete)
 
                 # Replace point to be deleted with the one to keep in each face
-                for k in range(len(self.mesh_faces)):
-                    if p_to_delete in self.mesh_faces[k]:
-                        self.mesh_faces[k] = \
-                            [x if x != p_to_delete else p_to_keep for x in self.mesh_faces[k]]
+                for k in range(len(self.faces)):
+                    if p_to_delete in self.faces[k]:
+                        self.faces[k] = \
+                            [x if x != p_to_delete else p_to_keep for x in self.faces[k]]
 
         # Reindex
         for_deletion = sorted(list(for_deletion), reverse=True)
         for p_to_delete in for_deletion:
-            for k in range(len(self.mesh_faces)):
-                self.mesh_faces[k] = [x - 1 if x > p_to_delete else x for x in self.mesh_faces[k]]
-            self.mesh_vertices.pop(p_to_delete)
+            for k in range(len(self.faces)):
+                self.faces[k] = [x - 1 if x > p_to_delete else x for x in self.faces[k]]
+            self.vertices.pop(p_to_delete)
 
     def fix_short_edges(self, min_length: float):
         """Delete vertices connected to short edges and regenerate mesh."""
@@ -174,17 +174,17 @@ class PolyMesh:
         for polyname in self.polygons.keys():
 
             protected_points = self.polygons[polyname].points
-            num_of_faces = len(self.mesh_faces)
+            num_of_faces = len(self.faces)
 
             # Calculate edge lengths
             edge_lengths = {}
             for i in range(num_of_faces):
-                p_index_0 = self.mesh_faces[i][0]
-                p_index_1 = self.mesh_faces[i][1]
-                p_index_2 = self.mesh_faces[i][2]
-                p0 = self.mesh_vertices[p_index_0]
-                p1 = self.mesh_vertices[p_index_1]
-                p2 = self.mesh_vertices[p_index_2]
+                p_index_0 = self.faces[i][0]
+                p_index_1 = self.faces[i][1]
+                p_index_2 = self.faces[i][2]
+                p0 = self.vertices[p_index_0]
+                p1 = self.vertices[p_index_1]
+                p2 = self.vertices[p_index_2]
                 edge_lengths[(p_index_0, p_index_1)] = length(vector(p0, p1))
                 edge_lengths[(p_index_1, p_index_2)] = length(vector(p1, p2))
                 edge_lengths[(p_index_2, p_index_0)] = length(vector(p2, p0))
@@ -192,8 +192,8 @@ class PolyMesh:
             # Pick points designated for removal
             points_to_delete = set()
             for (p_index_a, p_index_b), elen in edge_lengths.items():
-                pa = self.mesh_vertices[p_index_a]
-                pb = self.mesh_vertices[p_index_b]
+                pa = self.vertices[p_index_a]
+                pb = self.vertices[p_index_b]
                 if elen < min_length:
                     if pa not in protected_points:
                         points_to_delete.add(pa)
@@ -204,6 +204,6 @@ class PolyMesh:
 
             # Re-generate mesh
             initial_vertices[polyname] = [
-                p for p in self.mesh_vertices if p not in points_to_delete
+                p for p in self.vertices if p not in points_to_delete
             ]
-            self.generate(initial_vertices)
+        self.generate(initial_vertices)

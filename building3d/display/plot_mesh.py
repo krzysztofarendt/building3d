@@ -14,10 +14,10 @@ def plot_mesh(
     if boundary is True:
         if len(mesh.polymesh.polygons) <= 0:
             raise MeshError("plot_mesh(..., boundary=True, ...) but PolyMesh empty")
-        x = [p.x for p in mesh.polymesh.mesh_vertices]
-        y = [p.y for p in mesh.polymesh.mesh_vertices]
-        z = [p.z for p in mesh.polymesh.mesh_vertices]
-        tri = mesh.polymesh.mesh_faces
+        x = [p.x for p in mesh.polymesh.vertices]
+        y = [p.y for p in mesh.polymesh.vertices]
+        z = [p.z for p in mesh.polymesh.vertices]
+        tri = mesh.polymesh.faces
 
         # Plot triangles
         _ = mlab.triangular_mesh(

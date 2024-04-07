@@ -39,9 +39,9 @@ def example():
     mesh.add_solid(room)
     mesh.generate()
 
-    mesh.polymesh.collapse_points()
+    # mesh.polymesh.collapse_points()
     mesh.polymesh.mesh_statistics(show=True)
-    mesh.polymesh.fix_short_edges(min_length=0.1)  # TODO: Bug
+    mesh.polymesh.fix_short_edges(min_length=1.5)  # TODO: Bug
     mesh.polymesh.mesh_statistics(show=True)
 
     # Plot
