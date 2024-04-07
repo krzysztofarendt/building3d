@@ -28,7 +28,9 @@ def test_fix_short_edges():
 
     mesh_stats = mesh.mesh_statistics(show=True)
     initial_min_edge_len = mesh_stats["min_edge_len"]
-    assert initial_min_edge_len < 0.03, "This test requires initial mesh to have some short edges"
+    assert (
+        initial_min_edge_len < 0.03
+    ), "This test requires initial mesh to have some short edges"
 
     mesh.fix_short_edges(min_length=0.1)  # TODO: This functions does nothing now
 

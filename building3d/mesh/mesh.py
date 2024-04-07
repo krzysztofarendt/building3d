@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import numpy as np
-
 import building3d.geom.solid
 import building3d.geom.polygon
 import building3d.geom.point

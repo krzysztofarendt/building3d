@@ -2,14 +2,14 @@ import numpy as np
 import pytest
 
 from building3d import random_id
+from building3d.config import TETRAHEDRON_MIN_VOL
 from building3d.geom.exceptions import GeometryError
 from building3d.geom.point import Point
+from building3d.geom.tetrahedron import tetrahedron_volume
 from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
-from building3d.geom.tetrahedron import tetrahedron_volume
-from building3d.mesh.triangulation import delaunay_triangulation
 from building3d.mesh.tetrahedralization import delaunay_tetrahedralization
-from building3d.config import TETRAHEDRON_MIN_VOL
+from building3d.mesh.triangulation import delaunay_triangulation
 
 
 def test_tetrahedralization():
@@ -76,9 +76,12 @@ def test_tetrahedralization():
         init_vertices=None,
     )
 
-    assert len(np.unique(tetrahedra)) == len(vertices), \
-        "More points used in tetrahedra than available vertices"
-    assert np.max(np.array(tetrahedra)) == len(vertices) - 1, "Not all vertices used in the solid mesh"
+    assert len(np.unique(tetrahedra)) == len(
+        vertices
+    ), "More points used in tetrahedra than available vertices"
+    assert (
+        np.max(np.array(tetrahedra)) == len(vertices) - 1
+    ), "Not all vertices used in the solid mesh"
 
     # Make sure points are not duplicated
     for i in range(len(vertices) - 1):
@@ -103,7 +106,9 @@ def test_tetrahedralization():
         p2 = vertices[el[2]]
         p3 = vertices[el[3]]
         vol = tetrahedron_volume(p0, p1, p2, p3)
-        assert vol > TETRAHEDRON_MIN_VOL, f"Volume[{i}]={vol} < minimum ({TETRAHEDRON_MIN_VOL})"
+        assert (
+            vol > TETRAHEDRON_MIN_VOL
+        ), f"Volume[{i}]={vol} < minimum ({TETRAHEDRON_MIN_VOL})"
 
     # Assert tetrahedra vertices are not coplanar
     pass

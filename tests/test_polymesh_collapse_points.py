@@ -68,9 +68,7 @@ def test_collapse_points():
         p1 = mesh.mesh_vertices[face[1]]
         p2 = mesh.mesh_vertices[face[2]]
         vnorm = normal(p0, p1, p2)
-        assert np.isclose(
-            vnorm, poly.normal, atol=GEOM_EPSILON
-        ).all()
+        assert np.isclose(vnorm, poly.normal, atol=GEOM_EPSILON).all()
 
 
 if __name__ == "__main__":
