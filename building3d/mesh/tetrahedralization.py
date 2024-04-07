@@ -14,7 +14,6 @@ def delaunay_tetrahedralization(
     sld: Solid,
     boundary_vertices: dict[str, list[Point]],
     delta: float = 0.5,
-    init_vertices: None | list[Point] = None,
 ) -> tuple[list[Point], list[list[int]]]:
     """Delaunay tetrahedralization of a solid.
 
@@ -22,47 +21,43 @@ def delaunay_tetrahedralization(
         sld: solid to be meshed
         boundary_vertices: dict with polygon names and respective mesh vertices
         delta: approximate mesh size
-        init_vertices: initial vertices to be used for tetrahedralization
 
     Return:
         (list of mesh points, list of tetrahedral tetrahedra)
     """
     vertices = []
 
-    if init_vertices is not None:
-        pass  # TODO: Add logic for init_vertices in solid_mesh.py (to be used for mesh refinement)
-    else:
-        # Collect meshes from the boundary polygons
-        # -> boundary_vertices, boundary_faces
-        for poly_name, poly_points in boundary_vertices.items():
-            for pt in poly_points:
-                # Do not add duplicate points
-                if pt not in vertices:
-                    vertices.append(pt)
+    # Collect meshes from the boundary polygons
+    # -> boundary_vertices, boundary_faces
+    for poly_name, poly_points in boundary_vertices.items():
+        for pt in poly_points:
+            # Do not add duplicate points
+            if pt not in vertices:
+                vertices.append(pt)
 
-        # Add new points inside the solid
-        bbox_pmin, bbox_pmax = sld.bounding_box()
-        xmin = bbox_pmin.x
-        ymin = bbox_pmin.y
-        zmin = bbox_pmin.z
-        xmax = bbox_pmax.x
-        ymax = bbox_pmax.y
-        zmax = bbox_pmax.z
+    # Add new points inside the solid
+    bbox_pmin, bbox_pmax = sld.bounding_box()
+    xmin = bbox_pmin.x
+    ymin = bbox_pmin.y
+    zmin = bbox_pmin.z
+    xmax = bbox_pmax.x
+    ymax = bbox_pmax.y
+    zmax = bbox_pmax.z
 
-        # Make sure delta smaller than bbox dimensions
-        if delta >= xmax - xmin or delta >= ymax - ymin or delta >= zmax - zmin:
-            raise GeometryError(f"Solid {sld.name} cannot be meshed due to too large delta ({delta})")
+    # Make sure delta smaller than bbox dimensions
+    if delta >= xmax - xmin or delta >= ymax - ymin or delta >= zmax - zmin:
+        raise GeometryError(f"Solid {sld.name} cannot be meshed due to too large delta ({delta})")
 
-        xgrid = np.arange(xmin, xmax, delta)
-        ygrid = np.arange(ymin, ymax, delta)
-        zgrid = np.arange(zmin, zmax, delta)
-        for x in xgrid:
-            for y in ygrid:
-                for z in zgrid:
-                    pt = Point(x, y, z)
-                    if sld.is_point_inside(pt):
-                        if pt not in vertices:
-                            vertices.append(pt)
+    xgrid = np.arange(xmin, xmax, delta)
+    ygrid = np.arange(ymin, ymax, delta)
+    zgrid = np.arange(zmin, zmax, delta)
+    for x in xgrid:
+        for y in ygrid:
+            for z in zgrid:
+                pt = Point(x, y, z)
+                if sld.is_point_inside(pt):
+                    if pt not in vertices:
+                        vertices.append(pt)
 
     # Tetrahedralization - first pass
     pts_arr = np.array([[p.x, p.y, p.z] for p in vertices])

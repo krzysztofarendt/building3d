@@ -45,8 +45,6 @@ make example
 - [x] Check if all points of a wall are coplanar
 - [x] Triangle area: https://en.wikipedia.org/wiki/Heron%27s_formula
 - [x] Triangulation:
-    - https://www.geometrictools.com/Documentation/TriangulationByEarClipping.pdf
-    - https://nils-olovsson.se/articles/ear_clipping_triangulation/
 - [x] Accurate center of weight for Wall
 - [x] Tests are failing
 - [x] Check whether a point lays on the surface of a polygon
@@ -61,6 +59,9 @@ make example
 - [x] Discretize solid with tetrahedra (the mesh does not look correct)
 - [x] Plot solid mesh
 - [x] Fix highly skewed triangles in Delaunay triangulation
+- [ ] Fix short edges in PolyMesh and in SolidMesh
+- [ ] Export to STL
+- [ ] Polygon mesh faces should match solid mesh faces at the boundary
 - [ ] Add logger
 - [ ] Calculate solid volume
 - [ ] Accurate center of weight for Solid

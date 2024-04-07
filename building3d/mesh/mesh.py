@@ -18,12 +18,16 @@ class Mesh:
         self.solidmesh = SolidMesh(delta)
 
     def add_polygon(self, poly: building3d.geom.polygon.Polygon):
+        """Add polygon insntance to the list of polygons for this mesh.
+
+        This is not required if this polygon is part of a solid added to this mesh.
+        """
         self.polymesh.add_polygon(poly)
 
     def add_solid(self, sld: building3d.geom.solid.Solid):
         """Add solid instance to the list of solids for this mesh.
 
-        All solid boundary polygons are also added (if they were not already added manually).
+        All solid boundary polygons are added automatically.
         """
         self.solidmesh.add_solid(sld)
         for poly in sld.boundary:

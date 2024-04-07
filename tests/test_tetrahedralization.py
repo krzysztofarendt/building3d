@@ -57,7 +57,6 @@ def test_tetrahedralization():
                 roof_id: roof_vertices,
             },
             delta=1.0,
-            init_vertices=None,
         )
 
     # If delta is small enough, the number of returned vertices will be larger
@@ -73,7 +72,6 @@ def test_tetrahedralization():
             roof_id: roof_vertices,
         },
         delta=0.25,
-        init_vertices=None,
     )
 
     assert len(np.unique(tetrahedra)) == len(

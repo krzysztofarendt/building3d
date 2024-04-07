@@ -24,15 +24,6 @@ def test_plot_zone():
     wall3 = Wall("wall3", [p0, p4, p7, p3])
     roof = Wall("roof", [p4, p5, p6, p7])
 
-    mesh = Mesh()
-    mesh.add_polygon(floor)
-    mesh.add_polygon(wall0)
-    mesh.add_polygon(wall1)
-    mesh.add_polygon(wall2)
-    mesh.add_polygon(wall3)
-    mesh.add_polygon(roof)
-    mesh.generate()
-
     room = Zone("room", [floor, wall0, wall1, wall2, wall3, roof])
 
     # Plot

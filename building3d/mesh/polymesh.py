@@ -29,6 +29,7 @@ class PolyMesh:
         self.polygons[poly.name] = poly
 
     def get_vertices_per_polygon(self) -> dict[str, list[Point]]:
+        """Return list of vertices for each polygon name."""
         vertices = {}
         for name in self.polygons.keys():
             vertices[name] = []

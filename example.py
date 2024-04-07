@@ -7,7 +7,7 @@ from building3d.mesh.mesh import Mesh
 
 
 def example():
-    stretch = [10, 8, 5]
+    stretch = [7, 4, 5]
     translate = [3.0, 3.0, 3.0]
     p0 = Point(0.0, 0.0, 0.0) * stretch + translate
     p1 = Point(1.0, 0.0, 0.0) * stretch + translate
@@ -39,7 +39,7 @@ def example():
     mesh.add_solid(room)
     mesh.generate()
 
-    # mesh.polymesh.collapse_points()  # TODO: will it work with solid mesh?
+    mesh.polymesh.collapse_points()  # TODO: will it work with solid mesh?
 
     # Plot
     plot_zone(room, show_triangulation=True, show_normals=True, show=False)

@@ -38,8 +38,6 @@ def test_fix_short_edges():
     # min_edge_len = mesh_stats["min_edge_len"]
     # assert min_edge_len > 0.1, "Fixing mesh edges didn't work"  # TODO
 
-    # import pdb; pdb.set_trace()
-
 
 if __name__ == "__main__":
     test_fix_short_edges()
