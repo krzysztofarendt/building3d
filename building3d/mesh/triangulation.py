@@ -12,6 +12,7 @@ from ..geom.vector import length
 from ..geom.vector import normal
 from ..geom.line import create_points_between_2_points
 from building3d import random_id
+from building3d.mesh.exceptions import MeshError
 from building3d.config import GEOM_EPSILON
 
 
@@ -38,8 +39,10 @@ def delaunay_triangulation(
         (list of mesh points, list of faces)
     """
     points = poly.points
-    if len(init_vertices):
+    if len(init_vertices) > 0:
         init_vertices = [p for p in init_vertices if p not in points]
+        if len(init_vertices) == 0:
+            raise MeshError("init_vertices contained only polygon vertices?")
 
     # Rotate polygon points to XY
     origin = Point(0.0, 0.0, 0.0)

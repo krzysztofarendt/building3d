@@ -1,3 +1,9 @@
+import logging
+
+# Log file
+LOG_FILE = "building3d.log"
+LOG_LEVEL = logging.DEBUG
+
 # Geometry epsilon used for comparison operations
 GEOM_EPSILON = 1e-10
 

@@ -1,18 +1,26 @@
 from __future__ import annotations
+import logging
 
 import numpy as np
 
 import building3d.geom.solid
+import building3d.logger
 import building3d.geom.polygon
 from building3d.geom.point import Point
 from building3d.geom.triangle import triangle_area
 from building3d.geom.vector import length
 from building3d.geom.vector import vector
+from building3d.mesh.exceptions import MeshError
 from .triangulation import delaunay_triangulation
+
+
+logger = logging.getLogger(__name__)
 
 
 class PolyMesh:
     def __init__(self, delta: float = 0.5):
+        logger.debug(f"PolyMesh(delta={delta})")
+
         # Mesh settings
         self.delta = delta
 
@@ -26,16 +34,19 @@ class PolyMesh:
         self.face_owners = []  # polygon names
 
     def reinit(self):
+        logger.debug("Reinitializing PolyMesh")
         self.vertices = []
         self.vertex_owners = []  # polygon names
         self.faces = []
         self.face_owners = []  # polygon names
 
     def add_polygon(self, poly: building3d.geom.polygon.Polygon):
+        logger.debug(f"Adding polygon: {poly}")
         self.polygons[poly.name] = poly
 
     def get_vertices_per_polygon(self) -> dict[str, list[Point]]:
         """Return list of vertices for each polygon name."""
+        logger.debug("Getting the list of Points per polygon")
         vertices = {}
         for name in self.polygons.keys():
             vertices[name] = []
@@ -43,6 +54,8 @@ class PolyMesh:
                 if self.vertex_owners[i] == name:
                     v = self.vertices[i]
                     vertices[name].append(v)
+        log_return = {k: len(v) for (k, v) in vertices.items()}
+        logger.debug(f"Number of Points per polygon: {log_return}")
         return vertices
 
     def mesh_statistics(self, show=False) -> dict:
@@ -93,7 +106,7 @@ class PolyMesh:
 
     def generate(self, initial_vertices: dict[str, list[Point]] = {}):
         """Generate mesh for all added polygons and solids."""
-
+        logger.debug(f"Generating mesh (using initial vertices: {True if len(initial_vertices) > 0 else False})")
         self.reinit()
 
         # Polygons
@@ -103,6 +116,7 @@ class PolyMesh:
             if poly_name in initial_vertices.keys():
                 initial = initial_vertices[poly_name]
 
+            # import pdb; pdb.set_trace()
             vertices, faces = delaunay_triangulation(
                 poly=poly,
                 delta=self.delta,
@@ -134,6 +148,8 @@ class PolyMesh:
         Overlapping points typically exist on the edges of adjacent polygons,
         because the polygon meshes are generated independently.
         """
+        logger.debug("Collapsing points")
+        logger.debug(f"Number of points before collapsing: {len(self.vertices)}")
 
         # Identify identical points
         same_points = {}
@@ -166,12 +182,15 @@ class PolyMesh:
                 self.faces[k] = [x - 1 if x > p_to_delete else x for x in self.faces[k]]
             self.vertices.pop(p_to_delete)
 
+        logger.debug(f"Number of points after collapsing: {len(self.vertices)}")
+
     def fix_short_edges(self, min_length: float):
         """Delete vertices connected to short edges and regenerate mesh."""
+        logger.debug(f"Trying to fix short edges ({min_length=})")
 
         initial_vertices = {}
 
-        for polyname in self.polygons.keys():
+        for polyname, poly in self.polygons.items():
 
             protected_points = self.polygons[polyname].points
             num_of_faces = len(self.faces)
@@ -201,7 +220,6 @@ class PolyMesh:
                         points_to_delete.add(pb)
                     else:
                         pass  # Both points are the polygon vertices
-
             # Re-generate mesh
             poly_vertices = [
                 p for p, own in zip(self.vertices, self.vertex_owners) if own == polyname
@@ -209,4 +227,11 @@ class PolyMesh:
             initial_vertices[polyname] = [
                 p for p in poly_vertices if p not in points_to_delete
             ]
+            logger.debug(f"{polyname=}")
+            logger.debug(f"{len(initial_vertices[polyname])=}")
+            logger.debug(f"{len(poly.points)=}")
+            min_additional_points = len(poly.points) * 5
+            if len(initial_vertices[polyname]) <= len(poly.points) + min_additional_points:
+                self.fix_short_edges(min_length=min_length/2)  # TODO: This should be called outside for loop
+
         self.generate(initial_vertices)

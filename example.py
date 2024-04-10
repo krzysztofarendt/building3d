@@ -41,7 +41,7 @@ def example():
     mesh.generate()
 
     mesh.polymesh.mesh_statistics(show=True)
-    mesh.polymesh.fix_short_edges(min_length=0.5)  # TODO: Doesn't work with 2.0?
+    mesh.polymesh.fix_short_edges(min_length=0.5)  # TODO: Doesn't work with 0.5?
     mesh.polymesh.mesh_statistics(show=True)
     mesh.polymesh.collapse_points()
 
