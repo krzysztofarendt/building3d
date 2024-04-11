@@ -3,8 +3,8 @@ import pytest
 from building3d import random_id
 from building3d.geom.point import Point
 from building3d.geom.wall import Wall
-from building3d.mesh.triangulation import delaunay_triangulation
 from building3d.mesh.exceptions import MeshError
+from building3d.mesh.triangulation import delaunay_triangulation
 
 
 def test_delaunay_triangulation_init_vertices_with_centroid():
