@@ -78,8 +78,6 @@ def delaunay_triangulation(
 
         init_vertices_xy, _ = rotate_points_around_vector(init_vertices, rotaxis, phi)
         new_points_2d.extend(init_vertices_xy)
-
-        logger.debug(f"{len(new_points_2d)=}")
     else:
         # Add new points on the edges
         logger.debug("Adding new points on the edges")
@@ -96,7 +94,6 @@ def delaunay_triangulation(
             num_segments = int(edge_len // delta)
             new_pts = create_points_between_2_points(pt1, pt2, num_segments)
             edge_pts_2d.extend(new_pts)
-            logger.debug(f"{new_pts=}")
 
         new_points_2d.extend(edge_pts_2d)
 
@@ -116,9 +113,6 @@ def delaunay_triangulation(
                 if poly_2d.is_point_inside(pt):
                     new_points_2d.append(pt)
 
-        logger.debug(f"{len(new_points_2d)=}")
-
-
     # Triangulation - first pass
     logger.debug("Triangulation - first pass")
 
@@ -130,14 +124,10 @@ def delaunay_triangulation(
 
     # Remove points not used in the triangulation
     unique_tri_indices = np.unique(triangles)
-    logger.debug(f"{len(unique_tri_indices)=}")
-
     final_points_2d = []
     for i, p in enumerate(new_points_2d):
         if i in unique_tri_indices:
             final_points_2d.append(p)
-
-    logger.debug(f"{len(final_points_2d)=}")
 
     # Triangulation - second pass (TODO: can it be done in a single pass?)
     logger.debug("Triangulation - second pass")
@@ -170,6 +160,7 @@ def delaunay_triangulation(
     for face_num in range(len(faces)):
         face_n = face_normal(face_num)
         if np.isclose(face_n * -1., poly.normal).all():
+            logger.debug(f"Reordering face no. {face_num} vertices to flip the normal vector")
             faces[face_num] = [faces[face_num][0], faces[face_num][2], faces[face_num][1]]
 
     mesh_normal = face_normal(0)
