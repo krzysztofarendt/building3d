@@ -12,6 +12,7 @@ from ..geom.rotate import rotate_points_around_vector
 from ..geom.vector import length
 from ..geom.vector import normal
 from ..geom.line import create_points_between_2_points
+from building3d.geom.triangle import triangle_area
 from building3d import random_id
 from building3d.mesh.exceptions import MeshError
 from building3d.config import GEOM_EPSILON
@@ -46,11 +47,21 @@ def delaunay_triangulation(
     logger.debug(f"{delta=}")
     logger.debug(f"{len(init_vertices)=}")
 
-    points = poly.points
+    min_area = delta ** 2 / 10.0
+    logger.debug(f"Choosing min. face area -> {min_area}")
+
+    # Placeholder for points on the edges of the polygon
+    edge_pts_2d = []
+
+    # If init_vertices are used, make sure they contain enough points
     if len(init_vertices) > 0:
-        init_vertices = [p for p in init_vertices if p not in points]
-        if len(init_vertices) == 0:
-            error_msg = "Variable init_vertices contains only polygon vertices?"
+        for p in poly.points:
+            if p not in init_vertices:
+                error_msg = "Missing polygon vertex in init_vertices"
+                logger.error(error_msg)
+                raise MeshError(error_msg)
+        if len(init_vertices) == len(poly.points):
+            error_msg = "Init_vertices contains only polygon vertices! That's not enough."
             logger.error(error_msg)
             raise MeshError(error_msg)
 
@@ -59,7 +70,7 @@ def delaunay_triangulation(
     origin = Point(0.0, 0.0, 0.0)
     normal_xy = np.array([0.0, 0.0, 1.0])
     points_xy, rotaxis, phi = rotate_points_to_plane(
-        points,
+        poly.points,
         anchor=origin,
         u=normal_xy,
     )
@@ -82,7 +93,6 @@ def delaunay_triangulation(
         # Add new points on the edges
         logger.debug("Adding new points on the edges")
 
-        edge_pts_2d = []
         for i in range(len(new_points_2d)):
             cur = i
             nxt = i + 1 if i + 1 < len(new_points_2d) else 0
@@ -123,11 +133,24 @@ def delaunay_triangulation(
     logger.debug(f"{len(triangles)=}")
 
     # Remove points not used in the triangulation
+    # and remove small faces
     unique_tri_indices = np.unique(triangles)
     final_points_2d = []
+
+    pt_to_area = {}
+    for t in triangles:
+        p0, p1, p2 = new_points_2d[t[0]], new_points_2d[t[1]], new_points_2d[t[2]]
+        area = triangle_area(p0, p1, p2)
+        for i in range(3):
+            if t[i] not in pt_to_area:
+                pt_to_area[t[i]] = area
+            elif area < pt_to_area[t[i]]:
+                pt_to_area[t[i]] = area
+
     for i, p in enumerate(new_points_2d):
         if i in unique_tri_indices:
-            final_points_2d.append(p)
+            if pt_to_area[i] > min_area or new_points_2d[i] in edge_pts_2d:
+                final_points_2d.append(p)
 
     # Triangulation - second pass (TODO: can it be done in a single pass?)
     logger.debug("Triangulation - second pass")

@@ -1,7 +1,10 @@
+import pytest
+
 from building3d import random_id
 from building3d.geom.point import Point
 from building3d.geom.wall import Wall
 from building3d.mesh.triangulation import delaunay_triangulation
+from building3d.mesh.exceptions import MeshError
 
 
 def test_delaunay_triangulation_init_vertices_with_centroid():
@@ -35,9 +38,5 @@ def test_delaunay_triangulation_init_vertices_without_polygon_vertex():
     assert len(faces_2) == len(faces_1) - 1
 
     # Run triangulation again but with vertices_2 as initial vertices
-    vertices_3, faces_3 = delaunay_triangulation(floor, init_vertices=vertices_2)
-
-    # Make sure vertices_3 == vertices_1, because delaunay_triangulation should add
-    # back the corner point, because it is a vertex polygon
-    assert vertices_1 == vertices_3
-    assert faces_1 == faces_3
+    with pytest.raises(MeshError):
+        _, _ = delaunay_triangulation(floor, init_vertices=vertices_2)

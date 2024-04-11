@@ -7,7 +7,6 @@ from ..geom.exceptions import GeometryError
 from ..geom.point import Point
 from ..geom.solid import Solid
 from ..geom.tetrahedron import tetrahedron_volume
-from building3d.config import TETRAHEDRON_MIN_VOL
 
 
 def delaunay_tetrahedralization(
@@ -26,6 +25,8 @@ def delaunay_tetrahedralization(
         (list of mesh points, list of tetrahedral tetrahedra)
     """
     vertices = []
+
+    min_volume = delta ** 3 / 50.0
 
     # Collect meshes from the boundary polygons
     # -> boundary_vertices, boundary_faces
@@ -48,9 +49,9 @@ def delaunay_tetrahedralization(
     if delta >= xmax - xmin or delta >= ymax - ymin or delta >= zmax - zmin:
         raise GeometryError(f"Solid {sld.name} cannot be meshed due to too large delta ({delta})")
 
-    xgrid = np.arange(xmin, xmax, delta)
-    ygrid = np.arange(ymin, ymax, delta)
-    zgrid = np.arange(zmin, zmax, delta)
+    xgrid = np.arange(xmin + delta, xmax, delta)
+    ygrid = np.arange(ymin + delta, ymax, delta)
+    zgrid = np.arange(zmin + delta, zmax, delta)
     for x in xgrid:
         for y in ygrid:
             for z in zgrid:
@@ -72,7 +73,7 @@ def delaunay_tetrahedralization(
         p2 = vertices[el[2]]
         p3 = vertices[el[3]]
         vol = tetrahedron_volume(p0, p1, p2, p3)
-        if vol < TETRAHEDRON_MIN_VOL:
+        if vol < min_volume:
             removed_el.append(i)
     tetrahedra = [el for i, el in enumerate(tetrahedra) if i not in removed_el]
 
