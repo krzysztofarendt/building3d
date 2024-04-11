@@ -106,14 +106,17 @@ class PolyMesh:
 
     def generate(self, initial_vertices: dict[str, list[Point]] = {}):
         """Generate mesh for all added polygons and solids."""
-        logger.debug(f"Generating mesh (using initial vertices: {True if len(initial_vertices) > 0 else False})")
+        use_init = True if len(initial_vertices) > 0 else False
+        logger.debug(f"Generating mesh (using initial vertices: {use_init})")
         self.reinit()
 
         # Polygons
         for poly_name, poly in self.polygons.items():
+            logger.debug(f"Processing {poly_name}")
 
             initial = []
             if poly_name in initial_vertices.keys():
+                logger.debug(f"Adding {len(initial_vertices[poly_name])} init. vert. for {poly_name}")
                 initial = initial_vertices[poly_name]
 
             # import pdb; pdb.set_trace()
@@ -183,55 +186,3 @@ class PolyMesh:
             self.vertices.pop(p_to_delete)
 
         logger.debug(f"Number of points after collapsing: {len(self.vertices)}")
-
-    def fix_short_edges(self, min_length: float):
-        """Delete vertices connected to short edges and regenerate mesh."""
-        logger.debug(f"Trying to fix short edges ({min_length=})")
-
-        initial_vertices = {}
-
-        for polyname, poly in self.polygons.items():
-
-            protected_points = self.polygons[polyname].points
-            num_of_faces = len(self.faces)
-
-            # Calculate edge lengths
-            edge_lengths = {}
-            for i in range(num_of_faces):
-                p_index_0 = self.faces[i][0]
-                p_index_1 = self.faces[i][1]
-                p_index_2 = self.faces[i][2]
-                p0 = self.vertices[p_index_0]
-                p1 = self.vertices[p_index_1]
-                p2 = self.vertices[p_index_2]
-                edge_lengths[(p_index_0, p_index_1)] = length(vector(p0, p1))
-                edge_lengths[(p_index_1, p_index_2)] = length(vector(p1, p2))
-                edge_lengths[(p_index_2, p_index_0)] = length(vector(p2, p0))
-
-            # Pick points designated for removal
-            points_to_delete = set()
-            for (p_index_a, p_index_b), elen in edge_lengths.items():
-                pa = self.vertices[p_index_a]
-                pb = self.vertices[p_index_b]
-                if elen < min_length:
-                    if pa not in protected_points:
-                        points_to_delete.add(pa)
-                    elif pb not in protected_points:
-                        points_to_delete.add(pb)
-                    else:
-                        pass  # Both points are the polygon vertices
-            # Re-generate mesh
-            poly_vertices = [
-                p for p, own in zip(self.vertices, self.vertex_owners) if own == polyname
-            ]
-            initial_vertices[polyname] = [
-                p for p in poly_vertices if p not in points_to_delete
-            ]
-            logger.debug(f"{polyname=}")
-            logger.debug(f"{len(initial_vertices[polyname])=}")
-            logger.debug(f"{len(poly.points)=}")
-            min_additional_points = len(poly.points) * 5
-            if len(initial_vertices[polyname]) <= len(poly.points) + min_additional_points:
-                self.fix_short_edges(min_length=min_length/2)  # TODO: This should be called outside for loop
-
-        self.generate(initial_vertices)

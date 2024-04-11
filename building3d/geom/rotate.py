@@ -1,4 +1,6 @@
 """Rotation functions."""
+import logging
+
 import numpy as np
 
 from .point import Point
@@ -6,6 +8,9 @@ from .vector import angle
 from .vector import normal
 from .vector import length
 from building3d.config import GEOM_EPSILON
+
+
+logger = logging.getLogger(__name__)
 
 
 def rotation_matrix(u: np.ndarray, phi: float) -> np.ndarray:
@@ -45,10 +50,13 @@ def rotation_matrix(u: np.ndarray, phi: float) -> np.ndarray:
                   [-u[1], u[0], 0]])
     R = np.eye(3) + np.sin(phi) * W + (2 * np.sin(phi/2) ** 2) * np.dot(W, W)
 
+    logger.debug(f"Rotation matrix:\n{R=}")
+
     return R
 
 
 def rotate_points(points: list[Point], R: np.ndarray) -> list[Point]:
+    logger.debug(f"Rotating {len(points)} points using\n{R=}")
     pts_arr = np.array([p.vector() for p in points])
     pts_arr = pts_arr.dot(R.T)
     pts = [Point(x, y, z) for (x, y, z) in pts_arr]
@@ -69,6 +77,8 @@ def rotate_points_around_vector(
         (list of rotated points, rotation matrix)
 
     """
+    logger.debug(f"Rotating {len(points)} points around {u} using angle {phi}")
+
     if length(u) < GEOM_EPSILON or abs(phi) < GEOM_EPSILON:
         # No need to rotate
         return points, np.ones((3, 3))
@@ -98,6 +108,7 @@ def rotate_points_to_plane(
     Return:
         (list of rotated points, rotation axis, rotation angle)
     """
+    logger.debug(f"Rotating {len(points)} points to plane {u=}, {d=}, {anchor=}")
 
     # Find normal to the points
     p_norm = normal(points[-1], points[0], points[1])
