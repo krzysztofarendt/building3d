@@ -18,6 +18,10 @@ count:
 	cloc --by-file building3d/
 
 
+count-tests:
+	cloc --by-file building3d/ tests/
+
+
 example:
 	python example.py
 
