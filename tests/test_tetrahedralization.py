@@ -113,7 +113,3 @@ def test_tetrahedralization():
 
     # Assert tetrahedra vertices are not coplanar
     pass
-
-
-if __name__ == "__main__":
-    test_solid_mesh()
