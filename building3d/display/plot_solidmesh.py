@@ -1,0 +1,51 @@
+from mayavi import mlab
+
+from building3d.mesh.exceptions import MeshError
+from building3d.mesh.solidmesh import SolidMesh
+import building3d.display.colors as colors
+
+
+def plot_solidmesh(
+    mesh: SolidMesh,
+    show: bool = False,
+):
+    # Plot tetrahedral wireframe
+    # Vertices: a, b, c, d
+    # Edges:
+    # 1. a -> b
+    # 2. b -> c
+    # 3. c -> a
+    # 4. a -> d
+    # 5. d -> b
+    # 6. c -> d
+    if len(mesh.solids) <= 0:
+        raise MeshError("plot_mesh(..., interior=True, ...) but SolidMesh empty")
+    done_edges = []
+    done_vertices = set()
+    for i, el in enumerate(mesh.mesh_elements):
+        a = mesh.mesh_vertices[el[0]]
+        b = mesh.mesh_vertices[el[1]]
+        c = mesh.mesh_vertices[el[2]]
+        d = mesh.mesh_vertices[el[3]]
+        edges = [(a, b), (b, c), (c, a), (a, d), (d, b), (c, d)]
+        for pair in edges:
+            if set(pair) not in done_edges:
+                x = [p.x for p in pair]
+                y = [p.y for p in pair]
+                z = [p.z for p in pair]
+                _ = mlab.plot3d(x, y, z, line_width=0.1)
+                for xi, yi, zi in zip(x, y, z):
+                    if (xi, yi, zi) not in done_vertices:
+                        _ = mlab.points3d(xi, yi, zi, color=colors.RGB_BLUE, scale_factor=0.2)
+                        done_vertices.add((xi, yi, zi))
+
+                done_edges.append(set(pair))
+        print(f"\r{100.0 * (i + 1) / len(mesh.mesh_elements):.0f}%", end="")
+    print()
+
+    if show:
+        mlab.show()
+        return
+    else:
+        return
+

@@ -119,7 +119,6 @@ class PolyMesh:
                 logger.debug(f"Adding {len(initial_vertices[poly_name])} init. vert. for {poly_name}")
                 initial = initial_vertices[poly_name]
 
-            # import pdb; pdb.set_trace()
             vertices, faces = delaunay_triangulation(
                 poly=poly,
                 delta=self.delta,
