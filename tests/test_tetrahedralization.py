@@ -106,10 +106,8 @@ def test_tetrahedralization():
         p2 = vertices[el[2]]
         p3 = vertices[el[3]]
         vol = tetrahedron_volume(p0, p1, p2, p3)
-        min_volume = delta ** 3 / 50.0
-        assert (
-            vol > min_volume
-        ), f"Volume[{i}]={vol} < minimum ({min_volume})"
+        min_volume = delta**3 / 50.0
+        assert vol > min_volume, f"Volume[{i}]={vol} < minimum ({min_volume})"
 
     # Assert tetrahedra vertices are not coplanar
     pass

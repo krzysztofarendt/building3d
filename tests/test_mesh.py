@@ -36,9 +36,9 @@ def test_mesh():
     mesh.generate()
 
     solidmesh_stats = mesh.solidmesh.mesh_statistics()
-    min_vol = delta ** 3 / 50.0
+    min_vol = delta**3 / 50.0
     assert solidmesh_stats["min_tetrahedron_volume"] > min_vol
 
     polymesh_stats = mesh.polymesh.mesh_statistics()
-    min_area = delta ** 2 / 10.0
+    min_area = delta**2 / 10.0
     assert polymesh_stats["min_face_area"] > min_area
