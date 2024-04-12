@@ -127,3 +127,6 @@ class Solid:
 
     def __del__(self):
         Solid.remove_name(self.name)
+
+    def __str__(self):
+        return f"Solid({self.name=}, {self.boundary=})"

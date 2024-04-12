@@ -1,4 +1,5 @@
 from __future__ import annotations  # Needed for type hints to work (due to circular import)
+import logging
 
 import numpy as np
 from scipy.spatial import Delaunay
@@ -7,6 +8,9 @@ from ..geom.exceptions import GeometryError
 from ..geom.point import Point
 from ..geom.solid import Solid
 from ..geom.tetrahedron import tetrahedron_volume
+
+
+logger = logging.getLogger(__name__)
 
 
 def delaunay_tetrahedralization(
@@ -24,9 +28,11 @@ def delaunay_tetrahedralization(
     Return:
         (list of mesh points, list of tetrahedral tetrahedra)
     """
+    logger.debug(f"Starting tetrahedralization of {sld} with {delta=}")
     vertices = []
 
     min_volume = delta ** 3 / 50.0
+    logger.debug(f"Assuming tetrahedron min. volume = {min_volume}")
 
     # Collect meshes from the boundary polygons
     # -> boundary_vertices, boundary_faces
@@ -76,6 +82,9 @@ def delaunay_tetrahedralization(
         if vol < min_volume:
             removed_el.append(i)
     tetrahedra = [el for i, el in enumerate(tetrahedra) if i not in removed_el]
+
+    logger.debug(f"Number of mesh tetrahedra in {sld.name} = {len(tetrahedra)}")
+    logger.debug(f"Number of mesh vertices in {sld.name} = {len(vertices)}")
 
     # SANITY CHECKS
     # Make sure all boundary vertices are in the final_vertices

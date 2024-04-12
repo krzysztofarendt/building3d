@@ -4,6 +4,7 @@ import numpy as np
 
 import building3d.geom.solid
 import building3d.geom.polygon
+from building3d.geom.tetrahedron import tetrahedron_volume
 from building3d.geom.point import Point
 from .tetrahedralization import delaunay_tetrahedralization
 
@@ -32,17 +33,37 @@ class SolidMesh:
 
     def mesh_statistics(self, show=False) -> dict:
         """Print and return info about mesh quality."""
-        # TODO
+
         stats = {
-            "num_of_vertices": None,
-            "num_of_faces": None,
-            "max_face_area": None,
-            "avg_face_area": None,
-            "min_face_area": None,
-            "max_edge_len": None,
-            "avg_edge_len": None,
-            "min_edge_len": None,
+            "num_of_vertices": len(self.mesh_vertices),
+            "num_of_tetrahedra": len(self.mesh_elements),
+            "max_tetrahedron_volume": 0,
+            "avg_tetrahedron_volume": 0,
+            "min_tetrahedron_volume": np.inf,
         }
+
+        for tetra in self.mesh_elements:
+            p0 = self.mesh_vertices[tetra[0]]
+            p1 = self.mesh_vertices[tetra[1]]
+            p2 = self.mesh_vertices[tetra[2]]
+            p3 = self.mesh_vertices[tetra[3]]
+            vol = tetrahedron_volume(p0, p1, p2, p3)
+            if vol > stats["max_tetrahedron_volume"]:
+                stats["max_tetrahedron_volume"] = vol
+            elif vol < stats["min_tetrahedron_volume"]:
+                stats["min_tetrahedron_volume"] = vol
+            stats["avg_tetrahedron_volume"] += vol
+
+        stats["avg_tetrahedron_volume"] /= stats["num_of_tetrahedra"]
+
+        if show is True:
+            print("SolidMesh statistics:")
+            print(f"\tnum_of_vertices={stats['num_of_vertices']}")
+            print(f"\tnum_of_tetrahedra={stats['num_of_tetrahedra']}")
+            print(f"\tmax_tetrahedron_volume={stats['max_tetrahedron_volume']}")
+            print(f"\tavg_tetrahedron_volume={stats['avg_tetraedron_volume']}")
+            print(f"\tmin_tetrahedron_volume={stats['min_tetraedron_volume']}")
+
         return stats
 
     def generate(self, boundary_vertices: dict[str, list[Point]] = {}):  # TODO
@@ -61,22 +82,8 @@ class SolidMesh:
             self.mesh_element_owners.extend([sld_name for _ in tetrahedra])
 
 
-    def collapse_points(self):  # TODO: Add solid mesh. Currently works on polygon meshes only.
-        """Merge overlapping points.
-
-        Checks if there are points which are equal to one another.
-        Point equality is defined in the Point class. In general,
-        points are equal if the difference between their coordinates is below
-        the defined epsilon.
-
-        Subsequently, overlapping points are merged.
-
-        Overlapping points typically exist on the edges of adjacent polygons,
-        because the polygon meshes are generated independently.
+    def collapse_points(self):  # TODO
+        """Merge overlapping points (between solids).
         """
-        pass
-
-    def fix_short_edges(self, min_length: float):  # TODO
-        """Delete vertices connected to short edges."""
         pass
 

@@ -82,7 +82,7 @@ class PolyMesh:
         min_edge_len = np.min(edge_lengths)
 
         if show is True:
-            print("MESH STATISTICS:")
+            print("PolyMesh statistics:")
             print(f"\t{num_of_vertices=}")
             print(f"\t{num_of_faces=}")
             print(f"\t{max_face_area=}")
