@@ -88,9 +88,6 @@ def delaunay_tetrahedralization(
     tetrahedra = tri.simplices
     logger.debug(f"Number of mesh tetrahedra in {sld.name} = {len(tetrahedra)}")
 
-    unique_points = [vertices[i] for i in np.unique(np.array(tetrahedra))]
-    assert len(unique_points) == len(vertices), "Not all points used in tetrahedralization?"
-
     # Remove tetrahedra with zero volume
     removed_el = []
     for i, el in enumerate(tetrahedra):
@@ -110,14 +107,19 @@ def delaunay_tetrahedralization(
     pass
     vertices, tetrahedra = collapse_points(vertices, tetrahedra)  # TODO: is it needed?
 
+    unique_points = [vertices[i] for i in np.unique(np.array(tetrahedra))]
+    assert len(unique_points) == len(vertices), "Not all points used in tetrahedralization?"
+
     logger.debug(f"Number of tetrahedra in {sld.name} = {len(tetrahedra)}")
-    logger.debug(f"Number of mesh vertices in {sld.name} = {len(vertices)}")
+    logger.debug(
+        f"Number of unique vertices used in mesh elements in {sld.name} = {len(unique_points)}"
+    )
+    logger.debug(f"Number of all vertices in {sld.name} = {len(vertices)}")
 
     # SANITY CHECKS
     # Make sure all boundary vertices are in the final_vertices
     # and that the number of returned vertices is higher than the sum of polygon mesh vertices
     unique_boundary_vertices = []
-
 
     for poly_name, poly_points in boundary_vertices.items():
         for pt in poly_points:
