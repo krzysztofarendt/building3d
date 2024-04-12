@@ -45,6 +45,7 @@ make example
 - [x] Fix small area in PolyMesh (highly skewed triangles)
 - [x] Fix short edges in SolidMesh (through `min_volume`)
 - [x] Solid mesh statistics
+- [ ] Solid mesh vertices reindexing after element deletion due to low volume
 - [ ] Test solid mesh with multiple solid instances
 - [ ] Export to STL
 - [ ] Polygon mesh faces should match solid mesh faces at the boundary

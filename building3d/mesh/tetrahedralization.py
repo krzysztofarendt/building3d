@@ -135,8 +135,9 @@ def delaunay_tetrahedralization(
     return vertices, tetrahedra
 
 
-
-def collapse_points(vertices, elements):
+def collapse_points(
+        vertices: list[Point], elements: list[list[int]]
+) -> tuple[list[Point], list[list[int]]]:
     """Merge overlapping points.
     """
     logger.debug("Collapsing points")

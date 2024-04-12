@@ -1,9 +1,9 @@
 from building3d import random_id
+from building3d.display.plot_solidmesh import plot_solidmesh
 from building3d.geom.point import Point
 from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
 from building3d.mesh.solidmesh import SolidMesh
-from building3d.display.plot_solidmesh import plot_solidmesh
 
 
 def test_solidmesh(plot=False):
