@@ -2,7 +2,6 @@ import numpy as np
 import pytest
 
 from building3d import random_id
-from building3d.config import TETRAHEDRON_MIN_VOL
 from building3d.geom.exceptions import GeometryError
 from building3d.geom.point import Point
 from building3d.geom.tetrahedron import tetrahedron_volume
@@ -13,6 +12,8 @@ from building3d.mesh.triangulation import delaunay_triangulation
 
 
 def test_tetrahedralization():
+    delta = 1.0
+
     p0 = Point(0.0, 0.0, 0.0)
     p1 = Point(1.0, 0.0, 0.0)
     p2 = Point(1.0, 1.0, 0.0)
@@ -56,11 +57,12 @@ def test_tetrahedralization():
                 wall3_id: wall3_vertices,
                 roof_id: roof_vertices,
             },
-            delta=1.0,
+            delta=delta,
         )
 
     # If delta is small enough, the number of returned vertices will be larger
     # than polygon mesh vertices
+    delta = 0.25
     vertices, tetrahedra = delaunay_tetrahedralization(
         sld=zone,
         boundary_vertices={
@@ -71,7 +73,7 @@ def test_tetrahedralization():
             wall3_id: wall3_vertices,
             roof_id: roof_vertices,
         },
-        delta=0.25,
+        delta=delta,
     )
 
     assert len(np.unique(tetrahedra)) == len(
@@ -104,9 +106,10 @@ def test_tetrahedralization():
         p2 = vertices[el[2]]
         p3 = vertices[el[3]]
         vol = tetrahedron_volume(p0, p1, p2, p3)
+        min_volume = delta ** 3 / 50.0
         assert (
-            vol > TETRAHEDRON_MIN_VOL
-        ), f"Volume[{i}]={vol} < minimum ({TETRAHEDRON_MIN_VOL})"
+            vol > min_volume
+        ), f"Volume[{i}]={vol} < minimum ({min_volume})"
 
     # Assert tetrahedra vertices are not coplanar
     pass
