@@ -99,9 +99,8 @@ def delaunay_triangulation(
             pt1 = new_points_2d[cur]
             pt2 = new_points_2d[nxt]
             logger.debug(f"Edge between points {pt1} and {pt2}")
-
             edge_len = length(pt2.vector() - pt1.vector())
-            num_segments = int(edge_len // delta)
+            num_segments = int(edge_len // (delta + GEOM_EPSILON))
             new_pts = create_points_between_2_points(pt1, pt2, num_segments)
             edge_pts_2d.extend(new_pts)
 
@@ -120,7 +119,7 @@ def delaunay_triangulation(
         for x in xgrid:
             for y in ygrid:
                 pt = Point(x, y, z)
-                if poly_2d.is_point_inside(pt):
+                if poly_2d.is_point_inside_margin(pt, margin=delta/2):
                     new_points_2d.append(pt)
 
     # Triangulation - first pass
@@ -152,12 +151,13 @@ def delaunay_triangulation(
             if pt_to_area[i] > min_area or new_points_2d[i] in edge_pts_2d:
                 final_points_2d.append(p)
 
-    # Triangulation - second pass (TODO: can it be done in a single pass?)
+    # Triangulation - second pass
     logger.debug("Triangulation - second pass")
 
     pts_arr = np.array([[p.x, p.y] for p in final_points_2d])
     tri = Delaunay(pts_arr, incremental=False)
     triangles = tri.simplices
+    convex_hull = np.unique(tri.convex_hull).tolist()
 
     logger.debug(f"{len(triangles)=}")
     assert len(np.unique(triangles)) == len(final_points_2d)
@@ -170,6 +170,12 @@ def delaunay_triangulation(
         u=rotaxis,
         phi=-phi,
     )
+
+    # edge_pts, _ = rotate_points_around_vector(
+    #     edge_pts_2d,
+    #     u=rotaxis,
+    #     phi=-phi,
+    # )
 
     # Fix surface normal direction
     def face_normal(face_num):

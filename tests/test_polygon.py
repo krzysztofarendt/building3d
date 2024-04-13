@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 
 from building3d import random_id
+from building3d.config import GEOM_EPSILON
 from building3d.geom.exceptions import GeometryError
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
@@ -162,6 +163,47 @@ def test_triangulation_cross_shape_on_yz_plane():
     assert {7, 8, 9} not in triangles
 
 
+def test_distance_point_to_polygon():
+    p0 = Point(0.0, 0.0, 0.0)
+    p1 = Point(1.0, 0.0, 0.0)
+    p2 = Point(1.0, 1.0, 0.0)
+    p3 = Point(0.0, 1.0, 0.0)
+    ptest1 = Point(0.5, 0.5, 1.0)     # distance = 1
+    ptest2 = Point(1.0, 0.5, 1.0)     # distance = 1
+    ptest3 = Point(1.0, 0.5, -1.0)    # distance = 1
+    ptest4 = Point(1.0, 2.0, 0.0)     # distance = 1
+    ptest5 = Point(2.0, 1.0, 1.0)     # distance = np.sqrt(2)
+    ptest6 = Point(-1.0, -1.0, 0.0)   # distance = np.sqrt(2)
+    ptest7 = Point(0.9, 0.1, 3.0)     # distance = 3
+
+    poly = Polygon(random_id(), [p0, p1, p2, p3])
+
+    d = poly.distance_point_to_polygon(ptest1)
+    assert np.isclose(d, 1.0)
+    d = poly.distance_point_to_polygon(ptest2)
+    assert np.isclose(d, 1.0)
+    d = poly.distance_point_to_polygon(ptest3)
+    assert np.isclose(d, 1.0)
+    d = poly.distance_point_to_polygon(ptest4)
+    assert np.isclose(d, 1.0)
+    d = poly.distance_point_to_polygon(ptest5)
+    assert np.isclose(d, np.sqrt(2))
+    d = poly.distance_point_to_polygon(ptest6)
+    assert np.isclose(d, np.sqrt(2))
+    d = poly.distance_point_to_polygon(ptest7)
+    assert np.isclose(d, 3)
+
+    p0 = Point(1.0, 1.0, 0.0)
+    p1 = Point(0.0, 1.0, 0.0)
+    p2 = Point(0.0, 0.0, 1.0)
+    p3 = Point(1.0, 0.0, 1.0)
+    poly = Polygon(random_id(), [p0, p1, p2, p3])
+    ptest8 = Point(0.5, 1.0, 1.0)     # distance = np.sqrt(2) / 2
+
+    d = poly.distance_point_to_polygon(ptest8)
+    assert np.isclose(d, np.sqrt(2) / 2)
+
+
 def test_is_point_inside():
     # Test 1
     p1 = Point(1.0, 0.0, 0.0)
@@ -288,4 +330,4 @@ def test_copy():
 
 
 if __name__ == "__main__":
-    test_is_point_inside_ortho_projection()
+    test_distance_point_to_polygon()

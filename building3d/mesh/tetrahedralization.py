@@ -35,8 +35,9 @@ def delaunay_tetrahedralization(
         logger.debug(f"boundary vertifces for {name} = {len(boundary_vertices[name])}")
 
     vertices = []
+    boundary_pts = set()
 
-    min_volume = delta ** 3 / 50.0
+    min_volume = delta ** 3 / 1000.0
     logger.debug(f"Assuming tetrahedron min. volume = {min_volume}")
 
     # Collect meshes from the boundary polygons
@@ -48,6 +49,7 @@ def delaunay_tetrahedralization(
             for pt in polymesh_vertices:
                 if pt not in vertices:
                     vertices.append(pt)
+                    boundary_pts.add(pt)
     else:
         # Will take boundary vertices provided by the user
         for poly_name, poly_points in boundary_vertices.items():
@@ -55,6 +57,7 @@ def delaunay_tetrahedralization(
                 # Do not add duplicate points
                 if pt not in vertices:
                     vertices.append(pt)
+                    boundary_pts.add(pt)
 
     # Add new points inside the solid
     bbox_pmin, bbox_pmax = sld.bounding_box()
@@ -78,37 +81,73 @@ def delaunay_tetrahedralization(
                 pt = Point(x, y, z)
                 if sld.is_point_inside(pt):
                     if pt not in vertices:
-                        vertices.append(pt)
+                        far_enough_from_boundary = True
+                        for poly in sld.boundary:
+                            if poly.distance_point_to_polygon(pt) < delta / 2:
+                                far_enough_from_boundary = False
+                                break
+                        if far_enough_from_boundary is True:
+                            vertices.append(pt)
 
     # Tetrahedralization - first pass
     pts_arr = np.array([[p.x, p.y, p.z] for p in vertices])
-    logger.debug(f"Attempting Delaunay tetrahedralization on point array with shape {pts_arr.shape}")
 
-    tri = Delaunay(pts_arr, qhull_options="Qt", incremental=False)
-    tetrahedra = tri.simplices
+    logger.debug(f"Delaunay tetrahedralization (first pass) on point array with shape {pts_arr.shape}")
+    delaunay = Delaunay(pts_arr, qhull_options="Qt", incremental=False)
+    tetrahedra = delaunay.simplices
     logger.debug(f"Number of mesh tetrahedra in {sld.name} = {len(tetrahedra)}")
 
-    # Remove tetrahedra with zero volume
-    removed_el = []
-    for i, el in enumerate(tetrahedra):
-        p0 = vertices[el[0]]
-        p1 = vertices[el[1]]
-        p2 = vertices[el[2]]
-        p3 = vertices[el[3]]
-        vol = tetrahedron_volume(p0, p1, p2, p3)
-        if vol < min_volume:
-            logger.warning(f"Tetrahedron {i} has too low volume ({vol}) and will be removed.")
-            removed_el.append(i)
-    logger.debug(f"Number of tetrahedra to be removed due to small volume = {len(removed_el)}")
+    # Remove unused points and tetrahedra with small volume
+    unique_indices = np.unique(tetrahedra)
+    final_points = []
 
-    tetrahedra = [el for i, el in enumerate(tetrahedra) if i not in removed_el]
+    # BELOW CODE CREATES HIGHLY SKEWED TETRAHEDRA INSIDE THE SOLID
+    # logger.debug("Removing unused points and tetrahedra with small volume")
+    # pt_to_vol = {}  # Map point index to min. volume of attached elements
+    # for el in tetrahedra:
+    #     p0 = vertices[el[0]]
+    #     p1 = vertices[el[1]]
+    #     p2 = vertices[el[2]]
+    #     p3 = vertices[el[3]]
+    #     vol = tetrahedron_volume(p0, p1, p2, p3)
+    #     for i in range(4):
+    #         if el[i] not in pt_to_vol:
+    #             pt_to_vol[el[i]] = vol
+    #         elif vol < pt_to_vol[el[i]]:
+    #             pt_to_vol[el[i]] = vol
+    # for i, p in enumerate(vertices):
+    #     if i in unique_indices:
+    #         if pt_to_vol[i] > min_volume:
+    #             final_points.append(p)
+    #         elif p in boundary_pts:
+    #             logger.warning(
+    #                 f"Vertex {i} ({p}) of el. with vol={pt_to_vol[i]:.4f} "
+    #                 "can't be removed because it is at the boundary"
+    #             )
+    #             final_points.append(p)
+    # ... SO I DO NOT TAKE VOLUME INTO ACCOUNT:
+    for i, p in enumerate(vertices):
+        if i in unique_indices:
+            final_points.append(p)
 
-    # TODO: Reindexing vertices would be useful here, because not all may be used
-    pass
-    vertices, tetrahedra = collapse_points(vertices, tetrahedra)  # TODO: is it needed?
+    logger.debug(f"Number of final vertices to be used is {len(final_points)} out of {len(vertices)}")
+    vertices = final_points
+    pts_arr = np.array([[p.x, p.y, p.z] for p in vertices])
+
+    logger.debug(f"Delaunay tetrahedralization (second pass) on point array with shape {pts_arr.shape}")
+    delaunay = Delaunay(pts_arr, qhull_options="Qt", incremental=False)
+    tetrahedra = delaunay.simplices
+    logger.debug(f"Number of mesh tetrahedra in {sld.name} = {len(tetrahedra)}")
 
     unique_points = [vertices[i] for i in np.unique(np.array(tetrahedra))]
-    assert len(unique_points) == len(vertices), "Not all points used in tetrahedralization?"
+    logger.debug(f"Number of unique indices in {sld.name} = {len(unique_points)}")
+
+    vertices, tetrahedra = collapse_points(vertices, tetrahedra.tolist())  # TODO: is it needed?
+
+    if len(unique_points) > len(vertices):
+        raise MeshError("More point indices used in tetrahedra than available vertices")
+    elif len(unique_points) < len(vertices):
+        raise MeshError("Not all points used in tetrahedralization?")
 
     logger.debug(f"Number of tetrahedra in {sld.name} = {len(tetrahedra)}")
     logger.debug(

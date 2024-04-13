@@ -3,6 +3,7 @@ import numpy as np
 
 from .exceptions import GeometryError
 from .point import Point
+from .line import distance_point_to_edge
 from .vector import vector
 from .vector import length
 from .triangle import triangle_centroid
@@ -89,6 +90,35 @@ class Polygon:
         d = -1 * (a * p.x + b * p.y + c * p.z)
         return (a, b, c, d)
 
+    def distance_point_to_polygon(self, p: Point) -> float:
+        """Return distance of point to the polygon.
+
+        Note:
+            For points not laying inside the orthogonal
+            projection, the distance is calculated as the distance
+            to the closest polygon vertex.
+            TODO: Calculate distance to the nearest edge instead.
+        """
+        # Translate polygon's to the point p
+        _, _, _, d = self.plane_equation_coefficients()
+        _, _, _, dp = self.projection_coefficients(p)
+
+        # Distance
+        # Negative distance -> point behind the polygon
+        # Positive distance -> point in front of the polygon
+        dist = np.abs(d - dp)
+
+        if self.is_point_inside_ortho_projection(p):
+            return dist
+        else:
+            # Find the closest vertex
+            dist = np.inf
+            for v in self.points:
+                p_to_v = length(p.vector() - v.vector())
+                if  p_to_v < dist:
+                    dist = p_to_v
+            return dist
+
     def plane_normal_and_d(self) -> tuple[np.ndarray, float]:
         """Return the normal vector and coefficient d describing the plane."""
         _, _, _, d = self.plane_equation_coefficients()
@@ -117,6 +147,26 @@ class Polygon:
                 return True
 
         return False
+
+    def is_point_inside_margin(self, p: Point, margin: float) -> bool:
+        """Checks whether a point lies within a polygon's inline.
+
+        Args:
+            p: point to be checked
+            margin: distance from the boundary to the inline
+
+        Return:
+            check result (bool)
+        """
+        inside = self.is_point_inside(p)
+        if not inside:
+            return False
+        else:
+            for edge in self.edges:
+                d = distance_point_to_edge(p, edge[0], edge[1])
+                if d < margin:
+                    return False
+        return True
 
     def is_point_inside_ortho_projection(self, p: Point) -> bool:
         """Checks whether an orthogonally projected point hits the surface.
