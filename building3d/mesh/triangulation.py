@@ -13,6 +13,7 @@ from ..geom.vector import length
 from ..geom.vector import normal
 from ..geom.line import create_points_between_2_points
 from building3d.geom.triangle import triangle_area
+from building3d.geom.triangle import triangle_centroid
 from building3d import random_id
 from building3d.mesh.exceptions import MeshError
 from building3d.config import GEOM_EPSILON
@@ -170,6 +171,18 @@ def delaunay_triangulation(
         u=rotaxis,
         phi=-phi,
     )
+
+    # TODO: Delete faces which are outside the polygon (non-convex polygons)
+    faces_to_keep = []
+    for i, f in enumerate(faces):
+        p0 = new_points[f[0]]
+        p1 = new_points[f[1]]
+        p2 = new_points[f[2]]
+        c = triangle_centroid(p0, p1, p2)
+        if poly.is_point_inside(c):
+            faces_to_keep.append(f)
+
+    faces = faces_to_keep
 
     # edge_pts, _ = rotate_points_around_vector(
     #     edge_pts_2d,

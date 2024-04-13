@@ -49,6 +49,7 @@ make example
 - [x] Solid mesh min. volume can lead to a removal of boundary elements -> removed this logic
 - [x] Solid mesh vertices reindexing after element deletion due to low volume
 - [x] Solid mesh and polygon mesh
+- [x] PolyMesh does not work with non-convex polygons
 - [ ] PolyMesh should check if edge vertices are shared by at least 2 polygons (corners will be shared by >= 2)
 - [ ] Test solid mesh with multiple solid instances
 - [ ] Export to STL
