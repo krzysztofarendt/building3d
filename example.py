@@ -27,7 +27,7 @@ def example():
 
     room = Zone("room", [floor, wall0, wall1, wall2, wall3, roof])
 
-    mesh = Mesh(delta=2.0)
+    mesh = Mesh(delta=0.5)
     # Polygons do not need to be added manually, because
     # they are taken from the room zone
     mesh.add_polygon(floor)
@@ -41,6 +41,7 @@ def example():
     mesh.generate()
     mesh.polymesh.collapse_points()
     mesh.polymesh.mesh_statistics(show=True)
+    mesh.solidmesh.mesh_statistics(show=True)
 
     # Plot
     plot_zone(room, show_triangulation=True, show_normals=True, show=False)

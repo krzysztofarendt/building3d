@@ -1,3 +1,5 @@
+import logging
+
 from mayavi import mlab
 
 from building3d.mesh.exceptions import MeshError
@@ -5,10 +7,15 @@ from building3d.mesh.solidmesh import SolidMesh
 import building3d.display.colors as colors
 
 
+logger = logging.getLogger(__name__)
+
+
 def plot_solidmesh(
     mesh: SolidMesh,
     show: bool = False,
+    opacity: int = 1.0,
 ):
+    logger.debug(f"Starting plot_solidmesh() for {mesh}")
     # Plot tetrahedral wireframe
     # Vertices: a, b, c, d
     # Edges:
@@ -20,28 +27,26 @@ def plot_solidmesh(
     # 6. c -> d
     if len(mesh.solids) <= 0:
         raise MeshError("plot_mesh(..., interior=True, ...) but SolidMesh empty")
-    done_edges = []
-    done_vertices = set()
-    for i, el in enumerate(mesh.mesh_elements):
-        a = mesh.mesh_vertices[el[0]]
-        b = mesh.mesh_vertices[el[1]]
-        c = mesh.mesh_vertices[el[2]]
-        d = mesh.mesh_vertices[el[3]]
-        edges = [(a, b), (b, c), (c, a), (a, d), (d, b), (c, d)]
-        for pair in edges:
-            if set(pair) not in done_edges:
-                x = [p.x for p in pair]
-                y = [p.y for p in pair]
-                z = [p.z for p in pair]
-                _ = mlab.plot3d(x, y, z, line_width=0.1)
-                for xi, yi, zi in zip(x, y, z):
-                    if (xi, yi, zi) not in done_vertices:
-                        _ = mlab.points3d(xi, yi, zi, color=colors.RGB_BLUE, scale_factor=0.2)
-                        done_vertices.add((xi, yi, zi))
 
-                done_edges.append(set(pair))
-        print(f"\r{100.0 * (i + 1) / len(mesh.mesh_elements):.0f}%", end="")
-    print()
+    tri = []
+    x = [p.x for p in mesh.vertices]
+    y = [p.y for p in mesh.vertices]
+    z = [p.z for p in mesh.vertices]
+    for el in mesh.elements:
+        tri.append([el[0], el[1], el[2]])
+        tri.append([el[0], el[1], el[3]])
+        tri.append([el[1], el[2], el[3]])
+        tri.append([el[0], el[2], el[3]])
+
+    _ = mlab.triangular_mesh(
+        x, y, z, tri,
+        opacity=opacity,
+        line_width=1.0,
+        color=colors.RGB_WHITE,
+        representation="mesh",
+    )
+
+    logger.debug(f"Finished plot_solidmesh() for {mesh}")
 
     if show:
         mlab.show()
