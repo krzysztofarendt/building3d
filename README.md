@@ -47,6 +47,7 @@ make example
 - [x] Solid mesh statistics
 - [ ] Solid mesh min. volume can lead to a removal of boundary elements
 - [ ] Solid mesh vertices reindexing after element deletion due to low volume
+- [ ] Solid mesh and polygon mesh
 - [ ] Test solid mesh with multiple solid instances
 - [ ] Export to STL
 - [ ] Polygon mesh faces should match solid mesh faces at the boundary

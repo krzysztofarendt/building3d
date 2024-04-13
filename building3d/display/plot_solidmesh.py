@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 def plot_solidmesh(
     mesh: SolidMesh,
     show: bool = False,
-    opacity: int = 1.0,
+    opacity: float = 1.0,
 ):
     logger.debug(f"Starting plot_solidmesh() for {mesh}")
     # Plot tetrahedral wireframe
