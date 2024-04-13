@@ -15,16 +15,9 @@ def plot_solidmesh(
     show: bool = False,
     opacity: float = 1.0,
 ):
+    """Plot tetrahedral wireframe.
+    """
     logger.debug(f"Starting plot_solidmesh() for {mesh}")
-    # Plot tetrahedral wireframe
-    # Vertices: a, b, c, d
-    # Edges:
-    # 1. a -> b
-    # 2. b -> c
-    # 3. c -> a
-    # 4. a -> d
-    # 5. d -> b
-    # 6. c -> d
     if len(mesh.solids) <= 0:
         raise MeshError("plot_mesh(..., interior=True, ...) but SolidMesh empty")
 
