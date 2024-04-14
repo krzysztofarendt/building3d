@@ -1,8 +1,12 @@
 """Various functions related to vectors"""
+import logging
 
 import numpy as np
 
 from .point import Point
+
+
+logger = logging.getLogger(__name__)
 
 
 def vector(p1: Point, p2: Point) -> np.ndarray:
@@ -15,7 +19,11 @@ def length(v: np.ndarray) -> float:
 
 def normal(p0: Point, p1: Point, p2: Point) -> np.ndarray:
     n = np.cross(p1.vector() - p0.vector(), p2.vector() - p0.vector())
-    n /= np.linalg.norm(n)
+    len_n = np.linalg.norm(n)
+    if len_n == 0:
+        logger.warning(f"Normal vector with length 0: {n}")
+        return n
+    n /= len_n
     return n
 
 

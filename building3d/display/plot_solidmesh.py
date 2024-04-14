@@ -34,7 +34,7 @@ def plot_solidmesh(
     _ = mlab.triangular_mesh(
         x, y, z, tri,
         opacity=opacity,
-        line_width=1.0,
+        line_width=0.3,
         color=colors.RGB_WHITE,
         representation="mesh",
     )

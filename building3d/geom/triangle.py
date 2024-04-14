@@ -7,8 +7,13 @@ from .vector import length
 from .vector import is_point_colinear
 from .exceptions import GeometryError
 from building3d.config import GEOM_EPSILON
+from building3d.config import POINT_NUM_DEC
+from building3d.config import MESH_DELTA
 
 
+def minimum_triangle_area(delta: float = MESH_DELTA) -> float:
+    """Calculate min. face area for PolyMesh quality assurance."""
+    return delta ** 2 / 10.0
 
 
 def triangle_area(p1: Point, p2: Point, p3: Point) -> float:
@@ -77,13 +82,16 @@ def is_point_inside(ptest: Point, p1: Point, p2: Point, p3: Point) -> bool:
     for pair in [(p1, p2), (p2, p3), (p3, p1)]:
         if is_point_colinear(pair[0], pair[1], ptest):
             # Is colinear, but is it on the edge or outside the triangle?
+            x = np.round(ptest.x, POINT_NUM_DEC)
+            y = np.round(ptest.y, POINT_NUM_DEC)
+            z = np.round(ptest.z, POINT_NUM_DEC)
             if (
-                ptest.x > max(pair[0].x, pair[1].x) or \
-                ptest.y > max(pair[0].y, pair[1].y) or \
-                ptest.z > max(pair[0].z, pair[1].z) or \
-                ptest.x < min(pair[0].x, pair[1].x) or \
-                ptest.y < min(pair[0].y, pair[1].y) or \
-                ptest.z < min(pair[0].z, pair[1].z)
+                x > np.round(max(pair[0].x, pair[1].x), POINT_NUM_DEC) or \
+                y > np.round(max(pair[0].y, pair[1].y), POINT_NUM_DEC) or \
+                z > np.round(max(pair[0].z, pair[1].z), POINT_NUM_DEC) or \
+                x < np.round(min(pair[0].x, pair[1].x), POINT_NUM_DEC) or \
+                y < np.round(min(pair[0].y, pair[1].y), POINT_NUM_DEC) or \
+                z < np.round(min(pair[0].z, pair[1].z), POINT_NUM_DEC)
             ):
                 return False
             else:

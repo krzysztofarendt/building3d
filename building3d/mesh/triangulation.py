@@ -5,17 +5,22 @@ import numpy as np
 from scipy.spatial import Delaunay
 
 import building3d.geom.polygon as polygon  # Needed to break circular import
-from ..geom.exceptions import GeometryError
-from ..geom.point import Point
-from ..geom.rotate import rotate_points_to_plane
-from ..geom.rotate import rotate_points_around_vector
-from ..geom.vector import length
-from ..geom.vector import normal
-from ..geom.line import create_points_between_2_points
+from building3d.geom.exceptions import GeometryError
+from building3d.geom.point import Point
+from building3d.geom.rotate import rotate_points_to_plane
+from building3d.geom.rotate import rotate_points_around_vector
+from building3d.geom.vector import length
+from building3d.geom.vector import normal
+from building3d.geom.line import create_points_between_2_points
 from building3d.geom.triangle import triangle_area
+from building3d.geom.triangle import triangle_centroid
+from building3d.geom.triangle import minimum_triangle_area
 from building3d import random_id
 from building3d.mesh.exceptions import MeshError
 from building3d.config import GEOM_EPSILON
+from building3d.config import MESH_JOGGLE
+from building3d.config import MESH_DELTA
+from building3d import random_within
 
 
 logger = logging.getLogger(__name__)
@@ -23,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 def delaunay_triangulation(
     poly: polygon.Polygon,
-    delta: float = 0.5,
+    delta: float = MESH_DELTA,
     init_vertices: list[Point] = [],
 ) -> tuple[list[Point], list[list[int]]]:
     """Delaunay triangulation of a polygon.
@@ -47,7 +52,7 @@ def delaunay_triangulation(
     logger.debug(f"{delta=}")
     logger.debug(f"{len(init_vertices)=}")
 
-    min_area = delta ** 2 / 10.0
+    min_area = minimum_triangle_area(delta)
     logger.debug(f"Choosing min. face area -> {min_area}")
 
     # Placeholder for points on the edges of the polygon
@@ -99,9 +104,8 @@ def delaunay_triangulation(
             pt1 = new_points_2d[cur]
             pt2 = new_points_2d[nxt]
             logger.debug(f"Edge between points {pt1} and {pt2}")
-
             edge_len = length(pt2.vector() - pt1.vector())
-            num_segments = int(edge_len // delta)
+            num_segments = int(edge_len // (delta + GEOM_EPSILON))
             new_pts = create_points_between_2_points(pt1, pt2, num_segments)
             edge_pts_2d.extend(new_pts)
 
@@ -119,8 +123,12 @@ def delaunay_triangulation(
         ygrid = np.arange(ymin + delta, ymax, delta)
         for x in xgrid:
             for y in ygrid:
-                pt = Point(x, y, z)
-                if poly_2d.is_point_inside(pt):
+                pt = Point(
+                    x + random_within(MESH_JOGGLE),
+                    y + random_within(MESH_JOGGLE),
+                    z,
+                )
+                if poly_2d.is_point_inside_margin(pt, margin=delta/2):
                     new_points_2d.append(pt)
 
     # Triangulation - first pass
@@ -152,12 +160,13 @@ def delaunay_triangulation(
             if pt_to_area[i] > min_area or new_points_2d[i] in edge_pts_2d:
                 final_points_2d.append(p)
 
-    # Triangulation - second pass (TODO: can it be done in a single pass?)
+    # Triangulation - second pass
     logger.debug("Triangulation - second pass")
 
     pts_arr = np.array([[p.x, p.y] for p in final_points_2d])
     tri = Delaunay(pts_arr, incremental=False)
     triangles = tri.simplices
+    convex_hull = np.unique(tri.convex_hull).tolist()
 
     logger.debug(f"{len(triangles)=}")
     assert len(np.unique(triangles)) == len(final_points_2d)
@@ -170,6 +179,28 @@ def delaunay_triangulation(
         u=rotaxis,
         phi=-phi,
     )
+
+    # Delete faces which are outside the polygon (non-convex polygons)
+    faces_to_keep = []
+    for i, f in enumerate(faces):
+        p0 = new_points[f[0]]
+        p1 = new_points[f[1]]
+        p2 = new_points[f[2]]
+        c = triangle_centroid(p0, p1, p2)
+        if poly.is_point_inside(c):
+            faces_to_keep.append(f)
+        else:
+            logger.warning(
+                f"Face {i} (vertex indices {f}, centroid {c}) is outside {poly} "
+                "and will be removed"
+            )
+    faces = faces_to_keep
+
+    # edge_pts, _ = rotate_points_around_vector(
+    #     edge_pts_2d,
+    #     u=rotaxis,
+    #     phi=-phi,
+    # )
 
     # Fix surface normal direction
     def face_normal(face_num):

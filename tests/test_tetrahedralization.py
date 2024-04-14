@@ -9,6 +9,7 @@ from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
 from building3d.mesh.tetrahedralization import delaunay_tetrahedralization
 from building3d.mesh.triangulation import delaunay_triangulation
+from building3d.geom.plane import are_points_coplanar
 
 
 def test_tetrahedralization():
@@ -106,8 +107,14 @@ def test_tetrahedralization():
         p2 = vertices[el[2]]
         p3 = vertices[el[3]]
         vol = tetrahedron_volume(p0, p1, p2, p3)
-        min_volume = delta**3 / 50.0
+        ref_volume = tetrahedron_volume(
+            Point(0.0, 0.0, 0.0),
+            Point(delta, 0.0, 0.0),
+            Point(0.0, delta, 0.0),
+            Point(0.0, 0.0, delta),
+        )
+        min_volume = ref_volume / 50.
         assert vol > min_volume, f"Volume[{i}]={vol} < minimum ({min_volume})"
 
-    # Assert tetrahedra vertices are not coplanar
-    pass
+        # Assert tetrahedra vertices are not coplanar
+        assert not are_points_coplanar(p0, p1, p2, p3)
