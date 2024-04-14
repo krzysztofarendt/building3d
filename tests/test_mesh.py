@@ -1,5 +1,7 @@
 from building3d import random_id
 from building3d.geom.point import Point
+from building3d.geom.tetrahedron import minimum_tetra_volume
+from building3d.geom.triangle import minimum_triangle_area
 from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
 from building3d.mesh.mesh import Mesh
@@ -23,22 +25,23 @@ def test_mesh():
     roof = Wall(random_id(), [p4, p5, p6, p7])
 
     zone = Zone(random_id(), [floor, wall0, wall1, wall2, wall3, roof])
-
     delta = 0.5
-    mesh = Mesh(delta)
-    mesh.add_polygon(floor)
-    mesh.add_polygon(wall0)
-    mesh.add_polygon(wall1)
-    mesh.add_polygon(wall2)
-    mesh.add_polygon(wall3)
-    mesh.add_polygon(roof)
-    mesh.add_solid(zone)
-    mesh.generate()
+    num_tests = 10
 
-    solidmesh_stats = mesh.solidmesh.mesh_statistics()
-    min_vol = delta**3 / 50.0
-    assert solidmesh_stats["min_tetrahedron_volume"] > min_vol
+    for _ in range(num_tests):
+        # Need to repeat this test multiple times, because mesh generation is random
+        mesh = Mesh(delta)
+        mesh.add_polygon(floor)
+        mesh.add_polygon(wall0)
+        mesh.add_polygon(wall1)
+        mesh.add_polygon(wall2)
+        mesh.add_polygon(wall3)
+        mesh.add_polygon(roof)
+        mesh.add_solid(zone)
+        mesh.generate()
 
-    polymesh_stats = mesh.polymesh.mesh_statistics()
-    min_area = delta**2 / 10.0
-    assert polymesh_stats["min_face_area"] > min_area
+        solidmesh_stats = mesh.solidmesh.mesh_statistics()
+        assert solidmesh_stats["min_tetrahedron_volume"] > minimum_tetra_volume(delta)
+
+        polymesh_stats = mesh.polymesh.mesh_statistics()
+        assert polymesh_stats["min_face_area"] > minimum_triangle_area(delta)

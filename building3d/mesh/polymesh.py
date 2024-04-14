@@ -5,6 +5,7 @@ import numpy as np
 
 import building3d.geom.solid
 import building3d.logger
+from building3d.geom.collapse_points import collapse_points
 import building3d.geom.polygon
 from building3d.geom.point import Point
 from building3d.geom.triangle import triangle_area
@@ -137,51 +138,5 @@ class PolyMesh:
             face_owners = [poly_name for _ in faces]
             self.face_owners.extend(face_owners)
 
-    def collapse_points(self):
-        """Merge overlapping points.
-
-        Checks if there are points which are equal to one another.
-        Point equality is defined in the Point class. In general,
-        points are equal if the difference between their coordinates is below
-        the defined epsilon.
-
-        Subsequently, overlapping points are merged.
-
-        Overlapping points typically exist on the edges of adjacent polygons,
-        because the polygon meshes are generated independently.
-        """
-        logger.debug("Collapsing points")
-        logger.debug(f"Number of points before collapsing: {len(self.vertices)}")
-
-        # Identify identical points
-        same_points = {}
-        for i, p in enumerate(self.vertices):
-            if p in same_points.keys():
-                same_points[p].append(i)
-            else:
-                same_points[p] = [i]
-
-        # Merge same points
-        for_deletion = set()
-
-        for i in range(len(self.vertices)):
-            p = self.vertices[i]
-            p_to_keep = same_points[p][0]
-            for j in range(1, len(same_points[p])):
-                p_to_delete = same_points[p][j]
-                for_deletion.add(p_to_delete)
-
-                # Replace point to be deleted with the one to keep in each face
-                for k in range(len(self.faces)):
-                    if p_to_delete in self.faces[k]:
-                        self.faces[k] = \
-                            [x if x != p_to_delete else p_to_keep for x in self.faces[k]]
-
-        # Reindex
-        for_deletion = sorted(list(for_deletion), reverse=True)
-        for p_to_delete in for_deletion:
-            for k in range(len(self.faces)):
-                self.faces[k] = [x - 1 if x > p_to_delete else x for x in self.faces[k]]
-            self.vertices.pop(p_to_delete)
-
-        logger.debug(f"Number of points after collapsing: {len(self.vertices)}")
+        # TODO: info about ownership would be lost during collapsing points
+        # self.vertices, self.faces = collapse_points(self.vertices, self.faces)

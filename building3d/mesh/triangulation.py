@@ -14,6 +14,7 @@ from building3d.geom.vector import normal
 from building3d.geom.line import create_points_between_2_points
 from building3d.geom.triangle import triangle_area
 from building3d.geom.triangle import triangle_centroid
+from building3d.geom.triangle import minimum_triangle_area
 from building3d import random_id
 from building3d.mesh.exceptions import MeshError
 from building3d.config import GEOM_EPSILON
@@ -51,7 +52,7 @@ def delaunay_triangulation(
     logger.debug(f"{delta=}")
     logger.debug(f"{len(init_vertices)=}")
 
-    min_area = delta ** 2 / 10.0
+    min_area = minimum_triangle_area(delta)
     logger.debug(f"Choosing min. face area -> {min_area}")
 
     # Placeholder for points on the edges of the polygon

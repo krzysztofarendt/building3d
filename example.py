@@ -4,6 +4,7 @@ from building3d.geom.point import Point
 from building3d.geom.zone import Zone
 from building3d.geom.wall import Wall
 from building3d.mesh.mesh import Mesh
+from building3d.geom.tetrahedron import minimum_tetra_volume
 
 
 def example():
@@ -39,10 +40,8 @@ def example():
     mesh.add_solid(room)
 
     mesh.generate()
-    mesh.polymesh.collapse_points()
     mesh.polymesh.mesh_statistics(show=True)
     mesh.solidmesh.mesh_statistics(show=True)
-    # mesh.solidmesh = mesh.solidmesh.copy(max_vol=0.01)
 
     # Plot
     plot_zone(room, show_triangulation=True, show_normals=True, show=False)

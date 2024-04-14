@@ -113,9 +113,3 @@ class SolidMesh:
             mesh.volumes = self.volumes
 
         return mesh
-
-    def collapse_points(self):  # TODO
-        """Merge overlapping points (between solids).
-        """
-        pass
-

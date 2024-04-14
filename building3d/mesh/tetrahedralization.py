@@ -8,6 +8,8 @@ from building3d.geom.exceptions import GeometryError
 from building3d.geom.point import Point
 from building3d.geom.solid import Solid
 from building3d.geom.tetrahedron import tetrahedron_volume
+from building3d.geom.tetrahedron import minimum_tetra_volume
+from building3d.geom.collapse_points import collapse_points
 from building3d.mesh.triangulation import delaunay_triangulation
 from building3d import random_within
 from building3d.config import MESH_JOGGLE
@@ -41,13 +43,7 @@ def delaunay_tetrahedralization(
     vertices = []
     boundary_pts = set()
 
-    ref_volume = tetrahedron_volume(
-        Point(0.0, 0.0, 0.0),
-        Point(delta, 0.0, 0.0),
-        Point(0.0, delta, 0.0),
-        Point(0.0, 0.0, delta),
-    )
-    min_volume = ref_volume / 50.
+    min_volume = minimum_tetra_volume(delta)
     logger.debug(f"Assuming tetrahedron min. volume = {min_volume}")
 
     # Collect meshes from the boundary polygons
@@ -177,46 +173,3 @@ def delaunay_tetrahedralization(
         "Number of vertices is different than max index used in tetrahedra"
 
     return vertices, tetrahedra
-
-
-def collapse_points(
-        vertices: list[Point], elements: list[list[int]]
-) -> tuple[list[Point], list[list[int]]]:
-    """Merge overlapping points.
-    """
-    logger.debug("Collapsing points of tetrahedra")
-    logger.debug(f"Number of points before collapsing: {len(vertices)}")
-
-    # Identify identical points
-    same_points = {}
-    for i, p in enumerate(vertices):
-        if p in same_points.keys():
-            same_points[p].append(i)
-        else:
-            same_points[p] = [i]
-
-    # Merge same points
-    for_deletion = set()
-
-    for i in range(len(vertices)):
-        p = vertices[i]
-        p_to_keep = same_points[p][0]
-        for j in range(1, len(same_points[p])):
-            p_to_delete = same_points[p][j]
-            for_deletion.add(p_to_delete)
-
-            # Replace point to be deleted with the one to keep in each face
-            for k in range(len(elements)):
-                if p_to_delete in elements[k]:
-                    elements[k] = \
-                        [x if x != p_to_delete else p_to_keep for x in elements[k]]
-
-    # Reindex
-    for_deletion = sorted(list(for_deletion), reverse=True)
-    for p_to_delete in for_deletion:
-        for k in range(len(elements)):
-            elements[k] = [x - 1 if x > p_to_delete else x for x in elements[k]]
-        vertices.pop(p_to_delete)
-
-    logger.debug(f"Number of points after collapsing: {len(vertices)}")
-    return vertices, elements

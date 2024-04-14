@@ -50,12 +50,12 @@ make example
 - [x] Solid mesh vertices reindexing after element deletion due to low volume
 - [x] Solid mesh and polygon mesh
 - [x] PolyMesh does not work with non-convex polygons
-- [ ] Polygon mesh faces should match solid mesh faces at the boundary -> done with joggling
-- [ ] PolyMesh should check if edge vertices are shared by at least 2 polygons (corners will be shared by >= 2)
+- [x] Polygon mesh faces should match solid mesh faces at the boundary -> done with joggling
+- [x] PolyMesh should check if edge vertices are shared by at least 2 polygons (corners will be shared by >= 2) -> not sure if it's needed
+- [x] Add logger
+- [ ] Calculate solid volume
 - [ ] Test solid mesh with multiple solid instances
 - [ ] Export to STL
-- [ ] Add logger
-- [ ] Calculate solid volume
 - [ ] Accurate center of weight for Solid
 - [ ] Wall could be a collection of Polygons instead of a Polygon subclass
 - [ ] Zone could be a collection of Solids instead of a Solid subclass
