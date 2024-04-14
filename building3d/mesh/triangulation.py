@@ -172,7 +172,7 @@ def delaunay_triangulation(
         phi=-phi,
     )
 
-    # TODO: Delete faces which are outside the polygon (non-convex polygons)
+    # Delete faces which are outside the polygon (non-convex polygons)
     faces_to_keep = []
     for i, f in enumerate(faces):
         p0 = new_points[f[0]]
@@ -181,6 +181,8 @@ def delaunay_triangulation(
         c = triangle_centroid(p0, p1, p2)
         if poly.is_point_inside(c):
             faces_to_keep.append(f)
+        else:
+            logger.warning(f"Face {i} (vertex indices {f}) is outside {poly.name} and will be removed")
 
     faces = faces_to_keep
 
