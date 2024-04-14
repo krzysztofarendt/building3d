@@ -182,8 +182,10 @@ def delaunay_triangulation(
         if poly.is_point_inside(c):
             faces_to_keep.append(f)
         else:
-            logger.warning(f"Face {i} (vertex indices {f}) is outside {poly.name} and will be removed")
-
+            logger.warning(
+                f"Face {i} (vertex indices {f}, centroid {c}) is outside {poly} "
+                "and will be removed"
+            )
     faces = faces_to_keep
 
     # edge_pts, _ = rotate_points_around_vector(
