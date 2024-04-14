@@ -6,12 +6,13 @@ import building3d.geom.solid
 import building3d.geom.polygon
 from building3d.geom.tetrahedron import tetrahedron_volume
 from building3d.geom.point import Point
-from .tetrahedralization import delaunay_tetrahedralization
+from building3d.mesh.tetrahedralization import delaunay_tetrahedralization
+from building3d.config import MESH_DELTA
 
 
 class SolidMesh:
 
-    def __init__(self, delta: float = 0.5):
+    def __init__(self, delta: float = MESH_DELTA):
         # Mesh settings
         self.delta = delta
 
@@ -23,6 +24,7 @@ class SolidMesh:
         self.vertex_owners = []  # solid names
         self.elements = []
         self.element_owners = []  # solid names
+        self.volumes = []
 
     def add_solid(self, sld: building3d.geom.solid.Solid):
         """Add solid instance to the list of solids for this mesh.
@@ -37,24 +39,10 @@ class SolidMesh:
         stats = {
             "num_of_vertices": len(self.vertices),
             "num_of_tetrahedra": len(self.elements),
-            "max_tetrahedron_volume": 0,
-            "avg_tetrahedron_volume": 0,
-            "min_tetrahedron_volume": np.inf,
+            "max_tetrahedron_volume": max(self.volumes),
+            "avg_tetrahedron_volume": np.mean(self.volumes),
+            "min_tetrahedron_volume": min(self.volumes),
         }
-
-        for tetra in self.elements:
-            p0 = self.vertices[tetra[0]]
-            p1 = self.vertices[tetra[1]]
-            p2 = self.vertices[tetra[2]]
-            p3 = self.vertices[tetra[3]]
-            vol = tetrahedron_volume(p0, p1, p2, p3)
-            if vol > stats["max_tetrahedron_volume"]:
-                stats["max_tetrahedron_volume"] = vol
-            elif vol < stats["min_tetrahedron_volume"]:
-                stats["min_tetrahedron_volume"] = vol
-            stats["avg_tetrahedron_volume"] += vol
-
-        stats["avg_tetrahedron_volume"] /= stats["num_of_tetrahedra"]
 
         if show is True:
             print("SolidMesh statistics:")
@@ -81,6 +69,50 @@ class SolidMesh:
             self.elements.extend(tetrahedra)
             self.element_owners.extend([sld_name for _ in tetrahedra])
 
+        # Calculate volumes
+        for el in self.elements:
+            p0 = self.vertices[el[0]]
+            p1 = self.vertices[el[1]]
+            p2 = self.vertices[el[2]]
+            p3 = self.vertices[el[3]]
+            vol = tetrahedron_volume(p0, p1, p2, p3)
+            self.volumes.append(vol)
+
+    def copy(self,
+             elements: None | list = None,
+             max_vol: None | float = None,
+    ) -> SolidMesh:
+        """Create a filtered copy of itself."""
+        mesh = SolidMesh(delta=self.delta)
+        mesh.solids = self.solids
+
+        if elements is not None:
+            # Filtered copy
+            # TODO: Reorder vertices, because now all of them are copied even if they are not in `elements`
+            mesh.vertices = self.vertices
+            mesh.vertex_owners = self.vertex_owners
+            mesh.elements = elements
+            mesh.element_owners = [owner for i, owner in enumerate(self.elements_owners) if i in elements]
+            mesh.volumes = [vol for i, vol in enumerate(self.volumes) if i in elements]
+        elif max_vol is not None:
+            # Filtered copy
+            # TODO: Reorder vertices, because now all of them are copied even if they are not in `elements`
+            mesh.vertices = self.vertices
+            mesh.vertex_owners = self.vertex_owners
+            mesh.elements = [el for el, vol in zip(self.elements, self.volumes) if vol < max_vol]
+            mesh.element_owners = [
+                own for own, vol in zip(self.element_owners, self.volumes) if vol < max_vol
+            ]
+            mesh.volumes = [vol for vol in self.volumes if vol < max_vol]
+        else:
+            # Full copy
+            mesh.vertices = self.vertices
+            mesh.vertex_owners = self.vertex_owners
+            mesh.elements = self.elements
+            mesh.element_owners = self.element_owners
+            mesh.volumes = self.volumes
+
+        return mesh
 
     def collapse_points(self):  # TODO
         """Merge overlapping points (between solids).

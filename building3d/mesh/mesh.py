@@ -5,11 +5,12 @@ import building3d.geom.polygon
 import building3d.geom.point
 from building3d.mesh.polymesh import PolyMesh
 from building3d.mesh.solidmesh import SolidMesh
+from building3d.config import MESH_DELTA
 
 
 class Mesh:
 
-    def __init__(self, delta: float = 0.5):
+    def __init__(self, delta: float = MESH_DELTA):
         # Mesh settings
         self.delta = delta
 

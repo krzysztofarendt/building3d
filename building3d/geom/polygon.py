@@ -337,6 +337,7 @@ class Polygon:
         return abs(result / 2)
 
     def _are_points_coplanar(self) -> bool:
+        # TODO: use building3d.geom.plane.are_points_coplanar()
         vec_n = self.normal
 
         # Plane equation:

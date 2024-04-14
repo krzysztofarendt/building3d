@@ -10,15 +10,15 @@ from building3d.geom.point import Point
 from building3d.geom.triangle import triangle_area
 from building3d.geom.vector import length
 from building3d.geom.vector import vector
-from building3d.mesh.exceptions import MeshError
-from .triangulation import delaunay_triangulation
+from building3d.mesh.triangulation import delaunay_triangulation
+from building3d.config import MESH_DELTA
 
 
 logger = logging.getLogger(__name__)
 
 
 class PolyMesh:
-    def __init__(self, delta: float = 0.5):
+    def __init__(self, delta: float = MESH_DELTA):
         logger.debug(f"PolyMesh(delta={delta})")
 
         # Mesh settings

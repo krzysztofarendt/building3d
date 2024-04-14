@@ -5,18 +5,21 @@ import numpy as np
 from scipy.spatial import Delaunay
 
 import building3d.geom.polygon as polygon  # Needed to break circular import
-from ..geom.exceptions import GeometryError
-from ..geom.point import Point
-from ..geom.rotate import rotate_points_to_plane
-from ..geom.rotate import rotate_points_around_vector
-from ..geom.vector import length
-from ..geom.vector import normal
-from ..geom.line import create_points_between_2_points
+from building3d.geom.exceptions import GeometryError
+from building3d.geom.point import Point
+from building3d.geom.rotate import rotate_points_to_plane
+from building3d.geom.rotate import rotate_points_around_vector
+from building3d.geom.vector import length
+from building3d.geom.vector import normal
+from building3d.geom.line import create_points_between_2_points
 from building3d.geom.triangle import triangle_area
 from building3d.geom.triangle import triangle_centroid
 from building3d import random_id
 from building3d.mesh.exceptions import MeshError
 from building3d.config import GEOM_EPSILON
+from building3d.config import MESH_JOGGLE
+from building3d.config import MESH_DELTA
+from building3d import random_within
 
 
 logger = logging.getLogger(__name__)
@@ -24,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 def delaunay_triangulation(
     poly: polygon.Polygon,
-    delta: float = 0.5,
+    delta: float = MESH_DELTA,
     init_vertices: list[Point] = [],
 ) -> tuple[list[Point], list[list[int]]]:
     """Delaunay triangulation of a polygon.
@@ -119,7 +122,11 @@ def delaunay_triangulation(
         ygrid = np.arange(ymin + delta, ymax, delta)
         for x in xgrid:
             for y in ygrid:
-                pt = Point(x, y, z)
+                pt = Point(
+                    x + random_within(MESH_JOGGLE),
+                    y + random_within(MESH_JOGGLE),
+                    z,
+                )
                 if poly_2d.is_point_inside_margin(pt, margin=delta/2):
                     new_points_2d.append(pt)
 

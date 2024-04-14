@@ -4,12 +4,16 @@ import logging
 import numpy as np
 from scipy.spatial import Delaunay
 
-from ..geom.exceptions import GeometryError
-from ..geom.point import Point
-from ..geom.solid import Solid
-from ..geom.tetrahedron import tetrahedron_volume
-from building3d.mesh.exceptions import MeshError
+from building3d.geom.exceptions import GeometryError
+from building3d.geom.point import Point
+from building3d.geom.solid import Solid
+from building3d.geom.tetrahedron import tetrahedron_volume
 from building3d.mesh.triangulation import delaunay_triangulation
+from building3d import random_within
+from building3d.config import MESH_JOGGLE
+from building3d.config import MESH_DELTA
+from building3d.geom.plane import are_points_coplanar
+
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +21,7 @@ logger = logging.getLogger(__name__)
 def delaunay_tetrahedralization(
     sld: Solid,
     boundary_vertices: dict[str, list[Point]],
-    delta: float = 0.5,
+    delta: float = MESH_DELTA,
 ) -> tuple[list[Point], list[list[int]]]:
     """Delaunay tetrahedralization of a solid.
 
@@ -37,13 +41,19 @@ def delaunay_tetrahedralization(
     vertices = []
     boundary_pts = set()
 
-    min_volume = delta ** 3 / 1000.0
+    ref_volume = tetrahedron_volume(
+        Point(0.0, 0.0, 0.0),
+        Point(delta, 0.0, 0.0),
+        Point(0.0, delta, 0.0),
+        Point(0.0, 0.0, delta),
+    )
+    min_volume = ref_volume / 50.
     logger.debug(f"Assuming tetrahedron min. volume = {min_volume}")
 
     # Collect meshes from the boundary polygons
     # -> boundary_vertices, boundary_faces
     if len(boundary_vertices.keys()) == 0:
-        # Need to create boundary mesh to get vertices at the surrounding polygons
+        logger.debug("Need to create boundary mesh to get vertices at the surrounding polygons")
         for poly in sld.boundary:
             polymesh_vertices, _ = delaunay_triangulation(poly, delta=delta)
             for pt in polymesh_vertices:
@@ -51,7 +61,7 @@ def delaunay_tetrahedralization(
                     vertices.append(pt)
                     boundary_pts.add(pt)
     else:
-        # Will take boundary vertices provided by the user
+        logger.debug("Will take boundary vertices provided by the user")
         for poly_name, poly_points in boundary_vertices.items():
             for pt in poly_points:
                 # Do not add duplicate points
@@ -59,7 +69,7 @@ def delaunay_tetrahedralization(
                     vertices.append(pt)
                     boundary_pts.add(pt)
 
-    # Add new points inside the solid
+    logger.debug("Add new points inside the solid")
     bbox_pmin, bbox_pmax = sld.bounding_box()
     xmin = bbox_pmin.x
     ymin = bbox_pmin.y
@@ -78,7 +88,12 @@ def delaunay_tetrahedralization(
     for x in xgrid:
         for y in ygrid:
             for z in zgrid:
-                pt = Point(x, y, z)
+                pt = Point(
+                    x + random_within(MESH_JOGGLE),
+                    y + random_within(MESH_JOGGLE),
+                    z + random_within(MESH_JOGGLE),
+                )
+                # TODO: Below code is very slow -> need to optimize
                 if sld.is_point_inside(pt):
                     if pt not in vertices:
                         far_enough_from_boundary = True
@@ -89,76 +104,61 @@ def delaunay_tetrahedralization(
                         if far_enough_from_boundary is True:
                             vertices.append(pt)
 
-    # Tetrahedralization - first pass
+    # Delaunary - first pass
     pts_arr = np.array([[p.x, p.y, p.z] for p in vertices])
-
     logger.debug(f"Delaunay tetrahedralization (first pass) on point array with shape {pts_arr.shape}")
     delaunay = Delaunay(pts_arr, qhull_options="Qt", incremental=False)
     tetrahedra = delaunay.simplices
-    logger.debug(f"Number of mesh tetrahedra in {sld.name} = {len(tetrahedra)}")
+    logger.debug(f"Number of resulting mesh tetrahedra in {sld.name} = {len(tetrahedra)}")
 
     # Remove unused points and tetrahedra with small volume
     unique_indices = np.unique(tetrahedra)
     final_points = []
 
-    # BELOW CODE CREATES HIGHLY SKEWED TETRAHEDRA INSIDE THE SOLID
-    # logger.debug("Removing unused points and tetrahedra with small volume")
-    # pt_to_vol = {}  # Map point index to min. volume of attached elements
-    # for el in tetrahedra:
-    #     p0 = vertices[el[0]]
-    #     p1 = vertices[el[1]]
-    #     p2 = vertices[el[2]]
-    #     p3 = vertices[el[3]]
-    #     vol = tetrahedron_volume(p0, p1, p2, p3)
-    #     for i in range(4):
-    #         if el[i] not in pt_to_vol:
-    #             pt_to_vol[el[i]] = vol
-    #         elif vol < pt_to_vol[el[i]]:
-    #             pt_to_vol[el[i]] = vol
-    # for i, p in enumerate(vertices):
-    #     if i in unique_indices:
-    #         if pt_to_vol[i] > min_volume:
-    #             final_points.append(p)
-    #         elif p in boundary_pts:
-    #             logger.warning(
-    #                 f"Vertex {i} ({p}) of el. with vol={pt_to_vol[i]:.4f} "
-    #                 "can't be removed because it is at the boundary"
-    #             )
-    #             final_points.append(p)
-    # ... SO I DO NOT TAKE VOLUME INTO ACCOUNT:
-    for i, p in enumerate(vertices):
-        if i in unique_indices:
-            final_points.append(p)
+    if len(unique_indices) == len(vertices):
+        logger.debug("All vertices have been used. Second pass not needed.")
+    else:
+        logger.debug("Some vertices have not been used. Attempting a second pass.")
+        logger.debug(f"Number of vertices to be used is {len(unique_indices)} out of {len(vertices)}")
 
-    logger.debug(f"Number of final vertices to be used is {len(final_points)} out of {len(vertices)}")
-    vertices = final_points
-    pts_arr = np.array([[p.x, p.y, p.z] for p in vertices])
+        for i, p in enumerate(vertices):
+            if i in unique_indices:
+                final_points.append(p)
 
-    logger.debug(f"Delaunay tetrahedralization (second pass) on point array with shape {pts_arr.shape}")
-    delaunay = Delaunay(pts_arr, qhull_options="Qt", incremental=False)
-    tetrahedra = delaunay.simplices
-    logger.debug(f"Number of mesh tetrahedra in {sld.name} = {len(tetrahedra)}")
+        vertices = final_points
+        pts_arr = np.array([[p.x, p.y, p.z] for p in vertices])
+        logger.debug(f"Delaunay tetrahedralization (second pass) on point array with shape {pts_arr.shape}")
+        delaunay = Delaunay(pts_arr, qhull_options="Qt", incremental=False)
+        tetrahedra = delaunay.simplices
+        logger.debug(f"Number of resulting mesh tetrahedra in {sld.name} = {len(tetrahedra)}")
 
-    unique_points = [vertices[i] for i in np.unique(np.array(tetrahedra))]
-    logger.debug(f"Number of unique indices in {sld.name} = {len(unique_points)}")
-
+    logger.debug("Attempting to collapse points in SolidMesh...")
     vertices, tetrahedra = collapse_points(vertices, tetrahedra.tolist())  # TODO: is it needed?
 
-    if len(unique_points) > len(vertices):
-        raise MeshError("More point indices used in tetrahedra than available vertices")
-    elif len(unique_points) < len(vertices):
-        raise MeshError("Not all points used in tetrahedralization?")
+    logger.debug("Attempting to find and remove elements with incorrect geometry...")
+    tetrahedra_ok = []
+    for el in tetrahedra:
+        p0 = vertices[el[0]]
+        p1 = vertices[el[1]]
+        p2 = vertices[el[2]]
+        p3 = vertices[el[3]]
+        coplanar = are_points_coplanar(p0, p1, p2, p3)
+        vol = tetrahedron_volume(p0, p1, p2, p3)
+        if not coplanar and vol > min_volume:
+            tetrahedra_ok.append(el)
 
-    logger.debug(f"Number of tetrahedra in {sld.name} = {len(tetrahedra)}")
-    logger.debug(
-        f"Number of unique vertices used in mesh elements in {sld.name} = {len(unique_points)}"
-    )
-    logger.debug(f"Number of all vertices in {sld.name} = {len(vertices)}")
+    logger.debug(f"Number of tetrahedra with correct shape = {len(tetrahedra_ok)}")
+    tetrahedra = tetrahedra_ok
+
+    logger.debug(f"Final number of tetrahedra in {sld.name} = {len(tetrahedra)}")
+    logger.debug(f"Final number of vertices used in mesh {sld.name} = {len(np.unique(tetrahedra))}")
+    logger.debug(f"Final number of all vertices in {sld.name} = {len(vertices)}")
 
     # SANITY CHECKS
     # Make sure all boundary vertices are in the final_vertices
     # and that the number of returned vertices is higher than the sum of polygon mesh vertices
     unique_boundary_vertices = []
+    unique_points = [vertices[i] for i in np.unique(np.array(tetrahedra))]
 
     for poly_name, poly_points in boundary_vertices.items():
         for pt in poly_points:
@@ -170,6 +170,9 @@ def delaunay_tetrahedralization(
 
     assert len(vertices) > len(unique_boundary_vertices), \
         "Solid mesh has less vertices than boundary mesh"
+
+    # TODO: Below checks may not always be true,
+    #       because I am now removing incorrect tetrahedra without reordering vertices
     assert np.max(np.array(tetrahedra)) == len(vertices) - 1, \
         "Number of vertices is different than max index used in tetrahedra"
 
@@ -181,7 +184,7 @@ def collapse_points(
 ) -> tuple[list[Point], list[list[int]]]:
     """Merge overlapping points.
     """
-    logger.debug("Collapsing points")
+    logger.debug("Collapsing points of tetrahedra")
     logger.debug(f"Number of points before collapsing: {len(vertices)}")
 
     # Identify identical points
