@@ -3,7 +3,7 @@ import numpy as np
 from .point import Point
 from .vector import length
 from .vector import vector
-from building3d.config import GEOM_EPSILON
+from building3d.config import EPSILON
 from building3d.config import MESH_DELTA
 
 
@@ -22,7 +22,7 @@ def tetrahedron_volume(p0: Point, p1: Point, p2: Point, p3: Point) -> float:
     z = (a ** 2 + b ** 2 - d ** 2)
 
     nominator = 4 * a**2 * b**2 * c**2 - a**2 * x ** 2 - b**2 * y ** 2 - c**2 * z ** 2 + x * y * z
-    vol = np.sqrt(nominator + GEOM_EPSILON) / 12.0
+    vol = np.sqrt(nominator + EPSILON) / 12.0
 
     return vol
 

@@ -305,7 +305,7 @@ class Polygon:
 
         return wall_line_segments
 
-    def _area(self):
+    def _area(self) -> float:
         """Calculate the area of the wall.
 
         Calculated using the Stoke's theorem:

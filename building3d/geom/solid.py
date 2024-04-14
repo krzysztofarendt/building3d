@@ -3,9 +3,11 @@ from typing import Sequence
 
 import numpy as np
 
-from .exceptions import GeometryError
-from .polygon import Polygon
-from .point import Point
+from building3d.geom.exceptions import GeometryError
+from building3d.geom.polygon import Polygon
+from building3d.geom.point import Point
+from building3d.geom.vector import vector
+from building3d.geom.tetrahedron import tetrahedron_volume
 
 
 class Solid:
@@ -17,6 +19,7 @@ class Solid:
         self.name = name
         self.boundary = boundary
         self._verify(throw=True)
+        self.volume = self._volume()
 
     @staticmethod
     def add_name(name: str):
@@ -87,6 +90,30 @@ class Solid:
             if poly.is_point_inside(p):
                 return True
         return False
+
+    def _volume(self) -> float:
+        """Based on: http://chenlab.ece.cornell.edu/Publication/Cha/icip01_Cha.pdf"""
+        total_volume = 0.0
+        for poly in self.boundary:
+            for tri in poly.triangles:
+                p0 = Point(0.0, 0.0, 0.0)
+                p1 = poly.points[tri[0]]
+                p2 = poly.points[tri[1]]
+                p3 = poly.points[tri[2]]
+                v = tetrahedron_volume(p0, p1, p2, p3)
+
+                pos_wrt_origin = np.dot(poly.normal, vector(p0, p1))
+                if pos_wrt_origin == 0.0:
+                    pos_wrt_origin = np.dot(poly.normal, vector(p0, p2))
+
+                if pos_wrt_origin > 0:
+                    sign = 1.0
+                else:
+                    sign = -1.0
+
+                total_volume += sign * v
+
+        return abs(total_volume)
 
     def _verify(self, throw: bool = False) -> None:
         """Verify geometry correctness.

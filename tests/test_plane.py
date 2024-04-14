@@ -1,8 +1,8 @@
 import pytest
 
-from building3d.geom.point import Point
-from building3d.geom.plane import are_points_coplanar
 from building3d.geom.exceptions import GeometryError
+from building3d.geom.plane import are_points_coplanar
+from building3d.geom.point import Point
 
 
 def test_are_points_coplanar():

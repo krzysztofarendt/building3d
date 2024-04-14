@@ -2,11 +2,11 @@ import numpy as np
 
 from building3d import random_id
 from building3d.config import GEOM_EPSILON
+from building3d.geom.collapse_points import collapse_points
 from building3d.geom.point import Point
 from building3d.geom.vector import normal
 from building3d.geom.wall import Wall
 from building3d.mesh.polymesh import PolyMesh
-from building3d.geom.collapse_points import collapse_points
 
 
 def test_collapse_points():
@@ -38,7 +38,7 @@ def test_collapse_points():
     vertices = [v for v in mesh.vertices]
     faces = [f for f in mesh.faces]
 
-    new_vertices, new_faces= collapse_points(vertices, faces)
+    new_vertices, new_faces = collapse_points(vertices, faces)
 
     for v in new_vertices:
         assert v is not None

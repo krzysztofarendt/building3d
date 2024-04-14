@@ -1,10 +1,13 @@
+import numpy as np
+
 from building3d import random_id
 from building3d.display.plot_solidmesh import plot_solidmesh
 from building3d.geom.point import Point
+from building3d.geom.tetrahedron import tetrahedron_volume
 from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
 from building3d.mesh.solidmesh import SolidMesh
-from building3d.geom.tetrahedron import tetrahedron_volume
+from building3d.config import GEOM_EPSILON
 
 
 def test_solidmesh(plot=False):
@@ -39,11 +42,15 @@ def test_solidmesh(plot=False):
         Point(0.0, delta, 0.0),
         Point(0.0, 0.0, delta),
     )
-    min_volume = ref_volume / 50.
+    min_volume = ref_volume / 50.0
     assert stats["min_tetrahedron_volume"] > min_volume
 
     if plot:
         plot_solidmesh(mesh, show=True)
+
+    # Assert that the sum of tetrahedra volumes is equal to the zone volume
+    tot_volume = np.sum(mesh.volumes)
+    assert np.isclose(tot_volume, zone.volume, atol=GEOM_EPSILON)
 
 
 def test_copy(plot=False):

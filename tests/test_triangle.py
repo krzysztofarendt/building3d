@@ -1,5 +1,5 @@
-from building3d.geom.triangle import is_point_inside
 from building3d.geom.point import Point
+from building3d.geom.triangle import is_point_inside
 
 
 def test_is_point_inside_triangle():

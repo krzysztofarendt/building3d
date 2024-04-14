@@ -5,7 +5,11 @@ LOG_FILE: str = "building3d.log"
 LOG_LEVEL = logging.DEBUG
 
 # Geometry epsilon used for comparison operations
-GEOM_EPSILON: float = 1e-6
+GEOM_EPSILON: float = 1e-5
+
+# General epsilon - used to avoid zero division etc.
+# Should be as small as possible
+EPSILON: float = 1e-9
 
 # Mesh joggle - max distance to move vertices around
 MESH_JOGGLE: float = 0.1

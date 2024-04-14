@@ -27,6 +27,7 @@ def example():
     roof = Wall("roof", [p4, p5, p6, p7])
 
     room = Zone("room", [floor, wall0, wall1, wall2, wall3, roof])
+    print(room)
 
     mesh = Mesh()
     # Polygons do not need to be added manually, because

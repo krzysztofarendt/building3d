@@ -3,13 +3,13 @@ import pytest
 
 from building3d import random_id
 from building3d.geom.exceptions import GeometryError
+from building3d.geom.plane import are_points_coplanar
 from building3d.geom.point import Point
 from building3d.geom.tetrahedron import tetrahedron_volume
 from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
 from building3d.mesh.tetrahedralization import delaunay_tetrahedralization
 from building3d.mesh.triangulation import delaunay_triangulation
-from building3d.geom.plane import are_points_coplanar
 
 
 def test_tetrahedralization():
@@ -113,7 +113,7 @@ def test_tetrahedralization():
             Point(0.0, delta, 0.0),
             Point(0.0, 0.0, delta),
         )
-        min_volume = ref_volume / 50.
+        min_volume = ref_volume / 50.0
         assert vol > min_volume, f"Volume[{i}]={vol} < minimum ({min_volume})"
 
         # Assert tetrahedra vertices are not coplanar

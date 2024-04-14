@@ -168,13 +168,13 @@ def test_distance_point_to_polygon():
     p1 = Point(1.0, 0.0, 0.0)
     p2 = Point(1.0, 1.0, 0.0)
     p3 = Point(0.0, 1.0, 0.0)
-    ptest1 = Point(0.5, 0.5, 1.0)     # distance = 1
-    ptest2 = Point(1.0, 0.5, 1.0)     # distance = 1
-    ptest3 = Point(1.0, 0.5, -1.0)    # distance = 1
-    ptest4 = Point(1.0, 2.0, 0.0)     # distance = 1
-    ptest5 = Point(2.0, 1.0, 1.0)     # distance = np.sqrt(2)
-    ptest6 = Point(-1.0, -1.0, 0.0)   # distance = np.sqrt(2)
-    ptest7 = Point(0.9, 0.1, 3.0)     # distance = 3
+    ptest1 = Point(0.5, 0.5, 1.0)  # distance = 1
+    ptest2 = Point(1.0, 0.5, 1.0)  # distance = 1
+    ptest3 = Point(1.0, 0.5, -1.0)  # distance = 1
+    ptest4 = Point(1.0, 2.0, 0.0)  # distance = 1
+    ptest5 = Point(2.0, 1.0, 1.0)  # distance = np.sqrt(2)
+    ptest6 = Point(-1.0, -1.0, 0.0)  # distance = np.sqrt(2)
+    ptest7 = Point(0.9, 0.1, 3.0)  # distance = 3
 
     poly = Polygon(random_id(), [p0, p1, p2, p3])
 
@@ -198,7 +198,7 @@ def test_distance_point_to_polygon():
     p2 = Point(0.0, 0.0, 1.0)
     p3 = Point(1.0, 0.0, 1.0)
     poly = Polygon(random_id(), [p0, p1, p2, p3])
-    ptest8 = Point(0.5, 1.0, 1.0)     # distance = np.sqrt(2) / 2
+    ptest8 = Point(0.5, 1.0, 1.0)  # distance = np.sqrt(2) / 2
 
     d = poly.distance_point_to_polygon(ptest8)
     assert np.isclose(d, np.sqrt(2) / 2)

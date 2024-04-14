@@ -42,18 +42,8 @@ make example
 
 # TODO:
 
-- [x] Fix small area in PolyMesh (highly skewed triangles)
-- [x] Fix short edges in SolidMesh (through `min_volume`)
-- [x] Solid mesh statistics
-- [x] When generating new points for mesh, make sure they are far from polygon edges
-- [x] Solid mesh min. volume can lead to a removal of boundary elements -> removed this logic
-- [x] Solid mesh vertices reindexing after element deletion due to low volume
-- [x] Solid mesh and polygon mesh
-- [x] PolyMesh does not work with non-convex polygons
-- [x] Polygon mesh faces should match solid mesh faces at the boundary -> done with joggling
-- [x] PolyMesh should check if edge vertices are shared by at least 2 polygons (corners will be shared by >= 2) -> not sure if it's needed
-- [x] Add logger
-- [ ] Calculate solid volume
+- [x] Calculate solid volume
+- [ ] Mesh for non-convex solids
 - [ ] Test solid mesh with multiple solid instances
 - [ ] Export to STL
 - [ ] Accurate center of weight for Solid
