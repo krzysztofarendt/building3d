@@ -1,0 +1,79 @@
+from building3d import random_id
+from building3d.display.plot_mesh import plot_mesh
+from building3d.geom.point import Point
+from building3d.geom.tetrahedron import minimum_tetra_volume
+from building3d.geom.triangle import minimum_triangle_area
+from building3d.geom.wall import Wall
+from building3d.geom.zone import Zone
+from building3d.mesh.mesh import Mesh
+
+
+def test_mesh_l_shape(show=False):
+    stretch = [2.5, 2.5, 2.5]
+    p0 = Point(0.0, 0.0, 0.0) * stretch
+    p1 = Point(3.0, 0.0, 0.0) * stretch
+    p2 = Point(3.0, 2.0, 0.0) * stretch
+    p3 = Point(2.0, 2.0, 0.0) * stretch
+    p4 = Point(2.0, 1.0, 0.0) * stretch
+    p5 = Point(0.0, 1.0, 0.0) * stretch
+    p6 = Point(0.0, 0.0, 1.0) * stretch
+    p7 = Point(3.0, 0.0, 1.0) * stretch
+    p8 = Point(3.0, 2.0, 1.0) * stretch
+    p9 = Point(2.0, 2.0, 1.0) * stretch
+    p10 = Point(2.0, 1.0, 1.0) * stretch
+    p11 = Point(0.0, 1.0, 1.0) * stretch
+
+    floor = Wall(random_id(), [p0, p5, p4, p3, p2, p1])
+    roof = Wall(random_id(), [p6, p7, p8, p9, p10, p11])
+    w_0_1_7_6 = Wall(random_id(), [p0, p1, p7, p6])
+    w_1_2_8_7 = Wall(random_id(), [p1, p2, p8, p7])
+    w_2_3_9_8 = Wall(random_id(), [p2, p3, p9, p8])
+    w_4_10_9_3 = Wall(random_id(), [p4, p10, p9, p3])
+    w_4_5_11_10 = Wall(random_id(), [p4, p5, p11, p10])
+    w_0_6_11_5 = Wall(random_id(), [p0, p6, p11, p5])
+
+    zone = Zone(
+        random_id(),
+        [
+            floor,
+            roof,
+            w_0_1_7_6,
+            w_1_2_8_7,
+            w_2_3_9_8,
+            w_4_10_9_3,
+            w_4_5_11_10,
+            w_0_6_11_5,
+        ],
+    )
+    delta = 1.0
+
+    mesh = Mesh(delta)
+    mesh.add_polygon(floor)
+    mesh.add_polygon(w_0_1_7_6)
+    mesh.add_polygon(w_1_2_8_7)
+    mesh.add_polygon(w_2_3_9_8)
+    mesh.add_polygon(w_4_10_9_3)
+    mesh.add_polygon(w_4_5_11_10)
+    mesh.add_polygon(w_0_6_11_5)
+    mesh.add_polygon(roof)
+    mesh.add_solid(zone)
+    mesh.generate()
+
+    solidmesh_stats = mesh.solidmesh.mesh_statistics()
+    assert solidmesh_stats["min_element_volume"] > minimum_tetra_volume(
+        delta
+    ), f"{solidmesh_stats['min_element_volume']=} > {minimum_tetra_volume(delta)=}"
+
+    polymesh_stats = mesh.polymesh.mesh_statistics()
+    assert polymesh_stats["min_face_area"] > minimum_triangle_area(
+        delta
+    ), f"{polymesh_stats['min_face_area']=} > {minimum_triangle_area(delta)=}"
+
+    if show is True:
+        mesh.polymesh.mesh_statistics(show=True)
+        mesh.solidmesh.mesh_statistics(show=True)
+        plot_mesh(mesh, boundary=True, interior=True, show=True)
+
+
+if __name__ == "__main__":
+    test_mesh_l_shape(show=True)

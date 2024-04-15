@@ -9,6 +9,7 @@ from building3d.geom.point import Point
 from building3d.geom.solid import Solid
 from building3d.geom.tetrahedron import tetrahedron_volume
 from building3d.geom.tetrahedron import minimum_tetra_volume
+from building3d.geom.tetrahedron import tetrahedron_centroid
 from building3d.geom.collapse_points import collapse_points
 from building3d.mesh.triangulation import delaunay_triangulation
 from building3d import random_within
@@ -91,14 +92,13 @@ def delaunay_tetrahedralization(
                 )
                 # TODO: Below code is very slow -> need to optimize
                 if sld.is_point_inside(pt):
-                    if pt not in vertices:
-                        far_enough_from_boundary = True
-                        for poly in sld.boundary:
-                            if poly.distance_point_to_polygon(pt) < delta / 2:
-                                far_enough_from_boundary = False
-                                break
-                        if far_enough_from_boundary is True:
-                            vertices.append(pt)
+                    far_enough_from_boundary = True
+                    for poly in sld.boundary:
+                        if poly.distance_point_to_polygon(pt) < delta / 2:
+                            far_enough_from_boundary = False
+                            break
+                    if far_enough_from_boundary is True:
+                        vertices.append(pt)
 
     # Delaunary - first pass
     pts_arr = np.array([[p.x, p.y, p.z] for p in vertices])
@@ -131,7 +131,7 @@ def delaunay_tetrahedralization(
     logger.debug("Attempting to collapse points in SolidMesh...")
     vertices, tetrahedra = collapse_points(vertices, tetrahedra.tolist())  # TODO: is it needed?
 
-    logger.debug("Attempting to find and remove elements with incorrect geometry...")
+    logger.debug("Attempting to find and remove elements with invalid geometry or position...")
     tetrahedra_ok = []
     for el in tetrahedra:
         p0 = vertices[el[0]]
@@ -140,8 +140,10 @@ def delaunay_tetrahedralization(
         p3 = vertices[el[3]]
         coplanar = are_points_coplanar(p0, p1, p2, p3)
         vol = tetrahedron_volume(p0, p1, p2, p3)
+        ctr = tetrahedron_centroid(p0, p1, p2, p3)
         if not coplanar and vol > min_volume:
-            tetrahedra_ok.append(el)
+            if sld.is_point_inside(ctr):
+                tetrahedra_ok.append(el)
 
     logger.debug(f"Number of tetrahedra with correct shape = {len(tetrahedra_ok)}")
     tetrahedra = tetrahedra_ok

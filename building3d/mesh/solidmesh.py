@@ -99,7 +99,7 @@ class SolidMesh:
             mesh.vertices = self.vertices
             mesh.vertex_owners = self.vertex_owners
             mesh.elements = elements
-            mesh.element_owners = [owner for i, owner in enumerate(self.elements_owners) if i in elements]
+            mesh.element_owners = [owner for i, owner in enumerate(self.element_owners) if i in elements]
             mesh.volumes = [vol for i, vol in enumerate(self.volumes) if i in elements]
         elif max_vol is not None:
             # Filtered copy

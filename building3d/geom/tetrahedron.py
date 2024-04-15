@@ -37,3 +37,10 @@ def minimum_tetra_volume(delta: float = MESH_DELTA) -> float:
     )
     min_vol= ref_volume / 50.
     return min_vol
+
+
+def tetrahedron_centroid(p0: Point, p1: Point, p2: Point, p3: Point) -> Point:
+    """Centroid of a tetrahedron is just the average of its vertices."""
+    c = (p0.vector() + p1.vector() + p2.vector() + p3.vector()) / 4
+    cp = Point(c[0], c[1], c[2])
+    return cp

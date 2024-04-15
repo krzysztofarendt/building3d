@@ -6,6 +6,7 @@ from .vector import vector
 from .vector import length
 from .vector import is_point_colinear
 from .exceptions import GeometryError
+from building3d.config import EPSILON
 from building3d.config import GEOM_EPSILON
 from building3d.config import POINT_NUM_DEC
 from building3d.config import MESH_DELTA
@@ -29,7 +30,7 @@ def triangle_area(p1: Point, p2: Point, p3: Point) -> float:
     c = length(vec_c)
 
     s = 0.5 * (a + b + c)
-    area = np.sqrt(s * (s - a) * (s - b) * (s - c) + GEOM_EPSILON)
+    area = np.sqrt(s * (s - a) * (s - b) * (s - c) + EPSILON)
 
     return area
 

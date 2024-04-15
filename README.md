@@ -43,9 +43,9 @@ make example
 # TODO:
 
 - [x] Calculate solid volume
-- [ ] Mesh for non-convex solids
+- [x] Mesh for non-convex solids
+- [ ] Export/import to/from STL (and other formats?)
 - [ ] Test solid mesh with multiple solid instances
-- [ ] Export to STL
 - [ ] Accurate center of weight for Solid
 - [ ] Wall could be a collection of Polygons instead of a Polygon subclass
 - [ ] Zone could be a collection of Solids instead of a Solid subclass
