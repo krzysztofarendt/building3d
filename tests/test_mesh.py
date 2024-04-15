@@ -41,7 +41,7 @@ def test_mesh():
         mesh.generate()
 
         solidmesh_stats = mesh.solidmesh.mesh_statistics()
-        assert solidmesh_stats["min_tetrahedron_volume"] > minimum_tetra_volume(delta)
+        assert solidmesh_stats["min_element_volume"] > minimum_tetra_volume(delta)
 
         polymesh_stats = mesh.polymesh.mesh_statistics()
         assert polymesh_stats["min_face_area"] > minimum_triangle_area(delta)

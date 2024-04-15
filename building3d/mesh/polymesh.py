@@ -82,16 +82,7 @@ class PolyMesh:
         avg_edge_len = np.mean(edge_lengths)
         min_edge_len = np.min(edge_lengths)
 
-        if show is True:
-            print("PolyMesh statistics:")
-            print(f"\t{num_of_vertices=}")
-            print(f"\t{num_of_faces=}")
-            print(f"\t{max_face_area=}")
-            print(f"\t{avg_face_area=}")
-            print(f"\t{min_face_area=}")
-            print(f"\t{max_edge_len=}")
-            print(f"\t{avg_edge_len=}")
-            print(f"\t{min_edge_len=}")
+        area_hist, bin_edges = np.histogram(face_areas, bins=10)
 
         stats = {
             "num_of_vertices": num_of_vertices,
@@ -103,6 +94,23 @@ class PolyMesh:
             "avg_edge_len": avg_edge_len,
             "min_edge_len": min_edge_len,
         }
+
+        if show is True:
+            print("PolyMesh statistics:")
+            print("====================")
+            print(f"\t{num_of_vertices=}")
+            print(f"\t{num_of_faces=}")
+            print(f"\t{max_face_area=}")
+            print(f"\t{avg_face_area=}")
+            print(f"\t{min_face_area=}")
+            print(f"\t{max_edge_len=}")
+            print(f"\t{avg_edge_len=}")
+            print(f"\t{min_edge_len=}")
+            print("\tArea distribution:")
+            for i in range(len(area_hist)):
+                bracket = ")" if i < len(area_hist) - 1 else "]"
+                print(f"\t- [{bin_edges[i]:.3f}, {bin_edges[i+1]:.3f}{bracket} = {area_hist[i]}")
+
         return stats
 
     def generate(self, initial_vertices: dict[str, list[Point]] = {}):

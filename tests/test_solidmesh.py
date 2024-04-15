@@ -43,7 +43,7 @@ def test_solidmesh(plot=False):
         Point(0.0, 0.0, delta),
     )
     min_volume = ref_volume / 50.0
-    assert stats["min_tetrahedron_volume"] > min_volume
+    assert stats["min_element_volume"] > min_volume
 
     if plot:
         plot_solidmesh(mesh, show=True)
