@@ -2,6 +2,7 @@ from building3d import random_id
 from building3d.display.plot_mesh import plot_mesh
 from building3d.geom.point import Point
 from building3d.geom.tetrahedron import minimum_tetra_volume
+from building3d.geom.tetrahedron import tetrahedron_centroid
 from building3d.geom.triangle import minimum_triangle_area
 from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
@@ -68,6 +69,15 @@ def test_mesh_l_shape(show=False):
     assert polymesh_stats["min_face_area"] > minimum_triangle_area(
         delta
     ), f"{polymesh_stats['min_face_area']=} > {minimum_triangle_area(delta)=}"
+
+    for el in mesh.solidmesh.elements:
+        el_ctr = tetrahedron_centroid(
+            p0=mesh.solidmesh.vertices[el[0]],
+            p1=mesh.solidmesh.vertices[el[1]],
+            p2=mesh.solidmesh.vertices[el[2]],
+            p3=mesh.solidmesh.vertices[el[3]],
+        )
+        assert zone.is_point_inside(el_ctr), "SolidMesh element is outside the solid"
 
     if show is True:
         mesh.polymesh.mesh_statistics(show=True)
