@@ -44,10 +44,12 @@ make example
 
 - [x] Calculate solid volume
 - [x] Mesh for non-convex solids
-- [ ] Make it possible to define Polygon starting from a non-convex vector (if
+- [x] Make it possible to define Polygon starting from a non-convex vector (if
   the cross product of corner vertices points in the same direction as polygon
   normal, it is convex)
 - [ ] Export/import to/from STL (and other formats?)
+- [ ] Subpolygons
+- [ ] Constrained Delaunay
 - [ ] Test solid mesh with multiple solid instances
 - [ ] Accurate center of weight for Solid
 - [ ] Wall could be a collection of Polygons instead of a Polygon subclass

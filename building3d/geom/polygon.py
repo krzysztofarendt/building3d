@@ -1,26 +1,33 @@
 """Polygon class"""
+import logging
+
 import numpy as np
 
-from .exceptions import GeometryError
-from .point import Point
-from .line import distance_point_to_edge
-from .vector import vector
-from .vector import length
-from .triangle import triangle_centroid
-from .triangle import triangle_area
-from .triangle import is_point_inside as is_point_inside_triangle
-from .triangle import triangulate
+from building3d.geom.exceptions import GeometryError
+from building3d.geom.exceptions import TriangulationError
+from building3d.geom.point import Point
+from building3d.geom.line import distance_point_to_edge
+from building3d.geom.vector import normal
+from building3d.geom.vector import length
+from building3d.geom.triangle import triangle_centroid
+from building3d.geom.triangle import triangle_area
+from building3d.geom.triangle import is_point_inside as is_point_inside_triangle
+from building3d.geom.triangle import triangulate
 from building3d import random_id
 from building3d.config import GEOM_EPSILON
+from building3d.util.roll_back import roll_back
+
+
+logger = logging.getLogger(__name__)
 
 
 class Polygon:
     """Polygon defined by its vertices (Point instances).
 
     Notes:
-    - The first point must lay in the convex corner!
+    - Initialization is faster if the first point lays in the convex corner
     - If used as a wall, the points should be ordered counter-clockwise w.r.t.
-      to the zone that this wall belongs to.
+      to the zone that this wall belongs to. Normal vector should point outwards.
     """
     # List of names of all Polygon instances (names must be unique)
     instance_names = set()
@@ -30,9 +37,28 @@ class Polygon:
         Polygon.add_name(name)
 
         self.points = list(points)
-        self.normal = self._normal()
-        self._verify()
-        self.triangles = self._triangulate()
+
+        # Calculate normal vector and triangulate
+        # This works in the first iteration if the first point of the polygon
+        # is located in the convex corner. If it's located in the non-convex corner
+        # then the algorithm reorders the points until triangulation is successful
+        triangulation_successful = False
+        max_num_tries = len(self.points)
+        n_try = 0
+        while not triangulation_successful:
+            if n_try > max_num_tries:
+                raise TriangulationError(f"Cannot triangulate the polygon {self.name}")
+            try:
+                self.normal = self._normal()
+                self._verify()
+                self.triangles = self._triangulate()
+                triangulation_successful = True
+            except TriangulationError as e:
+                logger.warning(self.name + ": " + str(e))
+                logger.debug("Will try to reorder vertices")
+                self.points = roll_back(self.points)
+            n_try += 1
+
         self.centroid = self._centroid()
         self.edges = self._edges()
         self.area = self._area()
@@ -275,18 +301,7 @@ class Polygon:
         - A: 0 -> 1 (first and second point)
         - B: 0 -> -1 (first and last point)
         """
-        # TODO: use building3d.geom.vector.normal() instead
-        vec_a = vector(self.points[0], self.points[1])
-        vec_b = vector(self.points[0], self.points[-1])
-        norm = np.cross(vec_a, vec_b)
-
-        len_norm = length(norm)
-        if len_norm < GEOM_EPSILON:
-            raise GeometryError("Normal vector has zero length")
-        else:
-            norm /= len_norm
-
-        return norm
+        return normal(self.points[-1], self.points[0], self.points[1])
 
     def _edges(self) -> list[tuple[Point, Point]]:
         """Return a list of edges of this wall."""

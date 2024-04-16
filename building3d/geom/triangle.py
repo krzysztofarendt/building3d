@@ -1,11 +1,12 @@
 """Functions related to triangles."""
 import numpy as np
 
-from .point import Point
-from .vector import vector
-from .vector import length
-from .vector import is_point_colinear
-from .exceptions import GeometryError
+from building3d.geom.point import Point
+from building3d.geom.vector import vector
+from building3d.geom.vector import length
+from building3d.geom.vector import is_point_colinear
+from building3d.geom.exceptions import GeometryError
+from building3d.geom.exceptions import TriangulationError
 from building3d.config import EPSILON
 from building3d.config import GEOM_EPSILON
 from building3d.config import POINT_NUM_DEC
@@ -111,6 +112,31 @@ def is_point_inside(ptest: Point, p1: Point, p2: Point, p3: Point) -> bool:
     return False
 
 
+def is_corner_convex(p0: Point, p1: Point, p2: Point, n: np.ndarray) -> bool:
+    """Check if the angle between p1->p0 and p1->p2 is less than 180 degress.
+
+    It is done by comparing the polygon normal vector with the
+    cross product p1->p2 x p1->p0.
+    """
+    assert np.abs(length(n) - 1.) < GEOM_EPSILON
+    v1 = vector(p1, p2)
+    v2 = vector(p1, p0)
+    v1_v2_normal = np.cross(v1, v2)
+    len_v1_v2 = length(v1_v2_normal)
+    if len_v1_v2 < GEOM_EPSILON:
+        # Colinear points p0, p1, p2
+        return False
+    else:
+        # Normalize before comparing to n
+        v1_v2_normal /= length(v1_v2_normal)
+    if np.isclose(v1_v2_normal, n).all():
+        # Convex vertex
+        return True
+    else:
+        # Concave vertex
+        return False
+
+
 def triangulate(points: list[Point], normal: np.ndarray) -> list[int]:
     """Return a list of triangles (i, j, k) using the ear clipping algorithm.
 
@@ -122,30 +148,6 @@ def triangulate(points: list[Point], normal: np.ndarray) -> list[int]:
         points: list of points defining the polygon
         normal: vector normal to the polygon
     """
-    def is_convex(p0: Point, p1: Point, p2: Point, n: np.ndarray) -> bool:
-        """Check if the angle between p1->p0 and p1->p2 is less than 180 degress.
-
-        It is done by comparing the polygon normal vector with the
-        cross product p1->p2 x p1->p0.
-        """
-        assert np.abs(length(n) - 1.) < GEOM_EPSILON
-        v1 = vector(p1, p2)
-        v2 = vector(p1, p0)
-        v1_v2_normal = np.cross(v1, v2)
-        len_v1_v2 = length(v1_v2_normal)
-        if len_v1_v2 < GEOM_EPSILON:
-            # Colinear points p0, p1, p2
-            return False
-        else:
-            # Normalize before comparing to n
-            v1_v2_normal /= length(v1_v2_normal)
-        if np.isclose(v1_v2_normal, n).all():
-            # Convex vertex
-            return True
-        else:
-            # Concave vertex
-            return False
-
     vertices = [(i, p) for i, p in enumerate(points)]
     triangles = []
     pos = 0
@@ -155,7 +157,9 @@ def triangulate(points: list[Point], normal: np.ndarray) -> list[int]:
     while len(vertices) > 2:
 
         if number_failed > len(vertices):
-            raise RuntimeError("Triangulation failed, reason unknown :(")
+            raise TriangulationError(
+                "Triangulation error, probably first vertex lays in a non-convex corner"
+            )
 
         # If last vertix, start from the beginning
         if pos > len(vertices) - 1:
@@ -168,7 +172,7 @@ def triangulate(points: list[Point], normal: np.ndarray) -> list[int]:
         curr_id, curr_pt = vertices[pos]
         next_id, next_pt = vertices[next_pos]
 
-        convex_corner = is_convex(prev_pt, curr_pt, next_pt, normal)
+        convex_corner = is_corner_convex(prev_pt, curr_pt, next_pt, normal)
 
         if convex_corner:
             # Check if no other point is within this triangle

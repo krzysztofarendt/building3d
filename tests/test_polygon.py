@@ -121,6 +121,18 @@ def test_triangulation_l_shape():
     assert {2, 3, 4} not in triangles
 
 
+def test_triangulation_start_from_nonconvex_corner():
+    p0 = Point(0.0, 0.0, 0.0)
+    p1 = Point(2.0, 0.0, 0.0)
+    p2 = Point(2.0, 1.0, 0.0)
+    p3 = Point(1.0, 1.0, 0.0)  # non-convex corner
+    p4 = Point(1.0, 2.0, 0.0)
+    p5 = Point(0.0, 2.0, 0.0)
+    poly = Polygon(random_id(), [p3, p4, p5, p0, p1, p2])
+    triangles = [{i, j, k} for i, j, k in poly.triangles]
+    assert {2, 3, 4} not in triangles
+
+
 def test_triangulation_cross_shape_on_xy_plane():
     p0 = Point(-1.0, -1.0, 0.0)
     p1 = Point(-1.0, -2.0, 0.0)

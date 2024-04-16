@@ -6,7 +6,7 @@ from building3d.geom.wall import Wall
 from building3d.mesh.polymesh import PolyMesh
 
 
-def test_collapse_points(plot=False):
+def test_polymesh_l_shape(plot=False):
     p0 = Point(0.0, 0.0, 0.0)
     p1 = Point(2.0, 0.0, 0.0)
     p2 = Point(2.0, 1.0, 0.0)
@@ -31,4 +31,4 @@ def test_collapse_points(plot=False):
 
 
 if __name__ == "__main__":
-    test_collapse_points(plot=True)
+    test_polymesh_l_shape(plot=True)
