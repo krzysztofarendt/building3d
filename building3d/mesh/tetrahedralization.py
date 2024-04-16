@@ -86,9 +86,9 @@ def delaunay_tetrahedralization(
         for y in ygrid:
             for z in zgrid:
                 pt = Point(
-                    x + random_within(MESH_JOGGLE),
-                    y + random_within(MESH_JOGGLE),
-                    z + random_within(MESH_JOGGLE),
+                    x + random_within(MESH_JOGGLE * delta),
+                    y + random_within(MESH_JOGGLE * delta),
+                    z + random_within(MESH_JOGGLE * delta),
                 )
                 # TODO: Below code is very slow -> need to optimize
                 if sld.is_point_inside(pt):

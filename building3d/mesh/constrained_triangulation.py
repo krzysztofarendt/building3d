@@ -29,7 +29,6 @@ logger = logging.getLogger(__name__)
 def constr_delaunay_triangulation(
     poly: polygon.Polygon,
     delta: float = MESH_DELTA,
-    suggest_vertices: list[Point] = [],
     fix_vertices: list[Point] = [],
 ) -> tuple[list[Point], list[list[int]]]:
 
@@ -46,14 +45,14 @@ def constr_delaunay_triangulation(
     )
 
     z = points_xy[0].z
-    points_2d = [Point(p.x, p.y, z) for p in points_xy]
+    poly_points_2d = [Point(p.x, p.y, z) for p in points_xy]
+    points_2d = list(poly_points_2d)
 
     # Create a 2D polygon instance (used for checking if a point lies inside it)
     poly_2d = polygon.Polygon(random_id(), points_2d)
 
     # Rotate fixed and suggested points to XY
     fixed_2d, _ = rotate_points_around_vector(fix_vertices, rotaxis, phi)
-    suggest_2d, _ = rotate_points_around_vector(suggest_vertices, rotaxis, phi)
 
     # Add new points on the edges
     logger.debug("Adding new points on the edges of the polygon")
@@ -91,8 +90,8 @@ def constr_delaunay_triangulation(
     for x in xgrid:
         for y in ygrid:
             p = Point(
-                x + random_within(MESH_JOGGLE),
-                y + random_within(MESH_JOGGLE),
+                x + random_within(MESH_JOGGLE * delta),
+                y + random_within(MESH_JOGGLE * delta),
                 z,
             )
             is_far_from_all = True
@@ -107,7 +106,6 @@ def constr_delaunay_triangulation(
 
     # Add polygon points to fixed and suggested
     points_2d.extend(fixed_2d)
-    points_2d.extend(suggest_2d)
 
     # Triangulation - first pass
     logger.debug("Triangulation - first pass")
@@ -118,14 +116,7 @@ def constr_delaunay_triangulation(
 
     logger.debug(f"{len(triangles)=}")
 
-    # DONE: Below removal must take into account fixed points
-    # TODO: If done once, this can lead to uneven distribution of points
-    # TODO: It should be iterative and adaptive
-    # Remove points not used in the triangulation
-    # and remove small faces
-    unique_tri_indices = np.unique(triangles)
-    final_points_2d = []
-
+    # Find minimum face area for each vertex
     pt_to_area = {}
     for t in triangles:
         p0, p1, p2 = points_2d[t[0]], points_2d[t[1]], points_2d[t[2]]
@@ -136,9 +127,13 @@ def constr_delaunay_triangulation(
             elif area < pt_to_area[t[i]]:
                 pt_to_area[t[i]] = area
 
+    # Remove vertices with too small area
+    # but keep fixed vertices
+    unique_tri_indices = np.unique(triangles)
+    final_points_2d = []
     for i, p in enumerate(points_2d):
         if i in unique_tri_indices:
-            if pt_to_area[i] > min_area or points_2d[i] in fixed_2d:
+            if (pt_to_area[i] > min_area) or (points_2d[i] in fixed_2d) or (p in poly_points_2d):
                 final_points_2d.append(p)
 
     # Triangulation - second pass
@@ -156,7 +151,9 @@ def constr_delaunay_triangulation(
 
     # Manually add fixed points if not present
     # TODO: is it ever the case?
-    pass  # TODO
+    for fp in fixed_2d:
+        if fp not in points_2d:
+            raise MeshError(f"Fixed point not added to mesh {fp}")
 
     # Rotate back to 3D
     new_points, _ = rotate_points_around_vector(
