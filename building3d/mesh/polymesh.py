@@ -11,7 +11,7 @@ from building3d.geom.point import Point
 from building3d.geom.triangle import triangle_area
 from building3d.geom.vector import length
 from building3d.geom.vector import vector
-from building3d.mesh.triangulation import delaunay_triangulation
+from building3d.mesh.constrained_triangulation import constr_delaunay_triangulation
 from building3d.config import MESH_DELTA
 
 
@@ -131,10 +131,10 @@ class PolyMesh:
                 logger.debug(f"Adding {len(initial_vertices[poly_name])} init. vert. for {poly_name}")
                 initial = initial_vertices[poly_name]
 
-            vertices, faces = delaunay_triangulation(
+            vertices, faces = constr_delaunay_triangulation(
                 poly=poly,
                 delta=self.delta,
-                init_vertices=initial,  # TODO: It is never used and can be deleted
+                fix_vertices=initial,  # TODO: It is never used and can be deleted?
             )
 
             # Increase face counter to include previously added vertices

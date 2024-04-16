@@ -16,7 +16,6 @@ from building3d.geom.triangle import triangle_area
 from building3d.geom.triangle import triangle_centroid
 from building3d.geom.triangle import minimum_triangle_area
 from building3d import random_id
-from building3d.mesh.exceptions import MeshError
 from building3d.config import GEOM_EPSILON
 from building3d.config import MESH_JOGGLE
 from building3d.config import MESH_DELTA
@@ -52,108 +51,119 @@ def constr_delaunay_triangulation(
     poly_2d = polygon.Polygon(random_id(), points_2d)
 
     # Rotate fixed and suggested points to XY
-    fixed_2d, _ = rotate_points_around_vector(fix_vertices, rotaxis, phi)
+    if len(fix_vertices) > 0:
+        fixed_2d, _ = rotate_points_around_vector(fix_vertices, rotaxis, phi)
+    else:
+        fixed_2d = []
 
-    # Add new points on the edges
-    logger.debug("Adding new points on the edges of the polygon")
-    edge_points = []
-    for i in range(len(points_2d)):
-        cur = i
-        nxt = i + 1 if i + 1 < len(points_2d) else 0
-        pt1 = points_2d[cur]
-        pt2 = points_2d[nxt]
-        edge_len = length(pt2.vector() - pt1.vector())
-        num_segments = int(edge_len // (delta + GEOM_EPSILON))
-        new_pts = create_points_between_2_points(pt1, pt2, num_segments)
-        for p in new_pts:
-            is_far_from_all = True
-            for fp in fixed_2d:
-                dist = length(p.vector() - fp.vector())
-                if dist < delta:
-                    is_far_from_all = False
-                    break
-            if is_far_from_all:
-                edge_points.append(p)
+    mesh_quality_ok = False
 
-    points_2d.extend(edge_points)
+    while not mesh_quality_ok:
 
-    # Add new points inside the polygon
-    logger.debug("Adding new points inside the polygon")
+        # Add new points on the edges
+        logger.debug("Adding new points on the edges of the polygon")
+        edge_points = []
+        for i in range(len(points_2d)):
+            cur = i
+            nxt = i + 1 if i + 1 < len(points_2d) else 0
+            pt1 = points_2d[cur]
+            pt2 = points_2d[nxt]
+            edge_len = length(pt2.vector() - pt1.vector())
+            num_segments = int(edge_len // (delta + GEOM_EPSILON))
+            new_pts = create_points_between_2_points(pt1, pt2, num_segments)
+            for p in new_pts:
+                is_far_from_all = True
+                for fp in fixed_2d:
+                    dist = length(p.vector() - fp.vector())
+                    if dist < delta:
+                        is_far_from_all = False
+                        break
+                if is_far_from_all:
+                    edge_points.append(p)
 
-    xaxis = [p.x for p in points_2d]
-    yaxis = [p.y for p in points_2d]
-    xmin, xmax = min(xaxis), max(xaxis)
-    ymin, ymax = min(yaxis), max(yaxis)
+        points_2d.extend(edge_points)
 
-    xgrid = np.arange(xmin + delta, xmax, delta)
-    ygrid = np.arange(ymin + delta, ymax, delta)
-    for x in xgrid:
-        for y in ygrid:
-            p = Point(
-                x + random_within(MESH_JOGGLE * delta),
-                y + random_within(MESH_JOGGLE * delta),
-                z,
-            )
-            is_far_from_all = True
-            for fp in fixed_2d:
-                dist = length(p.vector() - fp.vector())
-                if dist < delta / 3.0:  # TODO: Add to config
-                    is_far_from_all = False
-                    break
-            if is_far_from_all:
-                if poly_2d.is_point_inside_margin(p, margin=delta/2):
-                    points_2d.append(p)
+        # Add new points inside the polygon
+        logger.debug("Adding new points inside the polygon")
 
-    # Add polygon points to fixed and suggested
-    points_2d.extend(fixed_2d)
+        xaxis = [p.x for p in points_2d]
+        yaxis = [p.y for p in points_2d]
+        xmin, xmax = min(xaxis), max(xaxis)
+        ymin, ymax = min(yaxis), max(yaxis)
 
-    # Triangulation - first pass
-    logger.debug("Triangulation - first pass")
+        xgrid = np.arange(xmin + delta, xmax, delta)
+        ygrid = np.arange(ymin + delta, ymax, delta)
+        for x in xgrid:
+            for y in ygrid:
+                p = Point(
+                    x + random_within(MESH_JOGGLE * delta),
+                    y + random_within(MESH_JOGGLE * delta),
+                    z,
+                )
+                is_far_from_all = True
+                for fp in fixed_2d:
+                    dist = length(p.vector() - fp.vector())
+                    if dist < delta / 3.0:  # TODO: Add to config
+                        is_far_from_all = False
+                        break
+                if is_far_from_all:
+                    if poly_2d.is_point_inside_margin(p, margin=delta/2):
+                        points_2d.append(p)
 
-    pts_arr = np.array([[p.x, p.y] for p in points_2d])
-    tri = Delaunay(pts_arr, incremental=False)
-    triangles = tri.simplices
+        # Add polygon points to fixed and suggested
+        points_2d.extend(fixed_2d)
 
-    logger.debug(f"{len(triangles)=}")
+        # Triangulation - first pass
+        logger.debug("Triangulation - first pass")
 
-    # Find minimum face area for each vertex
-    pt_to_area = {}
-    for t in triangles:
-        p0, p1, p2 = points_2d[t[0]], points_2d[t[1]], points_2d[t[2]]
-        area = triangle_area(p0, p1, p2)
-        for i in range(3):
-            if t[i] not in pt_to_area:
-                pt_to_area[t[i]] = area
-            elif area < pt_to_area[t[i]]:
-                pt_to_area[t[i]] = area
+        pts_arr = np.array([[p.x, p.y] for p in points_2d])
+        tri = Delaunay(pts_arr, incremental=False)
+        triangles = tri.simplices
 
-    # Remove vertices with too small area
-    # but keep fixed vertices
-    unique_tri_indices = np.unique(triangles)
-    final_points_2d = []
-    for i, p in enumerate(points_2d):
-        if i in unique_tri_indices:
-            if (pt_to_area[i] > min_area) or (points_2d[i] in fixed_2d) or (p in poly_points_2d):
-                final_points_2d.append(p)
+        logger.debug(f"{len(triangles)=}")
 
-    # Triangulation - second pass
-    logger.debug("Triangulation - second pass")
+        # Find minimum face area for each vertex
+        pt_to_area = {}
+        for t in triangles:
+            p0, p1, p2 = points_2d[t[0]], points_2d[t[1]], points_2d[t[2]]
+            area = triangle_area(p0, p1, p2)
+            for i in range(3):
+                if t[i] not in pt_to_area:
+                    pt_to_area[t[i]] = area
+                elif area < pt_to_area[t[i]]:
+                    pt_to_area[t[i]] = area
 
-    pts_arr = np.array([[p.x, p.y] for p in final_points_2d])
-    tri = Delaunay(pts_arr, incremental=False)
-    triangles = tri.simplices
+        # Remove vertices with too small area
+        # but keep fixed vertices
+        unique_tri_indices = np.unique(triangles)
+        final_points_2d = []
+        for i, p in enumerate(points_2d):
+            if i in unique_tri_indices:
+                if (pt_to_area[i] > min_area) or (points_2d[i] in fixed_2d) or (p in poly_points_2d):
+                    final_points_2d.append(p)
 
-    logger.debug(f"{len(triangles)=}")
-    assert len(np.unique(triangles)) == len(final_points_2d)
-    points_2d = final_points_2d
+        # Triangulation - second pass
+        logger.debug("Triangulation - second pass")
 
-    faces = triangles.tolist()
+        pts_arr = np.array([[p.x, p.y] for p in final_points_2d])
+        tri = Delaunay(pts_arr, incremental=False)
+        triangles = tri.simplices
 
-    # Manually add fixed points if not present
-    # TODO: is it ever the case?
-    for fp in fixed_2d:
-        if fp not in points_2d:
-            raise MeshError(f"Fixed point not added to mesh {fp}")
+        logger.debug(f"{len(triangles)=}")
+        assert len(np.unique(triangles)) == len(final_points_2d)
+        points_2d = final_points_2d
+
+        faces = triangles.tolist()
+
+        # Check if all fixed points are present
+        missing_fixed_point = False
+        for fp in fixed_2d:
+            if fp not in points_2d:
+                missing_fixed_point = True
+                break
+
+        if not missing_fixed_point:  # TODO: add other conditions?
+            mesh_quality_ok = True
 
     # Rotate back to 3D
     new_points, _ = rotate_points_around_vector(
