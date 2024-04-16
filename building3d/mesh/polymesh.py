@@ -113,7 +113,10 @@ class PolyMesh:
 
         return stats
 
-    def generate(self, initial_vertices: dict[str, list[Point]] = {}):
+    def generate(
+        self,
+        initial_vertices: dict[str, list[Point]] = {},  # TODO: It is never used and can be deleted
+    ):
         """Generate mesh for all added polygons and solids."""
         use_init = True if len(initial_vertices) > 0 else False
         logger.debug(f"Generating mesh (using initial vertices: {use_init})")
@@ -131,7 +134,7 @@ class PolyMesh:
             vertices, faces = delaunay_triangulation(
                 poly=poly,
                 delta=self.delta,
-                init_vertices=initial,
+                init_vertices=initial,  # TODO: It is never used and can be deleted
             )
 
             # Increase face counter to include previously added vertices
