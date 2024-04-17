@@ -25,13 +25,16 @@ from building3d import random_within
 logger = logging.getLogger(__name__)
 
 
-def constr_delaunay_triangulation(
+def constr_delaunay_tri(
     poly: polygon.Polygon,
     delta: float = MESH_DELTA,
-    fix_vertices: list[Point] = [],
+    fixed_points: list[Point] = [],
 ) -> tuple[list[Point], list[list[int]]]:
 
+    logger.debug("Constrained Delaunay triangulation started")
+
     min_area = minimum_triangle_area(delta)
+    faces = []
 
     # Rotate polygon to XY
     logger.debug("Rotating polygon to XY")
@@ -51,8 +54,8 @@ def constr_delaunay_triangulation(
     poly_2d = polygon.Polygon(random_id(), points_2d)
 
     # Rotate fixed and suggested points to XY
-    if len(fix_vertices) > 0:
-        fixed_2d, _ = rotate_points_around_vector(fix_vertices, rotaxis, phi)
+    if len(fixed_points) > 0:
+        fixed_2d, _ = rotate_points_around_vector(fixed_points, rotaxis, phi)
     else:
         fixed_2d = []
 
@@ -110,7 +113,9 @@ def constr_delaunay_triangulation(
                     if poly_2d.is_point_inside_margin(p, margin=delta/2):
                         points_2d.append(p)
 
-        # Add polygon points to fixed and suggested
+        # Add polygon points to fixed
+        logger.debug("Adding fixed points")
+
         points_2d.extend(fixed_2d)
 
         # Triangulation - first pass
@@ -120,9 +125,11 @@ def constr_delaunay_triangulation(
         tri = Delaunay(pts_arr, incremental=False)
         triangles = tri.simplices
 
-        logger.debug(f"{len(triangles)=}")
+        logger.debug(f"Number of faces after 1st pass = {len(triangles)}")
 
         # Find minimum face area for each vertex
+        logger.debug("Calculating face areas")
+
         pt_to_area = {}
         for t in triangles:
             p0, p1, p2 = points_2d[t[0]], points_2d[t[1]], points_2d[t[2]]
@@ -135,6 +142,7 @@ def constr_delaunay_triangulation(
 
         # Remove vertices with too small area
         # but keep fixed vertices
+        logger.debug("Removing unconnected points and points connected to too small faces")
         unique_tri_indices = np.unique(triangles)
         final_points_2d = []
         for i, p in enumerate(points_2d):
@@ -149,7 +157,7 @@ def constr_delaunay_triangulation(
         tri = Delaunay(pts_arr, incremental=False)
         triangles = tri.simplices
 
-        logger.debug(f"{len(triangles)=}")
+        logger.debug(f"Number of faces after 2nd pass = {len(triangles)}")
         assert len(np.unique(triangles)) == len(final_points_2d)
         points_2d = final_points_2d
 

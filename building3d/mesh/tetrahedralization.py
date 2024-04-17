@@ -11,7 +11,7 @@ from building3d.geom.tetrahedron import tetrahedron_volume
 from building3d.geom.tetrahedron import minimum_tetra_volume
 from building3d.geom.tetrahedron import tetrahedron_centroid
 from building3d.geom.collapse_points import collapse_points
-from building3d.mesh.triangulation import delaunay_triangulation
+from building3d.mesh.constr_delaunay_tri import constr_delaunay_tri
 from building3d import random_within
 from building3d.config import MESH_JOGGLE
 from building3d.config import MESH_DELTA
@@ -52,7 +52,7 @@ def delaunay_tetrahedralization(
     if len(boundary_vertices.keys()) == 0:
         logger.debug("Need to create boundary mesh to get vertices at the surrounding polygons")
         for poly in sld.boundary:
-            polymesh_vertices, _ = delaunay_triangulation(poly, delta=delta)
+            polymesh_vertices, _ = constr_delaunay_tri(poly, delta=delta)
             for pt in polymesh_vertices:
                 if pt not in vertices:
                     vertices.append(pt)
