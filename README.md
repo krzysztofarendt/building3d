@@ -48,7 +48,7 @@ make example
   the cross product of corner vertices points in the same direction as polygon
   normal, it is convex)
 - [x] Constrained Delaunay triangulation
-- [ ] Constrained Delaunay tetrahedralization
+- [x] Constrained Delaunay tetrahedralization
 - [ ] Subpolygons
 - [ ] Test solid mesh with multiple solid instances
 - [ ] Accurate center of weight for Solid
