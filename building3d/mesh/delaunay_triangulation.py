@@ -25,11 +25,18 @@ from building3d import random_within
 logger = logging.getLogger(__name__)
 
 
-def constr_delaunay_tri(
+def delaunay_triangulation(
     poly: polygon.Polygon,
     delta: float = MESH_DELTA,
     fixed_points: list[Point] = [],
 ) -> tuple[list[Point], list[list[int]]]:
+    """Constrained Delaunay triangulation of a Polygon.
+
+    Args:
+        poly: polygon to be meshed
+        delta: approximate mesh size
+        fixed_points: list of points that should be used for the mesh
+    """
 
     logger.debug("Constrained Delaunay triangulation started")
 

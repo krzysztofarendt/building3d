@@ -4,7 +4,7 @@ from building3d import random_id
 from building3d.geom.triangle import triangle_centroid
 from building3d.geom.point import Point
 from building3d.geom.wall import Wall
-from building3d.mesh.constr_delaunay_tri import constr_delaunay_tri
+from building3d.mesh.delaunay_triangulation import delaunay_triangulation
 from building3d.mesh.polymesh import PolyMesh
 from building3d.display.plot_polymesh import plot_polymesh
 import building3d.display.colors as colors
@@ -34,7 +34,7 @@ def test_constr_triangulation(show=False):
 
     for delta in [0.075, 0.3, 1.0]:
         # Constrained
-        vertices, faces = constr_delaunay_tri(
+        vertices, faces = delaunay_triangulation(
             poly,
             delta=delta,
             fixed_points=fix_points,
@@ -77,7 +77,7 @@ def test_delaunay_triangulation_init_vertices_with_centroid():
     p3 = Point(0.0, 1.0, 0.0)
     floor = Wall(random_id(), [p0, p3, p2, p1])
     fixed = floor.points + [floor.centroid]
-    vertices, faces = constr_delaunay_tri(floor, fixed_points=fixed)
+    vertices, faces = delaunay_triangulation(floor, fixed_points=fixed)
 
     assert len(faces) == 4
     assert len(vertices) == 5
@@ -90,7 +90,7 @@ def test_delaunay_triangulation_init_vertices_without_polygon_vertex():
     p3 = Point(0.0, 1.0, 0.0)
     floor = Wall(random_id(), [p0, p3, p2, p1])
 
-    vertices_1, faces_1 = constr_delaunay_tri(floor)
+    vertices_1, faces_1 = delaunay_triangulation(floor)
 
     # Remove a corner vertex
     vertices_2 = vertices_1[1:]
@@ -102,7 +102,7 @@ def test_delaunay_triangulation_init_vertices_without_polygon_vertex():
 
     # Run triangulation again but with vertices_2 as fixed vertices
     # Make sure the missing corner is added back
-    vertices_3, faces_3 = constr_delaunay_tri(floor, fixed_points=vertices_2)
+    vertices_3, faces_3 = delaunay_triangulation(floor, fixed_points=vertices_2)
     assert vertices_1[0] in vertices_3, "Missing corner not added to vertices"
     assert len(faces_3) == len(faces_2) + 1
 

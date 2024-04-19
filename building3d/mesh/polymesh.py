@@ -10,7 +10,7 @@ from building3d.geom.point import Point
 from building3d.geom.triangle import triangle_area
 from building3d.geom.vector import length
 from building3d.geom.vector import vector
-from building3d.mesh.constr_delaunay_tri import constr_delaunay_tri
+from building3d.mesh.delaunay_triangulation import delaunay_triangulation
 from building3d.config import MESH_DELTA
 
 
@@ -130,7 +130,7 @@ class PolyMesh:
                 logger.debug(f"Adding {len(fixed_points[poly_name])} init. vert. for {poly_name}")
                 fixed = fixed_points[poly_name]
 
-            vertices, faces = constr_delaunay_tri(
+            vertices, faces = delaunay_triangulation(
                 poly=poly,
                 delta=self.delta,
                 fixed_points=fixed,

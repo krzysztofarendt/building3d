@@ -9,7 +9,7 @@ from building3d.geom.tetrahedron import tetrahedron_volume
 from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
 from building3d.mesh.tetrahedralization import delaunay_tetrahedralization
-from building3d.mesh.constr_delaunay_tri import constr_delaunay_tri
+from building3d.mesh.delaunay_triangulation import delaunay_triangulation
 
 
 def test_tetrahedralization():
@@ -38,12 +38,12 @@ def test_tetrahedralization():
     wall3 = Wall(wall3_id, [p0, p4, p7, p3])
     roof = Wall(roof_id, [p4, p5, p6, p7])
 
-    floor_vertices, floor_faces = constr_delaunay_tri(floor)
-    wall0_vertices, wall0_faces = constr_delaunay_tri(wall0)
-    wall1_vertices, wall1_faces = constr_delaunay_tri(wall1)
-    wall2_vertices, wall2_faces = constr_delaunay_tri(wall2)
-    wall3_vertices, wall3_faces = constr_delaunay_tri(wall3)
-    roof_vertices, roof_faces = constr_delaunay_tri(roof)
+    floor_vertices, floor_faces = delaunay_triangulation(floor)
+    wall0_vertices, wall0_faces = delaunay_triangulation(wall0)
+    wall1_vertices, wall1_faces = delaunay_triangulation(wall1)
+    wall2_vertices, wall2_faces = delaunay_triangulation(wall2)
+    wall3_vertices, wall3_faces = delaunay_triangulation(wall3)
+    roof_vertices, roof_faces = delaunay_triangulation(roof)
     zone = Zone(random_id(), [floor, wall0, wall1, wall2, wall3, roof])
 
     # If delta is too big, the solid mesh cannot be generated
