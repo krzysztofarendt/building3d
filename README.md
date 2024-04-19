@@ -47,11 +47,12 @@ make example
 - [x] Make it possible to define Polygon starting from a non-convex vector (if
   the cross product of corner vertices points in the same direction as polygon
   normal, it is convex)
-- [ ] Export/import to/from STL (and other formats?)
+- [x] Constrained Delaunay triangulation
+- [x] Constrained Delaunay tetrahedralization
 - [ ] Subpolygons
-- [ ] Constrained Delaunay
 - [ ] Test solid mesh with multiple solid instances
 - [ ] Accurate center of weight for Solid
+- [ ] Export/import to/from STL (and other formats?)
 - [ ] Wall could be a collection of Polygons instead of a Polygon subclass
 - [ ] Zone could be a collection of Solids instead of a Solid subclass
 - [ ] Try plotly instead of mayavi2

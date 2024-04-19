@@ -12,7 +12,7 @@ GEOM_EPSILON: float = 1e-5
 EPSILON: float = 1e-9
 
 # Mesh joggle - max distance to move vertices around
-MESH_JOGGLE: float = 0.1
+MESH_JOGGLE: float = 0.1  # Relative to delta
 MESH_DELTA: float = 1.0
 
 # Number of decimal digits for point coordinates used in hash

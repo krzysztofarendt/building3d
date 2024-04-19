@@ -7,6 +7,7 @@ from building3d.geom.exceptions import GeometryError
 from building3d.geom.exceptions import TriangulationError
 from building3d.geom.point import Point
 from building3d.geom.line import distance_point_to_edge
+from building3d.geom.plane import are_points_coplanar
 from building3d.geom.vector import normal
 from building3d.geom.vector import length
 from building3d.geom.triangle import triangle_centroid
@@ -152,11 +153,8 @@ class Polygon:
 
     def is_point_coplanar(self, p: Point) -> bool:
         """Checks whether the point p is coplanar with the polygon."""
-        # Temporarily add the test point to self.points
-        self.points.append(p)
-        is_coplanar = self._are_points_coplanar()
-        # Remove the test point from self.points
-        self.points = self.points[:-1]
+        points = self.points + [p]
+        is_coplanar = are_points_coplanar(*points)
 
         return is_coplanar
 
@@ -351,25 +349,6 @@ class Polygon:
 
         return abs(result / 2)
 
-    def _are_points_coplanar(self) -> bool:
-        # TODO: use building3d.geom.plane.are_points_coplanar()
-        vec_n = self.normal
-
-        # Plane equation:
-        # ax + by + cz + d = 0
-        # (a, b, c) are taken from the normal vector
-        # d is calculated by substituting one of the points
-        ref = 0  # reference point index
-        ref_pt = self.points[ref]
-        d = -1 * (vec_n[0] * ref_pt.x + vec_n[1] * ref_pt.y + vec_n[2] * ref_pt.z)
-
-        # Check if all points lay on the same plane
-        for pt in self.points:
-            coplanar = np.abs(vec_n[0] * pt.x + vec_n[1] * pt.y + vec_n[2] * pt.z + d) < GEOM_EPSILON
-            if not coplanar:
-                return False
-        return True
-
     def _verify(self):
         """Verify geometry correctness."""
         # At least 3 points
@@ -377,7 +356,7 @@ class Polygon:
             raise GeometryError(f"Polygon has only {len(self.points)} points")
 
         # Check if all points are coplanar
-        if not self._are_points_coplanar():
+        if not are_points_coplanar(*self.points):
             raise GeometryError(f"Points of polygon aren't coplanar")
 
     def _centroid(self) -> Point:

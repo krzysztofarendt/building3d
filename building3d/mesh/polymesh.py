@@ -5,13 +5,12 @@ import numpy as np
 
 import building3d.geom.solid
 import building3d.logger
-from building3d.geom.collapse_points import collapse_points
 import building3d.geom.polygon
 from building3d.geom.point import Point
 from building3d.geom.triangle import triangle_area
 from building3d.geom.vector import length
 from building3d.geom.vector import vector
-from building3d.mesh.triangulation import delaunay_triangulation
+from building3d.mesh.delaunay_triangulation import delaunay_triangulation
 from building3d.config import MESH_DELTA
 
 
@@ -113,9 +112,12 @@ class PolyMesh:
 
         return stats
 
-    def generate(self, initial_vertices: dict[str, list[Point]] = {}):
+    def generate(
+        self,
+        fixed_points: dict[str, list[Point]] = {},
+    ):
         """Generate mesh for all added polygons and solids."""
-        use_init = True if len(initial_vertices) > 0 else False
+        use_init = True if len(fixed_points) > 0 else False
         logger.debug(f"Generating mesh (using initial vertices: {use_init})")
         self.reinit()
 
@@ -123,15 +125,15 @@ class PolyMesh:
         for poly_name, poly in self.polygons.items():
             logger.debug(f"Processing {poly_name}")
 
-            initial = []
-            if poly_name in initial_vertices.keys():
-                logger.debug(f"Adding {len(initial_vertices[poly_name])} init. vert. for {poly_name}")
-                initial = initial_vertices[poly_name]
+            fixed = []
+            if poly_name in fixed_points.keys():
+                logger.debug(f"Adding {len(fixed_points[poly_name])} init. vert. for {poly_name}")
+                fixed = fixed_points[poly_name]
 
             vertices, faces = delaunay_triangulation(
                 poly=poly,
                 delta=self.delta,
-                init_vertices=initial,
+                fixed_points=fixed,
             )
 
             # Increase face counter to include previously added vertices
@@ -145,6 +147,3 @@ class PolyMesh:
             self.faces.extend(faces)
             face_owners = [poly_name for _ in faces]
             self.face_owners.extend(face_owners)
-
-        # TODO: info about ownership would be lost during collapsing points
-        # self.vertices, self.faces = collapse_points(self.vertices, self.faces)

@@ -2,14 +2,14 @@ import numpy as np
 import pytest
 
 from building3d import random_id
-from building3d.geom.exceptions import GeometryError
+from building3d.mesh.exceptions import MeshError
 from building3d.geom.plane import are_points_coplanar
 from building3d.geom.point import Point
 from building3d.geom.tetrahedron import tetrahedron_volume
 from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
 from building3d.mesh.tetrahedralization import delaunay_tetrahedralization
-from building3d.mesh.triangulation import delaunay_triangulation
+from building3d.mesh.delaunay_triangulation import delaunay_triangulation
 
 
 def test_tetrahedralization():
@@ -47,7 +47,7 @@ def test_tetrahedralization():
     zone = Zone(random_id(), [floor, wall0, wall1, wall2, wall3, roof])
 
     # If delta is too big, the solid mesh cannot be generated
-    with pytest.raises(GeometryError):
+    with pytest.raises(MeshError):
         vertices, tetrahedra = delaunay_tetrahedralization(
             sld=zone,
             boundary_vertices={
