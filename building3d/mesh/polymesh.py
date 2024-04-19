@@ -29,16 +29,16 @@ class PolyMesh:
 
         # Attributes filled with data by self.generate()
         self.vertices = []
-        self.vertex_owners = []  # polygon names
+        self.vertex_owners = {}
         self.faces = []
-        self.face_owners = []  # polygon names
+        self.face_owners = {}
 
     def reinit(self):
         logger.debug("Reinitializing PolyMesh")
         self.vertices = []
-        self.vertex_owners = []  # polygon names
+        self.vertex_owners = {}
         self.faces = []
-        self.face_owners = []  # polygon names
+        self.face_owners = {}
 
     def add_polygon(self, poly: building3d.geom.polygon.Polygon):
         logger.debug(f"Adding polygon: {poly}")
@@ -49,11 +49,7 @@ class PolyMesh:
         logger.debug("Getting the list of Points per polygon")
         vertices = {}
         for name in self.polygons.keys():
-            vertices[name] = []
-            for i in range(len(self.vertices)):
-                if self.vertex_owners[i] == name:
-                    v = self.vertices[i]
-                    vertices[name].append(v)
+            vertices[name] = [self.vertices[i] for i in self.vertex_owners[name]]
         log_return = {k: len(v) for (k, v) in vertices.items()}
         logger.debug(f"Number of Points per polygon: {log_return}")
         return vertices
@@ -141,9 +137,12 @@ class PolyMesh:
             faces += len(self.vertices)
             faces = faces.tolist()
 
+            len_before = len(self.vertices)
             self.vertices.extend(vertices)
-            self.vertex_owners.extend([poly_name for _ in vertices])
+            len_after = len(self.vertices)
+            self.vertex_owners[poly_name] = [x for x in range(len_before, len_after)]
 
+            len_before = len(self.faces)
             self.faces.extend(faces)
-            face_owners = [poly_name for _ in faces]
-            self.face_owners.extend(face_owners)
+            len_after = len(self.faces)
+            self.face_owners[poly_name] = [x for x in range(len_before, len_after)]

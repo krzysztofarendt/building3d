@@ -10,7 +10,6 @@ from building3d.geom.solid import Solid
 from building3d.geom.tetrahedron import tetrahedron_volume
 from building3d.geom.tetrahedron import minimum_tetra_volume
 from building3d.geom.tetrahedron import tetrahedron_centroid
-from building3d.geom.collapse_points import collapse_points
 from building3d.mesh.delaunay_triangulation import delaunay_triangulation
 from building3d import random_within
 from building3d.config import MESH_JOGGLE
@@ -117,9 +116,6 @@ def delaunay_tetrahedralization(
         logger.debug("All vertices have been used. Great!")
     else:
         raise MeshError("Not all vertices have been used for mesh. Does this ever happen?")
-
-    logger.debug("Attempting to collapse points in SolidMesh...")
-    vertices, tetrahedra = collapse_points(vertices, tetrahedra.tolist())  # TODO: is it needed?
 
     logger.debug("Attempting to find and remove elements with invalid geometry or position...")
     tetrahedra_ok = []

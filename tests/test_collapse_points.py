@@ -59,14 +59,14 @@ def test_collapse_points():
     assert max_f - diff_num_vertices == max_new_f
 
     # Check if face normals are equal for each face attached to a given polygon
-    for i, face in enumerate(mesh.faces):
-        name = mesh.face_owners[i]
-        poly = mesh.polygons[name]
-        p0 = mesh.vertices[face[0]]
-        p1 = mesh.vertices[face[1]]
-        p2 = mesh.vertices[face[2]]
-        vnorm = normal(p0, p1, p2)
-        assert np.isclose(vnorm, poly.normal, atol=GEOM_EPSILON).all()
+    for face in mesh.faces:
+        for name, poly in mesh.polygons.items():
+            if face in mesh.face_owners[name]:
+                p0 = mesh.vertices[face[0]]
+                p1 = mesh.vertices[face[1]]
+                p2 = mesh.vertices[face[2]]
+                vnorm = normal(p0, p1, p2)
+                assert np.isclose(vnorm, poly.normal, atol=GEOM_EPSILON).all()
 
 
 if __name__ == "__main__":
