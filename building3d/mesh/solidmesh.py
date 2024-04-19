@@ -21,9 +21,7 @@ class SolidMesh:
 
         # Attributes filled with data by self.generate()
         self.vertices = []
-        self.vertex_owners = []  # solid names
         self.elements = []
-        self.element_owners = []  # solid names
         self.volumes = []
 
     def add_solid(self, sld: building3d.geom.solid.Solid):
@@ -61,20 +59,18 @@ class SolidMesh:
 
         return stats
 
-    def generate(self, boundary_vertices: dict[str, list[Point]] = {}):  # TODO
+    def generate(self, boundary_vertices: dict[str, list[Point]] = {}):
         """Generate mesh for all added polygons and solids."""
 
         # Solids
-        for sld_name, sld in self.solids.items():
+        for _, sld in self.solids.items():
             vertices, tetrahedra = delaunay_tetrahedralization(
                 sld=sld,
                 boundary_vertices=boundary_vertices,
                 delta=self.delta
             )
             self.vertices.extend(vertices)
-            self.vertex_owners.extend([sld_name for _ in vertices])
             self.elements.extend(tetrahedra)
-            self.element_owners.extend([sld_name for _ in tetrahedra])
 
         # Calculate volumes
         for el in self.elements:
@@ -97,26 +93,18 @@ class SolidMesh:
             # Filtered copy
             # TODO: Reorder vertices, because now all of them are copied even if they are not in `elements`
             mesh.vertices = self.vertices
-            mesh.vertex_owners = self.vertex_owners
             mesh.elements = elements
-            mesh.element_owners = [owner for i, owner in enumerate(self.element_owners) if i in elements]
             mesh.volumes = [vol for i, vol in enumerate(self.volumes) if i in elements]
         elif max_vol is not None:
             # Filtered copy
             # TODO: Reorder vertices, because now all of them are copied even if they are not in `elements`
             mesh.vertices = self.vertices
-            mesh.vertex_owners = self.vertex_owners
             mesh.elements = [el for el, vol in zip(self.elements, self.volumes) if vol < max_vol]
-            mesh.element_owners = [
-                own for own, vol in zip(self.element_owners, self.volumes) if vol < max_vol
-            ]
             mesh.volumes = [vol for vol in self.volumes if vol < max_vol]
         else:
             # Full copy
             mesh.vertices = self.vertices
-            mesh.vertex_owners = self.vertex_owners
             mesh.elements = self.elements
-            mesh.element_owners = self.element_owners
             mesh.volumes = self.volumes
 
         return mesh
