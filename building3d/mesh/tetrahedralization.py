@@ -4,7 +4,7 @@ import logging
 import numpy as np
 from scipy.spatial import Delaunay
 
-from building3d.geom.exceptions import GeometryError
+from building3d.mesh.exceptions import MeshError
 from building3d.geom.point import Point
 from building3d.geom.solid import Solid
 from building3d.geom.tetrahedron import tetrahedron_volume
@@ -77,7 +77,7 @@ def delaunay_tetrahedralization(
 
     # Make sure delta smaller than bbox dimensions
     if delta >= xmax - xmin or delta >= ymax - ymin or delta >= zmax - zmin:
-        raise GeometryError(f"Solid {sld.name} cannot be meshed due to too large delta ({delta})")
+        raise MeshError(f"Solid {sld.name} cannot be meshed due to too large delta ({delta})")
 
     xgrid = np.arange(xmin + delta, xmax, delta)
     ygrid = np.arange(ymin + delta, ymax, delta)
@@ -91,6 +91,9 @@ def delaunay_tetrahedralization(
                     z + random_within(MESH_JOGGLE * delta),
                 )
                 # TODO: Below code is very slow -> need to optimize
+                #       poly.distance_point_to_polygon can be replaced with "thick" polygons
+                #       i.e. making solids from the polygons and checking if the point
+                #       is inside this solid (which should be faster)
                 if sld.is_point_inside(pt):
                     far_enough_from_boundary = True
                     for poly in sld.boundary:
