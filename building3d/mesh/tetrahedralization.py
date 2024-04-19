@@ -112,24 +112,11 @@ def delaunay_tetrahedralization(
 
     # Remove unused points and tetrahedra with small volume
     unique_indices = np.unique(tetrahedra)
-    final_points = []
 
     if len(unique_indices) == len(vertices):
-        logger.debug("All vertices have been used. Second pass not needed.")
+        logger.debug("All vertices have been used. Great!")
     else:
-        logger.debug("Some vertices have not been used. Attempting a second pass.")
-        logger.debug(f"Number of vertices to be used is {len(unique_indices)} out of {len(vertices)}")
-
-        for i, p in enumerate(vertices):
-            if i in unique_indices:
-                final_points.append(p)
-
-        vertices = final_points
-        pts_arr = np.array([[p.x, p.y, p.z] for p in vertices])
-        logger.debug(f"Delaunay tetrahedralization (second pass) on point array with shape {pts_arr.shape}")
-        delaunay = Delaunay(pts_arr, qhull_options="Qt", incremental=False)
-        tetrahedra = delaunay.simplices
-        logger.debug(f"Number of resulting mesh tetrahedra in {sld.name} = {len(tetrahedra)}")
+        raise MeshError("Not all vertices have been used for mesh. Does this ever happen?")
 
     logger.debug("Attempting to collapse points in SolidMesh...")
     vertices, tetrahedra = collapse_points(vertices, tetrahedra.tolist())  # TODO: is it needed?
@@ -155,26 +142,11 @@ def delaunay_tetrahedralization(
     logger.debug(f"Final number of vertices used in mesh {sld.name} = {len(np.unique(tetrahedra))}")
     logger.debug(f"Final number of all vertices in {sld.name} = {len(vertices)}")
 
-    # SANITY CHECKS
-    # Make sure all boundary vertices are in the final_vertices
-    # and that the number of returned vertices is higher than the sum of polygon mesh vertices
-    unique_boundary_vertices = []
-    unique_points = [vertices[i] for i in np.unique(np.array(tetrahedra))]
+    # Sanity checks
+    unique_indices = np.unique(tetrahedra)
+    assert len(unique_indices) == len(vertices), "Not all vertices have been used for mesh!"
 
-    for poly_name, poly_points in boundary_vertices.items():
-        for pt in poly_points:
-            if pt not in unique_boundary_vertices:
-                unique_boundary_vertices.append(pt)
-            assert pt in vertices, \
-                f"{pt} (from mesh of {poly_name} polygon) not in the solid mesh"
-            assert pt in unique_points, "Not all points used for mesh vertices"
-
-    assert len(vertices) > len(unique_boundary_vertices), \
-        "Solid mesh has less vertices than boundary mesh"
-
-    # TODO: Below checks may not always be true,
-    #       because I am now removing incorrect tetrahedra without reordering vertices
-    assert np.max(np.array(tetrahedra)) == len(vertices) - 1, \
-        "Number of vertices is different than max index used in tetrahedra"
+    for pt in boundary_pts:
+        assert pt in vertices, f"Boundary point missing: {pt}"
 
     return vertices, tetrahedra
