@@ -2,7 +2,6 @@ import numpy as np
 import pytest
 
 from building3d import random_id
-from building3d.config import GEOM_EPSILON
 from building3d.geom.exceptions import GeometryError
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon

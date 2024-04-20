@@ -4,8 +4,8 @@ from building3d.geom.point import Point
 from building3d.geom.tetrahedron import minimum_tetra_volume
 from building3d.geom.tetrahedron import tetrahedron_centroid
 from building3d.geom.triangle import minimum_triangle_area
-from building3d.geom.wall import Wall
-from building3d.geom.zone import Zone
+from building3d.geom.polygon import Polygon
+from building3d.geom.solid import Solid
 from building3d.mesh.mesh import Mesh
 
 
@@ -24,16 +24,16 @@ def test_mesh_l_shape(show=False):
     p10 = Point(2.0, 1.0, 1.0) * stretch
     p11 = Point(0.0, 1.0, 1.0) * stretch
 
-    floor = Wall(random_id(), [p0, p5, p4, p3, p2, p1])
-    roof = Wall(random_id(), [p6, p7, p8, p9, p10, p11])
-    w_0_1_7_6 = Wall(random_id(), [p0, p1, p7, p6])
-    w_1_2_8_7 = Wall(random_id(), [p1, p2, p8, p7])
-    w_2_3_9_8 = Wall(random_id(), [p2, p3, p9, p8])
-    w_4_10_9_3 = Wall(random_id(), [p4, p10, p9, p3])
-    w_4_5_11_10 = Wall(random_id(), [p4, p5, p11, p10])
-    w_0_6_11_5 = Wall(random_id(), [p0, p6, p11, p5])
+    floor = Polygon(random_id(), [p0, p5, p4, p3, p2, p1])
+    roof = Polygon(random_id(), [p6, p7, p8, p9, p10, p11])
+    w_0_1_7_6 = Polygon(random_id(), [p0, p1, p7, p6])
+    w_1_2_8_7 = Polygon(random_id(), [p1, p2, p8, p7])
+    w_2_3_9_8 = Polygon(random_id(), [p2, p3, p9, p8])
+    w_4_10_9_3 = Polygon(random_id(), [p4, p10, p9, p3])
+    w_4_5_11_10 = Polygon(random_id(), [p4, p5, p11, p10])
+    w_0_6_11_5 = Polygon(random_id(), [p0, p6, p11, p5])
 
-    zone = Zone(
+    zone = Solid(
         random_id(),
         [
             floor,

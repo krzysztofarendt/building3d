@@ -1,12 +1,13 @@
+from typing import Sequence
+
 from mayavi import mlab
 
 from building3d.geom.polygon import Polygon
-from building3d.geom.wall import Wall
 import building3d.display.colors as colors
 
 
 def plot_polygons(
-    polygons: list[Polygon] | list[Wall],
+    polygons: Sequence[Polygon],
     show_triangulation: bool = True,
     show_normals: bool = True,
     show: bool = False,

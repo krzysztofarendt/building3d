@@ -6,8 +6,8 @@ from building3d.mesh.exceptions import MeshError
 from building3d.geom.plane import are_points_coplanar
 from building3d.geom.point import Point
 from building3d.geom.tetrahedron import tetrahedron_volume
-from building3d.geom.wall import Wall
-from building3d.geom.zone import Zone
+from building3d.geom.polygon import Polygon
+from building3d.geom.solid import Solid
 from building3d.mesh.tetrahedralization import delaunay_tetrahedralization
 from building3d.mesh.delaunay_triangulation import delaunay_triangulation
 
@@ -31,20 +31,20 @@ def test_tetrahedralization():
     wall3_id = random_id()
     roof_id = random_id()
 
-    floor = Wall(floor_id, [p0, p3, p2, p1])
-    wall0 = Wall(wall0_id, [p0, p1, p5, p4])
-    wall1 = Wall(wall1_id, [p1, p2, p6, p5])
-    wall2 = Wall(wall2_id, [p3, p7, p6, p2])
-    wall3 = Wall(wall3_id, [p0, p4, p7, p3])
-    roof = Wall(roof_id, [p4, p5, p6, p7])
+    floor = Polygon(floor_id, [p0, p3, p2, p1])
+    wall0 = Polygon(wall0_id, [p0, p1, p5, p4])
+    wall1 = Polygon(wall1_id, [p1, p2, p6, p5])
+    wall2 = Polygon(wall2_id, [p3, p7, p6, p2])
+    wall3 = Polygon(wall3_id, [p0, p4, p7, p3])
+    roof = Polygon(roof_id, [p4, p5, p6, p7])
 
-    floor_vertices, floor_faces = delaunay_triangulation(floor)
-    wall0_vertices, wall0_faces = delaunay_triangulation(wall0)
-    wall1_vertices, wall1_faces = delaunay_triangulation(wall1)
-    wall2_vertices, wall2_faces = delaunay_triangulation(wall2)
-    wall3_vertices, wall3_faces = delaunay_triangulation(wall3)
-    roof_vertices, roof_faces = delaunay_triangulation(roof)
-    zone = Zone(random_id(), [floor, wall0, wall1, wall2, wall3, roof])
+    floor_vertices, _ = delaunay_triangulation(floor)
+    wall0_vertices, _ = delaunay_triangulation(wall0)
+    wall1_vertices, _ = delaunay_triangulation(wall1)
+    wall2_vertices, _ = delaunay_triangulation(wall2)
+    wall3_vertices, _ = delaunay_triangulation(wall3)
+    roof_vertices, _ = delaunay_triangulation(roof)
+    zone = Solid(random_id(), [floor, wall0, wall1, wall2, wall3, roof])
 
     # If delta is too big, the solid mesh cannot be generated
     with pytest.raises(MeshError):
