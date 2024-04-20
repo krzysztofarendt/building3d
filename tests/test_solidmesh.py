@@ -4,9 +4,9 @@ from building3d import random_id
 from building3d.config import GEOM_EPSILON
 from building3d.display.plot_solidmesh import plot_solidmesh
 from building3d.geom.point import Point
-from building3d.geom.tetrahedron import tetrahedron_volume
 from building3d.geom.polygon import Polygon
 from building3d.geom.solid import Solid
+from building3d.geom.tetrahedron import tetrahedron_volume
 from building3d.mesh.solidmesh import SolidMesh
 
 

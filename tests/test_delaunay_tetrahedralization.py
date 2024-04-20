@@ -2,12 +2,12 @@ import numpy as np
 import pytest
 
 from building3d import random_id
-from building3d.mesh.exceptions import MeshError
 from building3d.geom.plane import are_points_coplanar
 from building3d.geom.point import Point
-from building3d.geom.tetrahedron import tetrahedron_volume
 from building3d.geom.polygon import Polygon
 from building3d.geom.solid import Solid
+from building3d.geom.tetrahedron import tetrahedron_volume
+from building3d.mesh.exceptions import MeshError
 from building3d.mesh.tetrahedralization import delaunay_tetrahedralization
 from building3d.mesh.triangulation import delaunay_triangulation
 

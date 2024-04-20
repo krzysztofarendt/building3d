@@ -1,9 +1,9 @@
 from building3d import random_id
 from building3d.geom.point import Point
-from building3d.geom.tetrahedron import minimum_tetra_volume
-from building3d.geom.triangle import minimum_triangle_area
 from building3d.geom.polygon import Polygon
 from building3d.geom.solid import Solid
+from building3d.geom.tetrahedron import minimum_tetra_volume
+from building3d.geom.triangle import minimum_triangle_area
 from building3d.mesh.mesh import Mesh
 
 
