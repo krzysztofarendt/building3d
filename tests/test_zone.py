@@ -1,16 +1,19 @@
+import pytest
+
 from building3d import random_id
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
 from building3d.geom.wall import Wall
 from building3d.geom.solid import Solid
 from building3d.geom.zone import Zone
+from building3d.geom.exceptions import GeometryError
 
 
 MAIN_SOLID_NAME = "main_solid"
 SUB_SOLID_NAME = "sub_solid"
 
 
-def make_zone() -> Zone:
+def make_zone(subsolid_move=[0.0, 0.0, 0.0]) -> Zone:
     # Large solid, cube 1x1x1m3
     p0 = Point(0.0, 0.0, 0.0)
     p1 = Point(1.0, 0.0, 0.0)
@@ -47,14 +50,15 @@ def make_zone() -> Zone:
 
     # Small solid, cube 0.5x0.5x0.5m3
     # Point p8 overlapping with point p0 (on purpose)
-    p8 = Point(0.0, 0.0, 0.0)  # 0
-    p9 = Point(0.5, 0.0, 0.0)  # 1
-    p10 = Point(0.5, 0.5, 0.0)  # 2
-    p11 = Point(0.0, 0.5, 0.0)  # 3
-    p12 = Point(0.0, 0.0, 0.5)  # 4
-    p13 = Point(0.5, 0.0, 0.5)  # 5
-    p14 = Point(0.5, 0.5, 0.5)  # 6
-    p15 = Point(0.0, 0.5, 0.5)  # 7
+    translate = subsolid_move
+    p8 = Point(0.0, 0.0, 0.0) + translate # 0
+    p9 = Point(0.5, 0.0, 0.0) + translate # 1
+    p10 = Point(0.5, 0.5, 0.0) + translate # 2
+    p11 = Point(0.0, 0.5, 0.0) + translate # 3
+    p12 = Point(0.0, 0.0, 0.5) + translate # 4
+    p13 = Point(0.5, 0.0, 0.5) + translate # 5
+    p14 = Point(0.5, 0.5, 0.5) + translate # 6
+    p15 = Point(0.0, 0.5, 0.5) + translate # 7
 
     poly_floor_small = Polygon(random_id(), [p8, p11, p10, p9])
     poly_wall0_small = Polygon(random_id(), [p8, p9, p13, p12])
@@ -94,7 +98,16 @@ def make_zone() -> Zone:
     return zone
 
 
-def test_zone():
+def test_zone_subsolid_entirely_inside():
+    zone = make_zone(subsolid_move=[0.1, 0.1, 0.1])
+    assert len(zone.solids.keys()) == 2
+    assert len(zone.solidgraph[MAIN_SOLID_NAME]) == 1
+
+def test_zone_subsolid_shares_some_boundary():
     zone = make_zone()
     assert len(zone.solids.keys()) == 2
     assert len(zone.solidgraph[MAIN_SOLID_NAME]) == 1
+
+def test_zone_incorrect_geometry():
+    with pytest.raises(GeometryError):
+        _ = make_zone(subsolid_move=[-0.1, -0.1, -0.1])

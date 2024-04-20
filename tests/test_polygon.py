@@ -287,6 +287,22 @@ def test_is_point_inside_ortho_projection_fwd_only():
     fwd_only = False
     assert poly.is_point_inside_projection(ptest, vec, fwd_only) is False
 
+    ptest = Point(1.0, 0.5, 0.5)  # This point is at the polygon's centroid
+    vec = np.array([1.0, 0.0, 0.0])
+    for vec in [np.array([1.0, 0.0, 0.0]), np.array([0.0, 1.0, 0.0]), np.array([0.0, 0.0, 1.0])]:
+        fwd_only = True
+        assert poly.is_point_inside_projection(ptest, vec, fwd_only) is True
+        fwd_only = False
+        assert poly.is_point_inside_projection(ptest, vec, fwd_only) is True
+
+    ptest = Point(1.0, 0.0, 0.0)  # This point is at the polygon's corner
+    vec = np.array([1.0, 0.0, 0.0])
+    for vec in [np.array([1.0, 0.0, 0.0]), np.array([0.0, 1.0, 0.0]), np.array([0.0, 0.0, 1.0])]:
+        fwd_only = True
+        assert poly.is_point_inside_projection(ptest, vec, fwd_only) is True
+        fwd_only = False
+        assert poly.is_point_inside_projection(ptest, vec, fwd_only) is True
+
 
 def test_is_point_behind():
     p1 = Point(1.0, 0.0, 0.0)

@@ -52,6 +52,8 @@ class Solid:
     def is_point_inside(self, p: Point) -> bool:
         """Checks whether the point p is inside the solid.
 
+        Being at the boundary is assumed to be inside.
+
         Uses the ray casting algorithm:
         draw a horizontal line in a chosen direction from the point
         and count how many times it intersects with the edges of the
@@ -71,7 +73,12 @@ class Solid:
         if p.x < min_x or p.y < min_y or p.z < min_z:
             return False
 
+        # Check if point is at the boundary
+        if self.is_point_at_the_boundary(p):
+            return True
+
         # It is possible, so we proceed with the ray casting algorithm
+        # This algorithm may give wrong answer if the point lays in the corner
         vec = np.array([1.0, 0.0, 0.0])
         num_crossings = 0
         for poly in self.boundary:

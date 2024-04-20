@@ -1,6 +1,7 @@
 """Wall class"""
 
-from .polygon import Polygon
+from building3d.geom.polygon import Polygon
+from building3d.geom.exceptions import GeometryError
 
 
 class Wall:
@@ -20,6 +21,8 @@ class Wall:
         Only 1 level of subpolygons is allowed, i.e. a polygon cannot be
         a subpolygon to another subpolygon.
 
+        A subpolygon must be entirely inside its parent polygon.
+
         Args:
             poly: polygon to be added
             parent: name of parent polygon if this is a subpolygon (default None)
@@ -31,3 +34,8 @@ class Wall:
         else:
             # Add this polygon to its parent
             self.polygraph[parent].append(poly.name)
+
+            # Assert polygon is inside parent polygon
+            for p in poly.points:
+                if not self.polygons[parent].is_point_inside(p):
+                    raise GeometryError(f"Polygon {poly.name} is not entirely inside {parent}")
