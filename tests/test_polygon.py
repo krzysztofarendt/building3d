@@ -364,5 +364,14 @@ def test_copy():
     assert not (poly_a is poly_b)
 
 
+def test_is_facing_polygon():
+    p1 = Point(0.0, 4.0, -1.0)
+    p2 = Point(1.0, -1.0, 2.0)
+    p3 = Point(0.0, -2.0, 3.0)
+    poly_a = Polygon(random_id(), [p1, p2, p3])
+    poly_b = Polygon(random_id(), [p3, p2, p1])
+    assert poly_a.is_facing_polygon(poly_b)
+
+
 if __name__ == "__main__":
     test_distance_point_to_polygon()

@@ -6,6 +6,10 @@ from building3d.geom.exceptions import GeometryError
 
 class Zone:
     """Zone is a collection of solids with additional attributes and methods.
+
+    Solids must be adjacent.
+
+    Zone is used to model 3D phenomena (e.g. ray tracing, heat transfer, CFD).
     """
     def __init__(self, name: str):
         self.name = name
@@ -25,7 +29,22 @@ class Zone:
             sld: solid to be added
             parent: name of parent solid if this is a subsolid (default None)
         """
+        # Check if it is adjacent to existing solids
+        if len(self.solids) > 1:
+            adjacent = False
+            for _, existing_sld in self.solids.items():
+                if sld.is_adjacent_to_solid(existing_sld):
+                    adjacent = True
+            if not adjacent:
+                raise GeometryError(
+                    f"Cannot add solid {sld.name}, because it is disconnected "
+                    f"from other solids in this zone: {self.solids.keys}"
+                )
+
+        # Add solid
         self.solids[sld.name] = sld
+
+        # Map to parent
         if parent is None:
             # This might be a parent solid
             self.solidgraph[sld.name] = []

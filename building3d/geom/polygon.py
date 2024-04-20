@@ -286,6 +286,19 @@ class Polygon:
         else:
             return False
 
+    def is_facing_polygon(self, poly) -> bool:
+        """Checks if this polygon is facing another polygon.
+
+        Returns True if all points of two polygons are equal and their normals
+        are pointing towards each other.
+        """
+        this_points = set(self.points)
+        other_points = set(poly.points)
+        if this_points == other_points:
+            if np.isclose(self.normal * -1, poly.normal).all():
+                return True
+        return False
+
     def _triangulate(self) -> list:
         """Return a list of triangles (i, j, k) using the ear clipping algorithm.
 

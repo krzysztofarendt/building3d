@@ -98,6 +98,14 @@ class Solid:
                 return True
         return False
 
+    def is_adjacent_to_solid(self, sld) -> bool:
+        """Checks if this solid is adjacent to another solid."""
+        for this_poly in self.boundary:
+            for other_poly in sld.boundary:
+                if this_poly.is_facing_polygon(other_poly):
+                    return True
+        return False
+
     def _volume(self) -> float:
         """Based on: http://chenlab.ece.cornell.edu/Publication/Cha/icip01_Cha.pdf"""
         total_volume = 0.0

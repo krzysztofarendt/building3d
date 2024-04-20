@@ -129,5 +129,68 @@ def test_volume():
     assert np.isclose(sld.volume, 2.0, atol=GEOM_EPSILON)
 
 
+def test_is_adjacent():
+    p0 = Point(0.0, 0.0, 0.0)
+    p1 = Point(1.0, 0.0, 0.0)
+    p2 = Point(1.0, 1.0, 0.0)
+    p3 = Point(0.0, 1.0, 0.0)
+    p4 = Point(0.0, 0.0, 1.0)
+    p5 = Point(1.0, 0.0, 1.0)
+    p6 = Point(1.0, 1.0, 1.0)
+    p7 = Point(0.0, 1.0, 1.0)
+
+    floor_1 = Polygon(random_id(), [p0, p3, p2, p1])
+    wall0_1 = Polygon(random_id(), [p0, p1, p5, p4])
+    wall1_1 = Polygon(random_id(), [p1, p2, p6, p5])
+    wall2_1 = Polygon(random_id(), [p3, p7, p6, p2])
+    wall3_1 = Polygon(random_id(), [p0, p4, p7, p3])
+    ceiling_1 = Polygon(random_id(), [p4, p5, p6, p7])
+
+    sld_1 = Solid(random_id(), [floor_1, wall0_1, wall1_1, wall2_1, wall3_1, ceiling_1])
+
+    move = [1.0, 0.0, 0.0]
+    p0 = Point(0.0, 0.0, 0.0) + move
+    p1 = Point(1.0, 0.0, 0.0) + move
+    p2 = Point(1.0, 1.0, 0.0) + move
+    p3 = Point(0.0, 1.0, 0.0) + move
+    p4 = Point(0.0, 0.0, 1.0) + move
+    p5 = Point(1.0, 0.0, 1.0) + move
+    p6 = Point(1.0, 1.0, 1.0) + move
+    p7 = Point(0.0, 1.0, 1.0) + move
+
+    floor_2 = Polygon(random_id(), [p0, p3, p2, p1])
+    wall0_2 = Polygon(random_id(), [p0, p1, p5, p4])
+    wall1_2 = Polygon(random_id(), [p1, p2, p6, p5])
+    wall2_2 = Polygon(random_id(), [p3, p7, p6, p2])
+    wall3_2 = Polygon(random_id(), [p0, p4, p7, p3])
+    ceiling_2 = Polygon(random_id(), [p4, p5, p6, p7])
+
+    sld_2 = Solid(random_id(), [floor_2, wall0_2, wall1_2, wall2_2, wall3_2, ceiling_2])
+
+    move = [2.0, 0.0, 0.0]
+    p0 = Point(0.0, 0.0, 0.0) + move
+    p1 = Point(1.0, 0.0, 0.0) + move
+    p2 = Point(1.0, 1.0, 0.0) + move
+    p3 = Point(0.0, 1.0, 0.0) + move
+    p4 = Point(0.0, 0.0, 1.0) + move
+    p5 = Point(1.0, 0.0, 1.0) + move
+    p6 = Point(1.0, 1.0, 1.0) + move
+    p7 = Point(0.0, 1.0, 1.0) + move
+
+    floor_3 = Polygon(random_id(), [p0, p3, p2, p1])
+    wall0_3 = Polygon(random_id(), [p0, p1, p5, p4])
+    wall1_3 = Polygon(random_id(), [p1, p2, p6, p5])
+    wall2_3 = Polygon(random_id(), [p3, p7, p6, p2])
+    wall3_3 = Polygon(random_id(), [p0, p4, p7, p3])
+    ceiling_3 = Polygon(random_id(), [p4, p5, p6, p7])
+
+    sld_3 = Solid(random_id(), [floor_3, wall0_3, wall1_3, wall2_3, wall3_3, ceiling_3])
+
+    assert sld_1.is_adjacent_to_solid(sld_2)
+    assert sld_2.is_adjacent_to_solid(sld_1)
+    assert not sld_1.is_adjacent_to_solid(sld_3)
+    assert not sld_3.is_adjacent_to_solid(sld_1)
+
+
 if __name__ == "__main__":
     test_point_inside()

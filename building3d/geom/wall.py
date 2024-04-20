@@ -8,6 +8,8 @@ class Wall:
     """A wall is a collection of polygons with additional attributes and methods.
 
     Polygons do not have to be coplanar.
+
+    Wall is used to model 1D phenomena (e.g. heat transfer).
     """
     def __init__(self, name: str):
         self.name = name
