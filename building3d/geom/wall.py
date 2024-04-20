@@ -5,6 +5,8 @@ from .polygon import Polygon
 
 class Wall:
     """A wall is a collection of polygons with additional attributes and methods.
+
+    Polygons do not have to be coplanar.
     """
     def __init__(self, name: str):
         self.name = name
