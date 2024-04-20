@@ -10,7 +10,7 @@ from building3d.geom.point import Point
 from building3d.geom.triangle import triangle_area
 from building3d.geom.vector import length
 from building3d.geom.vector import vector
-from building3d.mesh.delaunay_triangulation import delaunay_triangulation
+from building3d.mesh.triangulation import delaunay_triangulation
 from building3d.config import MESH_DELTA
 
 

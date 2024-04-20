@@ -4,7 +4,7 @@ from building3d import random_id
 from building3d.geom.triangle import triangle_centroid
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
-from building3d.mesh.delaunay_triangulation import delaunay_triangulation
+from building3d.mesh.triangulation import delaunay_triangulation
 from building3d.mesh.polymesh import PolyMesh
 from building3d.display.plot_polymesh import plot_polymesh
 import building3d.display.colors as colors

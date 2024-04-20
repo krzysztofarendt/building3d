@@ -9,7 +9,7 @@ from building3d.geom.tetrahedron import tetrahedron_volume
 from building3d.geom.polygon import Polygon
 from building3d.geom.solid import Solid
 from building3d.mesh.tetrahedralization import delaunay_tetrahedralization
-from building3d.mesh.delaunay_triangulation import delaunay_triangulation
+from building3d.mesh.triangulation import delaunay_triangulation
 
 
 def test_tetrahedralization():

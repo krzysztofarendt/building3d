@@ -10,7 +10,7 @@ from building3d.geom.solid import Solid
 from building3d.geom.tetrahedron import tetrahedron_volume
 from building3d.geom.tetrahedron import minimum_tetra_volume
 from building3d.geom.tetrahedron import tetrahedron_centroid
-from building3d.mesh.delaunay_triangulation import delaunay_triangulation
+from building3d.mesh.triangulation import delaunay_triangulation
 from building3d import random_within
 from building3d.config import MESH_JOGGLE
 from building3d.config import MESH_DELTA

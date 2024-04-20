@@ -1,19 +1,31 @@
 """Zone class"""
 
-from .wall import Wall
 from .solid import Solid
 
 
-class Zone(Solid):
-    """Zone is a subclass of Solid with additional attributes and methods."""
+class Zone:
+    """Zone is a collection of solids with additional attributes and methods.
+    """
+    def __init__(self, name: str):
+        self.name = name
+        self.solids = {}
+        self.solidgraph = {}
 
-    def __init__(self, name: str, walls: list[Wall]):
-        super().__init__(name, walls)
-        self.walls = walls
+    def add_solid(self, sld: Solid, parent: str | None = None):
+        """Add solid to the zone.
 
-    def __str__(self):
-        s =  f"Zone(name={self.name},\n"
-        for w in self.walls:
-            s += f"     {w}\n"
-        s += f") -> volume={self.volume:.3f}\n"
-        return s
+        A solid can be a top-level (parent) solid or a subsolid.
+        Only 1 level of subsolids is allowed, i.e. a solid cannot be
+        a subsolid to another subsolid.
+
+        Args:
+            sld: solid to be added
+            parent: name of parent solid if this is a subsolid (default None)
+        """
+        self.solids[sld.name] = sld
+        if parent is None:
+            # This might be a parent solid
+            self.solidgraph[sld.name] = []
+        else:
+            # Add this solid to its parent
+            self.solidgraph[parent].append(sld.name)
