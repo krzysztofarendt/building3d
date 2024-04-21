@@ -10,12 +10,6 @@ from building3d.geom.exceptions import TriangulationError
 from building3d.config import EPSILON
 from building3d.config import GEOM_EPSILON
 from building3d.config import POINT_NUM_DEC
-from building3d.config import MESH_DELTA
-
-
-def minimum_triangle_area(delta: float = MESH_DELTA) -> float:
-    """Calculate min. face area for PolyMesh quality assurance."""
-    return delta ** 2 / 10.0
 
 
 def triangle_area(p1: Point, p2: Point, p3: Point) -> float:

@@ -1,10 +1,11 @@
 from building3d.display.plot_zone import plot_zone
 from building3d.display.plot_mesh import plot_mesh
 from building3d.geom.point import Point
-from building3d.geom.zone import Zone
+from building3d.geom.solid import Solid
+from building3d.geom.polygon import Polygon
 from building3d.geom.wall import Wall
+from building3d.geom.zone import Zone
 from building3d.mesh.mesh import Mesh
-from building3d.geom.tetrahedron import minimum_tetra_volume
 
 
 def example():
@@ -19,33 +20,37 @@ def example():
     p6 = Point(1.0, 1.0, 1.0) * stretch + translate
     p7 = Point(0.0, 1.0, 1.5) * stretch + translate
 
-    floor = Wall("floor", [p0, p3, p2, p1])
-    wall0 = Wall("wall0", [p0, p1, p5, p4])
-    wall1 = Wall("wall1", [p1, p2, p6, p5])
-    wall2 = Wall("wall2", [p3, p7, p6, p2])
-    wall3 = Wall("wall3", [p0, p4, p7, p3])
-    roof = Wall("roof", [p4, p5, p6, p7])
+    poly_floor = Polygon("poly_floor", [p0, p3, p2, p1])
+    poly_wall0 = Polygon("poly_wall0", [p0, p1, p5, p4])
+    poly_wall1 = Polygon("poly_wall1", [p1, p2, p6, p5])
+    poly_wall2 = Polygon("poly_wall2", [p3, p7, p6, p2])
+    poly_wall3 = Polygon("poly_wall3", [p0, p4, p7, p3])
+    poly_roof = Polygon("poly_roof", [p4, p5, p6, p7])
 
-    room = Zone("room", [floor, wall0, wall1, wall2, wall3, roof])
-    print(room)
+    walls = Wall("walls")
+    walls.add_polygon(poly_wall0)
+    walls.add_polygon(poly_wall1)
+    walls.add_polygon(poly_wall2)
+    walls.add_polygon(poly_wall3)
+
+    floor = Wall("floor")
+    floor.add_polygon(poly_floor)
+
+    roof = Wall("roof")
+    roof.add_polygon(poly_roof)
+
+    zone = Zone("zone")
+    zone.add_solid("room", [floor, walls, roof])
 
     mesh = Mesh()
-    # Polygons do not need to be added manually, because
-    # they are taken from the room zone
-    mesh.add_polygon(floor)
-    mesh.add_polygon(wall0)
-    mesh.add_polygon(wall1)
-    mesh.add_polygon(wall2)
-    mesh.add_polygon(wall3)
-    mesh.add_polygon(roof)
-    mesh.add_solid(room)
-
-    mesh.generate()
+    mesh.add_zone(zone)
+    mesh.generate(solidmesh=True)
     mesh.polymesh.mesh_statistics(show=True)
     mesh.solidmesh.mesh_statistics(show=True)
+    # mesh.solidmesh = mesh.solidmesh.copy(max_vol=0.06)
 
     # Plot
-    plot_zone(room, show_triangulation=True, show_normals=True, show=False)
+    plot_zone(zone, show_triangulation=True, show_normals=True, show=False)
     plot_mesh(mesh, boundary=True, interior=True, show=True)
 
 

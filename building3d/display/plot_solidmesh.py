@@ -31,13 +31,14 @@ def plot_solidmesh(
         tri.append([el[1], el[2], el[3]])
         tri.append([el[0], el[2], el[3]])
 
-    _ = mlab.triangular_mesh(
-        x, y, z, tri,
-        opacity=opacity,
-        line_width=0.3,
-        color=colors.RGB_WHITE,
-        representation="mesh",
-    )
+    if len(mesh.elements) > 0:
+        _ = mlab.triangular_mesh(
+            x, y, z, tri,
+            opacity=opacity,
+            line_width=0.3,
+            color=colors.RGB_WHITE,
+            representation="mesh",
+        )
 
     logger.debug(f"Finished plot_solidmesh() for {mesh}")
 

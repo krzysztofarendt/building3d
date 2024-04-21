@@ -11,21 +11,23 @@ def plot_zone(
     show_normals: bool = True,
     show: bool = False,
 ):
-    # Plot vertices
-    vertices = zone.vertices()
-    x = [p.x for p in vertices]
-    y = [p.y for p in vertices]
-    z = [p.z for p in vertices]
+    for _, solid in zone.solids.items():
+        # Plot vertices
+        vertices = solid.vertices()
+        x = [p.x for p in vertices]
+        y = [p.y for p in vertices]
+        z = [p.z for p in vertices]
 
-    _ = mlab.points3d(x, y, z, color=colors.RGB_BLUE, scale_factor=0.1)
+        _ = mlab.points3d(x, y, z, color=colors.RGB_BLUE, scale_factor=0.1)
 
-    # Plot walls
-    plot_polygons(
-        zone.walls,
-        show_triangulation=show_triangulation,
-        show_normals=show_normals,
-        show=False,
-    )
+        # Plot walls
+        plot_polygons(
+            solid.boundary,
+            show_triangulation=show_triangulation,
+            show_normals=show_normals,
+            color=colors.random_color(),
+            show=False,
+        )
 
     if show:
         mlab.show()

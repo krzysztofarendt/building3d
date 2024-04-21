@@ -1,6 +1,5 @@
 from mayavi import mlab
 
-from building3d.mesh.exceptions import MeshError
 from building3d.mesh.polymesh import PolyMesh
 from building3d.geom.triangle import triangle_centroid
 import building3d.display.colors as colors
@@ -10,8 +9,6 @@ def plot_polymesh(
     mesh: PolyMesh,
     show: bool = False,
 ):
-    if len(mesh.polygons) <= 0:
-        raise MeshError("plot_mesh(..., boundary=True, ...) but PolyMesh empty")
     x = [p.x for p in mesh.vertices]
     y = [p.y for p in mesh.vertices]
     z = [p.z for p in mesh.vertices]

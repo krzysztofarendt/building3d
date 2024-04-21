@@ -1,14 +1,16 @@
+from typing import Sequence
+
 from mayavi import mlab
 
 from building3d.geom.polygon import Polygon
-from building3d.geom.wall import Wall
 import building3d.display.colors as colors
 
 
 def plot_polygons(
-    polygons: list[Polygon] | list[Wall],
+    polygons: Sequence[Polygon],
     show_triangulation: bool = True,
     show_normals: bool = True,
+    color: tuple = colors.RGB_WHITE,
     show: bool = False,
 ):
     # Plot vertices
@@ -35,7 +37,7 @@ def plot_polygons(
             x, y, z, tri,
             name=name,
             opacity=0.5,
-            color=colors.RGB_WHITE,
+            color=color,
             representation="surface",
         )
 
@@ -46,7 +48,7 @@ def plot_polygons(
                 name=name,
                 line_width=2.0,
                 opacity=1.0,
-                color=colors.RGB_WHITE,
+                color=color,
                 representation="wireframe",
             )
 

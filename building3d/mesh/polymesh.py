@@ -10,7 +10,7 @@ from building3d.geom.point import Point
 from building3d.geom.triangle import triangle_area
 from building3d.geom.vector import length
 from building3d.geom.vector import vector
-from building3d.mesh.delaunay_triangulation import delaunay_triangulation
+from building3d.mesh.triangulation import delaunay_triangulation
 from building3d.config import MESH_DELTA
 
 
@@ -108,13 +108,30 @@ class PolyMesh:
 
         return stats
 
+    def _add_vertices(self, owner, vertices, faces):
+        # Increase face counter to include previously added vertices
+        faces = np.array(faces)
+        faces += len(self.vertices)
+        faces = faces.tolist()
+
+        # Add vertices
+        len_before = len(self.vertices)
+        self.vertices.extend(vertices)
+        len_after = len(self.vertices)
+        self.vertex_owners[owner] = [x for x in range(len_before, len_after)]
+
+        # Add faces
+        len_before = len(self.faces)
+        self.faces.extend(faces)
+        len_after = len(self.faces)
+        self.face_owners[owner] = [x for x in range(len_before, len_after)]
+
     def generate(
         self,
         fixed_points: dict[str, list[Point]] = {},
     ):
         """Generate mesh for all added polygons and solids."""
-        use_init = True if len(fixed_points) > 0 else False
-        logger.debug(f"Generating mesh (using initial vertices: {use_init})")
+        logger.debug(f"Generating mesh...")
         self.reinit()
 
         # Polygons
@@ -132,17 +149,4 @@ class PolyMesh:
                 fixed_points=fixed,
             )
 
-            # Increase face counter to include previously added vertices
-            faces = np.array(faces)
-            faces += len(self.vertices)
-            faces = faces.tolist()
-
-            len_before = len(self.vertices)
-            self.vertices.extend(vertices)
-            len_after = len(self.vertices)
-            self.vertex_owners[poly_name] = [x for x in range(len_before, len_after)]
-
-            len_before = len(self.faces)
-            self.faces.extend(faces)
-            len_after = len(self.faces)
-            self.face_owners[poly_name] = [x for x in range(len_before, len_after)]
+            self._add_vertices(poly_name, vertices, faces)

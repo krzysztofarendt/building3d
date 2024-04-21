@@ -4,21 +4,22 @@ import logging
 import numpy as np
 from scipy.spatial import Delaunay
 
-import building3d.geom.polygon as polygon  # Needed to break circular import
-from building3d.geom.exceptions import GeometryError
+from building3d.geom.polygon import Polygon
+from building3d.mesh.exceptions import MeshError
 from building3d.geom.point import Point
 from building3d.geom.rotate import rotate_points_to_plane
 from building3d.geom.rotate import rotate_points_around_vector
 from building3d.geom.vector import length
 from building3d.geom.vector import normal
-from building3d.geom.line import create_points_between_2_points
+from building3d.geom.line import create_points_between_list_of_points
 from building3d.geom.triangle import triangle_area
 from building3d.geom.triangle import triangle_centroid
-from building3d.geom.triangle import minimum_triangle_area
+from building3d.mesh.quality import minimum_triangle_area
 from building3d import random_id
 from building3d.config import GEOM_EPSILON
 from building3d.config import MESH_JOGGLE
 from building3d.config import MESH_DELTA
+from building3d.config import MESH_REL_DIST_TO_POINTS
 from building3d import random_within
 
 
@@ -26,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 def delaunay_triangulation(
-    poly: polygon.Polygon,
+    poly: Polygon,
     delta: float = MESH_DELTA,
     fixed_points: list[Point] = [],
 ) -> tuple[list[Point], list[list[int]]]:
@@ -58,7 +59,7 @@ def delaunay_triangulation(
     points_2d = list(poly_points_2d)
 
     # Create a 2D polygon instance (used for checking if a point lies inside it)
-    poly_2d = polygon.Polygon(random_id(), points_2d)
+    poly_2d = Polygon(random_id(), points_2d)
 
     # Rotate fixed and suggested points to XY
     if len(fixed_points) > 0:
@@ -72,25 +73,11 @@ def delaunay_triangulation(
 
         # Add new points on the edges
         logger.debug("Adding new points on the edges of the polygon")
-        edge_points = []
-        for i in range(len(points_2d)):
-            cur = i
-            nxt = i + 1 if i + 1 < len(points_2d) else 0
-            pt1 = points_2d[cur]
-            pt2 = points_2d[nxt]
-            edge_len = length(pt2.vector() - pt1.vector())
-            num_segments = int(edge_len // (delta + GEOM_EPSILON))
-            new_pts = create_points_between_2_points(pt1, pt2, num_segments)
-            for p in new_pts:
-                is_far_from_all = True
-                for fp in fixed_2d:
-                    dist = length(p.vector() - fp.vector())
-                    if dist < delta:
-                        is_far_from_all = False
-                        break
-                if is_far_from_all:
-                    edge_points.append(p)
-
+        edge_points = create_points_between_list_of_points(
+            pts=points_2d,
+            delta=delta,
+            fixed_pts=fixed_2d,
+        )
         points_2d.extend(edge_points)
 
         # Add new points inside the polygon
@@ -113,7 +100,7 @@ def delaunay_triangulation(
                 is_far_from_all = True
                 for fp in fixed_2d:
                     dist = length(p.vector() - fp.vector())
-                    if dist < delta / 3.0:  # TODO: Add to config
+                    if dist < delta * MESH_REL_DIST_TO_POINTS:
                         is_far_from_all = False
                         break
                 if is_far_from_all:
@@ -228,7 +215,7 @@ def delaunay_triangulation(
             f"Mesh face normal points in a different direction ({mesh_normal}) " + \
             f"than polygon normal ({poly.normal})."
         logger.error(error_msg)
-        raise GeometryError(error_msg)
+        raise MeshError(error_msg)
 
     del poly_2d
     return new_points, faces

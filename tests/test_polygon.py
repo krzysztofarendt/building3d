@@ -2,7 +2,6 @@ import numpy as np
 import pytest
 
 from building3d import random_id
-from building3d.config import GEOM_EPSILON
 from building3d.geom.exceptions import GeometryError
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
@@ -288,6 +287,30 @@ def test_is_point_inside_ortho_projection_fwd_only():
     fwd_only = False
     assert poly.is_point_inside_projection(ptest, vec, fwd_only) is False
 
+    ptest = Point(1.0, 0.5, 0.5)  # This point is at the polygon's centroid
+    vec = np.array([1.0, 0.0, 0.0])
+    for vec in [
+        np.array([1.0, 0.0, 0.0]),
+        np.array([0.0, 1.0, 0.0]),
+        np.array([0.0, 0.0, 1.0]),
+    ]:
+        fwd_only = True
+        assert poly.is_point_inside_projection(ptest, vec, fwd_only) is True
+        fwd_only = False
+        assert poly.is_point_inside_projection(ptest, vec, fwd_only) is True
+
+    ptest = Point(1.0, 0.0, 0.0)  # This point is at the polygon's corner
+    vec = np.array([1.0, 0.0, 0.0])
+    for vec in [
+        np.array([1.0, 0.0, 0.0]),
+        np.array([0.0, 1.0, 0.0]),
+        np.array([0.0, 0.0, 1.0]),
+    ]:
+        fwd_only = True
+        assert poly.is_point_inside_projection(ptest, vec, fwd_only) is True
+        fwd_only = False
+        assert poly.is_point_inside_projection(ptest, vec, fwd_only) is True
+
 
 def test_is_point_behind():
     p1 = Point(1.0, 0.0, 0.0)
@@ -339,6 +362,15 @@ def test_copy():
         assert not (poly_a.points[i] is poly_b.points[i])
 
     assert not (poly_a is poly_b)
+
+
+def test_is_facing_polygon():
+    p1 = Point(0.0, 4.0, -1.0)
+    p2 = Point(1.0, -1.0, 2.0)
+    p3 = Point(0.0, -2.0, 3.0)
+    poly_a = Polygon(random_id(), [p1, p2, p3])
+    poly_b = Polygon(random_id(), [p3, p2, p1])
+    assert poly_a.is_facing_polygon(poly_b)
 
 
 if __name__ == "__main__":

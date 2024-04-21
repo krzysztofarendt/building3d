@@ -2,11 +2,11 @@ import numpy as np
 
 from building3d import random_id
 from building3d.config import GEOM_EPSILON
-from building3d.geom.collapse_points import collapse_points
 from building3d.geom.point import Point
+from building3d.geom.polygon import Polygon
 from building3d.geom.vector import normal
-from building3d.geom.wall import Wall
 from building3d.mesh.polymesh import PolyMesh
+from building3d.mesh.quality import collapse_points
 
 
 def test_collapse_points():
@@ -19,12 +19,12 @@ def test_collapse_points():
     p6 = Point(1.0, 1.0, 1.0)
     p7 = Point(0.0, 1.0, 1.5)
 
-    floor = Wall(random_id(), [p0, p3, p2, p1])
-    wall0 = Wall(random_id(), [p0, p1, p5, p4])
-    wall1 = Wall(random_id(), [p1, p2, p6, p5])
-    wall2 = Wall(random_id(), [p3, p7, p6, p2])
-    wall3 = Wall(random_id(), [p0, p4, p7, p3])
-    roof = Wall(random_id(), [p4, p5, p6, p7])
+    floor = Polygon(random_id(), [p0, p3, p2, p1])
+    wall0 = Polygon(random_id(), [p0, p1, p5, p4])
+    wall1 = Polygon(random_id(), [p1, p2, p6, p5])
+    wall2 = Polygon(random_id(), [p3, p7, p6, p2])
+    wall3 = Polygon(random_id(), [p0, p4, p7, p3])
+    roof = Polygon(random_id(), [p4, p5, p6, p7])
 
     mesh = PolyMesh()
     mesh.add_polygon(floor)

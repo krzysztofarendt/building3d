@@ -249,8 +249,10 @@ class Polygon:
         denom = (a * vec[0] + b * vec[1] + c * vec[2])
 
         if np.abs(denom) < GEOM_EPSILON:
-            # Vector vec is perpendicular to the plane
-            return False
+            # Vector vec is colinear with the plane
+            logger.warning(f"Projection vector {vec} is colinear with the polygon {self.name}")
+            logger.debug("The point lays inside this projection only if it is inside this polygon")
+            return self.is_point_inside(p)
         else:
             # Projection crosses the surface of the plane
             s = (-d - a * p.x - b * p.y - c * p.z) / (a * vec[0] + b * vec[1] + c * vec[2])
@@ -283,6 +285,19 @@ class Polygon:
             return True
         else:
             return False
+
+    def is_facing_polygon(self, poly) -> bool:
+        """Checks if this polygon is facing another polygon.
+
+        Returns True if all points of two polygons are equal and their normals
+        are pointing towards each other.
+        """
+        this_points = set(self.points)
+        other_points = set(poly.points)
+        if this_points == other_points:
+            if np.isclose(self.normal * -1, poly.normal).all():
+                return True
+        return False
 
     def _triangulate(self) -> list:
         """Return a list of triangles (i, j, k) using the ear clipping algorithm.

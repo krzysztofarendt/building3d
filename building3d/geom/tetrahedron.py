@@ -4,7 +4,6 @@ from .point import Point
 from .vector import length
 from .vector import vector
 from building3d.config import EPSILON
-from building3d.config import MESH_DELTA
 
 
 def tetrahedron_volume(p0: Point, p1: Point, p2: Point, p3: Point) -> float:
@@ -25,18 +24,6 @@ def tetrahedron_volume(p0: Point, p1: Point, p2: Point, p3: Point) -> float:
     vol = np.sqrt(nominator + EPSILON) / 12.0
 
     return vol
-
-
-def minimum_tetra_volume(delta: float = MESH_DELTA) -> float:
-    """Calculate minimum tetrahedron volume for mesh quality assurance."""
-    ref_volume = tetrahedron_volume(
-        Point(0.0, 0.0, 0.0),
-        Point(delta, 0.0, 0.0),
-        Point(0.0, delta, 0.0),
-        Point(0.0, 0.0, delta),
-    )
-    min_vol= ref_volume / 50.
-    return min_vol
 
 
 def tetrahedron_centroid(p0: Point, p1: Point, p2: Point, p3: Point) -> Point:
