@@ -6,7 +6,6 @@ I'm not sure where this project is heading, so there is not documentation yet.
 
 Geometry:
 - a set of points is used to define polygons
-- polygons are used to define walls
 - a set of polygons can be used to define a solid (volume, space)
 - a solid must be fully enclosed with polygons
 - a zone is a set of solids
