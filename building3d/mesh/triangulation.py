@@ -14,11 +14,12 @@ from building3d.geom.vector import normal
 from building3d.geom.line import create_points_between_list_of_points
 from building3d.geom.triangle import triangle_area
 from building3d.geom.triangle import triangle_centroid
-from building3d.geom.triangle import minimum_triangle_area
+from building3d.mesh.quality import minimum_triangle_area
 from building3d import random_id
 from building3d.config import GEOM_EPSILON
 from building3d.config import MESH_JOGGLE
 from building3d.config import MESH_DELTA
+from building3d.config import MESH_REL_DIST_TO_POINTS
 from building3d import random_within
 
 
@@ -99,7 +100,7 @@ def delaunay_triangulation(
                 is_far_from_all = True
                 for fp in fixed_2d:
                     dist = length(p.vector() - fp.vector())
-                    if dist < delta / 3.0:  # TODO: Add to config
+                    if dist < delta * MESH_REL_DIST_TO_POINTS:
                         is_far_from_all = False
                         break
                 if is_far_from_all:

@@ -4,9 +4,28 @@ import logging
 import numpy as np
 
 from building3d.geom.point import Point
+from building3d.geom.tetrahedron import tetrahedron_volume
+from building3d.config import MESH_DELTA
 
 
 logger = logging.getLogger(__name__)
+
+
+def minimum_triangle_area(delta: float = MESH_DELTA) -> float:
+    """Calculate min. face area for PolyMesh quality assurance."""
+    return delta ** 2 / 10.0
+
+
+def minimum_tetra_volume(delta: float = MESH_DELTA) -> float:
+    """Calculate minimum tetrahedron volume for mesh quality assurance."""
+    ref_volume = tetrahedron_volume(
+        Point(0.0, 0.0, 0.0),
+        Point(delta, 0.0, 0.0),
+        Point(0.0, delta, 0.0),
+        Point(0.0, 0.0, delta),
+    )
+    min_vol= ref_volume / 30.
+    return min_vol
 
 
 def collapse_points(
