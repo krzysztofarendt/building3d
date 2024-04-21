@@ -1,7 +1,9 @@
 import numpy as np
 
-from .point import Point
-from .vector import length
+from building3d.geom.point import Point
+from building3d.geom.vector import length
+from building3d.config import GEOM_EPSILON
+
 
 
 def create_points_between_2_points(p1: Point, p2: Point, num: int) -> list[Point]:
@@ -27,6 +29,42 @@ def create_points_between_2_points(p1: Point, p2: Point, num: int) -> list[Point
     points.append(p2)
 
     return points
+
+
+def create_points_between_list_of_points(
+    pts: list[Point],
+    delta: float,
+    fixed_pts: list[Point] = [],
+) -> list[Point]:
+    """Add new points on the edges, but respect fixed points.
+
+    Args:
+        pts: list of input points defining the edges
+        delta: approximate distance between new points
+        fixed_pts: list of fixed points which must appear in the output
+
+    Return:
+        list of new points (input and fixed points included)
+    """
+    edge_points = []
+    for i in range(len(pts)):
+        cur = i
+        nxt = i + 1 if i + 1 < len(pts) else 0
+        pt1 = pts[cur]
+        pt2 = pts[nxt]
+        edge_len = length(pt2.vector() - pt1.vector())
+        num_segments = int(edge_len // (delta + GEOM_EPSILON))
+        new_pts = create_points_between_2_points(pt1, pt2, num_segments)
+        for p in new_pts:
+            is_far_from_all = True
+            for fp in fixed_pts:
+                dist = length(p.vector() - fp.vector())
+                if dist < delta:
+                    is_far_from_all = False
+                    break
+            if is_far_from_all:
+                edge_points.append(p)
+    return edge_points
 
 
 def distance_point_to_edge(ptest: Point, p1: Point, p2: Point) -> float:

@@ -11,7 +11,7 @@ from building3d.geom.rotate import rotate_points_to_plane
 from building3d.geom.rotate import rotate_points_around_vector
 from building3d.geom.vector import length
 from building3d.geom.vector import normal
-from building3d.geom.line import create_points_between_2_points
+from building3d.geom.line import create_points_between_list_of_points
 from building3d.geom.triangle import triangle_area
 from building3d.geom.triangle import triangle_centroid
 from building3d.geom.triangle import minimum_triangle_area
@@ -72,25 +72,11 @@ def delaunay_triangulation(
 
         # Add new points on the edges
         logger.debug("Adding new points on the edges of the polygon")
-        edge_points = []
-        for i in range(len(points_2d)):
-            cur = i
-            nxt = i + 1 if i + 1 < len(points_2d) else 0
-            pt1 = points_2d[cur]
-            pt2 = points_2d[nxt]
-            edge_len = length(pt2.vector() - pt1.vector())
-            num_segments = int(edge_len // (delta + GEOM_EPSILON))
-            new_pts = create_points_between_2_points(pt1, pt2, num_segments)
-            for p in new_pts:
-                is_far_from_all = True
-                for fp in fixed_2d:
-                    dist = length(p.vector() - fp.vector())
-                    if dist < delta:
-                        is_far_from_all = False
-                        break
-                if is_far_from_all:
-                    edge_points.append(p)
-
+        edge_points = create_points_between_list_of_points(
+            pts=points_2d,
+            delta=delta,
+            fixed_pts=fixed_2d,
+        )
         points_2d.extend(edge_points)
 
         # Add new points inside the polygon
