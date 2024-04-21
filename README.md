@@ -2,6 +2,30 @@
 
 I'm not sure where this project is heading, so there is not documentation yet.
 
+# Assumptions
+
+Geometry:
+- a set of points is used to define polygons
+- polygons are used to define walls
+- a wall can consist of many polygons
+- wall polygons do not have to be coplanar
+- wall can have subpolygons (e.g. wall with a window)
+- a set of walls is used to define a zone
+- a zone must be fully enclosed with polygons
+- internally, each zone consists of a set of solids and each solid consists of
+  a set of polygons, but this will not be part of the user interface
+
+Mesh:
+- three types of meshes exist:
+    - polygon triangulation by ear-clipping algorithm
+    - polygon triangulation by Delaunay tesselation
+    - volume tetrahedrialization by Delaunay tesselation
+- these meshes do not necessarily share their vertices
+- ear-clipping is used to triangulate polygons based on its vertices only
+- Delaunay tesselation is used to make meshes with additional points suitable
+  for numerical simulations (ray-tracing, Finite Volume Method)
+
+
 # Installation
 ```
 python3.10 -m venv venv

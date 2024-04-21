@@ -35,6 +35,11 @@ class SolidMesh:
     def mesh_statistics(self, show=False) -> dict:
         """Print and return info about mesh quality."""
 
+        if len(self.elements) == 0:
+            if show:
+                print("SolidMesh empty!")
+            return {}
+
         vol_hist, bin_edges = np.histogram(self.volumes, bins=10)
 
         stats = {

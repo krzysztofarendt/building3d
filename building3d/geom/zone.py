@@ -1,6 +1,7 @@
 """Zone class"""
 
 from building3d.geom.solid import Solid
+from building3d.geom.wall import Wall
 from building3d.geom.exceptions import GeometryError
 
 
@@ -16,8 +17,16 @@ class Zone:
         self.solids = {}
         self.solidgraph = {}
 
-    def add_solid(self, sld: Solid, parent: str | None = None):
-        """Add solid to the zone.
+    def add_solid(self, name: str, walls: list[Wall]):
+        """Add solid created from walls to the zone."""
+        polygons = []
+        for w in walls:
+            polygons.extend(w.get_polygons())
+        solid = Solid(name, boundary=polygons)
+        self.add_solid_instance(solid)
+
+    def add_solid_instance(self, sld: Solid, parent: str | None = None):
+        """Add solid instance to the zone.
 
         A solid can be a top-level (parent) solid or a subsolid.
         Only 1 level of subsolids is allowed, i.e. a solid cannot be

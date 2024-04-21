@@ -91,8 +91,8 @@ def make_zone(subsolid_move=[0.0, 0.0, 0.0]) -> Zone:
     )
 
     zone = Zone(random_id())
-    zone.add_solid(main_sld)
-    zone.add_solid(sub_sld, parent=main_sld.name)
+    zone.add_solid_instance(main_sld)
+    zone.add_solid_instance(sub_sld, parent=main_sld.name)
 
     return zone
 
