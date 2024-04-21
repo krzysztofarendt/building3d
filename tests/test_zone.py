@@ -114,4 +114,3 @@ def test_zone_incorrect_geometry():
         _ = make_zone(subsolid_move=[-0.1, -0.1, -0.1])
     with pytest.raises(GeometryError):
         _ = make_zone(subsolid_move=[5.0, 0.0, 0.0])
-

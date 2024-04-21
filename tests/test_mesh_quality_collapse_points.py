@@ -2,11 +2,11 @@ import numpy as np
 
 from building3d import random_id
 from building3d.config import GEOM_EPSILON
-from building3d.mesh.quality import collapse_points
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
 from building3d.geom.vector import normal
 from building3d.mesh.polymesh import PolyMesh
+from building3d.mesh.quality import collapse_points
 
 
 def test_collapse_points():
