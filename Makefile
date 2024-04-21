@@ -22,8 +22,12 @@ count-tests:
 	cloc --by-file building3d/ tests/
 
 
-example:
-	python example.py
+example_1:
+	python example_1.py
+
+
+example_2:
+	python example_2.py
 
 
 test_publish:
