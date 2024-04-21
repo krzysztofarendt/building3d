@@ -4,7 +4,7 @@ import logging
 import numpy as np
 from scipy.spatial import Delaunay
 
-import building3d.geom.polygon as polygon  # Needed to break circular import
+from building3d.geom.polygon import Polygon
 from building3d.geom.exceptions import GeometryError
 from building3d.geom.point import Point
 from building3d.geom.rotate import rotate_points_to_plane
@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 
 def delaunay_triangulation(
-    poly: polygon.Polygon,
+    poly: Polygon,
     delta: float = MESH_DELTA,
     fixed_points: list[Point] = [],
 ) -> tuple[list[Point], list[list[int]]]:
@@ -58,7 +58,7 @@ def delaunay_triangulation(
     points_2d = list(poly_points_2d)
 
     # Create a 2D polygon instance (used for checking if a point lies inside it)
-    poly_2d = polygon.Polygon(random_id(), points_2d)
+    poly_2d = Polygon(random_id(), points_2d)
 
     # Rotate fixed and suggested points to XY
     if len(fixed_points) > 0:
