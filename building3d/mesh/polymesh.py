@@ -3,9 +3,8 @@ import logging
 
 import numpy as np
 
-import building3d.geom.solid
 import building3d.logger
-import building3d.geom.polygon
+from building3d.geom.polygon import Polygon
 from building3d.geom.point import Point
 from building3d.geom.triangle import triangle_area
 from building3d.geom.vector import length
@@ -40,7 +39,7 @@ class PolyMesh:
         self.faces = []
         self.face_owners = {}
 
-    def add_polygon(self, poly: building3d.geom.polygon.Polygon):
+    def add_polygon(self, poly: Polygon):
         logger.debug(f"Adding polygon: {poly}")
         self.polygons[poly.name] = poly
 

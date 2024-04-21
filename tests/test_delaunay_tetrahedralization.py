@@ -7,6 +7,7 @@ from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
 from building3d.geom.solid import Solid
 from building3d.geom.tetrahedron import tetrahedron_volume
+from building3d.geom.wall import Wall
 from building3d.mesh.exceptions import MeshError
 from building3d.mesh.tetrahedralization import delaunay_tetrahedralization
 from building3d.mesh.triangulation import delaunay_triangulation
@@ -31,12 +32,13 @@ def test_tetrahedralization():
     wall3_id = random_id()
     roof_id = random_id()
 
-    floor = Polygon(floor_id, [p0, p3, p2, p1])
-    wall0 = Polygon(wall0_id, [p0, p1, p5, p4])
-    wall1 = Polygon(wall1_id, [p1, p2, p6, p5])
-    wall2 = Polygon(wall2_id, [p3, p7, p6, p2])
-    wall3 = Polygon(wall3_id, [p0, p4, p7, p3])
-    roof = Polygon(roof_id, [p4, p5, p6, p7])
+    floor = Polygon([p0, p3, p2, p1], name=floor_id)
+    wall0 = Polygon([p0, p1, p5, p4], name=wall0_id)
+    wall1 = Polygon([p1, p2, p6, p5], name=wall1_id)
+    wall2 = Polygon([p3, p7, p6, p2], name=wall2_id)
+    wall3 = Polygon([p0, p4, p7, p3], name=wall3_id)
+    roof = Polygon([p4, p5, p6, p7], name=roof_id)
+    walls = Wall([floor, wall0, wall1, wall2, wall3, roof])
 
     floor_vertices, _ = delaunay_triangulation(floor)
     wall0_vertices, _ = delaunay_triangulation(wall0)
@@ -44,12 +46,12 @@ def test_tetrahedralization():
     wall2_vertices, _ = delaunay_triangulation(wall2)
     wall3_vertices, _ = delaunay_triangulation(wall3)
     roof_vertices, _ = delaunay_triangulation(roof)
-    zone = Solid(random_id(), [floor, wall0, wall1, wall2, wall3, roof])
+    solid = Solid([walls])
 
     # If delta is too big, the solid mesh cannot be generated
     with pytest.raises(MeshError):
         vertices, tetrahedra = delaunay_tetrahedralization(
-            sld=zone,
+            sld=solid,
             boundary_vertices={
                 floor_id: floor_vertices,
                 wall0_id: wall0_vertices,
@@ -65,7 +67,7 @@ def test_tetrahedralization():
     # than polygon mesh vertices
     delta = 0.25
     vertices, tetrahedra = delaunay_tetrahedralization(
-        sld=zone,
+        sld=solid,
         boundary_vertices={
             floor_id: floor_vertices,
             wall0_id: wall0_vertices,

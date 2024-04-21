@@ -1,7 +1,6 @@
 from mayavi import mlab
 
 import building3d.display.colors as colors
-from building3d import random_id
 from building3d.display.plot_polymesh import plot_polymesh
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
@@ -19,7 +18,7 @@ def test_constr_triangulation(show=False):
     p4 = Point(1.0, 2.0, 0.0)
     p5 = Point(0.0, 2.0, 0.0)
 
-    poly = Polygon(random_id(), [p0, p1, p2, p3, p4, p5])
+    poly = Polygon([p0, p1, p2, p3, p4, p5])
 
     # Fixed vertices
     f0 = Point(0.2, 0.0, 0.0)
@@ -75,7 +74,7 @@ def test_delaunay_triangulation_init_vertices_with_centroid():
     p1 = Point(1.0, 0.0, 0.0)
     p2 = Point(1.0, 1.0, 0.0)
     p3 = Point(0.0, 1.0, 0.0)
-    floor = Polygon(random_id(), [p0, p3, p2, p1])
+    floor = Polygon([p0, p3, p2, p1])
     fixed = floor.points + [floor.centroid]
     vertices, faces = delaunay_triangulation(floor, fixed_points=fixed)
 
@@ -88,7 +87,7 @@ def test_delaunay_triangulation_init_vertices_without_polygon_vertex():
     p1 = Point(1.0, 0.0, 0.0)
     p2 = Point(1.0, 1.0, 0.0)
     p3 = Point(0.0, 1.0, 0.0)
-    floor = Polygon(random_id(), [p0, p3, p2, p1])
+    floor = Polygon([p0, p3, p2, p1])
 
     vertices_1, faces_1 = delaunay_triangulation(floor)
 

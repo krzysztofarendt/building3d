@@ -21,7 +21,7 @@ def plot_solid(
 
     # Plot walls
     plot_polygons(
-        solid.boundary,
+        solid.polygons(),
         show_triangulation=show_triangulation,
         show_normals=show_normals,
         show=False,

@@ -3,7 +3,6 @@ from __future__ import annotations
 import numpy as np
 
 import building3d.geom.solid
-import building3d.geom.polygon
 from building3d.geom.tetrahedron import tetrahedron_volume
 from building3d.geom.point import Point
 from building3d.mesh.tetrahedralization import delaunay_tetrahedralization
@@ -17,7 +16,7 @@ class SolidMesh:
         # Mesh settings
         self.delta = delta
 
-        # Polygons and solid to be meshed
+        # Solids to be meshed
         self.solids = {}
 
         # Attributes filled with data by self.generate()

@@ -1,6 +1,5 @@
 import numpy as np
 
-from building3d import random_id
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
 from building3d.mesh.quality import purge_mesh
@@ -16,7 +15,7 @@ def test_purge_mesh(show=False):
     p5 = Point(0.0, 2.0, 0.0)
 
     # Generate some triangles
-    poly = Polygon(random_id(), [p0, p1, p2, p3, p4, p5])
+    poly = Polygon([p0, p1, p2, p3, p4, p5])
     vertices = poly.points
     faces = poly.triangles
     del poly  # Not needed anymore

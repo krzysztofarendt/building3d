@@ -1,12 +1,13 @@
 import numpy as np
 
-from building3d import random_id
 from building3d.config import GEOM_EPSILON
 from building3d.display.plot_solidmesh import plot_solidmesh
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
 from building3d.geom.solid import Solid
 from building3d.geom.tetrahedron import tetrahedron_volume
+from building3d.geom.wall import Wall
+from building3d.mesh.quality import minimum_tetra_volume
 from building3d.mesh.solidmesh import SolidMesh
 
 
@@ -21,36 +22,32 @@ def test_solidmesh(plot=False):
     p6 = Point(1.0, 1.0, 1.0) * scale
     p7 = Point(0.0, 1.0, 1.5) * scale
 
-    floor = Polygon(random_id(), [p0, p3, p2, p1])
-    wall0 = Polygon(random_id(), [p0, p1, p5, p4])
-    wall1 = Polygon(random_id(), [p1, p2, p6, p5])
-    wall2 = Polygon(random_id(), [p3, p7, p6, p2])
-    wall3 = Polygon(random_id(), [p0, p4, p7, p3])
-    roof = Polygon(random_id(), [p4, p5, p6, p7])
+    floor = Wall([Polygon([p0, p3, p2, p1])])
+    wall0 = Wall([Polygon([p0, p1, p5, p4])])
+    wall1 = Wall([Polygon([p1, p2, p6, p5])])
+    wall2 = Wall([Polygon([p3, p7, p6, p2])])
+    wall3 = Wall([Polygon([p0, p4, p7, p3])])
+    roof = Wall([Polygon([p4, p5, p6, p7])])
 
-    zone = Solid(random_id(), [floor, wall0, wall1, wall2, wall3, roof])
+    zone = Solid([floor, wall0, wall1, wall2, wall3, roof])
 
-    delta = 2.0
-    mesh = SolidMesh(delta)
-    mesh.add_solid(zone)
-    mesh.generate()
+    # Must test multiple times, because mesh generation is random
+    for _ in range(10):
+        delta = 2.0
+        mesh = SolidMesh(delta)
+        mesh.add_solid(zone)
+        mesh.generate()
 
-    stats = mesh.mesh_statistics()
-    ref_volume = tetrahedron_volume(
-        Point(0.0, 0.0, 0.0),
-        Point(delta, 0.0, 0.0),
-        Point(0.0, delta, 0.0),
-        Point(0.0, 0.0, delta),
-    )
-    min_volume = ref_volume / 50.0
-    assert stats["min_element_volume"] > min_volume
+        stats = mesh.mesh_statistics()
+        min_volume = minimum_tetra_volume(delta)
+        assert stats["min_element_volume"] > min_volume
 
-    if plot:
-        plot_solidmesh(mesh, show=True)
+        if plot:
+            plot_solidmesh(mesh, show=True)
 
-    # Assert that the sum of tetrahedra volumes is equal to the zone volume
-    tot_volume = np.sum(mesh.volumes)
-    assert np.isclose(tot_volume, zone.volume, atol=GEOM_EPSILON)
+        # Assert that the sum of tetrahedra volumes is equal to the zone volume
+        tot_volume = np.sum(mesh.volumes)
+        assert np.isclose(tot_volume, zone.volume, atol=GEOM_EPSILON)
 
 
 def test_copy(plot=False):
@@ -64,14 +61,14 @@ def test_copy(plot=False):
     p6 = Point(1.0, 1.0, 1.0) * scale
     p7 = Point(0.0, 1.0, 1.5) * scale
 
-    floor = Polygon(random_id(), [p0, p3, p2, p1])
-    wall0 = Polygon(random_id(), [p0, p1, p5, p4])
-    wall1 = Polygon(random_id(), [p1, p2, p6, p5])
-    wall2 = Polygon(random_id(), [p3, p7, p6, p2])
-    wall3 = Polygon(random_id(), [p0, p4, p7, p3])
-    roof = Polygon(random_id(), [p4, p5, p6, p7])
+    floor = Wall([Polygon([p0, p3, p2, p1])])
+    wall0 = Wall([Polygon([p0, p1, p5, p4])])
+    wall1 = Wall([Polygon([p1, p2, p6, p5])])
+    wall2 = Wall([Polygon([p3, p7, p6, p2])])
+    wall3 = Wall([Polygon([p0, p4, p7, p3])])
+    roof = Wall([Polygon([p4, p5, p6, p7])])
 
-    zone = Solid(random_id(), [floor, wall0, wall1, wall2, wall3, roof])
+    zone = Solid([floor, wall0, wall1, wall2, wall3, roof])
 
     delta = 2.0
     mesh = SolidMesh(delta)
