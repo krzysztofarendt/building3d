@@ -42,6 +42,7 @@ def example():
     mesh.generate()
     mesh.polymesh.mesh_statistics(show=True)
     mesh.solidmesh.mesh_statistics(show=True)
+    # mesh.solidmesh = mesh.solidmesh.copy(max_vol=0.06)
 
     # Plot
     plot_solid(room, show_triangulation=True, show_normals=True, show=False)
