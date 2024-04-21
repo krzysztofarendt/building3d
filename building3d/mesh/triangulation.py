@@ -5,7 +5,7 @@ import numpy as np
 from scipy.spatial import Delaunay
 
 from building3d.geom.polygon import Polygon
-from building3d.geom.exceptions import GeometryError
+from building3d.mesh.exceptions import MeshError
 from building3d.geom.point import Point
 from building3d.geom.rotate import rotate_points_to_plane
 from building3d.geom.rotate import rotate_points_around_vector
@@ -214,7 +214,7 @@ def delaunay_triangulation(
             f"Mesh face normal points in a different direction ({mesh_normal}) " + \
             f"than polygon normal ({poly.normal})."
         logger.error(error_msg)
-        raise GeometryError(error_msg)
+        raise MeshError(error_msg)
 
     del poly_2d
     return new_points, faces
