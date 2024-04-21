@@ -11,6 +11,7 @@ Geometry:
 - a set of solids defines a zone
 - wall polygons do not have to be coplanar
 - wall can have subpolygons (e.g. wall with a window)
+- subpolygons do not have own meshes (yet)
 
 Mesh:
 - three types of meshes exist:
