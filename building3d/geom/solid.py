@@ -3,8 +3,9 @@ from typing import Sequence
 
 import numpy as np
 
+from building3d import random_id
 from building3d.geom.exceptions import GeometryError
-from building3d.geom.polygon import Polygon
+from building3d.geom.wall import Wall
 from building3d.geom.point import Point
 from building3d.geom.vector import vector
 from building3d.geom.tetrahedron import tetrahedron_volume
@@ -15,9 +16,11 @@ class Solid:
     # List of names of all Solid instances (names must be unique)
     instance_names = set()
 
-    def __init__(self, name:str, boundary: Sequence[Polygon]):
+    def __init__(self, walls: Sequence[Wall], name: str | None = None):
+        if name is None:
+            name = random_id()
         self.name = name
-        self.boundary = boundary
+        self.walls = walls
         self._verify(throw=True)
         self.volume = self._volume()
 
@@ -33,9 +36,16 @@ class Solid:
         if name in Solid.instance_names:
             Solid.instance_names.remove(name)
 
+    def polygons(self):
+        poly = []
+        for wall in self.walls:
+            poly.extend(wall.polygons.values())
+        return poly
+
+
     def vertices(self) -> list[Point]:
         points = []
-        for poly in self.boundary:
+        for poly in self.polygons():
             points.extend(poly.points)
         return points
 
@@ -81,7 +91,7 @@ class Solid:
         # This algorithm may give wrong answer if the point lays in the corner
         vec = np.array([1.0, 0.0, 0.0])
         num_crossings = 0
-        for poly in self.boundary:
+        for poly in self.polygons():
             p_crosses_polygon = poly.is_point_inside_projection(p, vec)
             if p_crosses_polygon:
                 num_crossings += 1
@@ -93,15 +103,15 @@ class Solid:
 
     def is_point_at_the_boundary(self, p: Point) -> bool:
         """Checks whether the point p lays on any of the boundary polygons."""
-        for poly in self.boundary:
+        for poly in self.polygons():
             if poly.is_point_inside(p):
                 return True
         return False
 
     def is_adjacent_to_solid(self, sld) -> bool:
         """Checks if this solid is adjacent to another solid."""
-        for this_poly in self.boundary:
-            for other_poly in sld.boundary:
+        for this_poly in self.polygons():
+            for other_poly in sld.polygons():
                 if this_poly.is_facing_polygon(other_poly):
                     return True
         return False
@@ -109,7 +119,7 @@ class Solid:
     def _volume(self) -> float:
         """Based on: http://chenlab.ece.cornell.edu/Publication/Cha/icip01_Cha.pdf"""
         total_volume = 0.0
-        for poly in self.boundary:
+        for poly in self.polygons():
             for tri in poly.triangles:
                 p0 = Point(0.0, 0.0, 0.0)
                 p1 = poly.points[tri[0]]
@@ -143,11 +153,10 @@ class Solid:
         errors = []
         points = []
 
-        # Verify each wall
-        for wall in self.boundary:
-            points.extend([p.vector() for p in wall.points])
-
         # Check if all points are attached to at least 2 walls
+        for poly in self.polygons():
+            points.extend([p.vector() for p in poly.points])
+
         has_duplicates = np.array([False for _ in points])
         for i1 in range(len(points)):
             for i2 in range(i1 + 1, len(points)):
@@ -171,4 +180,4 @@ class Solid:
         Solid.remove_name(self.name)
 
     def __str__(self):
-        return f"Solid({self.name=}, {self.boundary=})"
+        return f"Solid({self.name=}, {self.walls=})"

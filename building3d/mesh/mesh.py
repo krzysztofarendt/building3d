@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from building3d.geom.polygon import Polygon
-from building3d.geom.point import Point
 from building3d.geom.solid import Solid
 from building3d.geom.zone import Zone
 from building3d.mesh.polymesh import PolyMesh
@@ -32,7 +31,7 @@ class Mesh:
         All solid boundary polygons are added automatically.
         """
         self.solidmesh.add_solid(sld)
-        for poly in sld.boundary:
+        for poly in sld.polygons():
             self.add_polygon(poly)
 
     def add_zone(self, zone: Zone):

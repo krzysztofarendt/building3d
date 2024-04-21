@@ -1,5 +1,6 @@
 """Zone class"""
 
+from building3d import random_id
 from building3d.geom.solid import Solid
 from building3d.geom.wall import Wall
 from building3d.geom.exceptions import GeometryError
@@ -12,17 +13,16 @@ class Zone:
 
     Zone is used to model 3D phenomena (e.g. ray tracing, heat transfer, CFD).
     """
-    def __init__(self, name: str):
+    def __init__(self, name: str | None = None):
+        if name is None:
+            name = random_id()
         self.name = name
         self.solids = {}
         self.solidgraph = {}
 
     def add_solid(self, name: str, walls: list[Wall]):
         """Add solid created from walls to the zone."""
-        polygons = []
-        for w in walls:
-            polygons.extend(w.get_polygons())
-        solid = Solid(name, boundary=polygons)
+        solid = Solid(walls=walls, name=name)
         self.add_solid_instance(solid)
 
     def add_solid_instance(self, sld: Solid, parent: str | None = None):

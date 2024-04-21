@@ -50,7 +50,7 @@ def delaunay_tetrahedralization(
     # -> boundary_vertices, boundary_faces
     if len(boundary_vertices.keys()) == 0:
         logger.debug("Need to create boundary mesh to get vertices at the surrounding polygons")
-        for poly in sld.boundary:
+        for poly in sld.polygons():
             polymesh_vertices, _ = delaunay_triangulation(poly, delta=delta)
             for pt in polymesh_vertices:
                 if pt not in vertices:
@@ -95,7 +95,7 @@ def delaunay_tetrahedralization(
                 #       is inside this solid (which should be faster)
                 if sld.is_point_inside(pt):
                     far_enough_from_boundary = True
-                    for poly in sld.boundary:
+                    for poly in sld.polygons():
                         if poly.distance_point_to_polygon(pt) < delta / 2:
                             far_enough_from_boundary = False
                             break

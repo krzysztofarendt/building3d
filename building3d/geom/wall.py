@@ -1,5 +1,6 @@
 """Wall class"""
 
+from building3d import random_id
 from building3d.geom.polygon import Polygon
 from building3d.geom.exceptions import GeometryError
 
@@ -12,10 +13,16 @@ class Wall:
 
     Wall is used to model 1D phenomena (e.g. heat transfer).
     """
-    def __init__(self, name: str):
+    def __init__(self, polygons: list[Polygon] = [], name: str | None = None):
+        if name is None:
+            name = random_id()
+
         self.name = name
         self.polygons = {}
         self.polygraph = {}
+
+        for poly in polygons:
+            self.add_polygon(poly)
 
     def get_parent_names(self) -> list[str]:
         return list(self.polygraph.keys())

@@ -1,4 +1,3 @@
-from building3d import random_id
 from building3d.display.plot_polymesh import plot_polymesh
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
@@ -14,7 +13,7 @@ def test_polymesh_l_shape(plot=False):
     p4 = Point(1.0, 2.0, 0.0)
     p5 = Point(0.0, 2.0, 0.0)
 
-    poly = Polygon(random_id(), [p0, p1, p2, p3, p4, p5])
+    poly = Polygon([p0, p1, p2, p3, p4, p5])
     mesh = PolyMesh()
     mesh.add_polygon(poly)
     mesh.generate()

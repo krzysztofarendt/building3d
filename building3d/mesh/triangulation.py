@@ -59,7 +59,7 @@ def delaunay_triangulation(
     points_2d = list(poly_points_2d)
 
     # Create a 2D polygon instance (used for checking if a point lies inside it)
-    poly_2d = Polygon(random_id(), points_2d)
+    poly_2d = Polygon(points_2d)
 
     # Rotate fixed and suggested points to XY
     if len(fixed_points) > 0:

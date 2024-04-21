@@ -33,7 +33,10 @@ class Polygon:
     # List of names of all Polygon instances (names must be unique)
     instance_names = set()
 
-    def __init__(self, name: str, points: list[Point]):
+    def __init__(self, points: list[Point], name: str | None = None):
+        if name is None:
+            name = random_id()
+
         self.name = name
         Polygon.add_name(name)
 
@@ -76,7 +79,7 @@ class Polygon:
         if name in Polygon.instance_names:
             Polygon.instance_names.remove(name)
 
-    def copy(self, new_name: str):
+    def copy(self, new_name: str | None = None):
         """Return a deep copy of itself.
 
         Args:
@@ -85,7 +88,9 @@ class Polygon:
         Return:
             Polygon
         """
-        return Polygon(new_name, [Point(p.x, p.y, p.z) for p in self.points])
+        if new_name is None:
+            new_name = random_id()
+        return Polygon([Point(p.x, p.y, p.z) for p in self.points], name=new_name)
 
     def points_as_array(self) -> np.ndarray:
         """Returns a copy of the points as a numpy array."""
