@@ -39,7 +39,7 @@ class Mesh:
         for _, solid in zone.solids.items():
             self.add_solid(solid)
 
-    def generate(self, solidmesh=True):
+    def generate(self, solidmesh=False):
         """Generate mesh for all added polygons and solids."""
         self.polymesh.generate()
         boundary_vertices = self.polymesh.get_vertices_per_polygon()

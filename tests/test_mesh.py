@@ -36,7 +36,7 @@ def test_mesh():
         # Need to repeat this test multiple times, because mesh generation is random
         mesh = Mesh(delta)
         mesh.add_zone(zone)
-        mesh.generate()
+        mesh.generate(solidmesh=True)
 
         solidmesh_stats = mesh.solidmesh.mesh_statistics()
         assert solidmesh_stats["min_element_volume"] > minimum_tetra_volume(delta)

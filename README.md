@@ -73,7 +73,8 @@ make example
   normal, it is convex)
 - [x] Constrained Delaunay triangulation
 - [x] Constrained Delaunay tetrahedralization
-- [ ] Subpolygons
+- [x] Subpolygons
+- [ ] SolidMesh unit tests sometimes fail, `example_2.py` also fails
 - [ ] Test solid mesh with multiple solid instances
 - [ ] Accurate center of weight for Solid
 - [ ] Export/import to/from STL (and other formats?)

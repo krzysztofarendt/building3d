@@ -53,7 +53,7 @@ def test_mesh_l_shape(show=False):
 
     mesh = Mesh(delta)
     mesh.add_zone(zone)
-    mesh.generate()
+    mesh.generate(solidmesh=True)
 
     solidmesh_stats = mesh.solidmesh.mesh_statistics()
     assert solidmesh_stats["min_element_volume"] > minimum_tetra_volume(

@@ -22,7 +22,7 @@ def plot_zone(
 
         # Plot walls
         plot_polygons(
-            solid.polygons(),
+            solid.polygons(only_parents=False),
             show_triangulation=show_triangulation,
             show_normals=show_normals,
             color=colors.random_color(),

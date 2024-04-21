@@ -1,14 +1,13 @@
 from building3d.display.plot_zone import plot_zone
 from building3d.display.plot_mesh import plot_mesh
 from building3d.geom.point import Point
-from building3d.geom.solid import Solid
 from building3d.geom.polygon import Polygon
 from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
 from building3d.mesh.mesh import Mesh
 
 
-def example():
+def example_1():
     stretch = [7, 4, 5]
     translate = [3.0, 3.0, 3.0]
     p0 = Point(0.0, 0.0, 0.0) * stretch + translate
@@ -55,4 +54,4 @@ def example():
 
 
 if __name__ == "__main__":
-    example()
+    example_1()
