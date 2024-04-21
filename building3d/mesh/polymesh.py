@@ -113,8 +113,7 @@ class PolyMesh:
         fixed_points: dict[str, list[Point]] = {},
     ):
         """Generate mesh for all added polygons and solids."""
-        use_init = True if len(fixed_points) > 0 else False
-        logger.debug(f"Generating mesh (using initial vertices: {use_init})")
+        logger.debug(f"Generating mesh...")
         self.reinit()
 
         # Polygons

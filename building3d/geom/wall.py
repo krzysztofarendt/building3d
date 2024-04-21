@@ -16,6 +16,15 @@ class Wall:
         self.polygons = {}
         self.polygraph = {}
 
+    def get_parents(self) -> list[str]:
+        return list(self.polygraph.keys())
+
+    def get_subpolygons(self, parent: str) -> list[Polygon]:
+        if parent in self.polygraph.keys():
+            return [self.polygons[name] for name in self.polygraph[parent]]
+        else:
+            return []
+
     def add_polygon(self, poly: Polygon, parent: str | None = None):
         """Add polygon to the wall.
 
