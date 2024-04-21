@@ -7,6 +7,7 @@ import building3d.geom.polygon
 from building3d.geom.tetrahedron import tetrahedron_volume
 from building3d.geom.point import Point
 from building3d.mesh.tetrahedralization import delaunay_tetrahedralization
+from building3d.mesh.quality import purge_mesh
 from building3d.config import MESH_DELTA
 
 
@@ -91,15 +92,15 @@ class SolidMesh:
 
         if elements is not None:
             # Filtered copy
-            # TODO: Reorder vertices, because now all of them are copied even if they are not in `elements`
             mesh.vertices = self.vertices
             mesh.elements = elements
+            mesh.vertices, mesh.elements = purge_mesh(mesh.vertices, mesh.elements)
             mesh.volumes = [vol for i, vol in enumerate(self.volumes) if i in elements]
         elif max_vol is not None:
             # Filtered copy
-            # TODO: Reorder vertices, because now all of them are copied even if they are not in `elements`
             mesh.vertices = self.vertices
             mesh.elements = [el for el, vol in zip(self.elements, self.volumes) if vol < max_vol]
+            mesh.vertices, mesh.elements = purge_mesh(mesh.vertices, mesh.elements)
             mesh.volumes = [vol for vol in self.volumes if vol < max_vol]
         else:
             # Full copy
