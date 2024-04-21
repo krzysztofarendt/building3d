@@ -36,10 +36,13 @@ class Solid:
         if name in Solid.instance_names:
             Solid.instance_names.remove(name)
 
-    def polygons(self):
+    def polygons(self, only_parents=True):
         poly = []
         for wall in self.walls:
-            poly.extend(wall.polygons.values())
+            if only_parents:
+                poly.extend(wall.get_polygons())
+            else:
+                poly.extend(wall.polygons.values())
         return poly
 
 
@@ -166,7 +169,7 @@ class Solid:
                         has_duplicates[i2] = True
 
         if not has_duplicates.all():
-            errors.append(GeometryError("Some points are attached to only 1 wall"))
+            errors.append(GeometryError(f"Some points in solid {self.name} are attached to only 1 wall"))
 
         # Print encountered geometry errors
         for e in errors:

@@ -27,8 +27,11 @@ class Wall:
     def get_parent_names(self) -> list[str]:
         return list(self.polygraph.keys())
 
-    def get_polygons(self) -> list[Polygon]:
-        return [self.polygons[name] for name in self.get_parent_names()]
+    def get_polygons(self, only_parents=True) -> list[Polygon]:
+        if only_parents:
+            return [self.polygons[name] for name in self.get_parent_names()]
+        else:
+            return list(self.polygons.values())
 
     def get_subpolygons(self, parent: str) -> list[Polygon]:
         if parent in self.polygraph.keys():
