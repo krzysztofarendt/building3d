@@ -5,16 +5,12 @@ I'm not sure where this project is heading, so there is not documentation yet.
 # Assumptions
 
 Geometry:
-- a set of points is used to define polygons
-- a set of polygons can be used to define a solid (volume, space)
-- a solid must be fully enclosed with polygons
-- a zone is a set of solids
-
-In addition, polygons can be grouped together into assemblies called *walls*:
-- a wall can consist of many polygons
+- a set of points defines a polygon
+- a set of polygons defines a wall
+- a set of walls defines a solid (3D space fully enclosed with polygons)
+- a set of solids defines a zone
 - wall polygons do not have to be coplanar
 - wall can have subpolygons (e.g. wall with a window)
-- a set of walls can be used to define a solid within a zone
 
 Mesh:
 - three types of meshes exist:
