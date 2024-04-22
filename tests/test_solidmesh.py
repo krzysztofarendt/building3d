@@ -1,11 +1,10 @@
 import numpy as np
 
-from building3d.config import GEOM_EPSILON
+from building3d.config import GEOM_RTOL
 from building3d.display.plot_solidmesh import plot_solidmesh
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
 from building3d.geom.solid import Solid
-from building3d.geom.tetrahedron import tetrahedron_volume
 from building3d.geom.wall import Wall
 from building3d.mesh.quality import minimum_tetra_volume
 from building3d.mesh.solidmesh import SolidMesh
@@ -47,7 +46,7 @@ def test_solidmesh(plot=False):
 
         # Assert that the sum of tetrahedra volumes is equal to the zone volume
         tot_volume = np.sum(mesh.volumes)
-        assert np.isclose(tot_volume, zone.volume, atol=GEOM_EPSILON), \
+        assert np.isclose(tot_volume, zone.volume, rtol=GEOM_RTOL), \
             f"Mesh volume incorrect {tot_volume} vs. {zone.volume}"
 
 

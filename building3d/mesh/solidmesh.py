@@ -1,4 +1,5 @@
 from __future__ import annotations
+import logging
 
 import numpy as np
 
@@ -8,6 +9,13 @@ from building3d.geom.point import Point
 from building3d.mesh.tetrahedralization import delaunay_tetrahedralization
 from building3d.mesh.quality import purge_mesh
 from building3d.config import MESH_DELTA
+from building3d.config import GEOM_RTOL
+from building3d.config import SOLID_MESH_MAX_TRIES
+from building3d.mesh.quality import total_volume
+from building3d.mesh.exceptions import MeshError
+
+
+logger = logging.getLogger(__name__)
 
 
 class SolidMesh:
@@ -90,12 +98,33 @@ class SolidMesh:
 
         # Solids
         for _, sld in self.solids.items():
-            vertices, tetrahedra = delaunay_tetrahedralization(
-                sld=sld,
-                boundary_vertices=boundary_vertices,
-                delta=self.delta
-            )
-            self._add_vertices(sld.name, vertices, tetrahedra)
+            mesh_volume = -1
+            vertices = []
+            elements = []
+            num_tries = 0
+            while not np.isclose(mesh_volume, sld.volume, rtol=GEOM_RTOL):
+                num_tries += 1
+                logger.debug(f"Trying to mesh a solid: {sld.name} (try #{num_tries})")
+
+                if num_tries > SOLID_MESH_MAX_TRIES:
+                    msg = f"Meshing the solid failed after {num_tries} tries..."
+                    logger.warning(msg)
+                    raise MeshError(msg)
+
+                vertices, elements = delaunay_tetrahedralization(
+                    sld=sld,
+                    boundary_vertices=boundary_vertices,
+                    delta=self.delta
+                )
+                mesh_volume = total_volume(vertices, elements)
+                error = np.abs(mesh_volume - sld.volume) / sld.volume
+                logger.debug(
+                    f"Mesh volume = {mesh_volume} vs. Geom. volume = {sld.volume} "
+                    f"(error = {error * 100.:4f}%)"
+                )
+
+            self._add_vertices(sld.name, vertices, elements)
+            logger.debug(f"Meshing finished. {len(vertices)=}, {len(elements)=}")
 
         # Calculate volumes
         for el in self.elements:

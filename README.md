@@ -69,8 +69,10 @@ make example
 # TODO:
 
 - [x] Subpolygons
+- [x] `SolidMesh` should iterate until mesh volume equals geometric volume
+- [ ] `SolidMesh` should verify if all interior elements are connected to 4 other
+- [ ] `SolidMesh` of `floor_1` in `example_2` does not look correct
 - [ ] `Solid` should find polygons with reversed order of vertices and fix it
-- [ ] `SolidMesh` should iterate until mesh volume equals geometric volume
 - [ ] SolidMesh unit tests sometimes fail, `example_2.py` also fails
 - [ ] Test solid mesh with multiple solid instances
 - [ ] Accurate center of weight for Solid

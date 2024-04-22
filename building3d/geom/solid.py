@@ -92,7 +92,9 @@ class Solid:
 
         # It is possible, so we proceed with the ray casting algorithm
         # This algorithm may give wrong answer if the point lays in the corner
-        vec = np.array([1.0, 0.0, 0.0])
+        vec = np.array([0.739, 0.239, 0.113])  # Just a random vector
+        vec /= np.linalg.norm(vec)
+
         num_crossings = 0
         for poly in self.polygons():
             p_crosses_polygon = poly.is_point_inside_projection(p, vec)

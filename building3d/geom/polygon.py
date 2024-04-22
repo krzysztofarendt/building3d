@@ -255,8 +255,8 @@ class Polygon:
 
         if np.abs(denom) < GEOM_EPSILON:
             # Vector vec is colinear with the plane
-            logger.warning(f"Projection vector {vec} is colinear with the polygon {self.name}")
-            logger.debug("The point lays inside this projection only if it is inside this polygon")
+            # logger.warning(f"Projection vector {vec} is colinear with the polygon {self.name}")
+            # logger.debug("The point lays inside this projection only if it is inside this polygon")
             return self.is_point_inside(p)
         else:
             # Projection crosses the surface of the plane
