@@ -133,7 +133,17 @@ class PolyMesh:
         logger.debug(f"Generating mesh...")
         self.reinit()
 
+        # Find matching faces, because they should share vertices
+        matching_pairs = {}
+        for poly_name_1, poly_1 in self.polygons.items():
+            for poly_name_2, poly_2 in self.polygons.items():
+                if poly_name_1 != poly_name_2:
+                    if poly_1.is_facing_polygon(poly_2):
+                        matching_pairs[poly_name_1] = poly_name_2
+
         # Polygons
+        poly_vertices = {}
+
         for poly_name, poly in self.polygons.items():
             logger.debug(f"Processing {poly_name}")
 
@@ -142,10 +152,15 @@ class PolyMesh:
                 logger.debug(f"Adding {len(fixed_points[poly_name])} init. vert. for {poly_name}")
                 fixed = fixed_points[poly_name]
 
+            if poly_name in matching_pairs.keys():
+                match_name = matching_pairs[poly_name]
+                if match_name in poly_vertices.keys():
+                    fixed.extend(poly_vertices[match_name])
+
             vertices, faces = delaunay_triangulation(
                 poly=poly,
                 delta=self.delta,
                 fixed_points=fixed,
             )
-
+            poly_vertices[poly_name] = vertices
             self._add_vertices(poly_name, vertices, faces)
