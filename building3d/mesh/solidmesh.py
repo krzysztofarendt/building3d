@@ -24,6 +24,9 @@ class SolidMesh:
         self.elements = []
         self.volumes = []
 
+        self.vertex_owners = {}
+        self.element_owners = {}
+
     def add_solid(self, sld: building3d.geom.solid.Solid):
         """Add solid instance to the list of solids for this mesh.
 
@@ -64,6 +67,24 @@ class SolidMesh:
 
         return stats
 
+    def _add_vertices(self, owner, vertices, elements):
+        # Increase face counter to include previously added vertices
+        elements = np.array(elements)
+        elements += len(self.vertices)
+        elements = elements.tolist()
+
+        # Add vertices
+        len_before = len(self.vertices)
+        self.vertices.extend(vertices)
+        len_after = len(self.vertices)
+        self.vertex_owners[owner] = [x for x in range(len_before, len_after)]
+
+        # Add faces
+        len_before = len(self.elements)
+        self.elements.extend(elements)
+        len_after = len(self.elements)
+        self.element_owners[owner] = [x for x in range(len_before, len_after)]
+
     def generate(self, boundary_vertices: dict[str, list[Point]] = {}):
         """Generate mesh for all added polygons and solids."""
 
@@ -74,8 +95,7 @@ class SolidMesh:
                 boundary_vertices=boundary_vertices,
                 delta=self.delta
             )
-            self.vertices.extend(vertices)
-            self.elements.extend(tetrahedra)
+            self._add_vertices(sld.name, vertices, tetrahedra)
 
         # Calculate volumes
         for el in self.elements:

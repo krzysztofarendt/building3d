@@ -97,7 +97,7 @@ def example_2():
 
     mesh = Mesh(delta=1.0)
     mesh.add_zone(building)
-    mesh.generate(solidmesh=False)  # TODO: SolidMesh fails!
+    mesh.generate(solidmesh=True)  # TODO: SolidMesh fails!
     mesh.polymesh.mesh_statistics(show=True)
     mesh.solidmesh.mesh_statistics(show=True)
 

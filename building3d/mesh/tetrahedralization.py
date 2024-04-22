@@ -9,6 +9,7 @@ from building3d.geom.point import Point
 from building3d.geom.solid import Solid
 from building3d.geom.tetrahedron import tetrahedron_volume
 from building3d.mesh.quality import minimum_tetra_volume
+from building3d.mesh.quality import purge_mesh
 from building3d.geom.tetrahedron import tetrahedron_centroid
 from building3d.mesh.triangulation import delaunay_triangulation
 from building3d import random_within
@@ -58,7 +59,7 @@ def delaunay_tetrahedralization(
                     boundary_pts.add(pt)
     else:
         logger.debug("Will take boundary vertices provided by the user")
-        for poly_name, poly_points in boundary_vertices.items():
+        for _, poly_points in boundary_vertices.items():
             for pt in poly_points:
                 # Do not add duplicate points
                 if pt not in vertices:
@@ -132,7 +133,12 @@ def delaunay_tetrahedralization(
                 tetrahedra_ok.append(el)
 
     logger.debug(f"Number of tetrahedra with correct shape = {len(tetrahedra_ok)}")
-    tetrahedra = tetrahedra_ok
+
+    if len(tetrahedra) != len(tetrahedra_ok):
+        logger.debug(f"Purging mesh...")
+        vertices, tetrahedra = purge_mesh(vertices, tetrahedra_ok)
+    else:
+        tetrahedra = tetrahedra_ok
 
     logger.debug(f"Final number of tetrahedra in {sld.name} = {len(tetrahedra)}")
     logger.debug(f"Final number of vertices used in mesh {sld.name} = {len(np.unique(tetrahedra))}")
@@ -142,7 +148,7 @@ def delaunay_tetrahedralization(
     unique_indices = np.unique(tetrahedra)
     assert len(unique_indices) == len(vertices), "Not all vertices have been used for mesh!"
 
-    for pt in boundary_pts:
-        assert pt in vertices, f"Boundary point missing: {pt}"
+    for pt in sld.vertices():
+        assert pt in vertices, f"Solid point missing: {pt}"
 
     return vertices, tetrahedra

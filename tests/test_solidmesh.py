@@ -47,7 +47,8 @@ def test_solidmesh(plot=False):
 
         # Assert that the sum of tetrahedra volumes is equal to the zone volume
         tot_volume = np.sum(mesh.volumes)
-        assert np.isclose(tot_volume, zone.volume, atol=GEOM_EPSILON)
+        assert np.isclose(tot_volume, zone.volume, atol=GEOM_EPSILON), \
+            f"Mesh volume incorrect {tot_volume} vs. {zone.volume}"
 
 
 def test_copy(plot=False):

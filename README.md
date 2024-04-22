@@ -68,14 +68,9 @@ make example
 
 # TODO:
 
-- [x] Calculate solid volume
-- [x] Mesh for non-convex solids
-- [x] Make it possible to define Polygon starting from a non-convex vector (if
-  the cross product of corner vertices points in the same direction as polygon
-  normal, it is convex)
-- [x] Constrained Delaunay triangulation
-- [x] Constrained Delaunay tetrahedralization
 - [x] Subpolygons
+- [ ] `Solid` should find polygons with reversed order of vertices and fix it
+- [ ] `SolidMesh` should iterate until mesh volume equals geometric volume
 - [ ] SolidMesh unit tests sometimes fail, `example_2.py` also fails
 - [ ] Test solid mesh with multiple solid instances
 - [ ] Accurate center of weight for Solid
