@@ -66,7 +66,7 @@ def example_2():
     # Floor 0
     wall_a_poly = Polygon([p_aaa, p_baa, p_bab, p_aab], "wall_a_poly")
     wall_b_poly = Polygon([p_baa, p_bba, p_bbb, p_bab], "wall_b_poly")
-    wall_c_poly = Polygon([p_aba, p_bba, p_bbb, p_abb], "wall_c_poly")
+    wall_c_poly = Polygon([p_aba, p_abb, p_bbb, p_bba], "wall_c_poly")
     wall_d_poly = Polygon([p_aaa, p_aab, p_abb, p_aba], "wall_d_poly")
     door_poly = Polygon([p_caa, p_daa, p_dae, p_cae], "door_poly")
     window_poly = Polygon([p_ead, p_fad, p_fae, p_eae], "window_poly")
