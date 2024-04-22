@@ -29,4 +29,4 @@ MESH_DELTA: float = 1.0
 MESH_REL_DIST_TO_POINTS: float = 0.5  # Relative to delta
 
 # Max. number of tries to re-mesh a solid
-SOLID_MESH_MAX_TRIES = 5
+SOLID_MESH_MAX_TRIES = 3

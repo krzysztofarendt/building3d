@@ -70,7 +70,8 @@ make example
 # TODO:
 
 - [x] Subpolygons
-- [x] `SolidMesh` should iterate until mesh volume equals geometric volume
+- [-] `SolidMesh` should iterate until mesh volume equals geometric volume ->
+  it coult work better, relying only on joggling is not enough
 - [x] `SolidMesh` between the floors in `example_2` does not look right
 - [ ] `SolidMesh` should verify if all interior elements are connected to 4 other
 - [ ] `Solid` should find polygons with reversed order of vertices and fix it
