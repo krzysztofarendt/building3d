@@ -152,6 +152,7 @@ class PolyMesh:
                 logger.debug(f"Adding {len(fixed_points[poly_name])} init. vert. for {poly_name}")
                 fixed = fixed_points[poly_name]
 
+            # Check if matching polygon was already meshed and add its points if yes
             if poly_name in matching_pairs.keys():
                 match_name = matching_pairs[poly_name]
                 if match_name in poly_vertices.keys():
