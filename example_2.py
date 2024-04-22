@@ -73,27 +73,27 @@ def example_2():
     floor_0_poly = Polygon([p_aaa, p_aba, p_bba, p_baa], "floor_0_poly")
     ceiling_poly = Polygon([p_aab, p_bab, p_bbb, p_abb], "ceiling_poly")
 
-    wall_bcd = Wall([wall_b_poly, wall_c_poly, wall_d_poly])
-    wall_a = Wall([wall_a_poly])
+    wall_bcd = Wall([wall_b_poly, wall_c_poly, wall_d_poly], "wall_bcd")
+    wall_a = Wall([wall_a_poly], "wall_a")
     wall_a.add_polygon(door_poly, parent=wall_a_poly.name)
     wall_a.add_polygon(window_poly, parent=wall_a_poly.name)
-    floor_0 = Wall([floor_0_poly])
-    ceiling = Wall([ceiling_poly])
+    floor_0 = Wall([floor_0_poly], "floor_0")
+    ceiling = Wall([ceiling_poly], "ceiling")
 
     building = Zone()
-    building.add_solid("floor_0", [wall_a, wall_bcd, floor_0, ceiling])
+    building.add_solid("solid_floor_0", [wall_a, wall_bcd, floor_0, ceiling])
 
     # Floor 1
-    floor_1_poly = Polygon([p_aab, p_abb, p_bbb, p_bab])
-    roof_a_poly = Polygon([p_aab, p_bab, p_bcc, p_acc])
-    roof_b_poly = Polygon([p_bab, p_bbb, p_bcc])
-    roof_c_poly = Polygon([p_abb, p_acc, p_bcc, p_bbb])
-    roof_d_poly = Polygon([p_aab, p_acc, p_abb])
+    floor_1_poly = Polygon([p_aab, p_abb, p_bbb, p_bab], "floor_1_poly")
+    roof_a_poly = Polygon([p_aab, p_bab, p_bcc, p_acc], "roof_a_poly")
+    roof_b_poly = Polygon([p_bab, p_bbb, p_bcc], "roof_b_poly")
+    roof_c_poly = Polygon([p_abb, p_acc, p_bcc, p_bbb], "roof_c_poly")
+    roof_d_poly = Polygon([p_aab, p_acc, p_abb], "roof_d_poly")
 
-    floor_1 = Wall([floor_1_poly])
-    roof = Wall([roof_a_poly, roof_b_poly, roof_c_poly, roof_d_poly])
+    floor_1 = Wall([floor_1_poly], "floor_1")
+    roof = Wall([roof_a_poly, roof_b_poly, roof_c_poly, roof_d_poly], "roof")
 
-    building.add_solid("floor_1", [floor_1, roof])
+    building.add_solid("solid_floor_1", [floor_1, roof])
 
     mesh = Mesh(delta=1.0)
     mesh.add_zone(building)
