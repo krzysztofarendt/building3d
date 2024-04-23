@@ -7,6 +7,7 @@ from building3d import random_id
 from building3d.geom.exceptions import GeometryError
 from building3d.geom.wall import Wall
 from building3d.geom.point import Point
+from building3d.geom.polygon import Polygon
 from building3d.geom.vector import vector
 from building3d.geom.tetrahedron import tetrahedron_volume
 
@@ -36,7 +37,8 @@ class Solid:
         if name in Solid.instance_names:
             Solid.instance_names.remove(name)
 
-    def polygons(self, only_parents=True):
+    def polygons(self, only_parents=True) -> list[Polygon]:
+        """Return a list with all polygons of this solid."""
         poly = []
         for wall in self.walls:
             if only_parents:
@@ -120,6 +122,15 @@ class Solid:
                 if this_poly.is_facing_polygon(other_poly):
                     return True
         return False
+
+    def distance_to_solid_points(self, p: Point) -> float:
+        """Return minimum distance from test point `p` to solid points."""
+        dist = np.inf
+        for poly in self.polygons():
+            dp = poly.distance_point_to_polygon_points(p)
+            if dp < dist:
+                dist = dp
+        return dist
 
     def _volume(self) -> float:
         """Based on: http://chenlab.ece.cornell.edu/Publication/Cha/icip01_Cha.pdf"""

@@ -80,7 +80,6 @@ make example
 - [ ] Test solid mesh with multiple solid instances
 - [ ] Accurate center of weight for Solid
 - [ ] Export/import to/from STL (and other formats?)
-- [ ] Wall could be a collection of Polygons instead of a Polygon subclass
-- [ ] Zone could be a collection of Solids instead of a Solid subclass
 - [ ] Try plotly instead of mayavi2
-- [ ] https://docs.enthought.com/mayavi/mayavi/tips.html#acceleration-mayavi-scripts
+- [ ] Try PyVista instead of mayavi2
+- [ ] Speed up mayavi2: https://docs.enthought.com/mayavi/mayavi/tips.html#acceleration-mayavi-scripts

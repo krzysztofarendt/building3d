@@ -144,12 +144,16 @@ class Polygon:
             return dist
         else:
             # Find the closest vertex
-            dist = np.inf
-            for v in self.points:
-                p_to_v = length(p.vector() - v.vector())
-                if  p_to_v < dist:
-                    dist = p_to_v
-            return dist
+            return self.distance_point_to_polygon_points(p)
+
+    def distance_point_to_polygon_points(self, p: Point) -> float:
+        """Return minimum distance between test point and polygon points."""
+        dist = np.inf
+        for v in self.points:
+            p_to_v = length(p.vector() - v.vector())
+            if  p_to_v < dist:
+                dist = p_to_v
+        return dist
 
     def plane_normal_and_d(self) -> tuple[np.ndarray, float]:
         """Return the normal vector and coefficient d describing the plane."""

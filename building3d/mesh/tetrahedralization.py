@@ -82,6 +82,10 @@ def delaunay_tetrahedralization(
     xgrid = np.arange(xmin + delta, xmax, delta)
     ygrid = np.arange(ymin + delta, ymax, delta)
     zgrid = np.arange(zmin + delta, zmax, delta)
+
+
+    dist_to_poly_pts = {poly.name: np.inf for poly in sld.polygons()}
+
     for x in xgrid:
         for y in ygrid:
             for z in zgrid:
@@ -94,13 +98,22 @@ def delaunay_tetrahedralization(
                 #       poly.distance_point_to_polygon can be replaced with "thick" polygons
                 #       i.e. making solids from the polygons and checking if the point
                 #       is inside this solid (which should be faster)
+                # Check if point is inside solid
                 if sld.is_point_inside(pt):
-                    far_enough_from_boundary = True
+
+                    # Check if point is closer to boundary than already existing points
+                    distance_to_boundary_ok = True
                     for poly in sld.polygons():
-                        if poly.distance_point_to_polygon(pt) < delta / 2:
-                            far_enough_from_boundary = False
-                            break
-                    if far_enough_from_boundary is True:
+                        d_to_p = poly.distance_point_to_polygon_points(pt)
+                        if d_to_p < dist_to_poly_pts[poly.name]:
+                            dist_to_poly_pts[poly.name] = d_to_p
+                            # Point is closer, so we must check if it's not too close
+                            if poly.distance_point_to_polygon(pt) < delta / 2:
+                                # It is too close
+                                distance_to_boundary_ok = False
+                                break
+
+                    if distance_to_boundary_ok:
                         vertices.append(pt)
 
     # Delaunary - first pass
