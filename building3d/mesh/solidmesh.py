@@ -42,60 +42,8 @@ class SolidMesh:
         """
         self.solids[sld.name] = sld
 
-    def mesh_statistics(self, show=False) -> dict:
-        """Print and return info about mesh quality."""
-
-        if len(self.elements) == 0:
-            if show:
-                print("SolidMesh empty!")
-            return {}
-
-        vol_hist, bin_edges = np.histogram(self.volumes, bins=10)
-
-        stats = {
-            "num_of_vertices": len(self.vertices),
-            "num_of_elements": len(self.elements),
-            "max_element_volume": max(self.volumes),
-            "avg_element_volume": np.mean(self.volumes),
-            "min_element_volume": min(self.volumes),
-        }
-
-        if show is True:
-            print("SolidMesh statistics:")
-            print("=====================")
-            print(f"\tnum_of_vertices={stats['num_of_vertices']}")
-            print(f"\tnum_of_elements={stats['num_of_elements']}")
-            print(f"\tmax_element_volume={stats['max_element_volume']}")
-            print(f"\tavg_element_volume={stats['avg_element_volume']}")
-            print(f"\tmin_element_volume={stats['min_element_volume']}")
-            print("\tVolume distribution:")
-            for i in range(len(vol_hist)):
-                bracket = ")" if i < len(vol_hist) - 1 else "]"
-                print(f"\t- [{bin_edges[i]:.3f}, {bin_edges[i+1]:.3f}{bracket} = {vol_hist[i]}")
-
-        return stats
-
-    def _add_vertices(self, owner, vertices, elements):
-        # Increase face counter to include previously added vertices
-        elements = np.array(elements)
-        elements += len(self.vertices)
-        elements = elements.tolist()
-
-        # Add vertices
-        len_before = len(self.vertices)
-        self.vertices.extend(vertices)
-        len_after = len(self.vertices)
-        self.vertex_owners[owner] = [x for x in range(len_before, len_after)]
-
-        # Add faces
-        len_before = len(self.elements)
-        self.elements.extend(elements)
-        len_after = len(self.elements)
-        self.element_owners[owner] = [x for x in range(len_before, len_after)]
-
     def generate(self, boundary_vertices: dict[str, list[Point]] = {}):
         """Generate mesh for all added polygons and solids."""
-
         # Solids
         for _, sld in self.solids.items():
             mesh_volume = -1
@@ -131,6 +79,7 @@ class SolidMesh:
             logger.debug(f"Meshing finished. {len(vertices)=}, {len(elements)=}")
 
         # Calculate volumes
+        self.volumes = []
         for el in self.elements:
             p0 = self.vertices[el[0]]
             p1 = self.vertices[el[1]]
@@ -166,3 +115,21 @@ class SolidMesh:
             mesh.volumes = self.volumes
 
         return mesh
+
+    def _add_vertices(self, owner, vertices, elements):
+        # Increase face counter to include previously added vertices
+        elements = np.array(elements)
+        elements += len(self.vertices)
+        elements = elements.tolist()
+
+        # Add vertices
+        len_before = len(self.vertices)
+        self.vertices.extend(vertices)
+        len_after = len(self.vertices)
+        self.vertex_owners[owner] = [x for x in range(len_before, len_after)]
+
+        # Add faces
+        len_before = len(self.elements)
+        self.elements.extend(elements)
+        len_after = len(self.elements)
+        self.element_owners[owner] = [x for x in range(len_before, len_after)]

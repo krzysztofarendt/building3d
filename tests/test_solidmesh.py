@@ -7,6 +7,7 @@ from building3d.geom.polygon import Polygon
 from building3d.geom.solid import Solid
 from building3d.geom.wall import Wall
 from building3d.mesh.quality import minimum_tetra_volume
+from building3d.mesh.quality import mesh_stats
 from building3d.mesh.solidmesh import SolidMesh
 
 
@@ -37,9 +38,9 @@ def test_solidmesh(plot=False):
         mesh.add_solid(zone)
         mesh.generate()
 
-        stats = mesh.mesh_statistics()
-        min_volume = minimum_tetra_volume(delta)
-        assert stats["min_element_volume"] > min_volume
+        min_el_volume = np.min(mesh.volumes)
+        min_allowed_volume = minimum_tetra_volume(delta)
+        assert min_el_volume > min_allowed_volume
 
         if plot:
             plot_solidmesh(mesh, show=True)
@@ -81,7 +82,7 @@ def test_copy(plot=False):
     num_el_copy = len(mesh_copy.elements)
     assert num_el == num_el_copy, f"{num_el=} != {num_el_copy} (should be equal!)"
 
-    mesh.mesh_statistics(show=True)
+    print(mesh_stats(mesh.vertices, mesh.elements))
 
     mesh_copy = mesh.copy(max_vol=0.01)  # Removing degenerate elements
     assert mesh_copy is not mesh

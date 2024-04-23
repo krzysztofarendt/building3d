@@ -5,6 +5,7 @@ from building3d.geom.polygon import Polygon
 from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
 from building3d.mesh.mesh import Mesh
+from building3d.mesh.quality import mesh_stats
 
 
 def example_1():
@@ -44,8 +45,8 @@ def example_1():
     mesh = Mesh()
     mesh.add_zone(zone)
     mesh.generate(solidmesh=True)
-    mesh.polymesh.mesh_statistics(show=True)
-    mesh.solidmesh.mesh_statistics(show=True)
+    print(mesh_stats(mesh.polymesh.vertices, mesh.polymesh.faces))
+    print(mesh_stats(mesh.solidmesh.vertices, mesh.solidmesh.elements))
     # mesh.solidmesh = mesh.solidmesh.copy(max_vol=0.06)
 
     # Plot

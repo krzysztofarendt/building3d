@@ -7,6 +7,7 @@ from building3d.geom.polygon import Polygon
 from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
 from building3d.mesh.mesh import Mesh
+from building3d.mesh.quality import mesh_stats
 
 
 def example_2():
@@ -98,8 +99,8 @@ def example_2():
     mesh = Mesh(delta=1.0)
     mesh.add_zone(building)
     mesh.generate(solidmesh=True)
-    mesh.polymesh.mesh_statistics(show=True)
-    mesh.solidmesh.mesh_statistics(show=True)
+    print(mesh_stats(mesh.polymesh.vertices, mesh.polymesh.faces))
+    print(mesh_stats(mesh.solidmesh.vertices, mesh.solidmesh.elements))
 
     # Plot
     plot_zone(building, show_triangulation=True, show_normals=True, show=False)

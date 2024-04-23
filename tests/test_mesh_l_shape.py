@@ -55,15 +55,13 @@ def test_mesh_l_shape(show=False):
     mesh.add_zone(zone)
     mesh.generate(solidmesh=True)
 
-    solidmesh_stats = mesh.solidmesh.mesh_statistics()
-    assert solidmesh_stats["min_element_volume"] > minimum_tetra_volume(
+    assert min(mesh.solidmesh.volumes) > minimum_tetra_volume(
         delta
-    ), f"{solidmesh_stats['min_element_volume']=} > {minimum_tetra_volume(delta)=}"
+    ), f"{min(mesh.solidmesh.volumes)=} > {minimum_tetra_volume(delta)=}"
 
-    polymesh_stats = mesh.polymesh.mesh_statistics()
-    assert polymesh_stats["min_face_area"] > minimum_triangle_area(
+    assert min(mesh.polymesh.areas) > minimum_triangle_area(
         delta
-    ), f"{polymesh_stats['min_face_area']=} > {minimum_triangle_area(delta)=}"
+    ), f"{min(mesh.polymesh.areas)=} > {minimum_triangle_area(delta)=}"
 
     for el in mesh.solidmesh.elements:
         el_ctr = tetrahedron_centroid(
@@ -75,8 +73,6 @@ def test_mesh_l_shape(show=False):
         assert solid.is_point_inside(el_ctr), "SolidMesh element is outside the solid"
 
     if show is True:
-        mesh.polymesh.mesh_statistics(show=True)
-        mesh.solidmesh.mesh_statistics(show=True)
         plot_mesh(mesh, boundary=True, interior=True, show=True)
 
 
