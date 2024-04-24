@@ -1,5 +1,6 @@
 from __future__ import annotations  # Needed for type hints to work (due to circular import)
 import logging
+import time
 
 import numpy as np
 from scipy.spatial import Delaunay
@@ -94,10 +95,7 @@ def delaunay_tetrahedralization(
                     y + random_within(MESH_JOGGLE * delta),
                     z + random_within(MESH_JOGGLE * delta),
                 )
-                # TODO: Below code is very slow -> need to optimize
-                #       poly.distance_point_to_polygon can be replaced with "thick" polygons
-                #       i.e. making solids from the polygons and checking if the point
-                #       is inside this solid (which should be faster)
+                # TODO: Below code might slow -> need to optimize
                 # Check if point is inside solid
                 if sld.is_point_inside(pt):
 
@@ -133,18 +131,39 @@ def delaunay_tetrahedralization(
 
     logger.debug("Attempting to find and remove elements with invalid geometry or position...")
     tetrahedra_ok = []
+    time_point_inside = 0
+    time_volume = 0
+    time_coplanar = 0
     for el in tetrahedra:
         p0 = vertices[el[0]]
         p1 = vertices[el[1]]
         p2 = vertices[el[2]]
         p3 = vertices[el[3]]
-        coplanar = are_points_coplanar(p0, p1, p2, p3)
+        t0 = time.time()
         vol = tetrahedron_volume(p0, p1, p2, p3)
-        ctr = tetrahedron_centroid(p0, p1, p2, p3)
-        if not coplanar and vol > min_volume:
-            if sld.is_point_inside(ctr):
-                tetrahedra_ok.append(el)
+        volume_ok = vol > min_volume
+        time_volume += time.time() - t0
+        if volume_ok:
+            t0 = time.time()
+            coplanar = are_points_coplanar(p0, p1, p2, p3)
+            time_coplanar += time.time() - t0
+            if not coplanar:
+                # TODO: Below part is the slowest part of mesh generation.
+                # Hints on how to improve:
+                # - it is needed only for non-convex solids
+                # - space can be divided into sectors and if centroids of surrounding sectors
+                #   are inside, then the interior sectors are also inside
+                t0 = time.time()
+                ctr = tetrahedron_centroid(p0, p1, p2, p3)
+                point_is_inside = sld.is_point_inside(ctr)
+                time_point_inside += time.time() - t0
+                if point_is_inside:
+                    tetrahedra_ok.append(el)
 
+    print("Timing:")                    # TODO: Remove
+    print(f"{time_volume=:.4f}")        # TODO: Remove
+    print(f"{time_coplanar=:.4f}")      # TODO: Remove
+    print(f"{time_point_inside=:.4f}")  # TODO: Remove
     logger.debug(f"Number of tetrahedra with correct shape = {len(tetrahedra_ok)}")
 
     if len(tetrahedra) != len(tetrahedra_ok):
