@@ -168,10 +168,11 @@ def delaunay_triangulation(
             if fp not in points_2d:
                 missing_fixed_point = True
                 break
-
-        if not missing_fixed_point:  # TODO: add other conditions?
-            if are_points_in_set(edge_points, points_2d):
-                mesh_quality_ok = True
+        if (
+            not missing_fixed_point and \
+            are_points_in_set(edge_points, points_2d)
+        ):  # TODO: any other conditions?
+            mesh_quality_ok = True
         else:
             print("Mesh quality NOT OK, will repeat...")  # TODO: Remove
             logger.debug("Mesh quality NOT OK, will repeat...")
