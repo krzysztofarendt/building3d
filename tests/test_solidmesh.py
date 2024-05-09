@@ -6,8 +6,8 @@ from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
 from building3d.geom.solid import Solid
 from building3d.geom.wall import Wall
-from building3d.mesh.quality import minimum_tetra_volume
 from building3d.mesh.quality import mesh_stats
+from building3d.mesh.quality import minimum_tetra_volume
 from building3d.mesh.solidmesh import SolidMesh
 
 
@@ -47,8 +47,9 @@ def test_solidmesh(plot=False):
 
         # Assert that the sum of tetrahedra volumes is equal to the zone volume
         tot_volume = np.sum(mesh.volumes)
-        assert np.isclose(tot_volume, zone.volume, rtol=GEOM_RTOL), \
-            f"Mesh volume incorrect {tot_volume} vs. {zone.volume}"
+        assert np.isclose(
+            tot_volume, zone.volume, rtol=GEOM_RTOL
+        ), f"Mesh volume incorrect {tot_volume} vs. {zone.volume}"
 
 
 def test_copy(plot=False):

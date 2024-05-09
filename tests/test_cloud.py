@@ -1,5 +1,5 @@
-from building3d.geom.point import Point
 from building3d.geom.cloud import are_points_in_set
+from building3d.geom.point import Point
 
 
 def test_are_points_in_set():
