@@ -110,7 +110,7 @@ def example_2():
 
     # Plot
     plot_zone(building, show_triangulation=True, show_normals=True, show=False)
-    plot_mesh(mesh, boundary=True, interior=True, show=False)
+    plot_mesh(mesh, boundary=True, interior=False, show=False)
     mlab.show()
 
 

@@ -255,7 +255,7 @@ class Polygon:
         a, b, c, d = self.plane_equation_coefficients()
 
         # Find the point projection along vec to the plane of the polygon
-        denom = (a * vec[0] + b * vec[1] + c * vec[2])
+        denom = a * vec[0] + b * vec[1] + c * vec[2]
 
         if np.abs(denom) < GEOM_EPSILON:
             # Vector vec is colinear with the plane

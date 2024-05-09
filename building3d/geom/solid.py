@@ -88,10 +88,6 @@ class Solid:
         if p.x < min_x or p.y < min_y or p.z < min_z:
             return False
 
-        # Check if point is at the boundary
-        if self.is_point_at_the_boundary(p):
-            return True
-
         # It is possible, so we proceed with the ray casting algorithm
         # This algorithm may give wrong answer if the point lays in the corner
         vec = np.array([0.739, 0.239, 0.113])  # Just a random vector
@@ -106,7 +102,11 @@ class Solid:
         if num_crossings % 2 == 1:
             return True
         else:
-            return False
+            # Check if point is at the boundary
+            if self.is_point_at_the_boundary(p):
+                return True
+            else:
+                return False
 
     def is_point_at_the_boundary(self, p: Point) -> bool:
         """Checks whether the point p lays on any of the boundary polygons."""

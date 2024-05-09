@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 def minimum_triangle_area(delta: float = MESH_DELTA) -> float:
     """Calculate min. face area for PolyMesh quality assurance."""
-    return delta ** 2 / 50.0
+    return delta ** 2 / 8.0
 
 
 def minimum_tetra_volume(delta: float = MESH_DELTA) -> float:

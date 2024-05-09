@@ -1,4 +1,5 @@
 from __future__ import annotations  # Needed for type hints to work (due to circular import)
+from collections import defaultdict
 import logging
 import time
 
@@ -20,6 +21,50 @@ from building3d.geom.plane import are_points_coplanar
 
 
 logger = logging.getLogger(__name__)
+
+
+def imbalance(vols):
+    return max(vols) / min(vols)
+
+
+def recalc_selected_volumes(volumes, keys, vertices, elements):
+    for i in keys:
+        p0 = vertices[elements[i][0]]
+        p1 = vertices[elements[i][1]]
+        p2 = vertices[elements[i][2]]
+        p3 = vertices[elements[i][3]]
+        volumes[i] = tetrahedron_volume(p0, p1, p2, p3)
+    return volumes
+
+
+def get_invalid_points(vertices, tetrahedra, restricted):
+    invalid = []
+    # Create a map {vertex number: list of element indices}
+    vertex_to_elems = defaultdict(list)
+    for i, el in enumerate(tetrahedra):
+        for vertex_index in el:
+            vertex_to_elems[vertex_index].append(i)
+    for i in range(len(vertices)):
+        if i in restricted:
+            continue
+        # Calculate element volumes
+        volumes = recalc_selected_volumes(
+            volumes={},
+            keys=[x for x in range(len(tetrahedra))],
+            vertices=vertices,
+            elements=tetrahedra,
+        )
+        # Find connected elements
+        connected_elements = vertex_to_elems[i]
+        # Find their volumes
+        connected_volumes = [volumes[x] for x in connected_elements]
+        # If imbalance too high, move the vertex to minimize imbalance
+        imbalance_threshold = 1000.
+        if imbalance(connected_volumes) > imbalance_threshold:
+            invalid.append(i)
+
+    return invalid
+
 
 
 def delaunay_tetrahedralization(
@@ -129,42 +174,44 @@ def delaunay_tetrahedralization(
     else:
         raise MeshError("Not all vertices have been used for mesh. Does this ever happen?")
 
+    # logger.debug("Attempting to remove points attached to invalid elements (before second pass)")
+    # boundary_pts_indices = [i for i, p in enumerate(vertices) if p in boundary_pts]
+    # invalid_vertices = get_invalid_points(vertices, tetrahedra, boundary_pts_indices)
+    # vertices = [vertices[i] for i in range(len(vertices)) if i not in invalid_vertices]
+
+    # pts_arr = np.array([[p.x, p.y, p.z] for p in vertices])
+    # logger.debug(f"Delaunay tetrahedralization (second pass) on point array with shape {pts_arr.shape}")
+    # delaunay = Delaunay(pts_arr, qhull_options="Qt", incremental=False)
+    # tetrahedra = delaunay.simplices
+    # logger.debug(f"Number of resulting mesh tetrahedra in {sld.name} = {len(tetrahedra)}")
+
     logger.debug("Attempting to find and remove elements with invalid geometry or position...")
     tetrahedra_ok = []
-    time_point_inside = 0
-    time_volume = 0
-    time_coplanar = 0
     for el in tetrahedra:
         p0 = vertices[el[0]]
         p1 = vertices[el[1]]
         p2 = vertices[el[2]]
         p3 = vertices[el[3]]
-        t0 = time.time()
         vol = tetrahedron_volume(p0, p1, p2, p3)
         volume_ok = vol > min_volume
-        time_volume += time.time() - t0
         if volume_ok:
-            t0 = time.time()
             coplanar = are_points_coplanar(p0, p1, p2, p3)
-            time_coplanar += time.time() - t0
             if not coplanar:
-                # TODO: Below part is the slowest part of mesh generation.
-                # Hints on how to improve:
-                # - it is needed only for non-convex solids
-                # - space can be divided into sectors and if centroids of surrounding sectors
-                #   are inside, then the interior sectors are also inside
-                t0 = time.time()
-                ctr = tetrahedron_centroid(p0, p1, p2, p3)
-                point_is_inside = sld.is_point_inside(ctr)
-                time_point_inside += time.time() - t0
-                if point_is_inside:
+                if (
+                        (p0 in boundary_pts) and \
+                        (p1 in boundary_pts) and \
+                        (p2 in boundary_pts) and \
+                        (p3 in boundary_pts)
+                ):
+                    # Need to check if the centroid is  inside the solid
+                    # (if it is not, this is a concave edge/corner)
+                    ctr = tetrahedron_centroid(p0, p1, p2, p3)
+                    point_is_inside = sld.is_point_inside(ctr)
+                    if point_is_inside:
+                        tetrahedra_ok.append(el)
+                else:
+                    # At least one of vert. is not at the boundary, so it must be el. inside the solid
                     tetrahedra_ok.append(el)
-
-    print("Timing:")                    # TODO: Remove
-    print(f"{time_volume=:.4f}")        # TODO: Remove
-    print(f"{time_coplanar=:.4f}")      # TODO: Remove
-    print(f"{time_point_inside=:.4f}")  # TODO: Remove
-    logger.debug(f"Number of tetrahedra with correct shape = {len(tetrahedra_ok)}")
 
     if len(tetrahedra) != len(tetrahedra_ok):
         logger.debug(f"Purging mesh...")
@@ -172,6 +219,7 @@ def delaunay_tetrahedralization(
     else:
         tetrahedra = tetrahedra_ok
 
+    logger.debug(f"Number of tetrahedra with correct shape = {len(tetrahedra_ok)}")
     logger.debug(f"Final number of tetrahedra in {sld.name} = {len(tetrahedra)}")
     logger.debug(f"Final number of vertices used in mesh {sld.name} = {len(np.unique(tetrahedra))}")
     logger.debug(f"Final number of all vertices in {sld.name} = {len(vertices)}")

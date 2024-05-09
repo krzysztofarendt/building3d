@@ -4,6 +4,7 @@ import logging
 import numpy as np
 from scipy.spatial import Delaunay
 
+from building3d.geom.cloud import are_points_in_set
 from building3d.geom.polygon import Polygon
 from building3d.mesh.exceptions import MeshError
 from building3d.geom.point import Point
@@ -140,7 +141,12 @@ def delaunay_triangulation(
         final_points_2d = []
         for i, p in enumerate(points_2d):
             if i in unique_tri_indices:
-                if (pt_to_area[i] > min_area) or (points_2d[i] in fixed_2d) or (p in poly_points_2d):
+                if (
+                        (pt_to_area[i] > min_area) or \
+                        (p in fixed_2d) or \
+                        (p in edge_points) or \
+                        (p in poly_points_2d)
+                ):
                     final_points_2d.append(p)
 
         # Triangulation - second pass
@@ -164,7 +170,11 @@ def delaunay_triangulation(
                 break
 
         if not missing_fixed_point:  # TODO: add other conditions?
-            mesh_quality_ok = True
+            if are_points_in_set(edge_points, points_2d):
+                mesh_quality_ok = True
+        else:
+            print("Mesh quality NOT OK, will repeat...")  # TODO: Remove
+            logger.debug("Mesh quality NOT OK, will repeat...")
 
     # Rotate back to 3D
     new_points, _ = rotate_points_around_vector(
