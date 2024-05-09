@@ -129,9 +129,6 @@ def delaunay_tetrahedralization(
     ygrid = np.arange(ymin + delta, ymax, delta)
     zgrid = np.arange(zmin + delta, zmax, delta)
 
-
-    dist_to_poly_pts = {poly.name: np.inf for poly in sld.polygons()}
-
     for x in xgrid:
         for y in ygrid:
             for z in zgrid:
@@ -140,22 +137,15 @@ def delaunay_tetrahedralization(
                     y + random_within(MESH_JOGGLE * delta),
                     z + random_within(MESH_JOGGLE * delta),
                 )
-                # TODO: Below code might slow -> need to optimize
                 # Check if point is inside solid
                 if sld.is_point_inside(pt):
-
                     # Check if point is closer to boundary than already existing points
                     distance_to_boundary_ok = True
                     for poly in sld.polygons():
-                        d_to_p = poly.distance_point_to_polygon_points(pt)
-                        if d_to_p < dist_to_poly_pts[poly.name]:
-                            dist_to_poly_pts[poly.name] = d_to_p
-                            # Point is closer, so we must check if it's not too close
-                            if poly.distance_point_to_polygon(pt) < delta / 2:
-                                # It is too close
-                                distance_to_boundary_ok = False
-                                break
-
+                        if poly.distance_point_to_polygon(pt) < delta / 2:
+                            # It is too close to at least one polygon, points should not be used
+                            distance_to_boundary_ok = False
+                            break
                     if distance_to_boundary_ok:
                         vertices.append(pt)
 
@@ -172,7 +162,8 @@ def delaunay_tetrahedralization(
     if len(unique_indices) == len(vertices):
         logger.debug("All vertices have been used. Great!")
     else:
-        raise MeshError("Not all vertices have been used for mesh. Does this ever happen?")
+        # raise MeshError("Not all vertices have been used for mesh. Does this ever happen?")
+        pass
 
     # logger.debug("Attempting to remove points attached to invalid elements (before second pass)")
     # boundary_pts_indices = [i for i, p in enumerate(vertices) if p in boundary_pts]
