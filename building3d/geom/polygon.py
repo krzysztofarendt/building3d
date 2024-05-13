@@ -7,7 +7,7 @@ from building3d.geom.exceptions import GeometryError
 from building3d.geom.exceptions import TriangulationError
 from building3d.geom.point import Point
 from building3d.geom.line import distance_point_to_edge
-from building3d.geom.plane import are_points_coplanar
+from building3d.geom.cloud import are_points_coplanar
 from building3d.geom.vector import normal
 from building3d.geom.vector import length
 from building3d.geom.triangle import triangle_centroid

@@ -105,12 +105,12 @@ def example_2():
     mesh.generate(solidmesh=True)
     end_time = time.time()
     print(f"MESH GENERATION TIME: {end_time - start_time:.3f}s")
-    # print(mesh_stats(mesh.polymesh.vertices, mesh.polymesh.faces))
-    # print(mesh_stats(mesh.solidmesh.vertices, mesh.solidmesh.elements))
+    print(mesh_stats(mesh.polymesh.vertices, mesh.polymesh.faces))
+    print(mesh_stats(mesh.solidmesh.vertices, mesh.solidmesh.elements))
 
     # Plot
     plot_zone(building, show_triangulation=True, show_normals=True, show=False)
-    plot_mesh(mesh, boundary=True, interior=False, show=False)
+    plot_mesh(mesh, boundary=True, interior=True, show=False)
     mlab.show()
 
 

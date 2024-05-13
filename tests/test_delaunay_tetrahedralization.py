@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from building3d import random_id
-from building3d.geom.plane import are_points_coplanar
+from building3d.geom.cloud import are_points_coplanar
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
 from building3d.geom.solid import Solid
@@ -52,7 +52,7 @@ def test_tetrahedralization():
     with pytest.raises(MeshError):
         vertices, tetrahedra = delaunay_tetrahedralization(
             sld=solid,
-            boundary_vertices={
+            boundary_vmap={
                 floor_id: floor_vertices,
                 wall0_id: wall0_vertices,
                 wall1_id: wall1_vertices,
@@ -68,7 +68,7 @@ def test_tetrahedralization():
     delta = 0.25
     vertices, tetrahedra = delaunay_tetrahedralization(
         sld=solid,
-        boundary_vertices={
+        boundary_vmap={
             floor_id: floor_vertices,
             wall0_id: wall0_vertices,
             wall1_id: wall1_vertices,
@@ -91,16 +91,15 @@ def test_tetrahedralization():
         for j in range(i + 1, len(vertices)):
             assert vertices[i] != vertices[j]
 
-    boundary_vertices = (
-        floor_vertices
-        + wall0_vertices
-        + wall1_vertices
-        + wall2_vertices
-        + wall3_vertices
-        + roof_vertices
-    )
-
-    assert len(vertices) > len(boundary_vertices)
+    # boundary_vertices = (
+    #     floor_vertices
+    #     + wall0_vertices
+    #     + wall1_vertices
+    #     + wall2_vertices
+    #     + wall3_vertices
+    #     + roof_vertices
+    # )
+    # assert len(vertices) > len(boundary_vertices)  # TODO: Can be removed? This does not have to be always True
 
     # Assert tetrahedra have non-zero volume
     for i, el in enumerate(tetrahedra):

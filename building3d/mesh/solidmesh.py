@@ -64,7 +64,7 @@ class SolidMesh:
 
                 vertices, elements = delaunay_tetrahedralization(
                     sld=sld,
-                    boundary_vertices=boundary_vertices,
+                    boundary_vmap=boundary_vertices,
                     delta=self.delta
                 )
 

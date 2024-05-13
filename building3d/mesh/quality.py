@@ -94,8 +94,8 @@ def collapse_points(
 
 def purge_mesh(
     vertices: list[Point],
-    elements: list[list[int]],
-) -> tuple[list[Point], list[list[int]]]:
+    elements: list[tuple[int, ...]],
+) -> tuple[list[Point], list[tuple]]:
     """Remove vertices not used in elements and reindex elements."""
 
     # Copy input lists (to not alter in place)
@@ -111,7 +111,7 @@ def purge_mesh(
     to_delete = sorted(list(to_delete), reverse=True)
     for p_to_delete in to_delete:
         for k in range(len(elements)):
-            elements[k] = [x - 1 if x > p_to_delete else x for x in elements[k]]
+            elements[k] = tuple([x - 1 if x > p_to_delete else x for x in elements[k]])
         vertices.pop(p_to_delete)
 
     return vertices, elements

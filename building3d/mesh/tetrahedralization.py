@@ -1,7 +1,6 @@
 from __future__ import annotations  # Needed for type hints to work (due to circular import)
 from collections import defaultdict
 import logging
-import time
 
 import numpy as np
 from scipy.spatial import Delaunay
@@ -10,25 +9,41 @@ from building3d.mesh.exceptions import MeshError
 from building3d.geom.point import Point
 from building3d.geom.solid import Solid
 from building3d.geom.tetrahedron import tetrahedron_volume
+from building3d.geom.tetrahedron import tetrahedron_centroid
 from building3d.mesh.quality import minimum_tetra_volume
 from building3d.mesh.quality import purge_mesh
-from building3d.geom.tetrahedron import tetrahedron_centroid
 from building3d.mesh.triangulation import delaunay_triangulation
 from building3d import random_within
 from building3d.config import MESH_JOGGLE
 from building3d.config import MESH_DELTA
-from building3d.geom.plane import are_points_coplanar
 
 
 logger = logging.getLogger(__name__)
 
 
 def imbalance(vols):
+    assert len(vols) > 0, "Empty sequence passed"
     return max(vols) / min(vols)
 
 
-def recalc_selected_volumes(volumes, keys, vertices, elements):
-    for i in keys:
+def recalc_selected_volumes(
+        volumes: dict[int, float],
+        indices: list[int],
+        vertices: list[Point],
+        elements: list[tuple[int, ...]]
+) -> dict[int, float]:
+    """Calculated volumes of selected elements.
+
+    Args:
+        volumes: dictionary of volumes (index->volume) to be updated, can be empty
+        indices: indices of elements to be recalculated
+        vertices: list of mesh points
+        elements: list of elements
+
+    Return:
+        dictionary {index: volume}
+    """
+    for i in indices:
         p0 = vertices[elements[i][0]]
         p1 = vertices[elements[i][1]]
         p2 = vertices[elements[i][2]]
@@ -37,30 +52,59 @@ def recalc_selected_volumes(volumes, keys, vertices, elements):
     return volumes
 
 
-def get_invalid_points(vertices, tetrahedra, restricted):
+def get_invalid_points(
+    vertices: list[Point],
+    tetrahedra: list[tuple],
+    restricted: list[int],
+    min_volume: float,
+) -> list[int]:
+    """Return a list of indices of vertices at imbalanced mesh.
+
+    An element is invalid if:
+    - volumes of connected elements are imbalanced
+    - at least one connected element has volume below threshold
+
+    Args:
+        vertices: list of points
+        tetrahedra: list of elements
+        restricted: list of indices which shouldn't be removed
+        min_volume: volume threshold below which element is considered invalid
+
+    Return:
+        list of indices of vertices connected to invalid elements
+    """
     invalid = []
     # Create a map {vertex number: list of element indices}
     vertex_to_elems = defaultdict(list)
+
     for i, el in enumerate(tetrahedra):
         for vertex_index in el:
             vertex_to_elems[vertex_index].append(i)
+
     for i in range(len(vertices)):
         if i in restricted:
             continue
+
         # Calculate element volumes
+        # (need to calculate on demand because mesh may have changed)
         volumes = recalc_selected_volumes(
             volumes={},
-            keys=[x for x in range(len(tetrahedra))],
+            indices=[x for x in range(len(tetrahedra))],
             vertices=vertices,
             elements=tetrahedra,
         )
+
         # Find connected elements
         connected_elements = vertex_to_elems[i]
+
         # Find their volumes
         connected_volumes = [volumes[x] for x in connected_elements]
-        # If imbalance too high, move the vertex to minimize imbalance
-        imbalance_threshold = 1000.
+
+        # If imbalance higher than threshold, add the vertix index to list
+        imbalance_threshold = 100  # TODO: Add to config
         if imbalance(connected_volumes) > imbalance_threshold:
+            invalid.append(i)
+        elif min(connected_volumes) < min_volume:
             invalid.append(i)
 
     return invalid
@@ -69,25 +113,26 @@ def get_invalid_points(vertices, tetrahedra, restricted):
 
 def delaunay_tetrahedralization(
     sld: Solid,
-    boundary_vertices: dict[str, list[Point]],
+    boundary_vmap: dict[str, list[Point]],
     delta: float = MESH_DELTA,
-) -> tuple[list[Point], list[list[int]]]:
+) -> tuple[list[Point], list[tuple[int, ...]]]:
     """Constrained Delaunay tetrahedralization of a solid.
 
     Args:
         sld: solid to be meshed
-        boundary_vertices: dict with polygon names and respective mesh vertices
+        boundary_v: dict with polygon names and respective mesh vertices
         delta: approximate mesh size
 
     Return:
-        (list of mesh points, list of tetrahedral tetrahedra)
+        (list of mesh points, list of tetrahedra)
     """
     logger.debug(f"Starting tetrahedralization of {sld} with {delta=}")
-    logger.debug(f"Number of polygons passed in boundary_vertices = {len(boundary_vertices.keys())}")
-    for name in boundary_vertices:
-        logger.debug(f"boundary vertifces for {name} = {len(boundary_vertices[name])}")
+    logger.debug(f"Number of polygons passed in boundary_vertices = {len(boundary_vmap.keys())}")
+    for name in boundary_vmap:
+        logger.debug(f"boundary vertifces for {name} = {len(boundary_vmap[name])}")
 
-    vertices = []
+    # Boundary points
+    boundary_vertices = []
     boundary_pts = set()
 
     min_volume = minimum_tetra_volume(delta)
@@ -95,21 +140,21 @@ def delaunay_tetrahedralization(
 
     # Collect meshes from the boundary polygons
     # -> boundary_vertices, boundary_faces
-    if len(boundary_vertices.keys()) == 0:
-        logger.debug("Need to create boundary mesh to get vertices at the surrounding polygons")
+    if len(boundary_vmap.keys()) == 0:
+        logger.debug("Need to create boundary mesh via triangulation of the surrounding polygons")
         for poly in sld.polygons():
             polymesh_vertices, _ = delaunay_triangulation(poly, delta=delta)
             for pt in polymesh_vertices:
-                if pt not in vertices:
-                    vertices.append(pt)
+                if pt not in boundary_vertices:
+                    boundary_vertices.append(pt)
                     boundary_pts.add(pt)
     else:
         logger.debug("Will take boundary vertices provided by the user")
-        for _, poly_points in boundary_vertices.items():
+        for _, poly_points in boundary_vmap.items():
             for pt in poly_points:
                 # Do not add duplicate points
-                if pt not in vertices:
-                    vertices.append(pt)
+                if pt not in boundary_vertices:
+                    boundary_vertices.append(pt)
                     boundary_pts.add(pt)
 
     logger.debug("Add new points inside the solid")
@@ -129,6 +174,11 @@ def delaunay_tetrahedralization(
     ygrid = np.arange(ymin + delta, ymax, delta)
     zgrid = np.arange(zmin + delta, zmax, delta)
 
+    # List of all mesh points (including boundary points)
+    vertices = []
+    vertices.extend(boundary_vertices)
+
+    interior_vertices = []
     for x in xgrid:
         for y in ygrid:
             for z in zgrid:
@@ -143,77 +193,101 @@ def delaunay_tetrahedralization(
                     distance_to_boundary_ok = True
                     for poly in sld.polygons():
                         if poly.distance_point_to_polygon(pt) < delta / 2:
-                            # It is too close to at least one polygon, points should not be used
+                            # It is too close to at least one polygon, so shouldn't be used
                             distance_to_boundary_ok = False
                             break
                     if distance_to_boundary_ok:
-                        vertices.append(pt)
+                        interior_vertices.append(pt)
 
-    # Delaunary - first pass
-    pts_arr = np.array([[p.x, p.y, p.z] for p in vertices])
-    logger.debug(f"Delaunay tetrahedralization (first pass) on point array with shape {pts_arr.shape}")
-    delaunay = Delaunay(pts_arr, qhull_options="Qt", incremental=False)
-    tetrahedra = delaunay.simplices
-    logger.debug(f"Number of resulting mesh tetrahedra in {sld.name} = {len(tetrahedra)}")
+    vertices.extend(interior_vertices)
 
-    # Remove unused points and tetrahedra with small volume
-    unique_indices = np.unique(tetrahedra)
+    logger.debug(f"Number of mesh vertices = {len(vertices)}")
 
-    if len(unique_indices) == len(vertices):
-        logger.debug("All vertices have been used. Great!")
-    else:
-        # raise MeshError("Not all vertices have been used for mesh. Does this ever happen?")
-        pass
+    mesh_ok = False
+    pass_num = 0
+    tetrahedra = []
 
-    # logger.debug("Attempting to remove points attached to invalid elements (before second pass)")
-    # boundary_pts_indices = [i for i, p in enumerate(vertices) if p in boundary_pts]
-    # invalid_vertices = get_invalid_points(vertices, tetrahedra, boundary_pts_indices)
-    # vertices = [vertices[i] for i in range(len(vertices)) if i not in invalid_vertices]
+    while not mesh_ok:
+        pass_num += 1
 
-    # pts_arr = np.array([[p.x, p.y, p.z] for p in vertices])
-    # logger.debug(f"Delaunay tetrahedralization (second pass) on point array with shape {pts_arr.shape}")
-    # delaunay = Delaunay(pts_arr, qhull_options="Qt", incremental=False)
-    # tetrahedra = delaunay.simplices
-    # logger.debug(f"Number of resulting mesh tetrahedra in {sld.name} = {len(tetrahedra)}")
+        # Delaunay
+        pts_arr = np.array([[p.x, p.y, p.z] for p in vertices])
 
-    logger.debug("Attempting to find and remove elements with invalid geometry or position...")
-    tetrahedra_ok = []
-    for el in tetrahedra:
+        logger.debug(f"Delaunay pass #{pass_num}")
+        logger.debug(f"Passing point array with shape {pts_arr.shape}")
+        delaunay = Delaunay(pts_arr, qhull_options="Qt", incremental=False)
+
+        # List comprehension to cast type to list[tuple[int, int, int, int]] - easier to follow
+        tetrahedra = [(v0, v1, v2, v3) for v0, v1, v2, v3 in delaunay.simplices]
+        logger.debug(f"Number of mesh tetrahedra in {sld.name} = {len(tetrahedra)}")
+
+        # Check if all points has been used
+        unique_indices = np.unique(tetrahedra)
+        if len(unique_indices) == len(vertices):
+            logger.debug("All vertices have been used. Great!")
+        else:
+            # raise MeshError("Not all vertices have been used for mesh. Does this ever happen?")
+            pass
+
+        # Remove tetrahedra with zero volume
+        # TODO: Not sure if it ever happens...
+        logger.debug("Attempting to find and remove elements with zero volume")
+        zero_volume_index = []
+        for i, el in enumerate(tetrahedra):
+            p0 = vertices[el[0]]
+            p1 = vertices[el[1]]
+            p2 = vertices[el[2]]
+            p3 = vertices[el[3]]
+            vol = tetrahedron_volume(p0, p1, p2, p3)
+            if np.isclose(vol, 0):
+                zero_volume_index.append(i)
+
+        logger.debug(f"Number of removed zero volume elements = {len(zero_volume_index)}")
+        tetrahedra = [el for i, el in enumerate(tetrahedra) if i not in zero_volume_index]
+        vertices, tetrahedra = purge_mesh(vertices, tetrahedra)
+
+        # Remove vertices attached to invalid elements
+        logger.debug("Attempting to remove points attached to invalid elements")
+        num_vert_before = len(vertices)
+        boundary_pts_indices = [i for i, p in enumerate(vertices) if p in boundary_pts]
+        invalid_vertices = get_invalid_points(vertices, tetrahedra, boundary_pts_indices, min_volume)
+        vertices = [vertices[i] for i in range(len(vertices)) if i not in invalid_vertices]
+
+        logger.debug(f"Number of vertices before->after removal: {num_vert_before}->{len(vertices)}")
+        if len(invalid_vertices) > 0:
+            logger.debug("Remeshing needed")
+            continue
+
+        # Check if mesh quality is OK
+        zero_volume_ok = len(zero_volume_index) == 0
+        invalid_vert_ok = len(invalid_vertices) == 0
+
+        mesh_ok = zero_volume_ok and invalid_vert_ok
+
+        logger.debug(f"(Mesh quality) Elements have volume > 0 is {zero_volume_ok}")
+        logger.debug(f"(Mesh quality) Vertices connected to good elements is {invalid_vert_ok}")
+        logger.debug(f"Mesh quality OK? {mesh_ok}")
+
+    # Remove external elements (can happen in non-convex solids)
+    logger.debug("Attempting to find and remove elements with outside (non-convex) solid")
+    outside_index = []
+    for i, el in enumerate(tetrahedra):
         p0 = vertices[el[0]]
         p1 = vertices[el[1]]
         p2 = vertices[el[2]]
         p3 = vertices[el[3]]
-        vol = tetrahedron_volume(p0, p1, p2, p3)
-        volume_ok = vol > min_volume
-        if volume_ok:
-            coplanar = are_points_coplanar(p0, p1, p2, p3)
-            if not coplanar:
-                if (
-                        (p0 in boundary_pts) and \
-                        (p1 in boundary_pts) and \
-                        (p2 in boundary_pts) and \
-                        (p3 in boundary_pts)
-                ):
-                    # Need to check if the centroid is  inside the solid
-                    # (if it is not, this is a concave edge/corner)
-                    ctr = tetrahedron_centroid(p0, p1, p2, p3)
-                    point_is_inside = sld.is_point_inside(ctr)
-                    if point_is_inside:
-                        tetrahedra_ok.append(el)
-                else:
-                    # At least one of vert. is not at the boundary, so it must be el. inside the solid
-                    tetrahedra_ok.append(el)
+        # Need to check if the centroid is inside the solid
+        # (if it is not, this is a concave edge/corner)
+        ctr = tetrahedron_centroid(p0, p1, p2, p3)
+        point_is_inside = sld.is_point_inside(ctr)
+        if not point_is_inside:
+            outside_index.append(i)
+    logger.debug(f"Number of external elements found = {len(outside_index)}")
+    tetrahedra = [el for i, el in enumerate(tetrahedra) if i not in outside_index]
+    vertices, tetrahedra = purge_mesh(vertices, tetrahedra)
 
-    if len(tetrahedra) != len(tetrahedra_ok):
-        logger.debug(f"Purging mesh...")
-        vertices, tetrahedra = purge_mesh(vertices, tetrahedra_ok)
-    else:
-        tetrahedra = tetrahedra_ok
-
-    logger.debug(f"Number of tetrahedra with correct shape = {len(tetrahedra_ok)}")
     logger.debug(f"Final number of tetrahedra in {sld.name} = {len(tetrahedra)}")
-    logger.debug(f"Final number of vertices used in mesh {sld.name} = {len(np.unique(tetrahedra))}")
-    logger.debug(f"Final number of all vertices in {sld.name} = {len(vertices)}")
+    logger.debug(f"Final number of vertices used in {sld.name} = {len(np.unique(tetrahedra))}")
 
     # Sanity checks
     unique_indices = np.unique(tetrahedra)
