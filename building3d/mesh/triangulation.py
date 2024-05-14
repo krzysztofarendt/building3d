@@ -15,7 +15,7 @@ from building3d.geom.vector import normal
 from building3d.geom.line import create_points_between_list_of_points
 from building3d.geom.triangle import triangle_area
 from building3d.geom.triangle import triangle_centroid
-from building3d.mesh.quality import minimum_triangle_area
+from building3d.mesh.quality.min_triangle_area import minimum_triangle_area
 from building3d.config import GEOM_EPSILON
 from building3d.config import MESH_JOGGLE
 from building3d.config import MESH_DELTA

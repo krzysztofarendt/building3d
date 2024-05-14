@@ -4,8 +4,8 @@ from building3d.geom.solid import Solid
 from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
 from building3d.mesh.mesh import Mesh
-from building3d.mesh.quality import minimum_tetra_volume
-from building3d.mesh.quality import minimum_triangle_area
+from building3d.mesh.quality.min_tetra_volume import minimum_tetra_volume
+from building3d.mesh.quality.min_triangle_area import minimum_triangle_area
 
 
 def test_mesh():

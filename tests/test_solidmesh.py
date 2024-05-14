@@ -6,8 +6,8 @@ from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
 from building3d.geom.solid import Solid
 from building3d.geom.wall import Wall
-from building3d.mesh.quality import mesh_stats
-from building3d.mesh.quality import minimum_tetra_volume
+from building3d.mesh.quality.mesh_stats import mesh_stats
+from building3d.mesh.quality.min_tetra_volume import minimum_tetra_volume
 from building3d.mesh.solidmesh import SolidMesh
 
 

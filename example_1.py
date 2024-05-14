@@ -5,7 +5,7 @@ from building3d.geom.polygon import Polygon
 from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
 from building3d.mesh.mesh import Mesh
-from building3d.mesh.quality import mesh_stats
+from building3d.mesh.quality.mesh_stats import mesh_stats
 
 
 def example_1():
