@@ -3,7 +3,6 @@ import logging
 
 import numpy as np
 
-import building3d.logger
 from building3d.geom.polygon import Polygon
 from building3d.geom.point import Point
 from building3d.geom.triangle import triangle_area

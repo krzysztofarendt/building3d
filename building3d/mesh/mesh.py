@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from building3d.geom.polygon import Polygon
 from building3d.geom.solid import Solid
 from building3d.geom.zone import Zone

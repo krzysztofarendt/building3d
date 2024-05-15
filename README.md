@@ -69,15 +69,7 @@ make example
 
 # TODO:
 
-- [x] Subpolygons
-- [-] `SolidMesh` should iterate until mesh volume equals geometric volume ->
-  it coult work better, relying only on joggling is not enough
-- [x] `SolidMesh` between the floors in `example_2` does not look right
-- [ ] `SolidMesh` generation should be faster
-- [ ] `SolidMesh` should verify if all interior elements are connected to 4 other
 - [ ] `Solid` should find polygons with reversed order of vertices and fix it
-- [x] SolidMesh unit tests sometimes fail, `example_2.py` also fails
-- [ ] Test solid mesh with multiple solid instances
 - [ ] Accurate center of weight for Solid (but is it even needed?)
 - [ ] Export/import to/from STL (and other formats?)
 - [ ] Try plotly instead of mayavi2

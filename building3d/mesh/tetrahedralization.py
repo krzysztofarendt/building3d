@@ -1,4 +1,3 @@
-from __future__ import annotations  # Needed for type hints to work (due to circular import)
 from collections import defaultdict
 import logging
 
@@ -10,8 +9,9 @@ from building3d.geom.point import Point
 from building3d.geom.solid import Solid
 from building3d.geom.tetrahedron import tetrahedron_volume
 from building3d.geom.tetrahedron import tetrahedron_centroid
-from building3d.mesh.quality import minimum_tetra_volume
-from building3d.mesh.quality import purge_mesh
+from building3d.mesh.quality.min_tetra_volume import minimum_tetra_volume
+from building3d.mesh.quality.purge_mesh import purge_mesh
+from building3d.mesh.quality.count_tetra_neighbors import count_tetra_neighbors
 from building3d.mesh.triangulation import delaunay_triangulation
 from building3d import random_within
 from building3d.config import MESH_JOGGLE
@@ -242,6 +242,9 @@ def delaunay_tetrahedralization(
             if np.isclose(vol, 0):
                 zero_volume_index.append(i)
 
+        if len(zero_volume_index) > 0:  # TODO: Remove
+            print("!!! ZERO VOLUME ELEMENTS REMOVED !!! I DID NOT KNOW IT EVERY HAPPENS! :)")
+
         logger.debug(f"Number of removed zero volume elements = {len(zero_volume_index)}")
         tetrahedra = [el for i, el in enumerate(tetrahedra) if i not in zero_volume_index]
         vertices, tetrahedra = purge_mesh(vertices, tetrahedra)
@@ -286,14 +289,55 @@ def delaunay_tetrahedralization(
     tetrahedra = [el for i, el in enumerate(tetrahedra) if i not in outside_index]
     vertices, tetrahedra = purge_mesh(vertices, tetrahedra)
 
-    logger.debug(f"Final number of tetrahedra in {sld.name} = {len(tetrahedra)}")
-    logger.debug(f"Final number of vertices used in {sld.name} = {len(np.unique(tetrahedra))}")
+    # Sanity checks =====================================================================
+    logger.debug("Final mesh verification...")
 
-    # Sanity checks
+    # Are all mesh vertices used by elements?
     unique_indices = np.unique(tetrahedra)
     assert len(unique_indices) == len(vertices), "Not all vertices have been used for mesh!"
 
+    # Are all solid vertices present in the mesh?
     for pt in sld.vertices():
         assert pt in vertices, f"Solid point missing: {pt}"
+
+    # Do all interior elements have 4 neighbors?
+    # Do all elements have at least 1 neighbor?
+    count = count_tetra_neighbors(vertices, tetrahedra)
+
+    # Check if each element has at least 1 neighbor
+    assert np.min(count) > 0, "Some mesh element has no neighbors"
+
+    # Find elements which should have 4 neighbors
+    # These are the elements that have less than 3 vertices at the boundary
+    boundary_pts_indices = set([i for i, p in enumerate(vertices) if p in boundary_pts])
+    boundary_elements = set()
+    for i, el in enumerate(tetrahedra):
+        num_boundary_pt = 0
+        for k in range(4):
+            if el[k] in boundary_pts_indices:
+                num_boundary_pt += 1
+
+        if num_boundary_pt >= 3:
+            boundary_elements.add(i)
+
+    count_interior = np.zeros(count.size, dtype=np.int32)
+    for i in range(len(count)):
+        if i not in boundary_elements:
+            count_interior[i] = count[i]
+
+    if np.sum(count_interior) == 0:
+        logger.warning(
+            "It seems that there are no interior elements in the mesh. " + \
+            "Is delta large w.r.t. to the solid dimensions?"
+        )
+    else:
+        # If there are interior elements, they need to have 4 neighbors each
+        assert set(np.unique(count_interior)) == set([0, 4]), \
+            "Some interior elements have < 4 neighbors"
+
+    # End sanity checks =================================================================
+
+    logger.debug(f"Final number of tetrahedra in {sld.name} = {len(tetrahedra)}")
+    logger.debug(f"Final number of vertices used in {sld.name} = {len(np.unique(tetrahedra))}")
 
     return vertices, tetrahedra

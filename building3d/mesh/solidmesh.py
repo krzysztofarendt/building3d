@@ -7,11 +7,11 @@ import building3d.geom.solid
 from building3d.geom.tetrahedron import tetrahedron_volume
 from building3d.geom.point import Point
 from building3d.mesh.tetrahedralization import delaunay_tetrahedralization
-from building3d.mesh.quality import purge_mesh
+from building3d.mesh.quality.purge_mesh import purge_mesh
 from building3d.config import MESH_DELTA
 from building3d.config import GEOM_RTOL
 from building3d.config import SOLID_MESH_MAX_TRIES
-from building3d.mesh.quality import total_volume
+from building3d.mesh.quality.total_volume import total_volume
 from building3d.mesh.exceptions import MeshError
 
 

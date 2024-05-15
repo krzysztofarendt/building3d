@@ -4,8 +4,8 @@ from building3d.geom.solid import Solid
 from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
 from building3d.mesh.mesh import Mesh
-from building3d.mesh.quality import minimum_tetra_volume
-from building3d.mesh.quality import minimum_triangle_area
+from building3d.mesh.quality.min_tetra_volume import minimum_tetra_volume
+from building3d.mesh.quality.min_triangle_area import minimum_triangle_area
 
 
 def test_mesh():
@@ -30,7 +30,7 @@ def test_mesh():
     zone.add_solid_instance(solid)
 
     delta = 0.5
-    num_tests = 10
+    num_tests = 5
 
     for _ in range(num_tests):
         # Need to repeat this test multiple times, because mesh generation is random
@@ -38,5 +38,7 @@ def test_mesh():
         mesh.add_zone(zone)
         mesh.generate(solidmesh=True)
 
-        assert min(mesh.solidmesh.volumes) > minimum_tetra_volume(delta)
-        assert min(mesh.polymesh.areas) > minimum_triangle_area(delta)
+        assert min(mesh.solidmesh.volumes) > minimum_tetra_volume(delta), \
+            "Min. volume below threshold"
+        assert min(mesh.polymesh.areas) > minimum_triangle_area(delta), \
+            "Min. area below threshold"

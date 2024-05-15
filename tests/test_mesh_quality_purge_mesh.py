@@ -2,7 +2,7 @@ import numpy as np
 
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
-from building3d.mesh.quality import purge_mesh
+from building3d.mesh.quality.purge_mesh import purge_mesh
 
 
 def test_purge_mesh(show=False):
