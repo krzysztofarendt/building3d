@@ -1,4 +1,3 @@
-from __future__ import annotations  # Needed for type hints to work (due to circular import)
 import logging
 
 import numpy as np

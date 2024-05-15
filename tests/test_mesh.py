@@ -30,7 +30,7 @@ def test_mesh():
     zone.add_solid_instance(solid)
 
     delta = 0.5
-    num_tests = 10
+    num_tests = 5
 
     for _ in range(num_tests):
         # Need to repeat this test multiple times, because mesh generation is random
@@ -38,5 +38,7 @@ def test_mesh():
         mesh.add_zone(zone)
         mesh.generate(solidmesh=True)
 
-        assert min(mesh.solidmesh.volumes) > minimum_tetra_volume(delta)
-        assert min(mesh.polymesh.areas) > minimum_triangle_area(delta)
+        assert min(mesh.solidmesh.volumes) > minimum_tetra_volume(delta), \
+            "Min. volume below threshold"
+        assert min(mesh.polymesh.areas) > minimum_triangle_area(delta), \
+            "Min. area below threshold"

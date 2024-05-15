@@ -2,6 +2,7 @@ import time
 
 from mayavi import mlab
 
+import building3d.logger
 from building3d.display.plot_zone import plot_zone
 from building3d.display.plot_mesh import plot_mesh
 from building3d.geom.point import Point
