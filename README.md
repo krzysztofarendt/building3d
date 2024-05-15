@@ -62,9 +62,10 @@ Produce a coverage report:
 make coverage
 ```
 
-# Example
+# Examples
 ```
-make example
+make example_1
+make example_2
 ```
 
 # TODO:
