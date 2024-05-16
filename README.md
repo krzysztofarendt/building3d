@@ -70,9 +70,13 @@ make example_2
 
 # TODO:
 
+- [ ] `example_1` fails with `delta=0.5` and it takes 5 minutes to generate the mesh
 - [ ] `Solid` should find polygons with reversed order of vertices and fix it
 - [ ] Accurate center of weight for Solid (but is it even needed?)
 - [ ] Export/import to/from STL (and other formats?)
 - [ ] Try plotly instead of mayavi2
 - [ ] Try PyVista instead of mayavi2
 - [ ] Speed up mayavi2: https://docs.enthought.com/mayavi/mayavi/tips.html#acceleration-mayavi-scripts
+- [ ] https://github.com/meshpro/pygalmesh
+- [ ] https://github.com/nschloe/meshio
+
