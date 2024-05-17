@@ -10,7 +10,8 @@ from building3d.mesh.quality.mesh_stats import mesh_stats
 
 
 def example_1():
-    stretch = [7, 4, 5]
+    size = 3
+    stretch = [size, size, size]
     translate = [3.0, 3.0, 3.0]
     p0 = Point(0.0, 0.0, 0.0) * stretch + translate
     p1 = Point(1.0, 0.0, 0.0) * stretch + translate
@@ -43,7 +44,7 @@ def example_1():
     zone = Zone(name="zone")
     zone.add_solid("room", [floor, walls, roof])
 
-    mesh = Mesh(delta = 1.0)
+    mesh = Mesh(delta = 0.5)
     mesh.add_zone(zone)
     mesh.generate(solidmesh=True)
     print(mesh_stats(mesh.polymesh.vertices, mesh.polymesh.faces))
