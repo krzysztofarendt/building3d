@@ -1,9 +1,15 @@
+import logging
+import time
+
 from building3d.geom.polygon import Polygon
 from building3d.geom.solid import Solid
 from building3d.geom.zone import Zone
 from building3d.mesh.polymesh import PolyMesh
 from building3d.mesh.solidmesh import SolidMesh
 from building3d.config import MESH_DELTA
+
+
+logger = logging.getLogger(__name__)
 
 
 class Mesh:
@@ -39,7 +45,23 @@ class Mesh:
 
     def generate(self, solidmesh=False):
         """Generate mesh for all added polygons and solids."""
+        t0 = time.time()
+
         self.polymesh.generate()
+        t_polymesh = time.time()
+
         boundary_vertices = self.polymesh.get_vertices_per_polygon()
+        t_boundary_vertices = time.time()
+
         if solidmesh is True:
             self.solidmesh.generate(boundary_vertices)
+        t_solidmesh = time.time()
+
+        time_poly = t_polymesh - t0
+        time_boundary = t_boundary_vertices - t_polymesh
+        time_solid = t_solidmesh - t_boundary_vertices
+        logger.info(
+            f"Mesh generation time: poly mesh = {time_poly:.2f}s, " + \
+            f"collect boundary vertices = {time_boundary:.2f}s, " + \
+            f"solid mesh = {time_solid:.2f}s"
+        )
