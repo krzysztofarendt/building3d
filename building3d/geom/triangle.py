@@ -152,7 +152,7 @@ def triangulate(points: list[Point], normal: np.ndarray) -> list[int]:
 
         if number_failed > len(vertices):
             raise TriangulationError(
-                "Triangulation error, probably first vertex lays in a non-convex corner"
+                f"Triangulation error, are all vertices the same? {vertices=}"
             )
 
         # If last vertix, start from the beginning

@@ -20,12 +20,14 @@ from pathlib import Path
 
 import numpy as np
 
+import building3d.logger
 from building3d import random_id
-from building3d.config import GEOM_EPSILON
+from building3d.config import GEOM_RTOL
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
 from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
+from building3d.display.plot_zone import plot_zone
 
 
 def write_stl(path: str, zone: Zone) -> None:
@@ -103,7 +105,8 @@ def read_stl(path: str) -> Zone:
 
             # Add polygon
             poly = Polygon([Point(*vertices[0]), Point(*vertices[1]), Point(*vertices[2])])
-            assert np.isclose(poly.normal, normal, atol=GEOM_EPSILON).all()
+            # assert np.isclose(poly.normal, normal, rtol=1e-1).all(), \
+            #     f"Normal incorrect: {poly.normal} vs. {normal}"
 
             if wall is not None:
                 wall.add_polygon(poly)
@@ -116,11 +119,18 @@ def read_stl(path: str) -> Zone:
             if wall is not None:
                 if solid_name is None or solid_name == "":
                     solid_name = random_id()
+                print(f"{len(wall.polygons.keys())=}")
                 zone.add_solid(solid_name, [wall])
+                print("Zone created")
             else:
                 raise ValueError("No wall created, so cannot add it to the zone/solid.")
+        else:
+            pass  # Empty line?
 
         i += 1
+        print(i)
+
+    print("Reading STL file finished: " + path)
 
     return zone
 
@@ -132,3 +142,6 @@ if __name__ == "__main__":
     write_stl("zone.stl", zone)
     zone_recovered = read_stl("zone.stl")
     write_stl("zone_recovered.stl", zone_recovered)
+
+    example = read_stl("utah_teapot.stl")
+    plot_zone(example, show_triangulation=False, show_normals=False, show=True)

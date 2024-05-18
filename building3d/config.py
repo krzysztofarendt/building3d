@@ -10,13 +10,13 @@ LOG_LEVEL = logging.DEBUG
 EPSILON: float = 1e-9
 
 # Geometry epsilon used for comparison operations
-GEOM_EPSILON: float = 1e-5
+GEOM_EPSILON: float = 1e-10
 
 # Geometry relative tolerance (0.25%)
 GEOM_RTOL: float = 0.0025
 
 # Number of decimal digits for point coordinates used in hash
-POINT_NUM_DEC: int = 6
+POINT_NUM_DEC: int = 10
 
 # MESH ========================================================================
 # Mesh joggle - max distance to move vertices around
