@@ -16,18 +16,20 @@ endsolid name
 Used for:
 - building3d.geom.solid.Zone
 """
+import logging
 from pathlib import Path
 
 import numpy as np
 
 import building3d.logger
 from building3d import random_id
-from building3d.config import GEOM_RTOL
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
 from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
-from building3d.display.plot_zone import plot_zone
+
+
+logger = logging.getLogger(__name__)
 
 
 def write_stl(path: str, zone: Zone) -> None:
@@ -105,8 +107,8 @@ def read_stl(path: str) -> Zone:
 
             # Add polygon
             poly = Polygon([Point(*vertices[0]), Point(*vertices[1]), Point(*vertices[2])])
-            # assert np.isclose(poly.normal, normal, rtol=1e-1).all(), \
-            #     f"Normal incorrect: {poly.normal} vs. {normal}"
+            if not np.isclose(poly.normal, normal, rtol=1e-2).all():
+                logger.warning(f"Normal different than in STL: calculated={poly.normal} vs. stl={normal}")
 
             if wall is not None:
                 wall.add_polygon(poly)
@@ -136,12 +138,9 @@ def read_stl(path: str) -> Zone:
 
 
 if __name__ == "__main__":
-    # Example
+    # Example  (TODO: Remove)
     from building3d.geom.predefined.box import box
     zone = box(2.0, 5.0, 3.0)
     write_stl("zone.stl", zone)
     zone_recovered = read_stl("zone.stl")
     write_stl("zone_recovered.stl", zone_recovered)
-
-    example = read_stl("utah_teapot.stl")
-    plot_zone(example, show_triangulation=False, show_normals=False, show=True)
