@@ -22,7 +22,7 @@ class Solid:
             name = random_id()
         self.name = name
         self.walls = walls
-        self._verify(throw=True)
+        self._verify(throw=True)  # TODO: Slow for large models (e.g. teapot.stl)
         self.volume = self._volume()
 
     @staticmethod
@@ -46,7 +46,6 @@ class Solid:
             else:
                 poly.extend(wall.polygons.values())
         return poly
-
 
     def vertices(self) -> list[Point]:
         points = []
