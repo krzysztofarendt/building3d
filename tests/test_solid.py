@@ -192,5 +192,22 @@ def test_is_adjacent():
     assert not sld_3.is_adjacent_to_solid(sld_1)
 
 
-if __name__ == "__main__":
-    test_point_inside()
+def test_equality():
+    p0 = Point(0.0, 0.0, 0.0)
+    p1 = Point(1.0, 0.0, 0.0)
+    p2 = Point(1.0, 1.0, 0.0)
+    p3 = Point(0.0, 1.0, 0.0)
+    p4 = Point(0.0, 0.0, 1.0)
+    p5 = Point(1.0, 0.0, 1.0)
+    p6 = Point(1.0, 1.0, 1.0)
+    p7 = Point(0.0, 1.0, 1.0)
+
+    floor = Wall([Polygon([p0, p3, p2, p1])])
+    wall0 = Wall([Polygon([p0, p1, p5, p4])])
+    wall1 = Wall([Polygon([p1, p2, p6, p5])])
+    wall2 = Wall([Polygon([p3, p7, p6, p2])])
+    wall3 = Wall([Polygon([p0, p4, p7, p3])])
+    ceiling = Wall([Polygon([p4, p5, p6, p7])])
+    sld0 = Solid([floor, wall0, wall1, wall2, wall3, ceiling])
+    sld1 = Solid([floor, wall0, wall1, wall2, wall3, ceiling])
+    assert sld0 == sld1

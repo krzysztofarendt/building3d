@@ -195,3 +195,18 @@ class Solid:
 
     def __str__(self):
         return f"Solid({self.name=}, {self.walls=})"
+
+    def __eq__(self, other):
+        """Return True if all walls of this and other are equal."""
+        if len(self.walls) != len(other.walls):
+            return False
+        else:
+            num_matches = 0
+            for this_wall in self.walls:
+                for other_wall in other.walls:
+                    if this_wall == other_wall:
+                        num_matches += 1
+                        break
+            if num_matches != len(self.walls):
+                return False
+        return True
