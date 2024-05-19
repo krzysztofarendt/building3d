@@ -8,6 +8,7 @@ from building3d.geom.exceptions import TriangulationError
 from building3d.geom.point import Point
 from building3d.geom.line import distance_point_to_edge
 from building3d.geom.cloud import are_points_coplanar
+from building3d.geom.cloud import points_to_array
 from building3d.geom.vector import normal
 from building3d.geom.vector import length
 from building3d.geom.triangle import triangle_centroid
@@ -94,7 +95,7 @@ class Polygon:
 
     def points_as_array(self) -> np.ndarray:
         """Returns a copy of the points as a numpy array."""
-        return np.array([[p.x, p.y, p.z] for p in self.points])
+        return points_to_array(self.points)
 
     def move_orthogonal(self, d: float) -> None:
         vec = self.normal * d
