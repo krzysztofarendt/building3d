@@ -189,7 +189,7 @@ def delaunay_tetrahedralization(
                 )
                 # Check if point is inside solid
                 if sld.is_point_inside(pt):
-                    # Check if point is closer to boundary than already existing points
+                    # Check if point is not too close to the boundary polygons
                     distance_to_boundary_ok = True
                     for poly in sld.polygons():
                         if poly.distance_point_to_polygon(pt) < delta / 2:
