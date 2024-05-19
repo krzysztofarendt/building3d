@@ -422,3 +422,21 @@ class Polygon:
 
     def __str__(self):
         return f"Polygon(name={self.name}, points={[p for p in self.points]})"
+
+    def __eq__(self, other):
+        """Checks if all points of two polygons are equal."""
+        if not np.isclose(self.normal, other.normal, atol=GEOM_EPSILON).all():
+            return False
+        elif len(self.points) == len(other.points):
+            other_set = set(other.points)
+            for p in self.points:
+                # TODO: Below test is not sufficient; it does not test how points are connected.
+                #       It may fail for some non-convex polygons, which can have same points
+                #       connected differently.
+                #       Convex polygons are covered, because there is only 1 way to connect
+                #       points of a convex polygon)
+                if p not in other_set:
+                    return False
+        else:
+            return False
+        return True

@@ -64,3 +64,19 @@ class Wall:
             for p in poly.points:
                 if not self.polygons[parent].is_point_inside(p):
                     raise GeometryError(f"Polygon {poly.name} is not entirely inside {parent}")
+
+    def __eq__(self, other):
+        """Return True if all polygons of this and other are equal."""
+        if len(self.polygons.values()) != len(other.polygons.values()):
+            return False
+        else:
+            num_matches = 0
+            for this_poly in self.polygons.values():
+                for other_poly in other.polygons.values():
+                    if this_poly == other_poly:
+                        num_matches += 1
+                        break
+            if num_matches != len(self.polygons.values()):
+                return False
+        return True
+

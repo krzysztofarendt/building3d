@@ -372,5 +372,21 @@ def test_is_facing_polygon():
     assert poly_a.is_facing_polygon(poly_b)
 
 
+def test_equality():
+    p1 = Point(0.0, 4.0, -1.0)
+    p2 = Point(1.0, -1.0, 2.0)
+    p3 = Point(0.0, -2.0, 3.0)
+    p4 = Point(0.0, -3.0, 4.0)
+    poly_a = Polygon([p1, p2, p3])
+    poly_b = Polygon([p1, p2, p3])
+    poly_c = Polygon([p2, p3, p1])
+    poly_d = Polygon([p3, p2, p1])
+    poly_e = Polygon([p1, p2, p4])
+    assert poly_a == poly_b  # Same polygon
+    assert poly_a == poly_c  # Same polygon, just different start vertex
+    assert poly_a != poly_d  # Opposite normal vectors
+    assert poly_a != poly_e  # One vertex different (p4)
+
+
 if __name__ == "__main__":
     test_distance_point_to_polygon()

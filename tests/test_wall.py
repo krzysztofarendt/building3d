@@ -57,3 +57,28 @@ def test_wall_with_subpolygon_sharing_boundary():
 
     assert len(wall.polygons.keys()) == 2
     assert len(wall.polygraph[poly0.name]) == 1
+
+
+def test_equality():
+    p0 = Point(0.0, 0.0, 0.0)
+    p1 = Point(1.0, 0.0, 0.0)
+    p2 = Point(1.0, 1.0, 0.0)
+    p3 = Point(0.0, 1.0, 0.0)
+    p4 = Point(0.0, 2.0, 0.0)
+    poly0 = Polygon([p0, p1, p2, p3])
+    poly1 = Polygon([p0, p1, p2, p3])
+    poly2 = Polygon([p0, p1, p2, p4])
+
+    wall0 = Wall()
+    wall0.add_polygon(poly0)
+    wall1 = Wall()
+    wall1.add_polygon(poly1)
+    wall2 = Wall()
+    wall2.add_polygon(poly2)
+    wall3 = Wall()
+    wall3.add_polygon(poly0)
+    wall3.add_polygon(poly2)
+
+    assert wall0 == wall1
+    assert wall0 != wall2
+    assert wall0 != wall3
