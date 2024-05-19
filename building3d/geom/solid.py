@@ -159,7 +159,6 @@ class Solid:
         """Verify geometry correctness.
 
         Tests:
-            - run verify() for each wall
             - make sure each point is attached to at least 2 walls
 
         Args:
@@ -170,13 +169,13 @@ class Solid:
 
         # Check if all points are attached to at least 2 walls
         for poly in self.polygons():
-            points.extend([p.vector() for p in poly.points])
+            points.extend(poly.points)
 
         has_duplicates = np.array([False for _ in points])
         for i1 in range(len(points)):
             for i2 in range(i1 + 1, len(points)):
                 if has_duplicates[i1] == False or has_duplicates[i2] == False:
-                    if (points[i1] == points[i2]).all():
+                    if points[i1] == points[i2]:
                         has_duplicates[i1] = True
                         has_duplicates[i2] = True
 
