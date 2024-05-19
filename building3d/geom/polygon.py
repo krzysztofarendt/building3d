@@ -37,11 +37,13 @@ class Polygon:
     def __init__(self, points: list[Point], name: str | None = None):
         if name is None:
             name = random_id()
+        logger.debug(f"Creating polygon: {name}")
 
         self.name = name
         Polygon.add_name(name)
 
         self.points = list(points)
+        logger.debug(f"Points added: {self.points}")
 
         # Calculate normal vector and triangulate
         # This works in the first iteration if the first point of the polygon

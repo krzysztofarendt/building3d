@@ -37,7 +37,11 @@ def write_stl(path: str, zone: Zone) -> None:
 
     STL does not contain information about how facets (triangles)
     are grouped together, so each facet is treated as a separate triangular wall/polygon.
+
+    It means that if you write a zone to STL and then read it again,
+    they may have different number of polygons!
     """
+    logger.debug(f"Writing zone {zone.name} to STL: {path}")
     lines = []
     l1 = " " * 2
     l2 = " " * 4
@@ -61,11 +65,24 @@ def write_stl(path: str, zone: Zone) -> None:
         lines.append(f"endsolid {sld.name}\n")
     with open(path, "w") as f:
         f.writelines(lines)
+    logger.debug(f"Number of lines in STL file = {len(lines)}")
 
 
 def read_stl(path: str) -> Zone:
+    """Reat zone from an STL file.
+
+    STL does not contain information about how facets (triangles)
+    are grouped together, so each facet is treated as a separate triangular wall/polygon.
+
+    It means that if you write a zone to STL and then read it again,
+    they may have different number of polygons!
+    """
+    logger.debug(f"Reading a zone from STL: {path}")
 
     zone = Zone(name=Path(path).stem)
+
+    logger.debug(f"Assuming zone name based on filename: {zone.name}")
+
     with open(path, "r") as f:
         lines = f.readlines()
 
@@ -121,26 +138,15 @@ def read_stl(path: str) -> Zone:
             if wall is not None:
                 if solid_name is None or solid_name == "":
                     solid_name = random_id()
-                print(f"{len(wall.polygons.keys())=}")
                 zone.add_solid(solid_name, [wall])
-                print("Zone created")
             else:
                 raise ValueError("No wall created, so cannot add it to the zone/solid.")
         else:
             pass  # Empty line?
 
         i += 1
-        print(i)
 
-    print("Reading STL file finished: " + path)
+    logger.debug(f"Zone read from STL: {zone}")
+    logger.debug(f"Number of solids in zone {zone.name} = {len(zone.solids.keys())}")
 
     return zone
-
-
-if __name__ == "__main__":
-    # Example  (TODO: Remove)
-    from building3d.geom.predefined.box import box
-    zone = box(2.0, 5.0, 3.0)
-    write_stl("zone.stl", zone)
-    zone_recovered = read_stl("zone.stl")
-    write_stl("zone_recovered.stl", zone_recovered)

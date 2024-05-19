@@ -36,23 +36,23 @@ def box(
         name = name + "-"
     name = name + random_id()
 
-    poly_fl = Polygon([p0, p3, p2, p1], name=f"{name}/poly/floor")
-    poly_w0 = Polygon([p0, p1, p5, p4], name=f"{name}/poly/wall0")
-    poly_w1 = Polygon([p1, p2, p6, p5], name=f"{name}/poly/wall1")
-    poly_w2 = Polygon([p3, p7, p6, p2], name=f"{name}/poly/wall2")
-    poly_w3 = Polygon([p0, p4, p7, p3], name=f"{name}/poly/wall3")
-    poly_rf = Polygon([p4, p5, p6, p7], name=f"{name}/poly/roof")
+    poly_fl = Polygon([p0, p3, p2, p1], name=f"{name}-poly-floor")
+    poly_w0 = Polygon([p0, p1, p5, p4], name=f"{name}-poly-wall0")
+    poly_w1 = Polygon([p1, p2, p6, p5], name=f"{name}-poly-wall1")
+    poly_w2 = Polygon([p3, p7, p6, p2], name=f"{name}-poly-wall2")
+    poly_w3 = Polygon([p0, p4, p7, p3], name=f"{name}-poly-wall3")
+    poly_rf = Polygon([p4, p5, p6, p7], name=f"{name}-poly-roof")
 
-    wall_fl = Wall([poly_fl], name=f"{name}/wall/floor")
-    wall_w0 = Wall([poly_w0], name=f"{name}/wall/wall0")
-    wall_w1 = Wall([poly_w1], name=f"{name}/wall/wall1")
-    wall_w2 = Wall([poly_w2], name=f"{name}/wall/wall2")
-    wall_w3 = Wall([poly_w3], name=f"{name}/wall/wall3")
-    wall_rf = Wall([poly_rf], name=f"{name}/wall/roof")
+    wall_fl = Wall([poly_fl], name=f"{name}-wall-floor")
+    wall_w0 = Wall([poly_w0], name=f"{name}-wall-wall0")
+    wall_w1 = Wall([poly_w1], name=f"{name}-wall-wall1")
+    wall_w2 = Wall([poly_w2], name=f"{name}-wall-wall2")
+    wall_w3 = Wall([poly_w3], name=f"{name}-wall-wall3")
+    wall_rf = Wall([poly_rf], name=f"{name}-wall-roof")
 
-    zone = Zone(name=f"{name}/zone")
+    zone = Zone(name=f"{name}-zone")
     zone.add_solid(
-        name=f"{name}/solid",
+        name=f"{name}-solid",
         walls=[wall_fl, wall_w0, wall_w1, wall_w2, wall_w3, wall_rf],
     )
 

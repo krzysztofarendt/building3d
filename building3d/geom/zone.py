@@ -67,3 +67,25 @@ class Zone:
                     raise GeometryError(
                         f"Solid {sld.name} is not entirely inside {parent} due to {p}"
                     )
+
+    def volume(self):
+        """Calculate zone volume as the sum of solid volumes."""
+        volume = 0
+        for sld in self.solids.values():
+            volume += sld.volume
+        return volume
+
+    def __eq__(self, other):
+        """Returns True if all solids of this and other are equal."""
+        if len(self.solids.values()) != len(other.solids.values()):
+            return False
+        else:
+            num_matches = 0
+            for this_solid in self.solids.values():
+                for other_solid in other.solids.values():
+                    if this_solid == other_solid:
+                        num_matches += 1
+                        break
+            if num_matches != len(self.solids.values()):
+                return False
+        return True
