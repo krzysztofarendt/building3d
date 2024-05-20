@@ -1,4 +1,5 @@
 """Solid class"""
+import logging
 from typing import Sequence
 
 import numpy as np
@@ -12,6 +13,9 @@ from building3d.geom.vector import vector
 from building3d.geom.tetrahedron import tetrahedron_volume
 
 
+logger = logging.getLogger(__name__)
+
+
 class Solid:
     """Solid is a space enclosed by polygons."""
     # List of names of all Solid instances (names must be unique)
@@ -22,7 +26,7 @@ class Solid:
             name = random_id()
         self.name = name
         self.walls = walls
-        self._verify(throw=True)  # TODO: Slow for large models (e.g. teapot.stl)
+        self._verify(throw=True)  # NOTE: Slow for large models thousands of points
         self.volume = self._volume()
 
     @staticmethod
@@ -164,6 +168,7 @@ class Solid:
         Args:
             throw: if True it will raise the first encountered exception
         """
+        logger.debug("Verifying solid: " + self.name)
         errors = []
         points = []
 
@@ -171,13 +176,17 @@ class Solid:
         for poly in self.polygons():
             points.extend(poly.points)
 
+        logger.debug("Checking if each point is attached to at least 2 walls")
         has_duplicates = np.array([False for _ in points])
         for i1 in range(len(points)):
+            if has_duplicates[i1] is True:
+                continue
             for i2 in range(i1 + 1, len(points)):
-                if has_duplicates[i1] == False or has_duplicates[i2] == False:
-                    if points[i1] == points[i2]:
-                        has_duplicates[i1] = True
-                        has_duplicates[i2] = True
+                if points[i1] == points[i2]:
+                    has_duplicates[i1] = True
+                    has_duplicates[i2] = True
+                    break
+        logger.debug("Checking finished")
 
         if not has_duplicates.all():
             errors.append(GeometryError(f"Some points in solid {self.name} are attached to only 1 wall"))
