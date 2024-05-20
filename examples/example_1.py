@@ -51,9 +51,12 @@ def example_1():
     print(mesh_stats(mesh.solidmesh.vertices, mesh.solidmesh.elements))
     # mesh.solidmesh = mesh.solidmesh.copy(max_vol=0.06)
 
-    # Plot
-    # plot_zone(zone)
-    plot_mesh(mesh)
+    # Plotting examples
+    plot_zone(zone)
+    plot_mesh(mesh, polygons=False, solids=True)
+    plot_mesh(mesh, polygons=False, solids=True, clip=(0.5, 0.5, 0.5))
+    plot_mesh(mesh, polygons=False, solids=False, clip="x")
+    plot_mesh(mesh, polygons=True, solids=False)
 
 
 if __name__ == "__main__":
