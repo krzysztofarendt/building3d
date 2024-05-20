@@ -1,37 +1,18 @@
-from mayavi import mlab
+import pyvista as pv
 
+from building3d.geom.cloud import points_to_array
 from building3d.geom.zone import Zone
-from building3d.display.plot_polygons import plot_polygons
-import building3d.display.colors as colors
 
 
-def plot_zone(
-    zone: Zone,
-    show_triangulation: bool = True,
-    show_normals: bool = True,
-    show: bool = False,
-):
-    for _, solid in zone.solids.items():
-        # Plot vertices
-        vertices = solid.vertices()
-        x = [p.x for p in vertices]
-        y = [p.y for p in vertices]
-        z = [p.z for p in vertices]
+def plot_zone(zone: Zone):
+    verts, faces = zone.get_mesh()
 
-        _ = mlab.points3d(x, y, z, color=colors.RGB_BLUE, scale_factor=0.1)
+    # Reformat points and faces
+    varr = points_to_array(verts)
+    farr = []
+    for f in faces:
+        farr.extend([3, f[0], f[1], f[2]])
 
-        # Plot walls
-        plot_polygons(
-            solid.polygons(only_parents=False),
-            show_triangulation=show_triangulation,
-            show_normals=show_normals,
-            color=colors.random_color(),
-            show=False,
-        )
-
-    if show:
-        mlab.show()
-        return
-    else:
-        return
-
+    # Plot with PyVista
+    mesh = pv.PolyData(varr, faces=farr)
+    mesh.plot(show_edges=True)

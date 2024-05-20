@@ -52,8 +52,8 @@ def example_1():
     # mesh.solidmesh = mesh.solidmesh.copy(max_vol=0.06)
 
     # Plot
-    plot_zone(zone, show_triangulation=True, show_normals=True, show=False)
-    plot_mesh(mesh, boundary=True, interior=True, show=True)
+    # plot_zone(zone)
+    plot_mesh(mesh)
 
 
 if __name__ == "__main__":

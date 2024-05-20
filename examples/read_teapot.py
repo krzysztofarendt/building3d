@@ -18,4 +18,4 @@ if __name__ == "__main__":
 
     # Plot with PyVista
     mesh = pv.PolyData(varr, faces=farr)
-    mesh.plot()
+    mesh.plot(show_edges=True)

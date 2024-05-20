@@ -1,7 +1,5 @@
 import time
 
-from mayavi import mlab
-
 import building3d.logger
 from building3d.display.plot_zone import plot_zone
 from building3d.display.plot_mesh import plot_mesh
@@ -110,9 +108,8 @@ def example_2():
     print(mesh_stats(mesh.solidmesh.vertices, mesh.solidmesh.elements))
 
     # Plot
-    plot_zone(building, show_triangulation=True, show_normals=True, show=False)
-    plot_mesh(mesh, boundary=True, interior=True, show=False)
-    mlab.show()
+    plot_zone(building)
+    plot_mesh(mesh)
 
 
 if __name__ == "__main__":
