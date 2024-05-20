@@ -7,7 +7,7 @@ from building3d.geom.tetrahedron import tetrahedron_volume
 logger = logging.getLogger(__name__)
 
 
-def total_volume(vertices: list[Point], elements: list[list[int]]) -> float:
+def total_volume(vertices: list[Point], elements: list[tuple[int, ...]]) -> float:
     """Return the sum of volumes of all mesh tetrahedra."""
     tot_vol = 0
     for el in elements:
