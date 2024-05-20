@@ -37,7 +37,7 @@ class Point:
         return Point(self.x * vec[0], self.y * vec[1], self.z * vec[2])
 
     def __str__(self):
-        return f"pt(x={self.x:.1f},y={self.y:.1f},z={self.z:.1f})"
+        return f"pt(x={self.x:.2f},y={self.y:.2f},z={self.z:.2f})"
 
     def __repr__(self):
         return str(self)
