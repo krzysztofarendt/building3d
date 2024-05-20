@@ -1,6 +1,8 @@
 """Wall class"""
+import numpy as np
 
 from building3d import random_id
+from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
 from building3d.geom.exceptions import GeometryError
 
@@ -18,8 +20,8 @@ class Wall:
             name = random_id()
 
         self.name = name
-        self.polygons = {}
-        self.polygraph = {}
+        self.polygons = {}  # Dict of polygons and subpolygons
+        self.polygraph = {}  # Graph with parent and subpolygons
 
         for poly in polygons:
             self.add_polygon(poly)
@@ -64,6 +66,19 @@ class Wall:
             for p in poly.points:
                 if not self.polygons[parent].is_point_inside(p):
                     raise GeometryError(f"Polygon {poly.name} is not entirely inside {parent}")
+
+    def get_mesh(self) -> tuple[list[Point], list[tuple[int, ...]]]:
+        verts = []
+        faces = []
+        for poly in self.get_polygons():
+            offset = len(verts)
+            verts.extend(poly.points)
+            f = np.array(poly.triangles) + offset
+            f = [tuple(x) for x in f]
+            faces.extend(f)
+
+        return verts, faces
+
 
     def __eq__(self, other):
         """Return True if all polygons of this and other are equal."""

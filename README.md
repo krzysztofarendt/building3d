@@ -88,3 +88,4 @@ Other cool projects:
 - https://glumpy.github.io/index.html
 - https://vispy.org/
 - https://github.com/pygfx/pygfx
+- https://github.com/Kitware/trame

@@ -1,6 +1,8 @@
 """Zone class"""
+import numpy as np
 
 from building3d import random_id
+from building3d.geom.point import Point
 from building3d.geom.solid import Solid
 from building3d.geom.wall import Wall
 from building3d.geom.exceptions import GeometryError
@@ -13,16 +15,17 @@ class Zone:
 
     Zone is used to model 3D phenomena (e.g. ray tracing, heat transfer, CFD).
     """
-    def __init__(self, name: str | None = None):
+    def __init__(self, name: str | None = None, verify: bool = True):
         if name is None:
             name = random_id()
         self.name = name
         self.solids = {}
         self.solidgraph = {}
+        self.verify = verify
 
     def add_solid(self, name: str, walls: list[Wall]):
         """Add solid created from walls to the zone."""
-        solid = Solid(walls=walls, name=name)
+        solid = Solid(walls=walls, name=name, verify=self.verify)
         self.add_solid_instance(solid)
 
     def add_solid_instance(self, sld: Solid, parent: str | None = None):
@@ -67,6 +70,20 @@ class Zone:
                     raise GeometryError(
                         f"Solid {sld.name} is not entirely inside {parent} due to {p}"
                     )
+
+    def get_mesh(self) -> tuple[list[Point], list[tuple[int, ...]]]:
+        """Get vertices and faces of all solids. Used mostly for plotting."""
+        verts = []
+        faces = []
+        for sld in self.solids.values():
+            offset = len(verts)
+            v, f = sld.get_mesh()
+            verts.extend(v)
+            f = np.array(f) + offset
+            f = [tuple(x) for x in f]
+            faces.extend(f)
+
+        return verts, faces
 
     def volume(self):
         """Calculate zone volume as the sum of solid volumes."""

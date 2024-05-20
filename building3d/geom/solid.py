@@ -21,12 +21,13 @@ class Solid:
     # List of names of all Solid instances (names must be unique)
     instance_names = set()
 
-    def __init__(self, walls: Sequence[Wall], name: str | None = None):
+    def __init__(self, walls: Sequence[Wall], name: str | None = None, verify: bool = True):
         if name is None:
             name = random_id()
         self.name = name
         self.walls = walls
-        self._verify(throw=True)  # NOTE: Slow for large models thousands of points
+        if verify:
+            self._verify(throw=True)  # NOTE: Slow for large models thousands of points
         self.volume = self._volume()
 
     @staticmethod
@@ -51,18 +52,29 @@ class Solid:
                 poly.extend(wall.polygons.values())
         return poly
 
+    def get_mesh(self) -> tuple[list[Point], list[tuple[int, ...]]]:
+        verts = []
+        faces = []
+        for w in self.walls:
+            offset = len(verts)
+            v, f = w.get_mesh()
+            verts.extend(v)
+            f = np.array(f) + offset
+            f = [tuple(x) for x in f]
+            faces.extend(f)
+
+        return verts, faces
+
     def vertices(self) -> list[Point]:
-        points = []
-        for poly in self.polygons():
-            points.extend(poly.points)
-        return points
+        verts, _ = self.get_mesh()
+        return verts
 
     def bounding_box(self) -> tuple[Point, Point]:
         """Return (Point(xmin, ymin, zmin), Point(xmax, ymax, zmax))"""
-        points = self.vertices()
-        xaxis = [p.x for p in points]
-        yaxis = [p.y for p in points]
-        zaxis = [p.z for p in points]
+        vertices, _ = self.get_mesh()
+        xaxis = [p.x for p in vertices]
+        yaxis = [p.y for p in vertices]
+        zaxis = [p.z for p in vertices]
         pmin = Point(min(xaxis), min(yaxis), min(zaxis))
         pmax = Point(max(xaxis), max(yaxis), max(zaxis))
         return (pmin, pmax)
@@ -77,7 +89,7 @@ class Solid:
         and count how many times it intersects with the edges of the
         solid; if the number of intersections is odd, it is inside.
         """
-        vertices = self.vertices()
+        vertices, _ = self.get_mesh()
         max_x = max([p.x for p in vertices])
         max_y = max([p.y for p in vertices])
         max_z = max([p.z for p in vertices])

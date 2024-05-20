@@ -68,7 +68,7 @@ def write_stl(path: str, zone: Zone) -> None:
     logger.debug(f"Number of lines in STL file = {len(lines)}")
 
 
-def read_stl(path: str) -> Zone:
+def read_stl(path: str, verify: bool = True) -> Zone:
     """Reat zone from an STL file.
 
     STL does not contain information about how facets (triangles)
@@ -79,7 +79,7 @@ def read_stl(path: str) -> Zone:
     """
     logger.debug(f"Reading a zone from STL: {path}")
 
-    zone = Zone(name=Path(path).stem)
+    zone = Zone(name=Path(path).stem, verify=verify)
 
     logger.debug(f"Assuming zone name based on filename: {zone.name}")
 
