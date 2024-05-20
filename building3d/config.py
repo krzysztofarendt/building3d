@@ -10,7 +10,7 @@ LOG_LEVEL = logging.DEBUG
 EPSILON: float = 1e-9
 
 # Geometry epsilon used for comparison operations
-GEOM_EPSILON: float = 1e-6
+GEOM_EPSILON: float = 1e-10  # TODO: 1e-10 needed for teapot :)
 
 # Geometry relative tolerance (0.25%)
 GEOM_RTOL: float = 0.0025
