@@ -76,7 +76,6 @@ make example_2
 - [ ] `Solid` should find polygons with reversed order of vertices and fix it
 - [ ] Accurate center of weight for Solid (but is it even needed?)
 - [ ] Export/import to/from STL (and other formats?)
-- [ ] Try plotly instead of mayavi2
 - [ ] Try PyVista instead of mayavi2
 - [ ] Speed up mayavi2: https://docs.enthought.com/mayavi/mayavi/tips.html#acceleration-mayavi-scripts
 - [ ] https://github.com/meshpro/pygalmesh
@@ -84,3 +83,8 @@ make example_2
 - [ ] Github Actions
 - [ ] `Polygon.__eq__()` can return wrong result for some non-convex polygons
 
+Other cool projects:
+- https://gitlab.com/drj11/pypng
+- https://glumpy.github.io/index.html
+- https://vispy.org/
+- https://github.com/pygfx/pygfx
