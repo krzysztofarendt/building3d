@@ -250,6 +250,7 @@ def delaunay_tetrahedralization(
         vertices, tetrahedra = purge_mesh(vertices, tetrahedra)
 
         # Remove vertices attached to invalid elements
+        # TODO: Potentially a bug here. Sometimes the mesh looks like a spider's web
         logger.debug("Attempting to remove points attached to invalid elements")
         num_vert_before = len(vertices)
         boundary_pts_indices = [i for i, p in enumerate(vertices) if p in boundary_pts]
