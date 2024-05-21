@@ -1,7 +1,7 @@
 import numpy as np
 
 from building3d.config import GEOM_RTOL
-from building3d.display.plot_solidmesh import plot_solidmesh
+from building3d.display.plot_mesh import plot_mesh
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
 from building3d.geom.solid import Solid
@@ -43,7 +43,7 @@ def test_solidmesh(plot=False):
         assert min_el_volume > min_allowed_volume
 
         if plot:
-            plot_solidmesh(mesh, show=True)
+            plot_mesh(mesh)
 
         # Assert that the sum of tetrahedra volumes is equal to the zone volume
         tot_volume = np.sum(mesh.volumes)
@@ -92,7 +92,7 @@ def test_copy(plot=False):
     assert num_el != num_el_copy, f"{num_el=} == {num_el_copy} (should be different!)"
 
     if plot:
-        plot_solidmesh(mesh_copy, show=True)
+        plot_mesh(mesh_copy)
 
 
 if __name__ == "__main__":

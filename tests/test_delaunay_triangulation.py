@@ -1,7 +1,6 @@
 from mayavi import mlab
 
-import building3d.display.colors as colors
-from building3d.display.plot_polymesh import plot_polymesh
+from building3d.display.plot_mesh import plot_mesh
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
 from building3d.geom.triangle import triangle_centroid
@@ -59,14 +58,8 @@ def test_constr_triangulation(show=False):
         for pt in fix_points:
             assert pt in mesh.vertices, f"Fixed point not in mesh: {pt}"
 
-        plot_polymesh(mesh, show=False)
-
         if show:
-            xc = [p.x for p in fix_points]
-            yc = [p.y for p in fix_points]
-            zc = [p.z for p in fix_points]
-            _ = mlab.points3d(xc, yc, zc, color=colors.RGB_RED, scale_factor=0.05)
-            mlab.show()
+            plot_mesh(mesh)
 
 
 def test_delaunay_triangulation_init_vertices_with_centroid():
