@@ -53,10 +53,10 @@ def example_1():
 
     # Plotting examples
     plot_zone(zone)
-    plot_mesh(mesh, polygons=False, solids=True)
-    plot_mesh(mesh, polygons=False, solids=True, clip=(0.5, 0.5, 0.5))
-    plot_mesh(mesh, polygons=False, solids=False, clip="x")
-    plot_mesh(mesh, polygons=True, solids=False)
+    plot_mesh(mesh)
+    plot_mesh(mesh.polymesh)
+    plot_mesh(mesh.solidmesh, clip=(0.5, 0.5, 0.5))
+    plot_mesh(mesh.solidmesh, clip="x")
 
 
 if __name__ == "__main__":

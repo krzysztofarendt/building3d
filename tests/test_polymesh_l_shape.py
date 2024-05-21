@@ -1,4 +1,4 @@
-from building3d.display.plot_polymesh import plot_polymesh
+from building3d.display.plot_mesh import plot_mesh
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
 from building3d.geom.triangle import triangle_centroid
@@ -14,7 +14,7 @@ def test_polymesh_l_shape(plot=False):
     p5 = Point(0.0, 2.0, 0.0)
 
     poly = Polygon([p0, p1, p2, p3, p4, p5])
-    mesh = PolyMesh()
+    mesh = PolyMesh(delta=0.5)
     mesh.add_polygon(poly)
     mesh.generate()
 
@@ -26,7 +26,7 @@ def test_polymesh_l_shape(plot=False):
         assert poly.is_point_inside(c), "Face outside polygon!"
 
     if plot is True:
-        plot_polymesh(mesh, show=True)
+        plot_mesh(mesh)
 
 
 if __name__ == "__main__":
