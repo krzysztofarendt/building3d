@@ -1,3 +1,7 @@
+"""This script does the following:
+- Read the Utah teapot STL file.
+- Plot the teapot using PyVista.
+"""
 import pyvista as pv
 
 import building3d.logger
@@ -18,4 +22,4 @@ if __name__ == "__main__":
 
     # Plot with PyVista
     mesh = pv.PolyData(varr, faces=farr)
-    mesh.plot(show_edges=True)
+    mesh.plot()
