@@ -11,7 +11,12 @@ def plot_mesh(
     mesh: Mesh | SolidMesh | PolyMesh,
     clip: tuple[float, float, float] | str | None = None,
 ):
-    """Plot mesh."""
+    """Plot any type of mesh.
+
+    This function accepts instances of Mesh, SolidMesh, and PolyMesh.
+    If the instance type is Mesh, then its SolidMesh is plotted.
+    To plot PolyMesh only, you need to explicitly pass PolyMesh.
+    """
     if type(mesh) is Mesh:
         polymesh = None
         solidmesh = mesh.solidmesh
