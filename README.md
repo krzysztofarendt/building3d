@@ -73,8 +73,9 @@ make example_2
 - [x] Add predefined geometry: box
 - [x] STL export/import
 - [x] Try PyVista instead of mayavi2
-- [ ] Plot subpolygons
+- [x] Plot subpolygons
 - [ ] Figure out subpolygon meshing and general usage
+- [ ] Own file format `*.b3d`
 - [ ] `example_1` fails with `delta=0.5` and it takes 5 minutes to generate the mesh
 - [ ] `Solid` should find polygons with reversed order of vertices and fix it
 - [ ] Accurate center of weight for Solid (but is it even needed?)

@@ -5,7 +5,7 @@ from building3d.geom.zone import Zone
 
 
 def plot_zone(zone: Zone):
-    verts, faces = zone.get_mesh()
+    verts, faces = zone.get_mesh(only_parents=False)
 
     # Reformat points and faces
     varr = points_to_array(verts)
@@ -15,4 +15,4 @@ def plot_zone(zone: Zone):
 
     # Plot with PyVista
     mesh = pv.PolyData(varr, faces=farr)
-    mesh.plot(show_edges=True)
+    mesh.plot(show_edges=True, opacity=0.9)
