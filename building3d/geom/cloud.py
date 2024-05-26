@@ -7,13 +7,18 @@ from building3d.geom.exceptions import GeometryError
 
 
 def points_to_array(pts: list[Point]) -> np.ndarray:
-    """Convert a list of points to a numpy array of shape (num_points, 3)."""
+    """Convert a list of points to a numpy array with shape (num_points, 3)."""
     return np.array([p.vector() for p in pts])
 
 
 def array_to_points(arr: np.ndarray) -> list[Point]:
     """Convert a numpy array shaped (num_points, 3) to a list of points."""
     return [Point(x[0], x[1], x[2]) for x in arr]
+
+
+def points_to_flat_list(pts: list[Point]) -> list[float]:
+    """Convert a list of points to a flattened list with length `num_points * 3`."""
+    return points_to_array(pts).flatten().tolist()
 
 
 def are_points_in_set(pts: list[Point], are_in: list[Point]) -> bool:

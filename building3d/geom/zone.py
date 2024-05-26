@@ -20,16 +20,16 @@ class Zone:
             name = random_id()
         self.name = name
         self.solids = {}
-        self.solidgraph = {}
+        self.solidgraph = {}  # TODO: Is this used and needed?
         self.verify = verify
 
-    def add_solid(self, name: str, walls: list[Wall]):
+    def add_solid(self, name: str, walls: list[Wall]) -> None:
         """Add solid created from walls to the zone."""
         solid = Solid(walls=walls, name=name, verify=self.verify)
         self.add_solid_instance(solid)
 
-    def add_solid_instance(self, sld: Solid, parent: str | None = None):
-        """Add solid instance to the zone.
+    def add_solid_instance(self, sld: Solid, parent: str | None = None) -> None:
+        """Add a Solid instance to the zone.
 
         A solid can be a top-level (parent) solid or a subsolid.
         Only 1 level of subsolids is allowed, i.e. a solid cannot be
@@ -91,14 +91,14 @@ class Zone:
 
         return verts, faces
 
-    def volume(self):
+    def volume(self) -> float:
         """Calculate zone volume as the sum of solid volumes."""
-        volume = 0
+        volume = 0.0
         for sld in self.solids.values():
             volume += sld.volume
         return volume
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         """Returns True if all solids of this and other are equal."""
         if len(self.solids.values()) != len(other.solids.values()):
             return False
