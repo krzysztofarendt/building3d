@@ -15,6 +15,4 @@ if __name__ == "__main__":
         building.add_zone_instance(z)
 
     write_dotbim(file_path, building)
-
-    # TODO: Add read_dotbim()
-    building = read_dotbim(file_path)
+    building_copy = read_dotbim(file_path)
