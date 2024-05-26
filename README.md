@@ -76,6 +76,7 @@ make example_2
 - [x] Plot subpolygons
 - [x] Building = set of zones
 - [-] Read/write to .bim
+- [ ] Model should be checking if all UIDs are unique (I removed name lists from Polygon and Solid)
 - [ ] Figure out subpolygon meshing and general usage
 - [ ] Own file format `*.b3d`
 - [ ] `example_1` fails with `delta=0.5` and it takes 5 minutes to generate the mesh

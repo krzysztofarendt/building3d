@@ -31,16 +31,12 @@ class Polygon:
     - If used as a wall, the points should be ordered counter-clockwise w.r.t.
       to the zone that this wall belongs to. Normal vector should point outwards.
     """
-    # List of names of all Polygon instances (names must be unique)
-    instance_names = set()
-
     def __init__(self, points: list[Point], name: str | None = None):
         if name is None:
             name = random_id()
         logger.debug(f"Creating polygon: {name}")
 
         self.name = name
-        Polygon.add_name(name)
 
         self.points = list(points)
         logger.debug(f"Points added: {self.points}")
@@ -69,18 +65,6 @@ class Polygon:
         self.centroid = self._centroid()
         self.edges = self._edges()
         self.area = self._area()
-
-    @staticmethod
-    def add_name(name: str):
-        if name not in Polygon.instance_names:
-            Polygon.instance_names.add(name)
-        else:
-            raise ValueError(f"Polygon {name} already exists!")
-
-    @staticmethod
-    def remove_name(name: str):
-        if name in Polygon.instance_names:
-            Polygon.instance_names.remove(name)
 
     def copy(self, new_name: str | None = None):
         """Return a deep copy of itself.
@@ -419,9 +403,6 @@ class Polygon:
         ctr = Point(vec[0], vec[1], vec[2])
 
         return ctr
-
-    def __del__(self):
-        Polygon.remove_name(self.name)
 
     def __str__(self):
         return f"Polygon(name={self.name}, points={[p for p in self.points]})"
