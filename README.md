@@ -11,9 +11,12 @@ Geometry:
 - a set of polygons defines a wall
 - a set of walls defines a solid (3D space fully enclosed with polygons)
 - a set of solids defines a zone
+- a set of zones defines a building
 - wall polygons do not have to be coplanar
 - wall can have subpolygons (e.g. wall with a window)
 - subpolygons do not have own meshes (yet)
+- solids of a zone need to be adjacent
+- but zones of a building do not need to be adjacent
 
 Mesh:
 - three types of meshes exist:
@@ -75,7 +78,7 @@ make example_2
 - [x] Try PyVista instead of mayavi2
 - [x] Plot subpolygons
 - [x] Building = set of zones
-- [-] Read/write to .bim
+- [x] Read/write to .bim
 - [ ] Model should be checking if all UIDs are unique (I removed name lists from Polygon and Solid)
 - [ ] Figure out subpolygon meshing and general usage
 - [ ] Own file format `*.b3d`
