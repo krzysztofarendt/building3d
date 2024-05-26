@@ -6,7 +6,6 @@ import dotbimpy
 import numpy as np
 
 from building3d.geom.building import Building
-from building3d.geom.zone import Zone
 from building3d.geom.solid import Solid
 from building3d.geom.wall import Wall
 from building3d.geom.polygon import Polygon
