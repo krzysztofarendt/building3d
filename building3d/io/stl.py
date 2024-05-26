@@ -1,5 +1,12 @@
 """STL import/export.
 
+This format can be used to import/export geometry.
+There is no metadata attached, so the information
+about the original structure of the model (zones, solids, walls, polygons)
+is lost. Each triangle is read/written as a separate wall.
+There can be multiple solids in an STL file.
+One STL file = one zone.
+
 STL format:
 ---------------------------------------
 solid name
@@ -12,9 +19,6 @@ solid name
      endfacet
 endsolid name
 ---------------------------------------
-
-Used for:
-- building3d.geom.solid.Zone
 """
 import logging
 from pathlib import Path

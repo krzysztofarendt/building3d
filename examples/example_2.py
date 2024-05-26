@@ -3,12 +3,14 @@ import time
 import building3d.logger
 from building3d.display.plot_zone import plot_zone
 from building3d.display.plot_mesh import plot_mesh
+from building3d.geom.building import Building
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
 from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
 from building3d.mesh.mesh import Mesh
 from building3d.mesh.quality.mesh_stats import mesh_stats
+from building3d.io.dotbim import write_dotbim
 
 
 def example_2():
@@ -82,8 +84,8 @@ def example_2():
     floor_0 = Wall([floor_0_poly], "floor_0")
     ceiling = Wall([ceiling_poly], "ceiling")
 
-    building = Zone()
-    building.add_solid("solid_floor_0", [wall_a, wall_bcd, floor_0, ceiling])
+    zone = Zone()
+    zone.add_solid("solid_floor_0", [wall_a, wall_bcd, floor_0, ceiling])
 
     # Floor 1
     floor_1_poly = Polygon([p_aab, p_abb, p_bbb, p_bab], "floor_1_poly")
@@ -95,10 +97,10 @@ def example_2():
     floor_1 = Wall([floor_1_poly], "floor_1")
     roof = Wall([roof_a_poly, roof_b_poly, roof_c_poly, roof_d_poly], "roof")
 
-    building.add_solid("solid_floor_1", [floor_1, roof])
+    zone.add_solid("solid_floor_1", [floor_1, roof])
 
     mesh = Mesh(delta=1.0)
-    mesh.add_zone(building)
+    mesh.add_zone(zone)
 
     start_time = time.time()
     mesh.generate(solidmesh=True)
@@ -108,8 +110,13 @@ def example_2():
     print(mesh_stats(mesh.solidmesh.vertices, mesh.solidmesh.elements))
 
     # Plot
-    plot_zone(building)
+    plot_zone(zone)
     plot_mesh(mesh)
+
+    # Save .bim
+    building = Building(name="example_2")
+    building.add_zone_instance(zone)
+    write_dotbim("example_2.bim", building)
 
 
 if __name__ == "__main__":

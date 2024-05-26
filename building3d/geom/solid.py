@@ -18,9 +18,6 @@ logger = logging.getLogger(__name__)
 
 class Solid:
     """Solid is a space enclosed by polygons."""
-    # List of names of all Solid instances (names must be unique)
-    instance_names = set()
-
     def __init__(self, walls: Sequence[Wall], name: str | None = None, verify: bool = True):
         if name is None:
             name = random_id()
@@ -29,18 +26,6 @@ class Solid:
         if verify:
             self._verify(throw=True)  # NOTE: Slow for large models thousands of points
         self.volume = self._volume()
-
-    @staticmethod
-    def add_name(name: str):
-        if name not in Solid.instance_names:
-            Solid.instance_names.add(name)
-        else:
-            raise ValueError(f"Solid {name} already exists!")
-
-    @staticmethod
-    def remove_name(name: str):
-        if name in Solid.instance_names:
-            Solid.instance_names.remove(name)
 
     def polygons(self, only_parents=True) -> list[Polygon]:
         """Return a list with all polygons of this solid."""
@@ -219,9 +204,6 @@ class Solid:
         # Raise the first exception
         if throw and len(errors) > 0:
             raise errors[0]
-
-    def __del__(self):
-        Solid.remove_name(self.name)
 
     def __str__(self):
         return f"Solid({self.name=}, {self.walls=})"
