@@ -1,9 +1,20 @@
 """dotbim (.bim) file I/O."""
+from collections import defaultdict
+import json
+
 import dotbimpy
 import numpy as np
 
 from building3d.geom.building import Building
+from building3d.geom.zone import Zone
+from building3d.geom.solid import Solid
+from building3d.geom.wall import Wall
+from building3d.geom.polygon import Polygon
 from building3d.geom.cloud import points_to_flat_list
+from building3d.geom.cloud import flat_list_to_points
+
+
+TOOL_NAME = "Building3D"
 
 
 def write_dotbim(path: str, bdg: Building) -> None:
@@ -14,7 +25,7 @@ def write_dotbim(path: str, bdg: Building) -> None:
     for zone in bdg.zones.values():
         for sld in zone.solids.values():
             for wall in sld.walls:
-                for poly in wall.get_polygons(only_parents=True):  # TODO: False
+                for poly in wall.get_polygons(only_parents=False):
                     verts, faces = poly.points, poly.triangles
                     coordinates = points_to_flat_list(verts)
                     indices = np.array(faces).flatten().tolist()
@@ -30,12 +41,13 @@ def write_dotbim(path: str, bdg: Building) -> None:
                     color = dotbimpy.Color(r=255, g=255, b=255, a=255)
                     guid = poly.name
                     info = {
-                        "Wall": wall.name,
-                        "Solid": sld.name,
                         "Zone": zone.name,
+                        "Solid": sld.name,
+                        "Wall": wall.name,
+                        "Polygon": poly.name,
                     }
                     rotation = dotbimpy.Rotation(qx=0, qy=0, qz=0, qw=1.0)
-                    type = "Polygon"
+                    type = poly.name
                     vector = dotbimpy.Vector(x=0, y=0, z=0)
 
                     # Instantiate Element object
@@ -58,6 +70,7 @@ def write_dotbim(path: str, bdg: Building) -> None:
     # File meta data
     file_info = {
         "Building": bdg.name,
+        "GeneratedBy": TOOL_NAME
     }
 
     # Instantiate and save File object
@@ -65,3 +78,74 @@ def write_dotbim(path: str, bdg: Building) -> None:
         "1.0.0", meshes=meshes, elements=elements, info=file_info
     )
     file.save(path)
+
+
+def read_dotbim(path: str) -> Building:
+    bim = {}
+    with open(path, "r") as f:
+        bim = json.load(f)
+
+    error_msg = ".bim format not compatible with Building3D"
+    if not "GeneratedBy" in bim["info"].keys():
+        raise KeyError(error_msg)
+    elif bim["info"]["GeneratedBy"] != TOOL_NAME:
+        raise ValueError(error_msg)
+
+    # Get mesh
+    data = {}
+    for m in bim["meshes"]:
+        mid = m["mesh_id"]
+        coords = m["coordinates"]
+        indices = m["indices"]
+        vertices = flat_list_to_points(coords)
+        faces = np.array(indices, dtype=np.int32).reshape((-1, 3)).tolist()
+        data[mid] = {
+            "vertices": vertices,
+            "faces": faces,
+        }
+
+    # Get metadata
+    bname = bim["info"]["Building"]
+    for el in bim["elements"]:
+        mid = el["mesh_id"]
+        data[mid]["Zone"] = el["info"]["Zone"]
+        data[mid]["Solid"] = el["info"]["Solid"]
+        data[mid]["Wall"] = el["info"]["Wall"]
+        data[mid]["Polygon"] = el["info"]["Polygon"]
+
+    # Construct the model dictionary
+    def ddict():
+        """Infinite level defaultdict."""
+        return defaultdict(ddict)
+
+    model = ddict()
+    for poly_num in data.keys():
+        poly_name = data[poly_num]["Polygon"]
+        wall_name = data[poly_num]["Wall"]
+        solid_name = data[poly_num]["Solid"]
+        zone_name = data[poly_num]["Zone"]
+
+        model[bname][zone_name][solid_name][wall_name][poly_name]["vertices"] = \
+            data[poly_num]["vertices"]
+        model[bname][zone_name][solid_name][wall_name][poly_name]["faces"] = \
+            data[poly_num]["faces"]
+    # print(model)
+
+    # Reconstruct the Building instance
+    building = Building(name=bname)
+    for zname in model[bname].keys():
+        solids = []
+        for sname in model[bname][zname].keys():
+            walls = []
+            for wname in model[bname][zname][sname].keys():
+                polys = []
+                for pname in model[bname][zname][sname][wname].keys():
+                    polys.append(Polygon(
+                        points=model[bname][zname][sname][wname][pname]["vertices"],
+                        name=pname,
+                    ))
+                walls.append(Wall(polygons=polys, name=wname))
+            solids.append(Solid(walls=walls, name=sname))
+        building.add_zone(name=zname, solids=solids)
+
+    return building

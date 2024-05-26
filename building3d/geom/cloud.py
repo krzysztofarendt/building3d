@@ -21,6 +21,15 @@ def points_to_flat_list(pts: list[Point]) -> list[float]:
     return points_to_array(pts).flatten().tolist()
 
 
+def flat_list_to_points(plist: list[float]) -> list[Point]:
+    """Convert a list of floats to a list of points."""
+    data = np.array(plist).reshape((-1, 3))
+    pts = []
+    for d in data:
+        pts.append(Point(d[0], d[1], d[2]))
+    return pts
+
+
 def are_points_in_set(pts: list[Point], are_in: list[Point]) -> bool:
     """Test if points `pts` are a subset of `are_in`."""
     pts_set = set(pts)
