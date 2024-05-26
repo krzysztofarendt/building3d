@@ -372,7 +372,7 @@ class Polygon:
             total[1] += prod[1]
             total[2] += prod[2]
 
-        result = np.dot(total, self.normal)
+        result = float(np.dot(total, self.normal))
 
         return abs(result / 2)
 
