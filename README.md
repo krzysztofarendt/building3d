@@ -69,6 +69,7 @@ make coverage
 ```
 make example_1
 make example_2
+make example_3
 ```
 
 # TODO:
