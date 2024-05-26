@@ -1,5 +1,3 @@
-from mayavi import mlab
-
 from building3d.display.plot_mesh import plot_mesh
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
