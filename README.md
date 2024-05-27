@@ -1,4 +1,5 @@
 ![Unit tests](https://github.com/krzysztofarendt/building3d/actions/workflows/unit_tests.yml/badge.svg)
+[![Coverage Status](https://coveralls.io/repos/github/krzysztofarendt/building3d/badge.svg)](https://coveralls.io/github/krzysztofarendt/building3d)
 
 # building3d
 
