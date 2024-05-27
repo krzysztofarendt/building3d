@@ -5,6 +5,7 @@ import json
 import dotbimpy
 import numpy as np
 
+from building3d import random_id
 from building3d.geom.building import Building
 from building3d.geom.solid import Solid
 from building3d.geom.wall import Wall
@@ -38,7 +39,7 @@ def write_dotbim(path: str, bdg: Building) -> None:
 
                     # Element properties
                     color = dotbimpy.Color(r=255, g=255, b=255, a=255)
-                    guid = poly.name
+                    guid = random_id()  # NOTE: GUID not used by Building3D
                     info = {
                         "Zone": zone.name,
                         "Solid": sld.name,
