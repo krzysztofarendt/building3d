@@ -1,11 +1,14 @@
-.PHONY: format lint test coverage count count-tests example_1 example_2 example_3 test_publish publish
+.PHONY: format lint lint-full test coverage count count-tests example_1 example_2 example_3 test_publish publish
 
 format:
 	black $(shell ls **/*.py)
 	isort --sl $(shell ls **/*.py)
 
 lint:
-	flake8 --max-line-length 100 --select=E9,F63,F7,F82 --show-source --statistics --count building3d/
+	flake8 --select=E9,F63,F7,F82,E501 --max-complexity=10 --max-line-length=100 --show-source --statistics building3d/
+
+lint-full:
+	flake8 --max-complexity=10 --max-line-length=100 --show-source --statistics building3d/
 
 test:
 	pytest tests/
