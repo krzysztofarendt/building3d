@@ -1,4 +1,4 @@
-![Unit tests](https://github.com/krzysztofarendt/building3d/actions/workflows/python-app.yml/badge.svg)
+![Unit tests](https://github.com/krzysztofarendt/building3d/actions/workflows/unit_tests.yml/badge.svg)
 
 # building3d
 
