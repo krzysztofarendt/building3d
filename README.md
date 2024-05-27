@@ -80,17 +80,16 @@ make example_3
 - [x] Plot subpolygons
 - [x] Building = set of zones
 - [x] Read/write to .bim
-- [ ] Model should be checking if all UIDs are unique (I removed name lists from Polygon and Solid)
+- [x] Export/import to/from STL (and other formats?)
+- [ ] Github Actions
+- [ ] Model should be checking if all component names are unique (I removed name lists from Polygon and Solid)
 - [ ] Figure out subpolygon meshing and general usage
 - [ ] Own file format `*.b3d`
 - [ ] `example_1` fails with `delta=0.5` and it takes 5 minutes to generate the mesh
 - [ ] `Solid` should find polygons with reversed order of vertices and fix it
 - [ ] Accurate center of weight for Solid (but is it even needed?)
-- [ ] Export/import to/from STL (and other formats?)
-- [ ] Speed up mayavi2: https://docs.enthought.com/mayavi/mayavi/tips.html#acceleration-mayavi-scripts
 - [ ] https://github.com/meshpro/pygalmesh
 - [ ] https://github.com/nschloe/meshio
-- [ ] Github Actions
 - [ ] `Polygon.__eq__()` can return wrong result for some non-convex polygons
 
 Other cool projects:
