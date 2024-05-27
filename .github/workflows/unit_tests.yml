@@ -35,4 +35,7 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=100 --statistics
     - name: Test with pytest
       run: |
-        make test
+        make coverage
+    - name: Coveralls GitHub Action
+      uses: coverallsapp/github-action@v2.3.0
+            
