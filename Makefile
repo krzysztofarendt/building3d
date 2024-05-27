@@ -14,7 +14,7 @@ test:
 	pytest tests/
 
 coverage:
-	pytest --cov=building3d --cov-report=json:.coverage.json tests/
+	pytest --cov=building3d tests/
 
 count:
 	cloc --by-file building3d/
