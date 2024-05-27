@@ -41,5 +41,3 @@ jobs:
       with:
         format: python
         base-path: building3d
-        file: .coverage.json
-
