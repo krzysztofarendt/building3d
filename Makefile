@@ -14,7 +14,7 @@ test:
 	pytest tests/
 
 coverage:
-	pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=building3d tests/ | tee pytest-coverage.txt
+	pytest --cov=building3d tests/
 
 count:
 	cloc --by-file building3d/
