@@ -2,12 +2,12 @@
 - Read the Utah teapot STL file.
 - Plot the teapot using PyVista.
 """
+
 import pyvista as pv
 
 import building3d.logger
-from building3d.io.stl import read_stl
 from building3d.geom.cloud import points_to_array
-
+from building3d.io.stl import read_stl
 
 if __name__ == "__main__":
     # Read STL

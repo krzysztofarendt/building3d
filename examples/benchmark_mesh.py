@@ -8,6 +8,7 @@ This script does the following:
 
 It takes several minutes to complete (about 6 minutes on i5-11400H @ 2.70GHz).
 """
+
 import time
 
 import numpy as np
@@ -15,7 +16,6 @@ import pandas as pd
 
 from building3d.geom.predefined.box import box
 from building3d.mesh.mesh import Mesh
-
 
 if __name__ == "__main__":
     zone = box(1.0, 1.0, 1.0)

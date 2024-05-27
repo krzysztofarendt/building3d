@@ -1,8 +1,8 @@
 import numpy as np
 
+from building3d.config import GEOM_RTOL
 from building3d.geom.building import Building
 from building3d.geom.predefined.box import box
-from building3d.config import GEOM_RTOL
 
 
 def test_building_volume_adjacent():

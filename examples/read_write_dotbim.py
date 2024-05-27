@@ -1,8 +1,7 @@
 from building3d.geom.building import Building
 from building3d.geom.predefined.box import box
-from building3d.io.dotbim import write_dotbim
 from building3d.io.dotbim import read_dotbim
-
+from building3d.io.dotbim import write_dotbim
 
 if __name__ == "__main__":
     file_path = "building.bim"

@@ -1,5 +1,5 @@
-from building3d.display.plot_zone import plot_zone
 from building3d.display.plot_mesh import plot_mesh
+from building3d.display.plot_zone import plot_zone
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
 from building3d.geom.wall import Wall
@@ -51,12 +51,16 @@ def test_find_neighbors(show=False):
     neighbors_1 = find_neighbors(vertices, elements)
     neighbors_2 = find_neighbors_numba_wrap(vertices, elements)
 
-    assert neighbors_1 == neighbors_2, "Python and Numba functions returning different results"
+    assert (
+        neighbors_1 == neighbors_2
+    ), "Python and Numba functions returning different results"
     unique_set = set()
     for el in neighbors_2:
         for index in el:
             unique_set.add(index)
-    assert len(unique_set) == len(elements), "Not all elements used for the neighbor graph"
+    assert len(unique_set) == len(
+        elements
+    ), "Not all elements used for the neighbor graph"
 
     if show:
         # Plot
@@ -66,4 +70,3 @@ def test_find_neighbors(show=False):
 
 if __name__ == "__main__":
     test_find_neighbors(show=True)
-

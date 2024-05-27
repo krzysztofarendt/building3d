@@ -1,16 +1,16 @@
 import time
 
 import building3d.logger
-from building3d.display.plot_zone import plot_zone
 from building3d.display.plot_mesh import plot_mesh
+from building3d.display.plot_zone import plot_zone
 from building3d.geom.building import Building
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
 from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
+from building3d.io.dotbim import write_dotbim
 from building3d.mesh.mesh import Mesh
 from building3d.mesh.quality.mesh_stats import mesh_stats
-from building3d.io.dotbim import write_dotbim
 
 
 def example_2():

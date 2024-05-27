@@ -1,7 +1,7 @@
 """Plot data from mesh_generation_time.csv."""
-import pandas as pd
-import matplotlib.pyplot as plt
 
+import matplotlib.pyplot as plt
+import pandas as pd
 
 if __name__ == "__main__":
     df = pd.read_csv("mesh_generation_time.csv")

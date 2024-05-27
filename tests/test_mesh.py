@@ -38,7 +38,9 @@ def test_mesh():
         mesh.add_zone(zone)
         mesh.generate(solidmesh=True)
 
-        assert min(mesh.solidmesh.volumes) > minimum_tetra_volume(delta), \
-            "Min. volume below threshold"
-        assert min(mesh.polymesh.areas) > minimum_triangle_area(delta), \
-            "Min. area below threshold"
+        assert min(mesh.solidmesh.volumes) > minimum_tetra_volume(
+            delta
+        ), "Min. volume below threshold"
+        assert min(mesh.polymesh.areas) > minimum_triangle_area(
+            delta
+        ), "Min. area below threshold"
