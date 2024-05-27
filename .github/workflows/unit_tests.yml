@@ -36,8 +36,7 @@ jobs:
     - name: Test with pytest
       run: |
         make coverage
-    - name: Pytest coverage comment
-      uses: MishaKav/pytest-coverage-comment@main
+    - name: Coveralls
+      uses: coverallsapp/github-action@v2
       with:
-        pytest-coverage-path: ../pytest-coverage.txt
-        junitxml-path: ../pytest.xml
+        base-path: ../
