@@ -22,7 +22,7 @@ dependencies = [
 version = "0.0.3"
 
 [project.optional-dependencies]
-dev = ["pytest", "pytest-cov", "black", "isort", "twine", "build"]
+dev = ["pytest", "pytest-cov", "black", "isort", "flake8", "twine", "build"]
 
 [tool.setuptools]
 packages = ["building3d"]
