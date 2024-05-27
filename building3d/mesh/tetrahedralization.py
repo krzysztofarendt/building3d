@@ -254,10 +254,14 @@ def delaunay_tetrahedralization(
         logger.debug("Attempting to remove points attached to invalid elements")
         num_vert_before = len(vertices)
         boundary_pts_indices = [i for i, p in enumerate(vertices) if p in boundary_pts]
-        invalid_vertices = get_invalid_points(vertices, tetrahedra, boundary_pts_indices, min_volume)
+        invalid_vertices = get_invalid_points(
+            vertices, tetrahedra, boundary_pts_indices, min_volume
+        )
         vertices = [vertices[i] for i in range(len(vertices)) if i not in invalid_vertices]
 
-        logger.debug(f"Number of vertices before->after removal: {num_vert_before}->{len(vertices)}")
+        logger.debug(
+            f"Number of vertices before->after removal: {num_vert_before}->{len(vertices)}"
+        )
         if len(invalid_vertices) > 0:
             logger.debug("Remeshing needed")
             continue

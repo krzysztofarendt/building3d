@@ -195,7 +195,9 @@ class Solid:
         logger.debug("Checking finished")
 
         if not has_duplicates.all():
-            errors.append(GeometryError(f"Some points in solid {self.name} are attached to only 1 wall"))
+            errors.append(
+                GeometryError(f"Some points in solid {self.name} are attached to only 1 wall")
+            )
 
         # Print encountered geometry errors
         for e in errors:

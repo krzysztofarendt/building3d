@@ -129,7 +129,9 @@ def read_stl(path: str, verify: bool = True) -> Zone:
             # Add polygon
             poly = Polygon([Point(*vertices[0]), Point(*vertices[1]), Point(*vertices[2])])
             if not np.isclose(poly.normal, normal, rtol=1e-2).all():
-                logger.warning(f"Normal different than in STL: calculated={poly.normal} vs. stl={normal}")
+                logger.warning(
+                    f"Normal different than in STL: calculated={poly.normal} vs. stl={normal}"
+                )
 
             if wall is not None:
                 wall.add_polygon(poly)
