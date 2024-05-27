@@ -418,7 +418,7 @@ class Polygon:
                 #       It may fail for some non-convex polygons, which can have same points
                 #       connected differently.
                 #       Convex polygons are covered, because there is only 1 way to connect
-                #       points of a convex polygon)
+                #       points of a convex polygon.
                 if p not in other_set:
                     return False
         else:
