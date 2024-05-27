@@ -84,7 +84,7 @@ make example_3
 - [x] Building = set of zones
 - [x] Read/write to .bim
 - [x] Export/import to/from STL (and other formats?)
-- [ ] Github Actions
+- [x] Github Actions
 - [ ] Model should be checking if all component names are unique (I removed name lists from Polygon and Solid)
 - [ ] Figure out subpolygon meshing and general usage
 - [ ] Own file format `*.b3d`
