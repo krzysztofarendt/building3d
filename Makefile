@@ -14,7 +14,7 @@ test:
 	pytest tests/
 
 coverage:
-	pytest --cov=building3d tests/
+	pytest --cov=building3d --cov-report=xml --cov-report=term-missing tests/
 
 count:
 	cloc --by-file building3d/
