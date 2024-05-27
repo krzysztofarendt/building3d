@@ -40,4 +40,5 @@ jobs:
       uses: coverallsapp/github-action@v2.3.0
       with:
         format: python
+        base-path: building3d/
 
