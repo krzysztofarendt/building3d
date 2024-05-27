@@ -101,7 +101,7 @@ def read_dotbim(path: str) -> Building:
         faces = np.array(indices, dtype=np.int32).reshape((-1, 3)).tolist()
         data[mid] = {
             "vertices": vertices,
-            "faces": faces,
+            "faces": faces,  # NOTE: Not used in reconstruction
         }
 
     # Get metadata
@@ -128,8 +128,7 @@ def read_dotbim(path: str) -> Building:
         model[bname][zone_name][solid_name][wall_name][poly_name]["vertices"] = \
             data[poly_num]["vertices"]
         model[bname][zone_name][solid_name][wall_name][poly_name]["faces"] = \
-            data[poly_num]["faces"]
-    # print(model)
+            data[poly_num]["faces"]  # NOTE: Not used in reconstruction
 
     # Reconstruct the Building instance
     building = Building(name=bname)
