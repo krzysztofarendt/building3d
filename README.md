@@ -75,6 +75,13 @@ make example_2
 make example_3
 ```
 
+# Notes
+
+- The meshing algorithms from this package are slow and may produce low quality meshes
+  for complex geometries
+- Professional meshing tools (gmsh, tetgen, CGAL), however, are licensed under GPL/LGPL/AGPL,
+  while I strive to keep this package under the MIT license
+
 # TODO:
 
 - [x] Add predefined geometry: box
@@ -85,6 +92,7 @@ make example_3
 - [x] Read/write to .bim
 - [x] Export/import to/from STL (and other formats?)
 - [x] Github Actions
+- [x] Benchmark against https://github.com/pyvista/tetgen
 - [ ] Model should be checking if all component names are unique (I removed name lists from Polygon and Solid)
 - [ ] Figure out subpolygon meshing and general usage
 - [ ] Own file format `*.b3d`
