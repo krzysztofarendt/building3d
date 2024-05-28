@@ -93,6 +93,7 @@ make example_3
 - [x] Export/import to/from STL (and other formats?)
 - [x] Github Actions
 - [x] Benchmark against https://github.com/pyvista/tetgen
+- [ ] Add `Mesh.add_building()`
 - [ ] Model should be checking if all component names are unique (I removed name lists from Polygon and Solid)
 - [ ] Figure out subpolygon meshing and general usage
 - [ ] Own file format `*.b3d`
