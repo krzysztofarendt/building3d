@@ -1,4 +1,3 @@
-from building3d.geom.building import Building
 from building3d.geom.predefined.box import box
 from building3d.mesh.mesh import Mesh
 from building3d.mesh.quality.mesh_stats import mesh_stats
