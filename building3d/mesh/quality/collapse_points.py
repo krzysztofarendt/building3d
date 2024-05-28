@@ -8,8 +8,8 @@ logger = logging.getLogger(__name__)
 
 def collapse_points(
     vertices: list[Point],
-    elements: list[list[int]],
-) -> tuple[list[Point], list[list[int]]]:
+    elements: list[tuple[int]],
+) -> tuple[list[Point], list[tuple[int, ...]]]:
     """Merge overlapping points.
 
     Checks if there are points which are equal to one another.
@@ -60,7 +60,7 @@ def collapse_points(
     for_deletion = sorted(list(for_deletion), reverse=True)
     for p_to_delete in for_deletion:
         for k in range(len(elements)):
-            elements[k] = [x - 1 if x > p_to_delete else x for x in elements[k]]
+            elements[k] = tuple([x - 1 if x > p_to_delete else x for x in elements[k]])
         vertices.pop(p_to_delete)
 
     logger.debug(f"Number of points after collapsing: {len(vertices)}")

@@ -4,7 +4,7 @@ from building3d.mesh.quality.mesh_stats import mesh_stats
 
 
 def test_mesh_stats():
-    zone = box(1, 1, 1, (0, 0, 0), name="Zone_1")
+    zone = box(1, 1, 1)
     mesh = Mesh(delta=0.3)
     mesh.add_zone(zone)
     mesh.generate(solidmesh=True)

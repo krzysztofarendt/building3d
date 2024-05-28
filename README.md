@@ -99,7 +99,6 @@ make example_3
 - [ ] Own file format `*.b3d`
 - [ ] `example_1` fails with `delta=0.5` and it takes 5 minutes to generate the mesh
 - [ ] `Solid` should find polygons with reversed order of vertices and fix it
-- [ ] Accurate center of weight for Solid (but is it even needed?)
 - [ ] https://github.com/meshpro/pygalmesh
 - [ ] https://github.com/nschloe/meshio
 - [ ] `Polygon.__eq__()` can return wrong result for some non-convex polygons
