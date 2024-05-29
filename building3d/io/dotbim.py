@@ -18,6 +18,10 @@ TOOL_NAME = "Building3D"
 
 
 def write_dotbim(path: str, bdg: Building) -> None:
+    """Save model to .bim.
+
+    .bim format can be used to store the model geometry without the mesh.
+    """
     mesh_id = 0
     meshes = []
     elements = []
@@ -81,6 +85,10 @@ def write_dotbim(path: str, bdg: Building) -> None:
 
 
 def read_dotbim(path: str) -> Building:
+    """Load model from .bim.
+
+    .bim format can be used to store the model geometry without the mesh.
+    """
     bim = {}
     with open(path, "r") as f:
         bim = json.load(f)
