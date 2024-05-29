@@ -1,6 +1,7 @@
 import logging
 import time
 
+from building3d.geom.building import Building
 from building3d.geom.polygon import Polygon
 from building3d.geom.solid import Solid
 from building3d.geom.zone import Zone
@@ -42,6 +43,11 @@ class Mesh:
         """Add zone. It will add all solids and polygons of the zone."""
         for _, solid in zone.solids.items():
             self.add_solid(solid)
+
+    def add_building(self, building: Building):
+        """Add building and all its zones, solids, polygons."""
+        for _, zone in building.zones.items():
+            self.add_zone(zone)
 
     def generate(self, solidmesh=False):
         """Generate mesh for all added polygons and solids."""
