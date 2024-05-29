@@ -10,6 +10,7 @@ from building3d.mesh.polymesh import PolyMesh
 def plot_mesh(
     mesh: Mesh | SolidMesh | PolyMesh,
     clip: tuple[float, float, float] | str | None = None,
+    show: bool = True,
 ):
     """Plot any type of mesh.
 
@@ -18,8 +19,13 @@ def plot_mesh(
     To plot PolyMesh only, you need to explicitly pass PolyMesh.
     """
     if type(mesh) is Mesh:
-        polymesh = None
-        solidmesh = mesh.solidmesh
+        # Need to check if the are volume elements in Mesh (or only surface elements)
+        if len(mesh.solidmesh.elements) > 0:
+            polymesh = None
+            solidmesh = mesh.solidmesh
+        else:
+            polymesh = mesh.polymesh
+            solidmesh = None
     elif type(mesh) is PolyMesh:
         polymesh = mesh
         solidmesh = None
@@ -69,4 +75,5 @@ def plot_mesh(
             lines = np.array(lines)
             plotter.add_lines(lines, color="black", width=1.0)
 
-    plotter.show()
+    if show:
+        plotter.show()
