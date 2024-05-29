@@ -1,5 +1,5 @@
 ![Unit tests](https://github.com/krzysztofarendt/building3d/actions/workflows/unit_tests.yml/badge.svg)
-[![Coverage Status](https://coveralls.io/repos/github/krzysztofarendt/building3d/badge.svg)](https://coveralls.io/github/krzysztofarendt/building3d)
+[![Coverage Status](https://coveralls.io/repos/github/krzysztofarendt/building3d/badge.svg?branch=main)](https://coveralls.io/github/krzysztofarendt/building3d?branch=main)
 
 # building3d
 
@@ -94,13 +94,12 @@ make example_3
 - [x] Github Actions
 - [x] Benchmark against https://github.com/pyvista/tetgen
 - [ ] Add `Mesh.add_building()`
+- [ ] Own file format `*.b3d`
+- [ ] Export mesh to VTK format to enable convertions with meshio: https://vtk.org/wp-content/uploads/2015/04/file-formats.pdf
 - [ ] Model should be checking if all component names are unique (I removed name lists from Polygon and Solid)
 - [ ] Figure out subpolygon meshing and general usage
-- [ ] Own file format `*.b3d`
 - [ ] `example_1` fails with `delta=0.5` and it takes 5 minutes to generate the mesh
 - [ ] `Solid` should find polygons with reversed order of vertices and fix it
-- [ ] https://github.com/meshpro/pygalmesh
-- [ ] https://github.com/nschloe/meshio
 - [ ] `Polygon.__eq__()` can return wrong result for some non-convex polygons
 
 Other cool projects:
@@ -109,3 +108,5 @@ Other cool projects:
 - https://vispy.org/
 - https://github.com/pygfx/pygfx
 - https://github.com/Kitware/trame
+- https://github.com/meshpro/pygalmesh
+- https://github.com/nschloe/meshio
