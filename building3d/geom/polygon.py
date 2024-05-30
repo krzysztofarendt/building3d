@@ -28,10 +28,29 @@ class Polygon:
 
     Notes:
     - Initialization is faster if the first point lays in the convex corner
-    - If used as a wall, the points should be ordered counter-clockwise w.r.t.
-      to the zone that this wall belongs to. Normal vector should point outwards.
+    - If used as a wall, the points should be ordered counter-clockwise
+      w.r.t. the zone that this wall belongs to. Normal vector should point outwards.
+    - If triangulation was done before (e.g. when reading from a file), `triangles` can
+      be passed as an argument
     """
-    def __init__(self, points: list[Point], name: str | None = None):
+    def __init__(
+        self,
+        points: list[Point],
+        name: str | None = None,
+        triangles: list[tuple[int, ...]] = [],
+    ):
+        """Make polygon.
+
+        If triangles are provided by the user, their correctness is not checked!
+
+        Args:
+            points: list of coplanar points, at least 3
+            name: polygon name, will be random if `None`
+            triangles: polygon faces (if known)
+
+        Return:
+            Polygon
+        """
         if name is None:
             name = random_id()
         logger.debug(f"Creating polygon: {name}")
@@ -41,26 +60,33 @@ class Polygon:
         self.points = list(points)
         logger.debug(f"Points added: {self.points}")
 
-        # Calculate normal vector and triangulate
-        # This works in the first iteration if the first point of the polygon
-        # is located in the convex corner. If it's located in the non-convex corner
-        # then the algorithm reorders the points until triangulation is successful
-        triangulation_successful = False
-        max_num_tries = len(self.points)
-        n_try = 0
-        while not triangulation_successful:
-            if n_try > max_num_tries:
-                raise TriangulationError(f"Cannot triangulate the polygon {self.name}")
-            try:
-                self.normal = self._normal()
-                self._verify()
-                self.triangles = self._triangulate()
-                triangulation_successful = True
-            except TriangulationError as e:
-                logger.warning(self.name + ": " + str(e))
-                logger.debug("Will try to reorder vertices")
-                self.points = roll_back(self.points)
-            n_try += 1
+        # Verify geometry (>= 3 coplanar points)
+        self._verify()
+
+        if len(triangles) > 0:
+            # Take triangles from the user
+            self.normal = self._normal()
+            self.triangles = triangles
+        else:
+            # Calculate normal vector and triangulate
+            # This works in the first iteration if the first point of the polygon
+            # is located in the convex corner. If it's located in the non-convex corner
+            # then the algorithm reorders the points until triangulation is successful
+            triangulation_successful = False
+            max_num_tries = len(self.points)
+            n_try = 0
+            while not triangulation_successful:
+                if n_try > max_num_tries:
+                    raise TriangulationError(f"Cannot triangulate the polygon {self.name}")
+                try:
+                    self.normal = self._normal()
+                    self.triangles = self._triangulate()
+                    triangulation_successful = True
+                except TriangulationError as e:
+                    logger.warning(self.name + ": " + str(e))
+                    logger.debug("Will try to reorder vertices")
+                    self.points = roll_back(self.points)
+                n_try += 1
 
         self.centroid = self._centroid()
         self.edges = self._edges()
@@ -295,7 +321,7 @@ class Polygon:
                 return True
         return False
 
-    def _triangulate(self) -> list:
+    def _triangulate(self) -> list[tuple[int, ...]]:
         """Return a list of triangles (i, j, k) using the ear clipping algorithm.
 
         (i, j, k) are the indices of the points in self.points.
