@@ -12,6 +12,7 @@ from building3d.geom.wall import Wall
 from building3d.geom.polygon import Polygon
 from building3d.geom.cloud import points_to_flat_list
 from building3d.geom.cloud import flat_list_to_points
+from building3d.types.recursive_default_dict import recursive_default_dict
 
 
 TOOL_NAME = "Building3D"
@@ -126,7 +127,7 @@ def read_dotbim(path: str) -> Building:
         """Infinite level defaultdict."""
         return defaultdict(ddict)
 
-    model = ddict()
+    model = recursive_default_dict()
     for poly_num in data.keys():
         poly_name = data[poly_num]["Polygon"]
         wall_name = data[poly_num]["Wall"]

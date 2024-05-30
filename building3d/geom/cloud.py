@@ -21,6 +21,11 @@ def points_to_flat_list(pts: list[Point]) -> list[float]:
     return points_to_array(pts).flatten().tolist()
 
 
+def points_to_nested_list(pts: list[Point]) -> list[list[float]]:
+    """Convert a list of points to a nested list."""
+    return points_to_array(pts).tolist()
+
+
 def flat_list_to_points(plist: list[float]) -> list[Point]:
     """Convert a list of floats to a list of points."""
     data = np.array(plist).reshape((-1, 3))

@@ -24,11 +24,11 @@ class PolyMesh:
         self.polygons = {}
 
         # Attributes filled with data by self.generate()
-        self.vertices = []
+        self.vertices: list[Point] = []
         self.vertex_owners = {}
         self.faces = []
         self.face_owners = {}
-        self.areas = []
+        self.areas = []  # TODO: Will have to calculate if mesh is read from B3D file
 
     def reinit(self):
         logger.debug("Reinitializing PolyMesh")
@@ -100,11 +100,11 @@ class PolyMesh:
             p2 = self.vertices[f[2]]
             self.areas.append(triangle_area(p0, p1, p2))
 
-    def _add_vertices(self, owner, vertices, faces):
+    def _add_vertices(self, owner: str, vertices: list[Point], faces: list[list[int]]):
         # Increase face counter to include previously added vertices
-        faces = np.array(faces)
-        faces += len(self.vertices)
-        faces = faces.tolist()
+        _faces = np.array(faces)
+        _faces += len(self.vertices)
+        faces = _faces.tolist()
 
         # Add vertices
         len_before = len(self.vertices)

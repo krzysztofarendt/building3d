@@ -22,7 +22,7 @@ class Solid:
         if name is None:
             name = random_id()
         self.name = name
-        self.walls = walls
+        self.walls = walls  # TODO: To keep consistency, this should be a dict
         if verify:
             self._verify(throw=True)  # NOTE: Slow for large models thousands of points
         self.volume = self._volume()

@@ -30,7 +30,7 @@ class SolidMesh:
         # Attributes filled with data by self.generate()
         self.vertices = []
         self.elements = []
-        self.volumes = []
+        self.volumes = []  # TODO: Will have to recalculate if reading from B3D file
 
         self.vertex_owners = {}
         self.element_owners = {}
