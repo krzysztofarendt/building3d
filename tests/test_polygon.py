@@ -388,5 +388,18 @@ def test_equality():
     assert poly_a != poly_e  # One vertex different (p4)
 
 
+def test_polygon_with_known_triangles():
+    p1 = Point(1.0, 0.0, 0.0)
+    p2 = Point(1.0, 1.0, 0.0)
+    p3 = Point(1.0, 1.0, 1.0)
+    p4 = Point(1.0, 0.0, 1.0)
+    poly = Polygon(
+        [p1, p2, p3, p4],
+        triangles=[(0, 1, 2), (0, 2, 3)],
+    )
+    assert np.isclose(poly.area, 1)
+    assert poly.centroid == Point(1.0, 0.5, 0.5)
+
+
 if __name__ == "__main__":
     test_distance_point_to_polygon()

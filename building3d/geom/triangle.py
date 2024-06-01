@@ -131,7 +131,7 @@ def is_corner_convex(p0: Point, p1: Point, p2: Point, n: np.ndarray) -> bool:
         return False
 
 
-def triangulate(points: list[Point], normal: np.ndarray) -> list[int]:
+def triangulate(points: list[Point], normal: np.ndarray) -> list[tuple[int, ...]]:
     """Return a list of triangles (i, j, k) using the ear clipping algorithm.
 
     (i, j, k) are the indices of the points.
