@@ -78,12 +78,14 @@ def write_b3d(path: str, bdg: Building) -> None:
     # Polygon mesh
     bdict["mesh"]["polymesh"]["vertices"] = points_to_nested_list(bdg.mesh.polymesh.vertices)
     bdict["mesh"]["polymesh"]["faces"] = bdg.mesh.polymesh.faces
+    # TODO: owners not used when reading B3D. They could be used for verification.
     bdict["mesh"]["polymesh"]["vertex_owners"] = bdg.mesh.polymesh.vertex_owners
     bdict["mesh"]["polymesh"]["face_owners"] = bdg.mesh.polymesh.face_owners
 
     # Solid mesh
     bdict["mesh"]["solidmesh"]["vertices"] = points_to_nested_list(bdg.mesh.solidmesh.vertices)
     bdict["mesh"]["solidmesh"]["elements"] = bdg.mesh.solidmesh.elements
+    # TODO: owners not used when reading B3D. They could be used for verification.
     bdict["mesh"]["solidmesh"]["vertex_owners"] = bdg.mesh.solidmesh.vertex_owners
     bdict["mesh"]["solidmesh"]["element_owners"] = bdg.mesh.solidmesh.element_owners
 
