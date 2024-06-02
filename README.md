@@ -94,7 +94,7 @@ make example_3
 - [x] Github Actions
 - [x] Benchmark against https://github.com/pyvista/tetgen
 - [x] Add `Mesh.add_building()`
-- [ ] Own file format `*.b3d`
+- [x] Own file format `*.b3d`
 - [ ] Export mesh to VTK format to enable convertions with meshio: https://vtk.org/wp-content/uploads/2015/04/file-formats.pdf
 - [ ] Model should be checking if all component names are unique (I removed name lists from Polygon and Solid)
 - [ ] Figure out subpolygon meshing and general usage
