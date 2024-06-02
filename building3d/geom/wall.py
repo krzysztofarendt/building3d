@@ -20,8 +20,8 @@ class Wall:
             name = random_id()
 
         self.name = name
-        self.polygons = {}  # Dict of polygons and subpolygons
-        self.polygraph = {}  # Graph with parent and subpolygons
+        self.polygons: dict[str, Polygon] = {}  # Dict of polygons and subpolygons
+        self.polygraph: dict[str, list[str]] = {}  # Graph with parent and subpolygons
 
         for poly in polygons:
             self.add_polygon(poly)
