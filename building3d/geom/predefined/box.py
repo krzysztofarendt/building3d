@@ -50,7 +50,7 @@ def box(
     wall_w3 = Wall([poly_w3], name=f"{name}-wall-wall3")
     wall_rf = Wall([poly_rf], name=f"{name}-wall-roof")
 
-    zone = Zone(name=f"{name}-zone")
+    zone = Zone(name=f"{name}")
     zone.add_solid(
         name=f"{name}-solid",
         walls=[wall_fl, wall_w0, wall_w1, wall_w2, wall_w3, wall_rf],

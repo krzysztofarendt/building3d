@@ -3,6 +3,8 @@ import tempfile
 import numpy as np
 
 from building3d.geom.building import Building
+from building3d.geom.point import Point
+from building3d.geom.polygon import Polygon
 from building3d.geom.predefined.box import box
 from building3d.io.b3d import read_b3d
 from building3d.io.b3d import write_b3d
@@ -16,6 +18,16 @@ def test_b3d():
         # path = "test.b3d"  # for manual investigation only
 
         zone_1 = box(1, 1, 1, (0, 0, 0), name="Zone_1")
+
+        # Add window (subpolygon)
+        # TODO: High-level API for adding subpolygons is needed
+        wall = zone_1.get_wall(zone_1.name + "-wall-wall0")  # Hardcoded name in box()
+        wall.add_polygon(
+            Polygon([Point(0.3, 0.0, 0.0), Point(0.6, 0.0, 0.0),
+                     Point(0.6, 0.0, 0.3), Point(0.3, 0.0, 0.6)], name="window"),
+            parent=zone_1.name + "-poly-wall0",  # Hardcoded name in box()
+        )
+
         zone_2 = box(1, 1, 1, (1, 0, 0), name="Zone_2")
         zones = [zone_1, zone_2]
         building = Building(name="building")
