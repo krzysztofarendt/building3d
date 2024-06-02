@@ -44,10 +44,16 @@ def test_b3d():
                         assert pname in wall.polygons.keys()
 
         # Check mesh
-        assert len(building.mesh.polymesh.vertices) == len(b_copy.mesh.polymesh.vertices)
+        assert len(building.mesh.polymesh.vertices) == len(
+            b_copy.mesh.polymesh.vertices
+        )
         assert len(building.mesh.polymesh.faces) == len(b_copy.mesh.polymesh.faces)
-        assert len(building.mesh.solidmesh.vertices) == len(b_copy.mesh.solidmesh.vertices)
-        assert len(building.mesh.solidmesh.elements) == len(b_copy.mesh.solidmesh.elements)
+        assert len(building.mesh.solidmesh.vertices) == len(
+            b_copy.mesh.solidmesh.vertices
+        )
+        assert len(building.mesh.solidmesh.elements) == len(
+            b_copy.mesh.solidmesh.elements
+        )
 
 
 if __name__ == "__main__":
