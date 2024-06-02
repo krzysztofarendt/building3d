@@ -71,6 +71,18 @@ class Zone:
                         f"Solid {sld.name} is not entirely inside {parent} due to {p}"
                     )
 
+    def get_wall(self, wall_name: str) -> Wall:
+        """Get wall by name."""
+        for sld in self.solids.values():
+            for wall in sld.walls:
+                if wall.name == wall_name:
+                    return wall
+        raise GeometryError(f"Wall {wall_name} not found")
+
+    def get_wall_list(self) -> list[str]:
+        """Get list of wall names."""
+        return [wall.name for sld in self.solids.values() for wall in sld.walls]
+
     def get_mesh(
         self,
         only_parents: bool = True,

@@ -15,6 +15,8 @@ Format:
                     Polygon.name: {
                         "points": [[x0, y0, z0], ..., [xN, yN, zN]],
                         "triangles": [[t0a, t0b, t0c], ..., [tMa, tMb, tMc]],
+                        "children": [Polygon.name, ...],
+                        "parent": Polygon.name | None
                     },
                     ...
                 },
@@ -26,19 +28,29 @@ Format:
     },
     "mesh": {
         "polymesh": {
+            "delta": PolyMesh.delta,
             "vertices": [[x0, y0, z0], ..., [xK, yK, zK]],
             "faces": [[f0a, f0b, f0c], ..., [fFa, fFb, fFc]],
             "vertex_owners": {
                 Polygon.name: [v0, ..., vK],
                 ...
             },
+            "face_owners": {
+                Polygon.name: [f0, ..., fF],
+                ...
+            },
         "solidmesh": {
+            "delta": SolidMesh.delta,
             "vertices": [[x0, y0, z0], ..., [xS, yS, zS]],
             "elements": [[e0a, e0b, e0c, e0d], ..., [eEa, eEb, eEc, eEd]],
             "vertex_owners": {
                 Solid.name: [v0, ..., vS],
                 ...
             }
+            "element_owners": {
+                Solid.name: [e0, ..., eE],
+                ...
+            },
         }
     }
 }
@@ -52,6 +64,9 @@ from building3d.geom.solid import Solid
 from building3d.geom.wall import Wall
 from building3d.geom.polygon import Polygon
 from building3d.geom.zone import Zone
+from building3d.mesh.polymesh import PolyMesh
+from building3d.mesh.solidmesh import SolidMesh
+from building3d.mesh.mesh import Mesh
 from building3d.types.recursive_default_dict import recursive_default_dict
 
 
@@ -75,17 +90,25 @@ def write_b3d(path: str, bdg: Building) -> None:
                     bdict["zones"][zone.name][solid.name][wall.name][poly.name]["triangles"] \
                         = triangles
 
+                    children = [x.name for x in wall.get_subpolygons(poly.name)]
+                    bdict["zones"][zone.name][solid.name][wall.name][poly.name]["children"] \
+                        = children  # Not used when loading, but useful for debugging
+
+                    parent = wall.get_parent_name(poly.name)
+                    bdict["zones"][zone.name][solid.name][wall.name][poly.name]["parent"] \
+                        = parent
+
     # Polygon mesh
+    bdict["mesh"]["polymesh"]["delta"] = bdg.mesh.polymesh.delta
     bdict["mesh"]["polymesh"]["vertices"] = points_to_nested_list(bdg.mesh.polymesh.vertices)
     bdict["mesh"]["polymesh"]["faces"] = bdg.mesh.polymesh.faces
-    # TODO: owners not used when reading B3D. They could be used for verification.
     bdict["mesh"]["polymesh"]["vertex_owners"] = bdg.mesh.polymesh.vertex_owners
     bdict["mesh"]["polymesh"]["face_owners"] = bdg.mesh.polymesh.face_owners
 
     # Solid mesh
+    bdict["mesh"]["solidmesh"]["delta"] = bdg.mesh.solidmesh.delta
     bdict["mesh"]["solidmesh"]["vertices"] = points_to_nested_list(bdg.mesh.solidmesh.vertices)
     bdict["mesh"]["solidmesh"]["elements"] = bdg.mesh.solidmesh.elements
-    # TODO: owners not used when reading B3D. They could be used for verification.
     bdict["mesh"]["solidmesh"]["vertex_owners"] = bdg.mesh.solidmesh.vertex_owners
     bdict["mesh"]["solidmesh"]["element_owners"] = bdg.mesh.solidmesh.element_owners
 
@@ -102,6 +125,7 @@ def read_b3d(path: str) -> Building:
 
     building = Building(name=bdict["name"])
 
+    # Read geometry
     for zname in bdict["zones"]:
         zone = Zone(name=zname)
 
@@ -110,26 +134,44 @@ def read_b3d(path: str) -> Building:
             walls = []
             for wname in bdict["zones"][zname][sname]:
 
-                polygons = []
+                wall = Wall(name=wname)
                 for pname in bdict["zones"][zname][sname][wname]:
 
                     points = bdict["zones"][zname][sname][wname][pname]["points"]
                     triangles = bdict["zones"][zname][sname][wname][pname]["triangles"]
+                    # children = bdict["zones"][zname][sname][wname][pname]["children"]  # Not used
+                    parent = bdict["zones"][zname][sname][wname][pname]["parent"]
 
                     poly = Polygon(
                         points=nested_list_to_points(points),
                         name=pname,
                         triangles=triangles,
                     )
+                    wall.add_polygon(poly, parent=parent)
 
-                    polygons.append(poly)
-
-                wall = Wall(polygons=polygons, name=wname)
                 walls.append(wall)
 
             solid = Solid(walls=walls, name=sname)
             zone.add_solid_instance(solid)  # TODO: Parent solids not implemented yet
 
         building.add_zone_instance(zone)
+
+    # Read polygon mesh
+    polymesh = PolyMesh(bdict["mesh"]["polymesh"]["delta"])
+    vertices = nested_list_to_points(bdict["mesh"]["polymesh"]["vertices"])
+    vertex_owners = bdict["mesh"]["polymesh"]["vertex_owners"]
+    faces = bdict["mesh"]["polymesh"]["faces"]
+    face_owners = bdict["mesh"]["polymesh"]["face_owners"]
+    polymesh.reinit(vertices, vertex_owners, faces, face_owners)
+    building.mesh.polymesh = polymesh
+
+    # Read solid mesh
+    solidmesh = SolidMesh(bdict["mesh"]["solidmesh"]["delta"])
+    vertices = nested_list_to_points(bdict["mesh"]["solidmesh"]["vertices"])
+    vertex_owners = bdict["mesh"]["solidmesh"]["vertex_owners"]
+    elements = bdict["mesh"]["solidmesh"]["elements"]
+    element_owners = bdict["mesh"]["solidmesh"]["element_owners"]
+    solidmesh.reinit(vertices, vertex_owners, elements, element_owners)
+    building.mesh.solidmesh = solidmesh
 
     return building

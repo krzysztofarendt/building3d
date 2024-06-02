@@ -4,7 +4,7 @@ from __future__ import annotations
 from building3d import random_id
 from building3d.geom.zone import Zone
 from building3d.geom.solid import Solid
-from building3d.mesh.mesh import Mesh
+import building3d.mesh.mesh as mesh
 from building3d.config import MESH_DELTA
 
 
@@ -19,7 +19,7 @@ class Building:
             name = random_id()
         self.name = name
         self.zones = {}
-        self.mesh = Mesh()
+        self.mesh = mesh.Mesh()
 
     def add_zone(self, name: str, solids: list[Solid]) -> None:
         """Add zone created from solids."""
@@ -52,7 +52,7 @@ class Building:
         if delta is None:
             delta = MESH_DELTA
 
-        self.mesh = Mesh(delta=delta)
+        self.mesh = mesh.Mesh(delta=delta)
 
         for zone in self.zones.values():
             self.mesh.add_zone(zone)

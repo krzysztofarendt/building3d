@@ -30,12 +30,25 @@ class PolyMesh:
         self.face_owners = {}
         self.areas = []  # TODO: Will have to calculate if mesh is read from B3D file
 
-    def reinit(self):
+    def reinit(
+        self,
+        vertices: list[Point] | None = None,
+        vertex_owners: dict | None = None,
+        faces: list[list[int]] | None = None,
+        face_owners: dict | None = None,
+    ):
         logger.debug("Reinitializing PolyMesh")
-        self.vertices = []
-        self.vertex_owners = {}
-        self.faces = []
-        self.face_owners = {}
+        if vertices and vertex_owners and faces and face_owners:
+            self.vertices = vertices
+            self.vertex_owners = vertex_owners
+            self.faces = faces
+            self.face_owners = face_owners
+            self._recalc_areas()
+        else:
+            self.vertices = []
+            self.vertex_owners = {}
+            self.faces = []
+            self.face_owners = {}
 
     def add_polygon(self, poly: Polygon):
         logger.debug(f"Adding polygon: {poly}")
@@ -93,12 +106,7 @@ class PolyMesh:
             self._add_vertices(poly_name, vertices, faces)
 
         # Calculate face areas
-        self.areas = []
-        for f in self.faces:
-            p0 = self.vertices[f[0]]
-            p1 = self.vertices[f[1]]
-            p2 = self.vertices[f[2]]
-            self.areas.append(triangle_area(p0, p1, p2))
+        self._recalc_areas()
 
     def _add_vertices(self, owner: str, vertices: list[Point], faces: list[list[int]]):
         # Increase face counter to include previously added vertices
@@ -117,3 +125,11 @@ class PolyMesh:
         self.faces.extend(faces)
         len_after = len(self.faces)
         self.face_owners[owner] = [x for x in range(len_before, len_after)]
+
+    def _recalc_areas(self):
+        self.areas = []
+        for f in self.faces:
+            p0 = self.vertices[f[0]]
+            p1 = self.vertices[f[1]]
+            p2 = self.vertices[f[2]]
+            self.areas.append(triangle_area(p0, p1, p2))

@@ -18,4 +18,3 @@ def test_mesh_stats():
     vertices, elements = mesh.solidmesh.vertices, mesh.solidmesh.elements
     stats = mesh_stats(vertices, elements)
     assert "SolidMesh statistics" in stats
-

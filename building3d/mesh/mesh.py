@@ -25,7 +25,7 @@ class Mesh:
         self.solidmesh = SolidMesh(delta)
 
     def add_polygon(self, poly: Polygon):
-        """Add polygon insntance to the list of polygons for this mesh.
+        """Add polygon instance to the list of polygons for this mesh.
 
         This is not required if this polygon is part of a solid added to this mesh.
         """
@@ -46,9 +46,20 @@ class Mesh:
             self.add_solid(solid)
 
     def add_building(self, building: building3d.geom.building.Building):
-        """Add building and all its zones, solids, polygons."""
+        """Add building and all its zones, solids, polygons.
+
+        Additionally, the mesh is assigned to the building.mesh.
+        This method changes the building mesh attribute in-place.
+
+        Args:
+            building: Building instance
+
+        Return:
+            None
+        """
         for _, zone in building.zones.items():
             self.add_zone(zone)
+        building.mesh = self  # NOTE: Changes building in-place!
 
     def generate(self, solidmesh=False):
         """Generate mesh for all added polygons and solids."""

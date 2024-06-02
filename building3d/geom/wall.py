@@ -20,26 +20,36 @@ class Wall:
             name = random_id()
 
         self.name = name
-        self.polygons = {}  # Dict of polygons and subpolygons
-        self.polygraph = {}  # Graph with parent and subpolygons
+        self.polygons: dict[str, Polygon] = {}  # Dict of polygons and subpolygons
+        self.polygraph: dict[str, list[str]] = {}  # Graph with parent and subpolygons
 
         for poly in polygons:
             self.add_polygon(poly)
 
     def get_parent_names(self) -> list[str]:
+        """Return list of parent polygon names."""
         return list(self.polygraph.keys())
 
     def get_polygons(self, only_parents=True) -> list[Polygon]:
+        """Return list of all polygons (parents and optionally subpolygons)."""
         if only_parents:
             return [self.polygons[name] for name in self.get_parent_names()]
         else:
             return list(self.polygons.values())
 
     def get_subpolygons(self, parent: str) -> list[Polygon]:
+        """Return list of subpolygons of the given parent polygon."""
         if parent in self.polygraph.keys():
             return [self.polygons[name] for name in self.polygraph[parent]]
         else:
             return []
+
+    def get_parent_name(self, poly_name: str) -> str | None:
+        """Return name of the parent polygon of the given subpolygon."""
+        for parent_name in self.polygraph.keys():
+            if poly_name in self.polygraph[parent_name]:
+                return parent_name
+        return None
 
     def add_polygon(self, poly: Polygon, parent: str | None = None):
         """Add polygon to the wall.

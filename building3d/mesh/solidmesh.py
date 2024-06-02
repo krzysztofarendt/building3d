@@ -35,6 +35,26 @@ class SolidMesh:
         self.vertex_owners = {}
         self.element_owners = {}
 
+    def reinit(
+        self,
+        vertices: list[Point] | None = None,
+        vertex_owners: dict | None = None,
+        elements: list[list[int]] | None = None,
+        element_owners: dict | None = None,
+    ):
+        logger.debug("Reinitializing SolidMesh")
+        if vertices and vertex_owners and elements and element_owners:
+            self.vertices = vertices
+            self.vertex_owners = vertex_owners
+            self.elements = elements
+            self.element_owners = element_owners
+            self._recalc_volumes()
+        else:
+            self.vertices = []
+            self.vertex_owners = {}
+            self.elements = []
+            self.element_owners = {}
+
     def add_solid(self, sld: building3d.geom.solid.Solid):
         """Add solid instance to the list of solids for this mesh.
 
@@ -79,14 +99,7 @@ class SolidMesh:
             logger.debug(f"Meshing finished. {len(vertices)=}, {len(elements)=}")
 
         # Calculate volumes
-        self.volumes = []
-        for el in self.elements:
-            p0 = self.vertices[el[0]]
-            p1 = self.vertices[el[1]]
-            p2 = self.vertices[el[2]]
-            p3 = self.vertices[el[3]]
-            vol = tetrahedron_volume(p0, p1, p2, p3)
-            self.volumes.append(vol)
+        self._recalc_volumes()
 
     def copy(self,
              elements: None | list = None,
@@ -133,3 +146,15 @@ class SolidMesh:
         self.elements.extend(elements)
         len_after = len(self.elements)
         self.element_owners[owner] = [x for x in range(len_before, len_after)]
+
+    def _recalc_volumes(self):
+        """Recalculate tetrahedra volumes."""
+        self.volumes = []
+        for el in self.elements:
+            p0 = self.vertices[el[0]]
+            p1 = self.vertices[el[1]]
+            p2 = self.vertices[el[2]]
+            p3 = self.vertices[el[3]]
+            vol = tetrahedron_volume(p0, p1, p2, p3)
+            self.volumes.append(vol)
+
