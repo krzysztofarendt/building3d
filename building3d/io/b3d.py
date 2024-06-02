@@ -15,6 +15,8 @@ Format:
                     Polygon.name: {
                         "points": [[x0, y0, z0], ..., [xN, yN, zN]],
                         "triangles": [[t0a, t0b, t0c], ..., [tMa, tMb, tMc]],
+                        "children": [Polygon.name, ...],
+                        "parent": Polygon.name | None
                     },
                     ...
                 },
@@ -88,6 +90,14 @@ def write_b3d(path: str, bdg: Building) -> None:
                     bdict["zones"][zone.name][solid.name][wall.name][poly.name]["triangles"] \
                         = triangles
 
+                    children = [x.name for x in wall.get_subpolygons(poly.name)]
+                    bdict["zones"][zone.name][solid.name][wall.name][poly.name]["children"] \
+                        = children  # Not used when loading, but useful for debugging
+
+                    parent = wall.get_parent_name(poly.name)
+                    bdict["zones"][zone.name][solid.name][wall.name][poly.name]["parent"] \
+                        = parent
+
     # Polygon mesh
     bdict["mesh"]["polymesh"]["delta"] = bdg.mesh.polymesh.delta
     bdict["mesh"]["polymesh"]["vertices"] = points_to_nested_list(bdg.mesh.polymesh.vertices)
@@ -124,21 +134,21 @@ def read_b3d(path: str) -> Building:
             walls = []
             for wname in bdict["zones"][zname][sname]:
 
-                polygons = []
+                wall = Wall(name=wname)
                 for pname in bdict["zones"][zname][sname][wname]:
 
                     points = bdict["zones"][zname][sname][wname][pname]["points"]
                     triangles = bdict["zones"][zname][sname][wname][pname]["triangles"]
+                    # children = bdict["zones"][zname][sname][wname][pname]["children"]  # Not used
+                    parent = bdict["zones"][zname][sname][wname][pname]["parent"]
 
                     poly = Polygon(
                         points=nested_list_to_points(points),
                         name=pname,
                         triangles=triangles,
                     )
+                    wall.add_polygon(poly, parent=parent)
 
-                    polygons.append(poly)
-
-                wall = Wall(polygons=polygons, name=wname)
                 walls.append(wall)
 
             solid = Solid(walls=walls, name=sname)

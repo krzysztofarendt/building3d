@@ -1,5 +1,7 @@
 import time
 
+import numpy as np
+
 import building3d.logger
 from building3d.display.plot_mesh import plot_mesh
 from building3d.display.plot_zone import plot_zone
@@ -10,6 +12,7 @@ from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
 from building3d.io.dotbim import write_dotbim
 from building3d.io.b3d import write_b3d
+from building3d.io.b3d import read_b3d
 from building3d.io.stl import write_stl
 from building3d.mesh.quality.mesh_stats import mesh_stats
 
@@ -120,11 +123,13 @@ def example_2():
     # Save .bim
     write_dotbim("example_2.bim", building)
 
-    # Save .b3d
-    write_b3d("example_2.b3d", building)
-
     # Save .stl
     write_stl("example_2.stl", zone)
+
+    # Save .b3d
+    write_b3d("example_2.b3d", building)
+    building_copy = read_b3d("example_2.b3d")  # Just to test
+    assert np.isclose(building.volume(), building_copy.volume())
 
 
 if __name__ == "__main__":
