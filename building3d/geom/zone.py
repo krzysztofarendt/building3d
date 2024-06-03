@@ -11,7 +11,7 @@ from building3d.geom.exceptions import GeometryError
 class Zone:
     """Zone is a collection of solids with additional attributes and methods.
 
-    Solids must be adjacent.
+    Solids must be adjacent. (TODO: I think, this is not checked at the moment)
 
     Zone is used to model 3D phenomena (e.g. ray tracing, heat transfer, CFD).
     """
@@ -20,7 +20,6 @@ class Zone:
             name = random_id()
         self.name = name
         self.solids = {}
-        self.solidgraph = {}  # TODO: Is this used and needed?
         self.verify = verify
 
     def add_solid(self, name: str, walls: list[Wall]) -> None:
@@ -55,21 +54,6 @@ class Zone:
 
         # Add solid
         self.solids[sld.name] = sld
-
-        # Map to parent
-        if parent is None:
-            # This might be a parent solid
-            self.solidgraph[sld.name] = []
-        else:
-            # Add this solid to its parent
-            self.solidgraph[parent].append(sld.name)
-
-            # Assert solid is inside parent solid
-            for p in sld.vertices():
-                if not self.solids[parent].is_point_inside(p):
-                    raise GeometryError(
-                        f"Solid {sld.name} is not entirely inside {parent} due to {p}"
-                    )
 
     def get_wall(self, wall_name: str) -> Wall:
         """Get wall by name."""
