@@ -1,102 +1,104 @@
-import pytest
-
-from building3d.geom.exceptions import GeometryError
+from building3d.geom.building import Building
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
-from building3d.geom.solid import Solid
 from building3d.geom.wall import Wall
+from building3d.geom.solid import Solid
 from building3d.geom.zone import Zone
 
-MAIN_SOLID_NAME = "main_solid"
-SUB_SOLID_NAME = "sub_solid"
 
+def test_zone_from_solids():
+    """Code taken from examples/example_2.py."""
+    xa = 0.0
+    xb = 10.0
+    xc = 3.0
+    xd = 4.0
+    xe = 6.0
+    xf = 7.5
 
-def make_zone(subsolid_move=[0.0, 0.0, 0.0]) -> Zone:
-    # Large solid, cube 1x1x1m3
-    p0 = Point(0.0, 0.0, 0.0)
-    p1 = Point(1.0, 0.0, 0.0)
-    p2 = Point(1.0, 1.0, 0.0)
-    p3 = Point(0.0, 1.0, 0.0)
-    p4 = Point(0.0, 0.0, 1.0)
-    p5 = Point(1.0, 0.0, 1.0)
-    p6 = Point(1.0, 1.0, 1.0)
-    p7 = Point(0.0, 1.0, 1.0)
+    ya = 0.0
+    yb = 5.0
+    yc = 1.5
 
-    poly_floor = Polygon([p0, p3, p2, p1])
-    poly_wall0 = Polygon([p0, p1, p5, p4])
-    poly_wall1 = Polygon([p1, p2, p6, p5])
-    poly_wall2 = Polygon([p3, p7, p6, p2])
-    poly_wall3 = Polygon([p0, p4, p7, p3])
-    poly_ceiling = Polygon([p4, p5, p6, p7])
+    za = 0.0
+    zb = 3.0
+    zc = 5.0
+    zd = 1.0
+    ze = 2.0
 
-    floor = Wall()
-    floor.add_polygon(poly_floor)
+    # WALL_A
+    p_aaa = Point(xa, ya, za)
+    p_baa = Point(xb, ya, za)
+    p_caa = Point(xc, ya, za)
+    p_daa = Point(xd, ya, za)
+    p_aab = Point(xa, ya, zb)
+    p_cae = Point(xc, ya, ze)
+    p_dae = Point(xd, ya, ze)
+    p_ead = Point(xe, ya, zd)
+    p_eae = Point(xe, ya, ze)
+    p_fae = Point(xf, ya, ze)
+    p_fad = Point(xf, ya, zd)
+    p_bab = Point(xb, ya, zb)
 
-    walls = Wall()
-    walls.add_polygon(poly_wall0)
-    walls.add_polygon(poly_wall1)
-    walls.add_polygon(poly_wall2)
-    walls.add_polygon(poly_wall3)
+    # WALL_B
+    # p_baa - already defined
+    # p_bab - already defined
+    p_bba = Point(xb, yb, za)
+    p_bbb = Point(xb, yb, zb)
 
-    ceiling = Wall()
-    ceiling.add_polygon(poly_ceiling)
+    # WALL_C
+    # p_bba - already defined
+    # p_bbb - already defined
+    p_aba = Point(xa, yb, za)
+    p_abb = Point(xa, yb, zb)
 
-    main_sld = Solid([floor, walls, ceiling], name=MAIN_SOLID_NAME)
+    # WALL_D
+    # p_aaa - already defined
+    # p_aba - already defined
+    # p_abb - already defined
+    # p_aab - already defined
 
-    # Small solid, cube 0.5x0.5x0.5m3
-    # Point p8 overlapping with point p0 (on purpose)
-    translate = subsolid_move
-    p8 = Point(0.0, 0.0, 0.0) + translate  # 0
-    p9 = Point(0.5, 0.0, 0.0) + translate  # 1
-    p10 = Point(0.5, 0.5, 0.0) + translate  # 2
-    p11 = Point(0.0, 0.5, 0.0) + translate  # 3
-    p12 = Point(0.0, 0.0, 0.5) + translate  # 4
-    p13 = Point(0.5, 0.0, 0.5) + translate  # 5
-    p14 = Point(0.5, 0.5, 0.5) + translate  # 6
-    p15 = Point(0.0, 0.5, 0.5) + translate  # 7
+    # Roof
+    p_acc = Point(xa, yc, zc)
+    p_bcc = Point(xb, yc, zc)
 
-    poly_floor_small = Polygon([p8, p11, p10, p9])
-    poly_wall0_small = Polygon([p8, p9, p13, p12])
-    poly_wall1_small = Polygon([p9, p10, p14, p13])
-    poly_wall2_small = Polygon([p11, p15, p14, p10])
-    poly_wall3_small = Polygon([p8, p12, p15, p11])
-    poly_ceiling_small = Polygon([p12, p13, p14, p15])
+    # Floor 0
+    wall_a_poly = Polygon([p_aaa, p_baa, p_bab, p_aab], "wall_a_poly")
+    wall_b_poly = Polygon([p_baa, p_bba, p_bbb, p_bab], "wall_b_poly")
+    wall_c_poly = Polygon([p_aba, p_abb, p_bbb, p_bba], "wall_c_poly")
+    wall_d_poly = Polygon([p_aaa, p_aab, p_abb, p_aba], "wall_d_poly")
+    door_poly = Polygon([p_caa, p_daa, p_dae, p_cae], "door_poly")
+    window_poly = Polygon([p_ead, p_fad, p_fae, p_eae], "window_poly")
+    floor_0_poly = Polygon([p_aaa, p_aba, p_bba, p_baa], "floor_0_poly")
+    ceiling_poly = Polygon([p_aab, p_bab, p_bbb, p_abb], "ceiling_poly")
 
-    floor_small = Wall()
-    floor_small.add_polygon(poly_floor_small)
-
-    walls_small = Wall()
-    walls_small.add_polygon(poly_wall0_small)
-    walls_small.add_polygon(poly_wall1_small)
-    walls_small.add_polygon(poly_wall2_small)
-    walls_small.add_polygon(poly_wall3_small)
-
-    ceiling_small = Wall()
-    ceiling_small.add_polygon(poly_ceiling_small)
-
-    sub_sld = Solid([floor_small, walls_small, ceiling_small], name=SUB_SOLID_NAME)
+    wall_bcd = Wall([wall_b_poly, wall_c_poly, wall_d_poly], "wall_bcd")
+    wall_a = Wall([wall_a_poly], "wall_a")
+    wall_a.add_polygon(door_poly, parent=wall_a_poly.name)
+    wall_a.add_polygon(window_poly, parent=wall_a_poly.name)
+    floor_0 = Wall([floor_0_poly], "floor_0")
+    ceiling = Wall([ceiling_poly], "ceiling")
 
     zone = Zone()
-    zone.add_solid_instance(main_sld)
-    zone.add_solid_instance(sub_sld, parent=main_sld.name)
+    solid1 = Solid(walls=[wall_a, wall_bcd, floor_0, ceiling], name="solid_floor_0")
+    zone.add_solid_instance(solid1)
 
-    return zone
+    # Floor 1
+    floor_1_poly = Polygon([p_aab, p_abb, p_bbb, p_bab], "floor_1_poly")
+    roof_a_poly = Polygon([p_aab, p_bab, p_bcc, p_acc], "roof_a_poly")
+    roof_b_poly = Polygon([p_bab, p_bbb, p_bcc], "roof_b_poly")
+    roof_c_poly = Polygon([p_abb, p_acc, p_bcc, p_bbb], "roof_c_poly")
+    roof_d_poly = Polygon([p_aab, p_acc, p_abb], "roof_d_poly")
 
+    floor_1 = Wall([floor_1_poly], "floor_1")
+    roof = Wall([roof_a_poly, roof_b_poly, roof_c_poly, roof_d_poly], "roof")
 
-def test_zone_subsolid_entirely_inside():
-    zone = make_zone(subsolid_move=[0.1, 0.1, 0.1])
-    assert len(zone.solids.keys()) == 2
-    assert len(zone.solidgraph[MAIN_SOLID_NAME]) == 1
+    solid2 = Solid(walls=[floor_1, roof], name="solid_floor_1")
+    zone.add_solid_instance(solid2)
 
+    assert len(zone.solids) == 2
+    assert len(zone.solids[solid1.name].polygons()) == 6
+    assert len(zone.solids[solid2.name].polygons()) == 5
 
-def test_zone_subsolid_shares_some_boundary():
-    zone = make_zone()
-    assert len(zone.solids.keys()) == 2
-    assert len(zone.solidgraph[MAIN_SOLID_NAME]) == 1
-
-
-def test_zone_incorrect_geometry():
-    with pytest.raises(GeometryError):
-        _ = make_zone(subsolid_move=[-0.1, -0.1, -0.1])
-    with pytest.raises(GeometryError):
-        _ = make_zone(subsolid_move=[5.0, 0.0, 0.0])
+    # Make building instance
+    building = Building(name="example_2")
+    building.add_zone_instance(zone)
