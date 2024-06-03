@@ -27,18 +27,11 @@ class Zone:
         solid = Solid(walls=walls, name=name, verify=self.verify)
         self.add_solid_instance(solid)
 
-    def add_solid_instance(self, sld: Solid, parent: str | None = None) -> None:
+    def add_solid_instance(self, sld: Solid) -> None:
         """Add a Solid instance to the zone.
-
-        A solid can be a top-level (parent) solid or a subsolid.
-        Only 1 level of subsolids is allowed, i.e. a solid cannot be
-        a subsolid to another subsolid.
-
-        A subsolid must be entirely inside its parent solid.
 
         Args:
             sld: solid to be added
-            parent: name of parent solid if this is a subsolid (default None)
         """
         # Check if it is adjacent to existing solids
         if len(self.solids) > 1:
