@@ -41,13 +41,13 @@ def test_building_mesh_adjacent(show=False):
     for z in zones:
         bdg.add_zone_instance(z)
 
-    bdg.generate_mesh()
+    bdg.generate_simulation_mesh()
     plot_mesh(bdg.mesh, show=show)
 
-    bdg.generate_mesh(delta=0.3)
+    bdg.generate_simulation_mesh(delta=0.3)
     plot_mesh(bdg.mesh, show=show)
 
-    bdg.generate_mesh(delta=0.3, include_volumes=True)
+    bdg.generate_simulation_mesh(delta=0.3, include_volumes=True)
     plot_mesh(bdg.mesh, show=show)
 
 
@@ -60,13 +60,13 @@ def test_building_mesh_disjoint(show=False):
     for z in zones:
         bdg.add_zone_instance(z)
 
-    bdg.generate_mesh()
+    bdg.generate_simulation_mesh()
     plot_mesh(bdg.mesh, show=show)
 
-    bdg.generate_mesh(delta=0.3)
+    bdg.generate_simulation_mesh(delta=0.3)
     plot_mesh(bdg.mesh, show=show)
 
-    bdg.generate_mesh(delta=0.3, include_volumes=True)
+    bdg.generate_simulation_mesh(delta=0.3, include_volumes=True)
     plot_mesh(bdg.mesh, show=show)
 
 

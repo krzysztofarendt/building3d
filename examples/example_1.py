@@ -1,11 +1,11 @@
 import building3d.logger
+from building3d.display.plot_building import plot_building
 from building3d.display.plot_mesh import plot_mesh
-from building3d.display.plot_zone import plot_zone
+from building3d.geom.building import Building
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
 from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
-from building3d.mesh.mesh import Mesh
 from building3d.mesh.quality.mesh_stats import mesh_stats
 
 
@@ -44,19 +44,22 @@ def example_1():
     zone = Zone(name="zone")
     zone.add_solid("room", [floor, walls, roof])
 
-    mesh = Mesh(delta=0.5)
-    mesh.add_zone(zone)
-    mesh.generate(solidmesh=True)
-    print(mesh_stats(mesh.polymesh.vertices, mesh.polymesh.faces))
-    print(mesh_stats(mesh.solidmesh.vertices, mesh.solidmesh.elements))
+    building = Building()
+    building.add_zone_instance(zone)
+    building.generate_simulation_mesh(delta=0.5, include_volumes=True)
+
+    print(mesh_stats(building.mesh.polymesh.vertices, building.mesh.polymesh.faces))
+    print(
+        mesh_stats(building.mesh.solidmesh.vertices, building.mesh.solidmesh.elements)
+    )
     # mesh.solidmesh = mesh.solidmesh.copy(max_vol=0.06)
 
     # Plotting examples
-    plot_zone(zone)
-    plot_mesh(mesh)
-    plot_mesh(mesh.polymesh)
-    plot_mesh(mesh.solidmesh, clip=(0.5, 0.5, 0.5))
-    plot_mesh(mesh.solidmesh, clip="x")
+    plot_building(building)
+    plot_mesh(building.mesh)
+    plot_mesh(building.mesh.polymesh)
+    plot_mesh(building.mesh.solidmesh, clip=(0.5, 0.5, 0.5))
+    plot_mesh(building.mesh.solidmesh, clip="x")
 
 
 if __name__ == "__main__":

@@ -3,16 +3,16 @@ import time
 import numpy as np
 
 import building3d.logger
+from building3d.display.plot_building import plot_building
 from building3d.display.plot_mesh import plot_mesh
-from building3d.display.plot_zone import plot_zone
 from building3d.geom.building import Building
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
 from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
-from building3d.io.dotbim import write_dotbim
-from building3d.io.b3d import write_b3d
 from building3d.io.b3d import read_b3d
+from building3d.io.b3d import write_b3d
+from building3d.io.dotbim import write_dotbim
 from building3d.io.stl import write_stl
 from building3d.mesh.quality.mesh_stats import mesh_stats
 
@@ -109,15 +109,17 @@ def example_2():
 
     # Generate mesh
     start_time = time.time()
-    building.generate_mesh(delta=1.0, include_volumes=True)
+    building.generate_simulation_mesh(delta=1.0, include_volumes=True)
     end_time = time.time()
 
     print(f"MESH GENERATION TIME: {end_time - start_time:.3f}s")
     print(mesh_stats(building.mesh.polymesh.vertices, building.mesh.polymesh.faces))
-    print(mesh_stats(building.mesh.solidmesh.vertices, building.mesh.solidmesh.elements))
+    print(
+        mesh_stats(building.mesh.solidmesh.vertices, building.mesh.solidmesh.elements)
+    )
 
     # Plot
-    plot_zone(zone)
+    plot_building(building)
     plot_mesh(building.mesh)
 
     # Save .bim
