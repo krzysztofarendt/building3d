@@ -23,8 +23,15 @@ def test_b3d():
         # TODO: High-level API for adding subpolygons is needed
         wall = zone_1.get_wall(zone_1.name + "-wall-wall0")  # Hardcoded name in box()
         wall.add_polygon(
-            Polygon([Point(0.3, 0.0, 0.0), Point(0.6, 0.0, 0.0),
-                     Point(0.6, 0.0, 0.3), Point(0.3, 0.0, 0.6)], name="window"),
+            Polygon(
+                [
+                    Point(0.3, 0.0, 0.0),
+                    Point(0.6, 0.0, 0.0),
+                    Point(0.6, 0.0, 0.3),
+                    Point(0.3, 0.0, 0.6),
+                ],
+                name="window",
+            ),
             parent=zone_1.name + "-poly-wall0",  # Hardcoded name in box()
         )
 
@@ -34,7 +41,7 @@ def test_b3d():
         for z in zones:
             building.add_zone_instance(z)
 
-        building.generate_mesh(delta=0.3, include_volumes=True)
+        building.generate_simulation_mesh(delta=0.3, include_volumes=True)
 
         write_b3d(path, building)
         b_copy = read_b3d(path)
