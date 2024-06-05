@@ -17,6 +17,11 @@ def wall(
 ) -> Wall:
     """Create a Wall with given dimensions, located at origin.
 
+    Order of transformations:
+    - create a wall with the first vertex at (0, 0, 0)
+    - apply rotation
+    - apply translation
+
     Args:
         width: Width of the wall
         height: Height of the wall
@@ -30,10 +35,10 @@ def wall(
     """
     vec = np.array(rot_vec)
 
-    p0 = Point(0.0, 0.0, 0.0) + origin
-    p1 = Point(width, 0.0, 0.0) + origin
-    p2 = Point(width, height, 0.0) + origin
-    p3 = Point(0.0, height, 0.0) + origin
+    p0 = Point(0.0, 0.0, 0.0)
+    p1 = Point(width, 0.0, 0.0)
+    p2 = Point(width, height, 0.0)
+    p3 = Point(0.0, height, 0.0)
 
     if rot_angle != 0:
         (p0, p1, p2, p3), _ = rotate_points_around_vector(
@@ -41,6 +46,11 @@ def wall(
             u = vec,
             phi = rot_angle,
         )
+
+    p0 += origin
+    p1 += origin
+    p2 += origin
+    p3 += origin
 
     poly = Polygon([p0, p1, p2, p3], name=name)
     wall = Wall([poly], name=name)
@@ -73,7 +83,7 @@ if __name__ == "__main__":
     w2 = wall(
         width=2.0,
         height=1.0,
-        origin=(-2.0, 0.0, 0.0),
+        origin=(0.0, 0.0, 0.0),
         rot_vec=(0.0, 1.0, 0.0),
         rot_angle=np.pi / 4.0,
     )
@@ -81,7 +91,7 @@ if __name__ == "__main__":
     w3 = wall(
         width=2.0,
         height=1.0,
-        origin=(-2.0, 0.0, 0.0),
+        origin=(0.0, 0.0, 0.0),
         rot_vec=(0.0, 1.0, 0.0),
         rot_angle=-np.pi / 4.0,
     )
