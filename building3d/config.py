@@ -30,3 +30,6 @@ MESH_REL_DIST_TO_POINTS: float = 0.5  # Relative to delta
 
 # Max. number of tries to re-mesh a solid
 SOLID_MESH_MAX_TRIES = 10
+
+# Max. number of tries for tetrahedralization quality improvement
+TETRA_MAX_TRIES = 500
