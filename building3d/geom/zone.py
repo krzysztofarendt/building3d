@@ -19,7 +19,7 @@ class Zone:
         if name is None:
             name = random_id()
         self.name = name
-        self.solids = {}
+        self.solids: dict[str, Solid] = {}
         self.verify = verify
 
     def add_solid(self, name: str | None, walls: list[Wall]) -> None:

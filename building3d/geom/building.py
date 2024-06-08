@@ -21,7 +21,7 @@ class Building:
         if name is None:
             name = random_id()
         self.name = name
-        self.zones = {}
+        self.zones: dict[str, Zone] = {}
         self.mesh = mesh.Mesh()
 
     def add_zone(self, name: str, solids: list[Solid]) -> None:

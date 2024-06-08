@@ -59,8 +59,8 @@ def floor_plan(
     floor = Wall([floor_poly])
     ceiling = Wall([ceiling_poly])
 
-    # Make sure all polygon normals should point outwards the zone.
-    # It is done by comparing the order of wall vertices to the order
+    # Make sure all polygon normals point outwards the zone.
+    # Compare the order of wall vertices to the order
     # of floor vertices - they should be opposite.
     for k in range(len(walls)):
         w_poly = walls[k].get_polygons()[0]  # There is only one

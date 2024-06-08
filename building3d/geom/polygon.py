@@ -57,7 +57,7 @@ class Polygon:
 
         self.name = name
 
-        self.points = list(points)
+        self.points: list[Point] = list(points)
         logger.debug(f"Points added: {self.points}")
 
         # Verify geometry (>= 3 coplanar points)
