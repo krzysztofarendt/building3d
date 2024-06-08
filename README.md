@@ -41,19 +41,6 @@ pip install -e .[dev]
 sudo apt install cloc  # for source code line counting
 ```
 
-If you see the following error when running `mayavi2`:
-```
-********************************************************************************
-WARNING: Imported VTK version (9.3) does not match the one used
-         to build the TVTK classes (9.2). This may cause problems.
-         Please rebuild TVTK.
-********************************************************************************
-```
-try updating `vtk` to the correct version:
-```
-pip install -U vtk==9.2
-```
-
 # Testing
 
 Run unit tests:
