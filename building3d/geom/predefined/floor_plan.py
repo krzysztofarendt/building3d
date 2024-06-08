@@ -31,6 +31,7 @@ def floor_plan(
     ceiling_pts = [Point(x, y, height) for x, y in plan]
 
     walls = []
+    wall_num = 0
     for i in range(len(plan)):
         ths = i  # This point
         nxt = ths + 1  # Next point
@@ -43,15 +44,16 @@ def floor_plan(
         p3 = ceiling_pts[ths]
 
         poly = Polygon([p0, p1, p2, p3])
-        wall = Wall([poly])
+        wall = Wall([poly], name=f"wall-{wall_num}")
         walls.append(wall)
+        wall_num += 1
 
-    floor_poly = Polygon(floor_pts)
+    floor_poly = Polygon(floor_pts, name="floor")
     # Floor's normal should point downwards
     if not np.isclose(floor_poly.normal, [0, 0, -1]).all():
         floor_poly = floor_poly.flip()
 
-    ceiling_poly = Polygon(ceiling_pts)
+    ceiling_poly = Polygon(ceiling_pts, name="ceiling")
     # Ceiling's normal should point upwards
     if not np.isclose(ceiling_poly.normal, [0, 0, 1]).all():
         ceiling_poly = ceiling_poly.flip()
