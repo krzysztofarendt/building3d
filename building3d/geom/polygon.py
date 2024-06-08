@@ -96,7 +96,7 @@ class Polygon:
         """Return a copy of itself (with a new name).
 
         Args:
-            new_name: polygon name (must be unique)
+            new_name: polygon name (must be unique within a Wall)
 
         Return:
             Polygon
@@ -107,7 +107,7 @@ class Polygon:
         """Copy and flip the polygon. Changes the name.
 
         Args:
-            new_name: polygon name (must be unique)
+            new_name: polygon name (must be unique within a Wall)
 
         Return:
             Polygon

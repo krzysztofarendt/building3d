@@ -82,7 +82,6 @@ make example_3
 - [x] Own file format `*.b3d`
 - [ ] `Solid` should find polygons with reversed order of vertices and fix it
 - [ ] Export mesh to VTK format to enable convertions with meshio: https://vtk.org/wp-content/uploads/2015/04/file-formats.pdf
-- [ ] Model should be checking if all component names are unique (I removed name lists from Polygon and Solid)
 - [ ] Figure out subpolygon meshing and general usage
 - [ ] `example_1` fails with `delta=0.5` and it takes 5 minutes to generate the mesh
 - [ ] `Polygon.__eq__()` can return wrong result for some non-convex polygons
