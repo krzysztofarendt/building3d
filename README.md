@@ -3,9 +3,7 @@
 
 # building3d
 
-I'm not sure where this project is heading, so there is not documentation yet, but it looks as follows:
-
-![building3d_2024_04_21](https://github.com/krzysztofarendt/building3d/assets/16005748/1d81fe19-f07a-4087-b3d1-95dc0e2ed6cf)
+I'm not sure where this project is heading, so there is not documentation yet.
 
 # Assumptions
 
