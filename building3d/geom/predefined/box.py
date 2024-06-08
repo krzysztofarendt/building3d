@@ -9,10 +9,10 @@ def box(
     x: float,
     y: float,
     z: float,
-    origin: tuple[float, float, float] = (0.0, 0.0, 0.0),
+    translate: tuple[float, float, float] = (0.0, 0.0, 0.0),
     name: str = "",
 ) -> Zone:
-    """Return a zone with given dimensions, located at origin.
+    """Return a zone with given dimensions, located at translate.
 
     `x` is the dimension along the X axis.
     `y` is the dimension along the Y axis.
@@ -20,17 +20,17 @@ def box(
 
     Rotation is currently not supported.
 
-    The corner `(min(x), min(y), min(z))` will be located at `origin`.
+    The corner `(min(x), min(y), min(z))` will be located at `translate`.
     """
     stretch = (x, y, z)
-    p0 = Point(0.0, 0.0, 0.0) * stretch + origin
-    p1 = Point(1.0, 0.0, 0.0) * stretch + origin
-    p2 = Point(1.0, 1.0, 0.0) * stretch + origin
-    p3 = Point(0.0, 1.0, 0.0) * stretch + origin
-    p4 = Point(0.0, 0.0, 1.0) * stretch + origin
-    p5 = Point(1.0, 0.0, 1.0) * stretch + origin
-    p6 = Point(1.0, 1.0, 1.0) * stretch + origin
-    p7 = Point(0.0, 1.0, 1.0) * stretch + origin
+    p0 = Point(0.0, 0.0, 0.0) * stretch + translate
+    p1 = Point(1.0, 0.0, 0.0) * stretch + translate
+    p2 = Point(1.0, 1.0, 0.0) * stretch + translate
+    p3 = Point(0.0, 1.0, 0.0) * stretch + translate
+    p4 = Point(0.0, 0.0, 1.0) * stretch + translate
+    p5 = Point(1.0, 0.0, 1.0) * stretch + translate
+    p6 = Point(1.0, 1.0, 1.0) * stretch + translate
+    p7 = Point(0.0, 1.0, 1.0) * stretch + translate
 
     if name != "":
         name = name + "-"
