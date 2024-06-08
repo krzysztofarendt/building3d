@@ -25,6 +25,9 @@ def plot_objects(*objects):
     for f in faces_all:
         farr.extend([3, f[0], f[1], f[2]])
 
+    assert len(varr) > 0, "No points available, plotting is impossible"
+    assert len(farr) > 0, "No faces specified, plotting is impossible"
+
     # Plot with PyVista
     mesh = pv.PolyData(varr, faces=farr)
     mesh.plot(show_edges=True, opacity=0.9)

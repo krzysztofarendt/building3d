@@ -22,7 +22,7 @@ class Zone:
         self.solids = {}
         self.verify = verify
 
-    def add_solid(self, name: str, walls: list[Wall]) -> None:
+    def add_solid(self, name: str | None, walls: list[Wall]) -> None:
         """Add solid created from walls to the zone."""
         solid = Solid(walls=walls, name=name, verify=self.verify)
         self.add_solid_instance(solid)
