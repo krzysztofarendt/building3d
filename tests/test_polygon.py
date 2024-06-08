@@ -401,5 +401,17 @@ def test_polygon_with_known_triangles():
     assert poly.centroid == Point(1.0, 0.5, 0.5)
 
 
+def test_polygon_flip():
+    p1 = Point(1.0, 0.0, 0.0)
+    p2 = Point(1.0, 1.0, 0.0)
+    p3 = Point(1.0, 1.0, 1.0)
+    p4 = Point(1.0, 0.0, 1.0)
+    poly = Polygon([p1, p2, p3, p4])
+    flipped = poly.flip()
+    assert np.isclose(flipped.area, poly.area)
+    assert flipped.centroid == poly.centroid
+    assert np.isclose(flipped.normal, -poly.normal).all()
+
+
 if __name__ == "__main__":
     test_distance_point_to_polygon()

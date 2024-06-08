@@ -93,7 +93,7 @@ class Polygon:
         self.area = self._area()
 
     def copy(self, new_name: str | None = None):
-        """Return a deep copy of itself.
+        """Return a copy of itself (with a new name).
 
         Args:
             new_name: polygon name (must be unique)
@@ -101,9 +101,18 @@ class Polygon:
         Return:
             Polygon
         """
-        if new_name is None:
-            new_name = random_id()
         return Polygon([Point(p.x, p.y, p.z) for p in self.points], name=new_name)
+
+    def flip(self, new_name: str | None = None):
+        """Copy and flip the polygon. Changes the name.
+
+        Args:
+            new_name: polygon name (must be unique)
+
+        Return:
+            Polygon
+        """
+        return Polygon(self.points[::-1], name=new_name)
 
     def points_as_array(self) -> np.ndarray:
         """Returns a copy of the points as a numpy array."""
