@@ -1,6 +1,9 @@
+import pytest
+
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
 from building3d.geom.wall import Wall
+from building3d.geom.exceptions import GeometryError
 
 
 def test_wall_without_subpolygons():
@@ -57,6 +60,20 @@ def test_wall_with_subpolygon_sharing_boundary():
 
     assert len(wall.polygons.keys()) == 2
     assert len(wall.polygraph[poly0.name]) == 1
+
+
+def test_wall_with_subpolygons_with_same_names():
+    p0 = Point(0.0, 0.0, 0.0)
+    p1 = Point(1.0, 0.0, 0.0)
+    p2 = Point(1.0, 1.0, 0.0)
+    p3 = Point(0.0, 1.0, 0.0)
+    poly0 = Polygon([p0, p1, p2, p3], name="polygon")
+    poly1 = Polygon([p0, p1, p2, p3], name="polygon")
+
+    wall = Wall()
+    wall.add_polygon(poly0)
+    with pytest.raises(GeometryError):
+        wall.add_polygon(poly1)
 
 
 def test_equality():

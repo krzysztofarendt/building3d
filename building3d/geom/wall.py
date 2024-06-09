@@ -38,7 +38,9 @@ class Wall:
             self.uid = random_id()
 
         self.polygons: dict[str, Polygon] = {}  # {Polygon.name: Polygon}
-        self.polygraph: dict[str, list[str]] = {}  # Graph with parent and subpolygons
+
+        # Graph of polygons and subpolygons
+        self.polygraph: dict[str, list[str]] = {}  # {Polygon.name: [Polygon.name, ...]}
 
         for poly in polygons:
             self.add_polygon(poly)
@@ -56,6 +58,9 @@ class Wall:
             poly: polygon to be added
             parent: name of parent polygon if this is a subpolygon (default None)
         """
+        if poly.name in self.polygons.keys():
+            raise GeometryError(f"Polygon {poly.name} already exists in the wall")
+
         self.polygons[poly.name] = poly
         if parent is None:
             # This might be a parent polygon
