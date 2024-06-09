@@ -96,14 +96,14 @@ class Solid:
 
         return verts, faces
 
-    def vertices(self, children: bool = False) -> list[Point]:  # TODO: Rename or remove?
-        """Get a list of vertices of this solid."""
+    def get_all_vertices(self, children: bool = False) -> list[Point]:
+        """Get list of all vertices of this solid (excluding simulation mesh)."""
         verts, _ = self.get_mesh(children=children)
         return verts
 
     def bounding_box(self) -> tuple[Point, Point]:
         """Return (Point(xmin, ymin, zmin), Point(xmax, ymax, zmax))"""
-        vertices = self.vertices()
+        vertices = self.get_all_vertices()
         xaxis = [p.x for p in vertices]
         yaxis = [p.y for p in vertices]
         zaxis = [p.z for p in vertices]
@@ -121,7 +121,7 @@ class Solid:
         and count how many times it intersects with the edges of the
         solid; if the number of intersections is odd, it is inside.
         """
-        vertices = self.vertices()
+        vertices = self.get_all_vertices()
         max_x = max([p.x for p in vertices])
         max_y = max([p.y for p in vertices])
         max_z = max([p.z for p in vertices])

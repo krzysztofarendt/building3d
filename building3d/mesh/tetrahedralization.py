@@ -308,7 +308,7 @@ def delaunay_tetrahedralization(
     assert len(unique_indices) == len(vertices), "Not all vertices have been used for mesh!"
 
     # Are all solid vertices present in the mesh?
-    for pt in sld.vertices():
+    for pt in sld.get_all_vertices():
         assert pt in vertices, f"Solid point missing: {pt}"
 
     # Do all interior elements have 4 neighbors?
