@@ -15,19 +15,18 @@ class Zone:
 
     Zone is used to model 3D phenomena (e.g. ray tracing, heat transfer, CFD).
     """
-    def __init__(self, name: str | None = None, verify: bool = True):
+    def __init__(self, name: str | None = None, uid: str | None = None, verify: bool = True):
         if name is None:
             name = random_id()
         self.name = name
+        if uid is not None:
+            self.uid = uid
+        else:
+            self.uid = random_id()
         self.solids: dict[str, Solid] = {}
         self.verify = verify
 
-    def add_solid(self, name: str | None, walls: list[Wall]) -> None:
-        """Add solid created from walls to the zone."""
-        solid = Solid(walls=walls, name=name, verify=self.verify)
-        self.add_solid_instance(solid)
-
-    def add_solid_instance(self, sld: Solid) -> None:
+    def add_solid(self, sld: Solid) -> None:
         """Add a Solid instance to the zone.
 
         Args:

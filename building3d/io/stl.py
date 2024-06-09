@@ -31,6 +31,7 @@ from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
 from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
+from building3d.geom.solid import Solid
 
 
 logger = logging.getLogger(__name__)
@@ -45,13 +46,13 @@ def write_stl(path: str, zone: Zone) -> None:
     It means that if you write a zone to STL and then read it again,
     they may have different number of polygons!
     """
-    logger.debug(f"Writing zone {zone.name} to STL: {path}")
+    logger.debug(f"Writing zone {zone.name} ({zone.uid}) to STL: {path}")
     lines = []
     l1 = " " * 2
     l2 = " " * 4
     l3 = " " * 6
-    for sld_name, sld in zone.solids.items():
-        lines.append(f"solid {sld_name}\n")
+    for sld in zone.solids.values():
+        lines.append(f"solid {sld.uid}\n")
         for wall in sld.walls:
             for _, poly in wall.polygons.items():
                 ni, nj, nk = poly.normal
@@ -66,7 +67,7 @@ def write_stl(path: str, zone: Zone) -> None:
                     lines.append(f"{l3}vertex {v3x} {v3y} {v3z}\n")
                     lines.append(f"{l2}endloop\n")
                     lines.append(f"{l1}endfacet\n")
-        lines.append(f"endsolid {sld.name}\n")
+        lines.append(f"endsolid {sld.uid}\n")
     with open(path, "w") as f:
         f.writelines(lines)
     logger.debug(f"Number of lines in STL file = {len(lines)}")
@@ -92,14 +93,14 @@ def read_stl(path: str, verify: bool = True) -> Zone:
 
     i = 0
     wall = None
-    solid_name = None
+    solid_uid = None
     while i < len(lines):
 
         line = lines[i].strip()
 
         if line[:len("solid")] == "solid":
             # Start new solid with one wall and multiple polygons
-            solid_name = line[len("solid"):].strip()
+            solid_uid = line[len("solid"):].strip()
             wall = Wall()
 
         elif line[:5] == "facet":
@@ -139,12 +140,19 @@ def read_stl(path: str, verify: bool = True) -> Zone:
                 raise ValueError("No wall created, so cannot add polygons to it.")
 
         elif line[:len("endsolid")] == "endsolid":
-            assert line[len("endsolid"):].strip() == solid_name
+            assert line[len("endsolid"):].strip() == solid_uid
             # Add solid to wall
             if wall is not None:
-                if solid_name is None or solid_name == "":
-                    solid_name = random_id()
-                zone.add_solid(solid_name, [wall])
+                if solid_uid is None or solid_uid == "":
+                    solid_uid = random_id()
+
+                solid = Solid(
+                    [wall],
+                    name=None,  # Name will be random, because it was not saved in STL
+                    uid=solid_uid,
+                    verify=False,  # Solid verification is too slow, so we disable it
+                )
+                zone.add_solid(solid)
             else:
                 raise ValueError("No wall created, so cannot add it to the zone/solid.")
         else:

@@ -4,6 +4,7 @@ from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
 from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
+from building3d.geom.solid import Solid
 from building3d.mesh.mesh import Mesh
 from building3d.mesh.quality.tetra_graph import find_neighbors
 from building3d.mesh.quality.tetra_graph import find_neighbors_numba_wrap
@@ -38,8 +39,10 @@ def test_find_neighbors(show=False):
     roof = Wall(name="roof")
     roof.add_polygon(poly_roof)
 
+    solid = Solid([floor, walls, roof], name="room")
+
     zone = Zone(name="zone")
-    zone.add_solid("room", [floor, walls, roof])
+    zone.add_solid(solid)
 
     mesh = Mesh(delta=0.4)
     mesh.add_zone(zone)
@@ -64,8 +67,8 @@ def test_find_neighbors(show=False):
 
     if show:
         # Plot
-        plot_zone(zone, show_triangulation=True, show_normals=True, show=False)
-        plot_mesh(mesh, boundary=True, interior=True, show=True)
+        plot_zone(zone)
+        plot_mesh(mesh)
 
 
 if __name__ == "__main__":

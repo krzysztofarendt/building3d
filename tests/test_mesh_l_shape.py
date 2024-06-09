@@ -47,7 +47,7 @@ def test_mesh_l_shape(show=False):
         ]
     )
     zone = Zone()
-    zone.add_solid_instance(solid)
+    zone.add_solid(solid)
 
     delta = 1.0
 
@@ -72,8 +72,7 @@ def test_mesh_l_shape(show=False):
         )
         assert solid.is_point_inside(el_ctr), "SolidMesh element is outside the solid"
 
-    if show is True:
-        plot_mesh(mesh, boundary=True, interior=True, show=True)
+    plot_mesh(mesh, show=show)
 
 
 if __name__ == "__main__":

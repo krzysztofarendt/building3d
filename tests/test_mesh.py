@@ -28,7 +28,7 @@ def test_mesh():
 
     solid = Solid([floor, wall0, wall1, wall2, wall3, roof])
     zone = Zone()
-    zone.add_solid_instance(solid)
+    zone.add_solid(solid)
     bdg = Building()
     bdg.add_zone(zone)
 

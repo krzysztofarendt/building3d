@@ -6,6 +6,7 @@ from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
 from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
+from building3d.geom.solid import Solid
 from building3d.mesh.quality.mesh_stats import mesh_stats
 
 
@@ -41,8 +42,10 @@ def example_1():
     roof = Wall(name="roof")
     roof.add_polygon(poly_roof)
 
+    solid = Solid(name="room", walls=[walls, floor, roof])
+
     zone = Zone(name="zone")
-    zone.add_solid("room", [floor, walls, roof])
+    zone.add_solid(solid)
 
     building = Building()
     building.add_zone(zone)

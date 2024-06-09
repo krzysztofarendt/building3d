@@ -37,6 +37,7 @@ class Polygon:
         self,
         points: list[Point],
         name: str | None = None,
+        uid: str | None = None,
         triangles: list[tuple[int, ...]] = [],
     ):
         """Make polygon.
@@ -56,6 +57,10 @@ class Polygon:
         logger.debug(f"Creating polygon: {name}")
 
         self.name = name
+        if uid is None:
+            self.uid = random_id()
+        else:
+            self.uid = uid
 
         self.points: list[Point] = list(points)
         logger.debug(f"Points added: {self.points}")

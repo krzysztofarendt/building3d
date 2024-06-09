@@ -3,6 +3,7 @@ from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
 from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
+from building3d.geom.solid import Solid
 
 
 def test_zone_from_walls():
@@ -36,8 +37,8 @@ def test_zone_from_walls():
     ceiling.add_polygon(poly_ceiling)
 
     zone = Zone()
-    solid_name = random_id()
-    zone.add_solid(solid_name, [floor, walls, ceiling])
+    solid = Solid([floor, walls, ceiling], name=random_id())
+    zone.add_solid(solid)
 
     assert len(zone.solids) == 1
-    assert len(zone.solids[solid_name].polygons()) == 6
+    assert len(zone.solids[solid.name].polygons()) == 6

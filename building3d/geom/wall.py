@@ -15,11 +15,20 @@ class Wall:
 
     Wall is used to model 1D phenomena (e.g. heat transfer).
     """
-    def __init__(self, polygons: list[Polygon] = [], name: str | None = None):
+    def __init__(
+        self,
+        polygons: list[Polygon] = [],
+        name: str | None = None,
+        uid: str | None = None,
+    ):
         if name is None:
             name = random_id()
 
         self.name = name
+        if uid is not None:
+            self.uid = uid
+        else:
+            self.uid = random_id()
         self.polygons: dict[str, Polygon] = {}  # Dict of polygons and subpolygons
         self.polygraph: dict[str, list[str]] = {}  # Graph with parent and subpolygons
 

@@ -17,10 +17,14 @@ class Building:
     Zones do not have to be adjacent. They can be even separate buildings.
     """
 
-    def __init__(self, name: str | None = None):
+    def __init__(self, name: str | None = None, uid: str | None = None):
         if name is None:
             name = random_id()
         self.name = name
+        if uid is not None:
+            self.uid = uid
+        else:
+            self.uid = random_id()
         self.zones: dict[str, Zone] = {}
         self.mesh = mesh.Mesh()
 

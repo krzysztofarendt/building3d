@@ -152,7 +152,7 @@ def read_b3d(path: str) -> Building:
                 walls.append(wall)
 
             solid = Solid(walls=walls, name=sname)
-            zone.add_solid_instance(solid)  # TODO: Parent solids not implemented yet
+            zone.add_solid(solid)
 
         building.add_zone(zone)
 

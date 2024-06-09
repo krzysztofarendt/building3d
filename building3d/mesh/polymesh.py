@@ -21,7 +21,7 @@ class PolyMesh:
         self.delta = delta
 
         # Polygons to be meshed
-        self.polygons = {}
+        self.polygons = {}  # {Polygon.uid: Polygon}
 
         # Attributes filled with data by self.generate()
         self.vertices: list[Point] = []
@@ -52,14 +52,14 @@ class PolyMesh:
 
     def add_polygon(self, poly: Polygon):
         logger.debug(f"Adding polygon: {poly}")
-        self.polygons[poly.name] = poly
+        self.polygons[poly.uid] = poly
 
     def get_vertices_per_polygon(self) -> dict[str, list[Point]]:
         """Return list of vertices for each polygon name."""
         logger.debug("Getting the list of Points per polygon")
         vertices = {}
-        for name in self.polygons.keys():
-            vertices[name] = [self.vertices[i] for i in self.vertex_owners[name]]
+        for uid in self.polygons.keys():
+            vertices[uid] = [self.vertices[i] for i in self.vertex_owners[uid]]
         log_return = {k: len(v) for (k, v) in vertices.items()}
         logger.debug(f"Number of Points per polygon: {log_return}")
         return vertices
@@ -74,26 +74,26 @@ class PolyMesh:
 
         # Find matching faces, because they should share vertices
         matching_pairs = {}
-        for poly_name_1, poly_1 in self.polygons.items():
-            for poly_name_2, poly_2 in self.polygons.items():
-                if poly_name_1 != poly_name_2:
+        for poly_uid_1, poly_1 in self.polygons.items():
+            for poly_uid_2, poly_2 in self.polygons.items():
+                if poly_uid_1 != poly_uid_2:
                     if poly_1.is_facing_polygon(poly_2):
-                        matching_pairs[poly_name_1] = poly_name_2
+                        matching_pairs[poly_uid_1] = poly_uid_2
 
         # Polygons
         poly_vertices = {}
 
-        for poly_name, poly in self.polygons.items():
-            logger.debug(f"Processing {poly_name}")
+        for poly_uid, poly in self.polygons.items():
+            logger.debug(f"Processing {poly_uid}")
 
             fixed = []
-            if poly_name in fixed_points.keys():
-                logger.debug(f"Adding {len(fixed_points[poly_name])} init. vert. for {poly_name}")
-                fixed = fixed_points[poly_name]
+            if poly_uid in fixed_points.keys():
+                logger.debug(f"Adding {len(fixed_points[poly_uid])} init. vert. for {poly_uid}")
+                fixed = fixed_points[poly_uid]
 
             # Check if matching polygon was already meshed and add its points if yes
-            if poly_name in matching_pairs.keys():
-                match_name = matching_pairs[poly_name]
+            if poly_uid in matching_pairs.keys():
+                match_name = matching_pairs[poly_uid]
                 if match_name in poly_vertices.keys():
                     fixed.extend(poly_vertices[match_name])
 
@@ -102,8 +102,8 @@ class PolyMesh:
                 delta=self.delta,
                 fixed_points=fixed,
             )
-            poly_vertices[poly_name] = vertices
-            self._add_vertices(poly_name, vertices, faces)
+            poly_vertices[poly_uid] = vertices
+            self._add_vertices(poly_uid, vertices, faces)
 
         # Calculate face areas
         self._recalc_areas()

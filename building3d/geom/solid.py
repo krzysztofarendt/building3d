@@ -18,10 +18,20 @@ logger = logging.getLogger(__name__)
 
 class Solid:
     """Solid is a space enclosed by polygons."""
-    def __init__(self, walls: Sequence[Wall], name: str | None = None, verify: bool = True):
+    def __init__(
+        self,
+        walls: Sequence[Wall],
+        name: str | None = None,
+        uid: str | None = None,
+        verify: bool = True,
+    ):
         if name is None:
             name = random_id()
         self.name = name
+        if uid is not None:
+            self.uid = uid
+        else:
+            self.uid = random_id()
         self.walls = walls  # TODO: To keep consistency, this should be a dict
         if verify:
             self._verify(throw=True)  # NOTE: Slow for large models thousands of points

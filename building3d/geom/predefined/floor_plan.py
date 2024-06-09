@@ -6,6 +6,7 @@ from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
 from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
+from building3d.geom.solid import Solid
 
 
 logger = logging.getLogger(__name__)
@@ -98,7 +99,8 @@ def floor_plan(
     walls.append(floor)
     walls.append(ceiling)
 
+    solid = Solid(walls, name=name)
     zone = Zone(name=name)
-    zone.add_solid(name=name, walls=walls)
+    zone.add_solid(solid)
 
     return zone
