@@ -59,8 +59,8 @@ def floor_plan(
     if not np.isclose(ceiling_poly.normal, [0, 0, 1]).all():
         ceiling_poly = ceiling_poly.flip()
 
-    floor = Wall([floor_poly])
-    ceiling = Wall([ceiling_poly])
+    floor = Wall([floor_poly], name="floor")
+    ceiling = Wall([ceiling_poly], name="ceiling")
 
     # Make sure all polygon normals point outwards the zone.
     # Compare the order of wall vertices to the order
@@ -77,9 +77,18 @@ def floor_plan(
                 wall_z0_pts.append(w_pts[i])
 
         floor_adjacent_pts = []
+
+        prev_taken = None
         for i in range(len(f_pts)):
             if f_pts[i] in wall_z0_pts:
                 floor_adjacent_pts.append(f_pts[i])
+                if prev_taken is None:
+                    prev_taken = i
+                else:
+                    if prev_taken != i - 1:
+                        # Need to flip the list, because the first and last points
+                        # were taken and they are now in the wrong order
+                        floor_adjacent_pts.reverse()
 
             if len(floor_adjacent_pts) == 2:
                 break
@@ -90,16 +99,15 @@ def floor_plan(
         else:
             # Need to reverse the order of polygon vertices
             w_poly = w_poly.flip()
-            old_wall_name = walls[k].name
-            walls[k] = Wall([w_poly])
-            logger.debug(
-                f"Wall vertices reversed. Old name: {old_wall_name}. New name: {walls[k].name}"
-            )
+            wall_name = walls[k].name
+            walls[k] = Wall([w_poly], name=wall_name)
+            logger.debug(f"Wall vertices reversed {wall_name}")
 
     walls.append(floor)
     walls.append(ceiling)
 
     solid = Solid(walls, name=name)
+
     zone = Zone(name=name)
     zone.add_solid(solid)
 
