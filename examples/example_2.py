@@ -8,9 +8,9 @@ from building3d.display.plot_mesh import plot_mesh
 from building3d.geom.building import Building
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
+from building3d.geom.solid import Solid
 from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
-from building3d.geom.solid import Solid
 from building3d.io.b3d import read_b3d
 from building3d.io.b3d import write_b3d
 from building3d.io.dotbim import write_dotbim

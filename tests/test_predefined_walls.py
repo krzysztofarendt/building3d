@@ -13,8 +13,9 @@ def test_wall_orientation():
     )
 
     poly = w.get_polygons()[0]
-    assert np.isclose(poly.normal, np.array([0, 1, 0])).all(), \
-        "Wall normal should be (0, 1, 0) according to the documentation of vertical_wall()"
+    assert np.isclose(
+        poly.normal, np.array([0, 1, 0])
+    ).all(), "Wall normal should be (0, 1, 0) according to the documentation of vertical_wall()"
 
 
 def test_wall_orientation_rot90_degrees():
@@ -42,7 +43,7 @@ def test_wall_with_aperture_orientation():
 
     polys = w.get_polygons(only_parents=False)
     for p in polys:
-        assert np.isclose(p.normal, np.array([0, 1, 0])).all(), \
-            "Wall normal should be (0, 1, 0) according to the documentation of " \
+        assert np.isclose(p.normal, np.array([0, 1, 0])).all(), (
+            "Wall normal should be (0, 1, 0) according to the documentation of "
             "vertical_wall_with_aperture()"
-
+        )

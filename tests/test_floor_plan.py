@@ -1,7 +1,7 @@
 import numpy as np
 
-from building3d.geom.predefined.floor_plan import floor_plan
 from building3d.display.plot_objects import plot_objects
+from building3d.geom.predefined.floor_plan import floor_plan
 
 
 def test_floor_plan(show=False):
