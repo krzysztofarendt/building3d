@@ -5,6 +5,8 @@ Its structure is based on the relationships between the classes:
 Building, Zone, Solid, Wall, Polygon, Point.
 E.g. a zone is part of a building, a solid is part of a zone, and a wall is part of a solid.
 
+Element `uid`s are not saved. They are randomly generated when reading the file.
+
 Format:
 {
     "name": Building.name,
