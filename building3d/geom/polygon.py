@@ -47,6 +47,7 @@ class Polygon:
         Args:
             points: list of coplanar points, at least 3
             name: polygon name, will be random if `None`
+            uid: polygon uid, will be random if `None`
             triangles: polygon faces (if known)
 
         Return:

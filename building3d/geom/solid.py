@@ -25,6 +25,14 @@ class Solid:
         uid: str | None = None,
         verify: bool = True,
     ):
+        """Initialize the solid
+
+        Args:
+            walls: list of Wall instances
+            name: name of the solid
+            uid: unique id of the solid, random if None
+            verify: if True it will verify the geometry
+        """
         if name is None:
             name = random_id()
         self.name = name

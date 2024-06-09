@@ -16,6 +16,13 @@ class Zone:
     Zone is used to model 3D phenomena (e.g. ray tracing, heat transfer, CFD).
     """
     def __init__(self, name: str | None = None, uid: str | None = None, verify: bool = True):
+        """Initialize the zone.
+
+        Args:
+            name: name of the zone
+            uid: unique id of the zone, random if None
+            verify: if True it will verify the geometry
+        """
         if name is None:
             name = random_id()
         self.name = name

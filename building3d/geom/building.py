@@ -14,10 +14,15 @@ from building3d.config import MESH_DELTA
 class Building:
     """Building is a collection of zones.
 
-    Zones do not have to be adjacent. They can be even separate buildings.
+    Zones do not have to be adjacent. They can even be separate buildings.
     """
-
     def __init__(self, name: str | None = None, uid: str | None = None):
+        """Initialize the building.
+
+        Args:
+            name: name of the building
+            uid: unique id of the building, random if None
+        """
         if name is None:
             name = random_id()
         self.name = name
