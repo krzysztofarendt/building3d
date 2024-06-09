@@ -16,6 +16,7 @@ from building3d.geom.triangle import triangle_area
 from building3d.geom.triangle import is_point_inside as is_point_inside_triangle
 from building3d.geom.triangle import triangulate
 from building3d import random_id
+from building3d import validate_name
 from building3d.config import GEOM_EPSILON
 from building3d.util.roll_back import roll_back
 
@@ -35,7 +36,7 @@ class Polygon:
     """
     def __init__(
         self,
-        points: list[Point],
+        points: list[Point] = [],
         name: str | None = None,
         uid: str | None = None,
         triangles: list[tuple[int, ...]] = [],
@@ -57,7 +58,7 @@ class Polygon:
             name = random_id()
         logger.debug(f"Creating polygon: {name}")
 
-        self.name = name
+        self.name = validate_name(name)
         if uid is None:
             self.uid = random_id()
         else:

@@ -1,8 +1,13 @@
 import numpy as np
+import pytest
 
 from building3d.config import GEOM_RTOL
 from building3d.display.plot_mesh import plot_mesh
 from building3d.geom.building import Building
+from building3d.geom.zone import Zone
+from building3d.geom.solid import Solid
+from building3d.geom.polygon import Polygon
+from building3d.geom.wall import Wall
 from building3d.geom.predefined.box import box
 
 
@@ -68,6 +73,33 @@ def test_building_mesh_disjoint(show=False):
 
     bdg.generate_simulation_mesh(delta=0.3, include_volumes=True)
     plot_mesh(bdg.mesh, show=show)
+
+
+def test_get_object():
+    zone = box(1, 1, 1, (0, 0, 0), name="test_name")
+    bdg = Building(name="building")
+    bdg.add_zone(zone)
+
+    obj = bdg.get_object("test_name/test_name/floor/floor")
+    assert type(obj) is Polygon
+
+    obj = bdg.get_object("test_name/test_name/floor")
+    assert type(obj) is Wall
+
+    obj = bdg.get_object("test_name/test_name")
+    assert type(obj) is Solid
+
+    obj = bdg.get_object("test_name")
+    assert type(obj) is Zone
+
+    with pytest.raises(ValueError):
+        obj = bdg.get_object("xxx")
+
+    with pytest.raises(ValueError):
+        obj = bdg.get_object("test_name/test_name/floor/xxx")
+
+    with pytest.raises(ValueError):
+        obj = bdg.get_object("test_name/test_name/floor/floor/xxx")
 
 
 if __name__ == "__main__":

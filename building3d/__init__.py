@@ -28,3 +28,9 @@ def random_within(lim=1.0):
         return 0.0
     else:
         return 2 * lim * (np.random.random() - 0.5)
+
+
+def validate_name(name: str) -> str:
+    if "/" in name:
+        raise ValueError("Slash '/' not allowed in object names")
+    return name

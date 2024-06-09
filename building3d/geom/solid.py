@@ -5,6 +5,7 @@ from typing import Sequence
 import numpy as np
 
 from building3d import random_id
+from building3d import validate_name
 from building3d.geom.exceptions import GeometryError
 from building3d.geom.wall import Wall
 from building3d.geom.point import Point
@@ -20,7 +21,7 @@ class Solid:
     """Solid is a space enclosed by polygons."""
     def __init__(
         self,
-        walls: Sequence[Wall],
+        walls: Sequence[Wall] = [],
         name: str | None = None,
         uid: str | None = None,
         verify: bool = True,
@@ -35,7 +36,7 @@ class Solid:
         """
         if name is None:
             name = random_id()
-        self.name = name
+        self.name = validate_name(name)
         if uid is not None:
             self.uid = uid
         else:

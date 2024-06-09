@@ -2,6 +2,7 @@
 import numpy as np
 
 from building3d import random_id
+from building3d import validate_name
 from building3d.geom.point import Point
 from building3d.geom.solid import Solid
 from building3d.geom.wall import Wall
@@ -25,7 +26,7 @@ class Zone:
         """
         if name is None:
             name = random_id()
-        self.name = name
+        self.name = validate_name(name)
         if uid is not None:
             self.uid = uid
         else:
