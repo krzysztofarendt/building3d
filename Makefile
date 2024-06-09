@@ -36,7 +36,7 @@ examples:
 	python examples/example_2.py
 	python examples/example_3.py
 	python examples/read_teapot.py
-	python examples/write_dotbim.py
+	python examples/read_write_dotbim.py
 
 test_publish:
 	-rm -r logs/
