@@ -50,14 +50,14 @@ class Zone:
     def get_wall(self, wall_name: str) -> Wall:
         """Get wall by name."""
         for sld in self.solids.values():
-            for wall in sld.walls:
+            for wall in sld.walls.values():
                 if wall.name == wall_name:
                     return wall
         raise GeometryError(f"Wall {wall_name} not found")
 
     def get_wall_list(self) -> list[str]:
         """Get list of wall names."""
-        return [wall.name for sld in self.solids.values() for wall in sld.walls]
+        return [wall.name for sld in self.solids.values() for wall in sld.walls.values()]
 
     def get_mesh(
         self,

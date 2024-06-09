@@ -32,15 +32,21 @@ class Solid:
             self.uid = uid
         else:
             self.uid = random_id()
-        self.walls = walls  # TODO: To keep consistency, this should be a dict
+        self.walls: dict[str, Wall] = {}  # {Wall.name: Wall}
+        for w in walls:
+            self.add_wall(w)
         if verify:
             self._verify(throw=True)  # NOTE: Slow for large models thousands of points
         self.volume = self._volume()
 
+    def add_wall(self, wall: Wall) -> None:
+        """Add a Wall instance to the solid."""
+        self.walls[wall.name] = wall
+
     def polygons(self, only_parents=True) -> list[Polygon]:
         """Return a list with all polygons of this solid."""
         poly = []
-        for wall in self.walls:
+        for wall in self.walls.values():
             if only_parents:
                 poly.extend(wall.get_polygons())
             else:
@@ -64,7 +70,7 @@ class Solid:
         verts = []
         faces = []
 
-        for w in self.walls:
+        for w in self.walls.values():
             offset = len(verts)
             v, f = w.get_mesh(only_parents)
             verts.extend(v)

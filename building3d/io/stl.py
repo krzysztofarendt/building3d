@@ -53,7 +53,7 @@ def write_stl(path: str, zone: Zone) -> None:
     l3 = " " * 6
     for sld in zone.solids.values():
         lines.append(f"solid {sld.uid}\n")
-        for wall in sld.walls:
+        for wall in sld.walls.values():
             for _, poly in wall.polygons.items():
                 ni, nj, nk = poly.normal
                 for facet in poly.triangles:

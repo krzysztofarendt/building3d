@@ -29,7 +29,7 @@ def write_dotbim(path: str, bdg: Building) -> None:
 
     for zone in bdg.zones.values():
         for sld in zone.solids.values():
-            for wall in sld.walls:
+            for wall in sld.walls.values():
                 for poly in wall.get_polygons(only_parents=False):
                     verts, faces = poly.points, poly.triangles
                     coordinates = points_to_flat_list(verts)

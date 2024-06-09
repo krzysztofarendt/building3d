@@ -56,8 +56,8 @@ def test_b3d():
                 vol1 = building.zones[zname].solids[sname].volume
                 vol2 = b_copy.zones[zname].solids[sname].volume
                 assert np.isclose(vol1, vol2)
-                for wall in building.zones[zname].solids[sname].walls:
-                    b_copy_walls = b_copy.zones[zname].solids[sname].walls
+                for wall in building.zones[zname].solids[sname].walls.values():
+                    b_copy_walls = b_copy.zones[zname].solids[sname].walls.values()
                     assert wall.name in [w.name for w in b_copy_walls]
                     for pname in wall.polygons.keys():
                         assert pname in wall.polygons.keys()
