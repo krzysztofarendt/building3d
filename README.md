@@ -85,7 +85,8 @@ make example_3
 - [x] Benchmark against https://github.com/pyvista/tetgen
 - [x] Add `Mesh.add_building()`
 - [x] Own file format `*.b3d`
-- [ ] Add `uid` to B3D (`uid`s are not saved and they are regenerated when reading B3D)
+- [ ] Tidy up methods in Building, Zone, Solid, Wall - they should be similar
+- [ ] Finish `floor_plan()`
 - [ ] `Solid` should find polygons with reversed order of vertices and fix it
 - [ ] Export mesh to VTK format to enable convertions with meshio: https://vtk.org/wp-content/uploads/2015/04/file-formats.pdf
 - [ ] Figure out subpolygon meshing and general usage
