@@ -11,8 +11,7 @@ def test_floor_plan(show=False):
     vol = list(zone.solids.values())[0].volume
     assert np.isclose(vol, 5 * 5 * 2)
 
-    wall_names = zone.get_wall_names()
-    walls = [zone.get_wall(name) for name in wall_names]
+    walls = zone.get_walls()
 
     # Make sure normals are pointing outside the zone
     for w in walls:
@@ -52,8 +51,7 @@ def test_floor_plan_reversed(show=False):
     vol = list(zone.solids.values())[0].volume
     assert np.isclose(vol, 5 * 5 * 2)
 
-    wall_names = zone.get_wall_names()
-    walls = [zone.get_wall(name) for name in wall_names]
+    walls = zone.get_walls()
 
     # Make sure normals are pointing outside the zone
     for w in walls:

@@ -21,7 +21,7 @@ def test_b3d():
 
         # Add window (subpolygon)
         # TODO: High-level API for adding subpolygons is needed
-        wall = zone_1.get_wall("wall-0")  # Hardcoded name in box()
+        wall = zone_1.find_wall("wall-0")  # Hardcoded name in box()
         wall.add_polygon(
             Polygon(
                 [

@@ -62,18 +62,21 @@ class Zone:
         """Get list of solids."""
         return list(self.solids.values())
 
-    def get_wall(self, wall_name: str) -> Wall:  # TODO: Rename or remove?
-        """Get wall by name."""
+    def get_wall_names(self) -> list[str]:  # TODO: Rename or remove?
+        """Get list of wall names."""
+        return [name for sld in self.get_solids() for name in sld.get_wall_names()]
+
+    def get_walls(self) -> list[Wall]:
+        """Get list of wall instances."""
+        return [w for sld in self.get_solids() for w in sld.get_walls()]
+
+    def find_wall(self, wall_name: str) -> Wall:  # TODO: Rename or remove?
+        """Get wall by name. Will search in all solids."""
         for sld in self.get_solids():
             for wall in sld.get_walls():
                 if wall.name == wall_name:
                     return wall
         raise GeometryError(f"Wall {wall_name} not found")
-
-    def get_wall_names(self) -> list[str]:  # TODO: Rename or remove?
-        """Get list of wall names."""
-        names = [name for sld in self.get_solids() for name in sld.get_wall_names()]
-        return names
 
     def get_mesh(
         self,
