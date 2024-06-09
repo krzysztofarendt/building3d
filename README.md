@@ -85,7 +85,7 @@ make example_3
 - [x] Benchmark against https://github.com/pyvista/tetgen
 - [x] Add `Mesh.add_building()`
 - [x] Own file format `*.b3d`
-- [ ] Tidy up methods in Building, Zone, Solid, Wall - they should be similar
+- [x] Tidy up methods in Building, Zone, Solid, Wall - they should be similar
 - [ ] Add method `get_object(path/to/object)`, e.g. `Building.get_object("zone_name/solid_name/wall_name/polygon_name")`
 - [ ] Finish `floor_plan()`
 - [ ] `Solid` should find polygons with reversed order of vertices and fix it
