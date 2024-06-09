@@ -12,7 +12,7 @@ def plot_objects(*objects):
     faces_all = []
 
     for obj in objects:
-        verts, faces = obj.get_mesh(only_parents=False)
+        verts, faces = obj.get_mesh(children=True)
         offset = len(verts_all)
 
         verts_all.extend(verts)

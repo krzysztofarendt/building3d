@@ -81,10 +81,10 @@ def write_b3d(path: str, bdg: Building) -> None:
     bdict["name"] = bdg.name
 
     # Zones (geometry)
-    for zone in bdg.zones.values():
-        for solid in zone.solids.values():
-            for wall in solid.walls.values():
-                for poly in wall.polygons.values():
+    for zone in bdg.get_zones():
+        for solid in zone.get_solids():
+            for wall in solid.get_walls():
+                for poly in wall.get_polygons(children=True):
                     points = points_to_nested_list(poly.points)
                     triangles = poly.triangles
                     bdict["zones"][zone.name][solid.name][wall.name][poly.name]["points"] \

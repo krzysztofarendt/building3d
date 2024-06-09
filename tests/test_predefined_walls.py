@@ -41,7 +41,7 @@ def test_wall_with_aperture_orientation():
         aperture_xz_offset=(0.5, 0.25),
     )
 
-    polys = w.get_polygons(only_parents=False)
+    polys = w.get_polygons(children=True)
     for p in polys:
         assert np.isclose(p.normal, np.array([0, 1, 0])).all(), (
             "Wall normal should be (0, 1, 0) according to the documentation of "

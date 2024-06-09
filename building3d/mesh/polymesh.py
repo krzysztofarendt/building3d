@@ -7,6 +7,7 @@ from building3d.geom.polygon import Polygon
 from building3d.geom.point import Point
 from building3d.geom.triangle import triangle_area
 from building3d.mesh.triangulation import delaunay_triangulation
+from building3d.mesh.exceptions import MeshError
 from building3d.config import MESH_DELTA
 
 
@@ -52,6 +53,8 @@ class PolyMesh:
 
     def add_polygon(self, poly: Polygon):
         logger.debug(f"Adding polygon: {poly}")
+        if poly.uid in self.polygons.keys():
+            raise MeshError(f"Polygon {poly.uid} already exists")
         self.polygons[poly.uid] = poly
 
     def get_vertices_per_polygon(self) -> dict[str, list[Point]]:

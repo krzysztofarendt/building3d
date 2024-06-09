@@ -86,6 +86,7 @@ make example_3
 - [x] Add `Mesh.add_building()`
 - [x] Own file format `*.b3d`
 - [ ] Tidy up methods in Building, Zone, Solid, Wall - they should be similar
+- [ ] Add method `get_object(path/to/object)`, e.g. `Building.get_object("zone_name/solid_name/wall_name/polygon_name")`
 - [ ] Finish `floor_plan()`
 - [ ] `Solid` should find polygons with reversed order of vertices and fix it
 - [ ] Export mesh to VTK format to enable convertions with meshio: https://vtk.org/wp-content/uploads/2015/04/file-formats.pdf

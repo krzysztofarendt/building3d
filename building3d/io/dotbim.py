@@ -27,10 +27,10 @@ def write_dotbim(path: str, bdg: Building) -> None:
     meshes = []
     elements = []
 
-    for zone in bdg.zones.values():
-        for sld in zone.solids.values():
-            for wall in sld.walls.values():
-                for poly in wall.get_polygons(only_parents=False):
+    for zone in bdg.get_zones():
+        for sld in zone.get_solids():
+            for wall in sld.get_walls():
+                for poly in wall.get_polygons(children=True):
                     verts, faces = poly.points, poly.triangles
                     coordinates = points_to_flat_list(verts)
                     indices = np.array(faces).flatten().tolist()

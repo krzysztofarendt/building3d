@@ -60,6 +60,8 @@ class SolidMesh:
 
         All solid boundary polygons are also added (if they were not already added manually).
         """
+        if sld.uid in self.solids.keys():
+            raise MeshError(f"Solid {sld.uid} already exists")
         self.solids[sld.uid] = sld
 
     def generate(self, boundary_vertices: dict[str, list[Point]] = {}):

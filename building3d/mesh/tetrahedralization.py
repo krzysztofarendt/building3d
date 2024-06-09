@@ -143,12 +143,13 @@ def delaunay_tetrahedralization(
     # -> boundary_vertices, boundary_faces
     if len(boundary_vmap.keys()) == 0:
         logger.debug("Need to create boundary mesh via triangulation of the surrounding polygons")
-        for poly in sld.polygons():
-            polymesh_vertices, _ = delaunay_triangulation(poly, delta=delta)
-            for pt in polymesh_vertices:
-                if pt not in boundary_vertices:
-                    boundary_vertices.append(pt)
-                    boundary_pts.add(pt)
+        for wall in sld.get_walls():
+            for poly in wall.get_polygons(children=False):
+                polymesh_vertices, _ = delaunay_triangulation(poly, delta=delta)
+                for pt in polymesh_vertices:
+                    if pt not in boundary_vertices:
+                        boundary_vertices.append(pt)
+                        boundary_pts.add(pt)
     else:
         logger.debug("Will take boundary vertices provided by the user")
         for _, poly_points in boundary_vmap.items():

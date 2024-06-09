@@ -49,18 +49,18 @@ def test_b3d():
         # Check geometry
         assert np.isclose(building.volume(), b_copy.volume())
         assert building.name == b_copy.name
-        for zname in building.zones.keys():
-            assert zname in b_copy.zones.keys()
-            for sname in building.zones[zname].solids.keys():
-                assert sname in b_copy.zones[zname].solids.keys()
+        for zname in building.get_zone_names():
+            assert zname in b_copy.get_zone_names()
+            for sname in building.zones[zname].get_solid_names():
+                assert sname in b_copy.zones[zname].get_solid_names()
                 vol1 = building.zones[zname].solids[sname].volume
                 vol2 = b_copy.zones[zname].solids[sname].volume
                 assert np.isclose(vol1, vol2)
-                for wall in building.zones[zname].solids[sname].walls.values():
-                    b_copy_walls = b_copy.zones[zname].solids[sname].walls.values()
+                for wall in building.zones[zname].solids[sname].get_walls():
+                    b_copy_walls = b_copy.zones[zname].solids[sname].get_walls()
                     assert wall.name in [w.name for w in b_copy_walls]
-                    for pname in wall.polygons.keys():
-                        assert pname in wall.polygons.keys()
+                    for pname in wall.get_polygon_names():
+                        assert pname in wall.get_polygon_names()
 
         # Check mesh
         assert len(building.mesh.polymesh.vertices) == len(
