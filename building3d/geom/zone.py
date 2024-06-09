@@ -23,7 +23,7 @@ class Zone:
             self.uid = uid
         else:
             self.uid = random_id()
-        self.solids: dict[str, Solid] = {}
+        self.solids: dict[str, Solid] = {}  # {Solid.name: Solid}
         self.verify = verify
 
     def add_solid(self, sld: Solid) -> None:

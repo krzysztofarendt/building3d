@@ -29,7 +29,7 @@ class Wall:
             self.uid = uid
         else:
             self.uid = random_id()
-        self.polygons: dict[str, Polygon] = {}  # Dict of polygons and subpolygons
+        self.polygons: dict[str, Polygon] = {}  # {Polygon.name: Polygon}
         self.polygraph: dict[str, list[str]] = {}  # Graph with parent and subpolygons
 
         for poly in polygons:

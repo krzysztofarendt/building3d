@@ -25,7 +25,7 @@ class Building:
             self.uid = uid
         else:
             self.uid = random_id()
-        self.zones: dict[str, Zone] = {}
+        self.zones: dict[str, Zone] = {}  # {Zone.name: Zone}
         self.mesh = mesh.Mesh()
 
     def add_zone(self, zone: Zone) -> None:
