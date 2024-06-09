@@ -11,7 +11,7 @@ if __name__ == "__main__":
     zones = [zone_1, zone_2]
     building = Building(name="building")
     for z in zones:
-        building.add_zone_instance(z)
+        building.add_zone(z)
 
     write_dotbim(file_path, building)
     building_copy = read_dotbim(file_path)

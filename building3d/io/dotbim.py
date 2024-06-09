@@ -7,6 +7,7 @@ import numpy as np
 
 from building3d import random_id
 from building3d.geom.building import Building
+from building3d.geom.zone import Zone
 from building3d.geom.solid import Solid
 from building3d.geom.wall import Wall
 from building3d.geom.polygon import Polygon
@@ -154,6 +155,9 @@ def read_dotbim(path: str) -> Building:
                     ))
                 walls.append(Wall(polygons=polys, name=wname))
             solids.append(Solid(walls=walls, name=sname))
-        building.add_zone(name=zname, solids=solids)
+        zone = Zone(name=zname)
+        for sld in solids:
+            zone.add_solid_instance(sld)
+        building.add_zone(zone)
 
     return building

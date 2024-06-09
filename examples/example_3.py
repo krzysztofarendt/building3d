@@ -11,7 +11,7 @@ if __name__ == "__main__":
 
     # Save to B3D
     building = Building(name="example_3")
-    building.add_zone_instance(zone)
+    building.add_zone(zone)
     building.generate_simulation_mesh(delta=0.5, include_volumes=True)
 
     print(mesh_stats(building.mesh.polymesh.vertices, building.mesh.polymesh.faces))

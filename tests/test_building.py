@@ -15,7 +15,7 @@ def test_building_volume_adjacent():
 
     bdg = Building(name="building")
     for z in zones:
-        bdg.add_zone_instance(z)
+        bdg.add_zone(z)
     assert np.isclose(bdg.volume(), expected_volume, rtol=GEOM_RTOL)
 
 
@@ -28,7 +28,7 @@ def test_building_volume_disjoint():
 
     bdg = Building(name="building")
     for z in zones:
-        bdg.add_zone_instance(z)
+        bdg.add_zone(z)
     assert np.isclose(bdg.volume(), expected_volume, rtol=GEOM_RTOL)
 
 
@@ -39,7 +39,7 @@ def test_building_mesh_adjacent(show=False):
 
     bdg = Building(name="building")
     for z in zones:
-        bdg.add_zone_instance(z)
+        bdg.add_zone(z)
 
     bdg.generate_simulation_mesh()
     plot_mesh(bdg.mesh, show=show)
@@ -58,7 +58,7 @@ def test_building_mesh_disjoint(show=False):
 
     bdg = Building(name="building")
     for z in zones:
-        bdg.add_zone_instance(z)
+        bdg.add_zone(z)
 
     bdg.generate_simulation_mesh()
     plot_mesh(bdg.mesh, show=show)

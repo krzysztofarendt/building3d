@@ -105,7 +105,7 @@ def example_2():
 
     # Make building instance
     building = Building(name="example_2")
-    building.add_zone_instance(zone)
+    building.add_zone(zone)
 
     # Generate mesh
     start_time = time.time()

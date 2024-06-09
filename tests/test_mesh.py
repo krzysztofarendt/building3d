@@ -30,7 +30,7 @@ def test_mesh():
     zone = Zone()
     zone.add_solid_instance(solid)
     bdg = Building()
-    bdg.add_zone_instance(zone)
+    bdg.add_zone(zone)
 
     delta = 0.5
     num_tests = 5

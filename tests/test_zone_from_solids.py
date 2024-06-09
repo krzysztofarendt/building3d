@@ -101,4 +101,4 @@ def test_zone_from_solids():
 
     # Make building instance
     building = Building(name="example_2")
-    building.add_zone_instance(zone)
+    building.add_zone(zone)

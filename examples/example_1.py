@@ -45,7 +45,7 @@ def example_1():
     zone.add_solid("room", [floor, walls, roof])
 
     building = Building()
-    building.add_zone_instance(zone)
+    building.add_zone(zone)
     building.generate_simulation_mesh(delta=0.5, include_volumes=True)
 
     print(mesh_stats(building.mesh.polymesh.vertices, building.mesh.polymesh.faces))

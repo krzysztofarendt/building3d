@@ -24,14 +24,7 @@ class Building:
         self.zones: dict[str, Zone] = {}
         self.mesh = mesh.Mesh()
 
-    def add_zone(self, name: str, solids: list[Solid]) -> None:
-        """Add zone created from solids."""
-        zone = Zone(name=name)
-        for sld in solids:
-            zone.add_solid_instance(sld)
-        self.add_zone_instance(zone)
-
-    def add_zone_instance(self, zone: Zone) -> None:
+    def add_zone(self, zone: Zone) -> None:
         """Add a Zone instance."""
         self.zones[zone.name] = zone
 

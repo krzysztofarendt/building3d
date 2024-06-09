@@ -154,7 +154,7 @@ def read_b3d(path: str) -> Building:
             solid = Solid(walls=walls, name=sname)
             zone.add_solid_instance(solid)  # TODO: Parent solids not implemented yet
 
-        building.add_zone_instance(zone)
+        building.add_zone(zone)
 
     # Read polygon mesh
     polymesh = PolyMesh(bdict["mesh"]["polymesh"]["delta"])
