@@ -21,6 +21,13 @@ class Wall:
         name: str | None = None,
         uid: str | None = None,
     ):
+        """Initialize the wall.
+
+        Args:
+            polygons: list of Polygon instances
+            name: name of the wall, random if None
+            uid: unique id of the wall, random if None
+        """
         if name is None:
             name = random_id()
 
