@@ -96,8 +96,8 @@ def test_zone_from_solids():
     zone.add_solid(solid2)
 
     assert len(zone.solids) == 2
-    assert len(zone.solids[solid1.name].polygons()) == 6
-    assert len(zone.solids[solid2.name].polygons()) == 5
+    assert len(zone.solids[solid1.name].get_polygons()) == 6
+    assert len(zone.solids[solid2.name].get_polygons()) == 5
 
     # Make building instance
     building = Building(name="example_2")

@@ -41,4 +41,4 @@ def test_zone_from_walls():
     zone.add_solid(solid)
 
     assert len(zone.solids) == 1
-    assert len(zone.solids[solid.name].polygons()) == 6
+    assert len(zone.solids[solid.name].get_polygons()) == 6

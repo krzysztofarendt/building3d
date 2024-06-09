@@ -59,14 +59,11 @@ class Solid:
         """Get list of walls."""
         return list(self.walls.values())
 
-    def polygons(self, only_parents=True) -> list[Polygon]:  # TODO: Rename or remove?
-        """Return a list with all polygons of this solid."""
+    def get_polygons(self, children=False) -> list[Polygon]:
+        """Return list with all polygons of this solid."""
         poly = []
-        for wall in self.walls.values():
-            if only_parents:
-                poly.extend(wall.get_polygons())
-            else:
-                poly.extend(wall.polygons.values())
+        for wall in self.get_walls():
+            poly.extend(wall.get_polygons(children=children))
         return poly
 
     def get_mesh(
@@ -96,14 +93,14 @@ class Solid:
 
         return verts, faces
 
-    def get_all_vertices(self, children: bool = False) -> list[Point]:
+    def get_vertices(self, children: bool = False) -> list[Point]:
         """Get list of all vertices of this solid (excluding simulation mesh)."""
         verts, _ = self.get_mesh(children=children)
         return verts
 
     def bounding_box(self) -> tuple[Point, Point]:
         """Return (Point(xmin, ymin, zmin), Point(xmax, ymax, zmax))"""
-        vertices = self.get_all_vertices()
+        vertices = self.get_vertices()
         xaxis = [p.x for p in vertices]
         yaxis = [p.y for p in vertices]
         zaxis = [p.z for p in vertices]
@@ -121,7 +118,7 @@ class Solid:
         and count how many times it intersects with the edges of the
         solid; if the number of intersections is odd, it is inside.
         """
-        vertices = self.get_all_vertices()
+        vertices = self.get_vertices()
         max_x = max([p.x for p in vertices])
         max_y = max([p.y for p in vertices])
         max_z = max([p.z for p in vertices])
@@ -141,7 +138,7 @@ class Solid:
         vec /= np.linalg.norm(vec)
 
         num_crossings = 0
-        for poly in self.polygons():
+        for poly in self.get_polygons():
             p_crosses_polygon = poly.is_point_inside_projection(p, vec)
             if p_crosses_polygon:
                 num_crossings += 1
@@ -157,15 +154,15 @@ class Solid:
 
     def is_point_at_the_boundary(self, p: Point) -> bool:
         """Checks whether the point p lays on any of the boundary polygons."""
-        for poly in self.polygons():
+        for poly in self.get_polygons():
             if poly.is_point_inside(p):
                 return True
         return False
 
     def is_adjacent_to_solid(self, sld) -> bool:
         """Checks if this solid is adjacent to another solid."""
-        for this_poly in self.polygons():
-            for other_poly in sld.polygons():
+        for this_poly in self.get_polygons():
+            for other_poly in sld.get_polygons():
                 if this_poly.is_facing_polygon(other_poly):
                     return True
         return False
@@ -173,7 +170,7 @@ class Solid:
     def distance_to_solid_points(self, p: Point) -> float:
         """Return minimum distance from test point `p` to solid points."""
         dist = np.inf
-        for poly in self.polygons():
+        for poly in self.get_polygons():
             dp = poly.distance_point_to_polygon_points(p)
             if dp < dist:
                 dist = dp
@@ -182,7 +179,7 @@ class Solid:
     def _volume(self) -> float:
         """Based on: http://chenlab.ece.cornell.edu/Publication/Cha/icip01_Cha.pdf"""
         total_volume = 0.0
-        for poly in self.polygons():
+        for poly in self.get_polygons():
             for tri in poly.triangles:
                 p0 = Point(0.0, 0.0, 0.0)
                 p1 = poly.points[tri[0]]
@@ -217,7 +214,7 @@ class Solid:
         points = []
 
         # Check if all points are attached to at least 2 walls
-        for poly in self.polygons():
+        for poly in self.get_polygons():
             points.extend(poly.points)
 
         logger.debug("Checking if each point is attached to at least 2 walls")

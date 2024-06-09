@@ -193,7 +193,7 @@ def delaunay_tetrahedralization(
                 if sld.is_point_inside(pt):
                     # Check if point is not too close to the boundary polygons
                     distance_to_boundary_ok = True
-                    for poly in sld.polygons():
+                    for poly in sld.get_polygons():
                         if poly.distance_point_to_polygon(pt) < delta / 2:
                             # It is too close to at least one polygon, so shouldn't be used
                             distance_to_boundary_ok = False
@@ -308,7 +308,7 @@ def delaunay_tetrahedralization(
     assert len(unique_indices) == len(vertices), "Not all vertices have been used for mesh!"
 
     # Are all solid vertices present in the mesh?
-    for pt in sld.get_all_vertices():
+    for pt in sld.get_vertices():
         assert pt in vertices, f"Solid point missing: {pt}"
 
     # Do all interior elements have 4 neighbors?
