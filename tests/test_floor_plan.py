@@ -8,7 +8,7 @@ def test_floor_plan(show=False):
     plan = [(0, 0), (5, 0), (5, 5), (0, 5)]
     h = 2
     zone = floor_plan(plan, height=h)
-    vol = list(zone.solids.values())[0].volume
+    vol = list(zone.get_solids())[0].volume
     assert np.isclose(vol, 5 * 5 * 2)
 
     walls = zone.get_walls()
@@ -48,7 +48,7 @@ def test_floor_plan_reversed(show=False):
     plan = plan[::-1]
     h = 2
     zone = floor_plan(plan, height=h)
-    vol = list(zone.solids.values())[0].volume
+    vol = list(zone.get_solids())[0].volume
     assert np.isclose(vol, 5 * 5 * 2)
 
     walls = zone.get_walls()
@@ -83,6 +83,24 @@ def test_floor_plan_reversed(show=False):
         plot_objects(*walls)
 
 
+def test_floor_plan_rotated(show=False):
+    plan = [(0, 0), (5, 0), (5, 5), (0, 5)]
+    h = 1
+    zone = floor_plan(
+        plan,
+        height = h,
+        rot_vec = (0, 0, 1),
+        rot_angle = np.pi / 4,
+    )
+
+    vol = list(zone.get_solids())[0].volume
+    assert np.isclose(vol, 5 * 5 * 1)
+
+    if show:
+        plot_objects(zone)
+
+
 if __name__ == "__main__":
-    test_floor_plan(show=True)
-    test_floor_plan_reversed(show=True)
+    # test_floor_plan(show=True)
+    # test_floor_plan_reversed(show=True)
+    test_floor_plan_rotated(show=True)

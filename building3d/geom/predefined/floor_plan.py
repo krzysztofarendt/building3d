@@ -7,6 +7,7 @@ from building3d.geom.polygon import Polygon
 from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
 from building3d.geom.solid import Solid
+from building3d.geom.rotate import rotate_points_around_vector
 
 
 logger = logging.getLogger(__name__)
@@ -22,15 +23,38 @@ def floor_plan(
 ) -> Zone:
     """Make a zone from a floor plan (list of (x, y) points)."""
 
-    # TODO: translation
-    # TODO: rotation
     # TODO: controllable wall names
+    # TODO: apertures
 
+    # Convert rot_vec to array
+    vec = np.array(rot_vec)
+
+    # Convert xy to floats, just in case they were provided as ints
     plan = [(float(x), float(y)) for x, y in plan]
 
+    # Convert to Points
     floor_pts = [Point(x, y, 0.0) for x, y in plan]
     ceiling_pts = [Point(x, y, height) for x, y in plan]
 
+    # Rotate
+    if rot_angle != 0:
+        floor_pts, _ = rotate_points_around_vector(
+            points = floor_pts,
+            u = vec,
+            phi = rot_angle,
+        )
+        ceiling_pts, _ = rotate_points_around_vector(
+            points = ceiling_pts,
+            u = vec,
+            phi = rot_angle,
+        )
+
+    # Translate
+    if not np.isclose(translate, (0, 0, 0)).all():
+        floor_pts = [p + translate for p in floor_pts]
+        ceiling_pts = [p + translate for p in ceiling_pts]
+
+    # Make Polygons and Walls
     walls = []
     wall_num = 0
     for i in range(len(plan)):
@@ -43,6 +67,7 @@ def floor_plan(
         p1 = floor_pts[nxt]
         p2 = ceiling_pts[nxt]
         p3 = ceiling_pts[ths]
+
 
         poly = Polygon([p0, p1, p2, p3])
         wall = Wall([poly], name=f"wall-{wall_num}")
