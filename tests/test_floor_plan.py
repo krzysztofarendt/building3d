@@ -1,10 +1,10 @@
 import numpy as np
 
 from building3d.display.plot_objects import plot_objects
-from building3d.geom.predefined.floor_plan import floor_plan
 from building3d.geom.polygon import Polygon
-from building3d.geom.wall import Wall
+from building3d.geom.predefined.floor_plan import floor_plan
 from building3d.geom.solid import Solid
+from building3d.geom.wall import Wall
 
 
 def test_floor_plan(show=False):
@@ -91,8 +91,8 @@ def test_floor_plan_rotated(show=False):
     h = 1
     zone = floor_plan(
         plan,
-        height = h,
-        rot_angle = np.pi / 4,
+        height=h,
+        rot_angle=np.pi / 4,
     )
 
     vol = list(zone.get_solids())[0].volume
@@ -107,8 +107,8 @@ def test_floor_plan_translated(show=False):
     h = 3
     zone = floor_plan(
         plan,
-        height = h,
-        translate = (10, 10, 10),
+        height=h,
+        translate=(10, 10, 10),
     )
 
     vertices, _ = zone.get_mesh()
@@ -127,9 +127,9 @@ def test_floor_plan_rotated_and_translated(show=False):
     h = 1
     zone = floor_plan(
         plan,
-        height = h,
-        translate = (10, 10, 10),
-        rot_angle = np.pi / 4,
+        height=h,
+        translate=(10, 10, 10),
+        rot_angle=np.pi / 4,
     )
 
     vol = list(zone.get_solids())[0].volume
@@ -151,12 +151,12 @@ def test_floor_plan_with_apertures(show=False):
 
     zone = floor_plan(
         plan,
-        height = h,
-        name = "room",
-        wall_names = ["w0", "w1", "w2", "w3"],
-        floor_name = "floor",
-        ceiling_name = "ceiling",
-        apertures = apertures,
+        height=h,
+        name="room",
+        wall_names=["w0", "w1", "w2", "w3"],
+        floor_name="floor",
+        ceiling_name="ceiling",
+        apertures=apertures,
     )
 
     vol = list(zone.get_solids())[0].volume
