@@ -8,6 +8,7 @@ from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
 from building3d.geom.solid import Solid
 from building3d.geom.rotate import rotate_points_around_vector
+from building3d.geom.vector import length
 
 
 logger = logging.getLogger(__name__)
@@ -17,7 +18,6 @@ def floor_plan(
     plan: list[tuple[float, float]],
     height: float,
     translate: tuple[float, float, float] = (0.0, 0.0, 0.0),
-    rot_vec: tuple[float, float, float] = (0.0, 0.0, 1.0),
     rot_angle: float = 0.0,
     name: str | None = None,
 ) -> Zone:
@@ -26,8 +26,8 @@ def floor_plan(
     # TODO: controllable wall names
     # TODO: apertures
 
-    # Convert rot_vec to array
-    vec = np.array(rot_vec)
+    # Define the rotation vector (it is hardcoded, floor and ceiling must be horizontal)
+    rot_vec = np.array([0.0, 0.0, 1.0])
 
     # Convert xy to floats, just in case they were provided as ints
     plan = [(float(x), float(y)) for x, y in plan]
@@ -37,15 +37,15 @@ def floor_plan(
     ceiling_pts = [Point(x, y, height) for x, y in plan]
 
     # Rotate
-    if rot_angle != 0:
+    if not np.isclose(rot_angle, 0):
         floor_pts, _ = rotate_points_around_vector(
             points = floor_pts,
-            u = vec,
+            u = rot_vec,
             phi = rot_angle,
         )
         ceiling_pts, _ = rotate_points_around_vector(
             points = ceiling_pts,
-            u = vec,
+            u = rot_vec,
             phi = rot_angle,
         )
 
@@ -53,6 +53,9 @@ def floor_plan(
     if not np.isclose(translate, (0, 0, 0)).all():
         floor_pts = [p + translate for p in floor_pts]
         ceiling_pts = [p + translate for p in ceiling_pts]
+        z0 = translate[2]
+    else:
+        z0 = 0
 
     # Make Polygons and Walls
     walls = []
@@ -98,7 +101,7 @@ def floor_plan(
 
         wall_z0_pts = []
         for i in range(len(w_pts)):
-            if w_pts[i].z == 0:
+            if w_pts[i].z == z0:
                 wall_z0_pts.append(w_pts[i])
 
         floor_adjacent_pts = []

@@ -89,7 +89,43 @@ def test_floor_plan_rotated(show=False):
     zone = floor_plan(
         plan,
         height = h,
-        rot_vec = (0, 0, 1),
+        rot_angle = np.pi / 4,
+    )
+
+    vol = list(zone.get_solids())[0].volume
+    assert np.isclose(vol, 5 * 5 * 1)
+
+    if show:
+        plot_objects(zone)
+
+
+def test_floor_plan_translated(show=False):
+    plan = [(0, 0), (5, 0), (5, 5), (0, 5)]
+    h = 3
+    zone = floor_plan(
+        plan,
+        height = h,
+        translate = (10, 10, 10),
+    )
+
+    vertices, _ = zone.get_mesh()
+    for v in vertices:
+        assert v.x > 9.99 and v.y > 9.99 and v.z > 9.99
+
+    vol = list(zone.get_solids())[0].volume
+    assert np.isclose(vol, 5 * 5 * 3)
+
+    if show:
+        plot_objects(zone)
+
+
+def test_floor_plan_rotated_and_translated(show=False):
+    plan = [(0, 0), (5, 0), (5, 5), (0, 5)]
+    h = 1
+    zone = floor_plan(
+        plan,
+        height = h,
+        translate = (10, 10, 10),
         rot_angle = np.pi / 4,
     )
 
@@ -101,6 +137,8 @@ def test_floor_plan_rotated(show=False):
 
 
 if __name__ == "__main__":
-    # test_floor_plan(show=True)
-    # test_floor_plan_reversed(show=True)
+    test_floor_plan(show=True)
+    test_floor_plan_reversed(show=True)
     test_floor_plan_rotated(show=True)
+    test_floor_plan_translated(show=True)
+    test_floor_plan_rotated_and_translated(show=True)

@@ -6,6 +6,7 @@ from building3d import validate_name
 from building3d.geom.point import Point
 from building3d.geom.solid import Solid
 from building3d.geom.wall import Wall
+from building3d.geom.polygon import Polygon
 from building3d.geom.exceptions import GeometryError
 
 
@@ -79,7 +80,7 @@ class Zone:
                     return wall
         raise GeometryError(f"Wall {wall_name} not found")
 
-    def get_object(self, path: str) -> Solid | Wall | None:
+    def get_object(self, path: str) -> Solid | Wall | Polygon | None:
         """Get object by the path. The path contains names of nested components."""
         names = path.split("/")
         solid_name = names.pop(0)
