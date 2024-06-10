@@ -6,6 +6,27 @@ from building3d.config import GEOM_EPSILON
 
 
 
+def create_point_between_2_points_at_distance(
+    p1: Point,
+    p2: Point,
+    distance: float
+) -> Point:
+    """Create new point along the edge spanning from p1 to p2.
+
+    Args:
+        p1: first point of the edge
+        p2: second point of the edge
+        distance: relative distance along the edge, 0 = p1, 1 = p2
+
+    Return:
+        new point
+    """
+    alpha = distance
+    alpha_v = np.array([alpha, alpha, alpha])
+    new_vec = p1.vector() * (1 - alpha_v) + p2.vector() * alpha_v
+    return Point(new_vec[0], new_vec[1], new_vec[2])
+
+
 def create_points_between_2_points(p1: Point, p2: Point, num: int) -> list[Point]:
     """Create new points along the edge spanning from p1 to p2.
 

@@ -1,8 +1,23 @@
 import numpy as np
 
+from building3d.geom.line import create_point_between_2_points_at_distance
 from building3d.geom.line import create_points_between_2_points
 from building3d.geom.line import distance_point_to_edge
 from building3d.geom.point import Point
+
+
+def test_create_point_between_2_points_at_distance():
+    p1 = Point(0.0, 0.0, 0.0)
+    p2 = Point(1.0, 0.0, 0.0)
+    distance = 0.5
+    pnew = create_point_between_2_points_at_distance(p1, p2, distance)
+    assert pnew == Point(0.5, 0.0, 0.0)
+    distance = 0.1
+    pnew = create_point_between_2_points_at_distance(p1, p2, distance)
+    assert pnew == Point(0.1, 0.0, 0.0)
+    distance = 0.9
+    pnew = create_point_between_2_points_at_distance(p1, p2, distance)
+    assert pnew == Point(0.9, 0.0, 0.0)
 
 
 def test_create_points_between_2_points():
