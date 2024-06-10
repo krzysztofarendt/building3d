@@ -111,8 +111,16 @@ class Wall:
         names = path.split("/")
         poly_name = names.pop(0)
 
-        if poly_name not in self.get_polygon_names():
+        polygon_names_all = self.get_polygon_names(children=True)
+
+        if poly_name not in polygon_names_all:
             return None
+        elif len(names) == 1:  # searching for subpolygon
+            subpoly_name = names[0]
+            if subpoly_name in polygon_names_all:
+                return self.polygons[subpoly_name]
+            else:
+                return None
         elif len(names) == 0:
             return self.polygons[poly_name]
         else:
