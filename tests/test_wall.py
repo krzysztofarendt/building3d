@@ -1,9 +1,9 @@
 import pytest
 
+from building3d.geom.exceptions import GeometryError
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
 from building3d.geom.wall import Wall
-from building3d.geom.exceptions import GeometryError
 
 
 def test_wall_without_subpolygons():

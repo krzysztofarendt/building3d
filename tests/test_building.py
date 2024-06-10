@@ -4,11 +4,11 @@ import pytest
 from building3d.config import GEOM_RTOL
 from building3d.display.plot_mesh import plot_mesh
 from building3d.geom.building import Building
-from building3d.geom.zone import Zone
-from building3d.geom.solid import Solid
 from building3d.geom.polygon import Polygon
-from building3d.geom.wall import Wall
 from building3d.geom.predefined.box import box
+from building3d.geom.solid import Solid
+from building3d.geom.wall import Wall
+from building3d.geom.zone import Zone
 
 
 def test_building_volume_adjacent():
