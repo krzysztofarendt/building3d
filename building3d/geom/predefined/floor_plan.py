@@ -20,10 +20,29 @@ def floor_plan(
     translate: tuple[float, float, float] = (0.0, 0.0, 0.0),
     rot_angle: float = 0.0,
     name: str | None = None,
+    wall_names: list[str] = [],
+    floor_name: str = "floor",
+    ceiling_name: str = "ceiling",
 ) -> Zone:
-    """Make a zone from a floor plan (list of (x, y) points)."""
+    """Make a zone from a floor plan (list of (x, y) points).
 
-    # TODO: controllable wall names
+    If wall_names is not provided, the names will be "wall-0", "wall-1", etc.
+    If floor_name and ceiling_name are not provided, they will be "floor" and "ceiling".
+
+    Args:
+        plan: list of (x, y) points
+        height: height of the zone
+        translate: translation vector
+        rot_angle: rotation angle
+        name: name of the zone
+        wall_names: names of the walls
+        floor_name: name of the floor
+        ceiling_name: name of the ceiling
+
+    Return:
+        Zone
+    """
+
     # TODO: apertures
 
     # Define the rotation vector (it is hardcoded, floor and ceiling must be horizontal)
@@ -31,6 +50,17 @@ def floor_plan(
 
     # Convert xy to floats, just in case they were provided as ints
     plan = [(float(x), float(y)) for x, y in plan]
+
+    # Prepare wall names
+    if len(wall_names) == 0:
+        wall_names = [f"wall-{i}" for i in range(len(plan))]
+    else:
+        if len(wall_names) != len(plan):
+            raise ValueError(
+                "Number of wall names must be equal to the number of points in the plan"
+            )
+        if len(set(wall_names)) != len(wall_names):
+            raise ValueError("Wall names must be unique")
 
     # Convert to Points
     floor_pts = [Point(x, y, 0.0) for x, y in plan]
@@ -71,24 +101,23 @@ def floor_plan(
         p2 = ceiling_pts[nxt]
         p3 = ceiling_pts[ths]
 
-
-        poly = Polygon([p0, p1, p2, p3])
-        wall = Wall([poly], name=f"wall-{wall_num}")
+        poly = Polygon([p0, p1, p2, p3], name=wall_names[i])
+        wall = Wall([poly], name=wall_names[i])
         walls.append(wall)
         wall_num += 1
 
-    floor_poly = Polygon(floor_pts, name="floor")
+    floor_poly = Polygon(floor_pts, name=floor_name)
     # Floor's normal should point downwards
     if not np.isclose(floor_poly.normal, [0, 0, -1]).all():
         floor_poly = floor_poly.flip()
 
-    ceiling_poly = Polygon(ceiling_pts, name="ceiling")
+    ceiling_poly = Polygon(ceiling_pts, name=ceiling_name)
     # Ceiling's normal should point upwards
     if not np.isclose(ceiling_poly.normal, [0, 0, 1]).all():
         ceiling_poly = ceiling_poly.flip()
 
-    floor = Wall([floor_poly], name="floor")
-    ceiling = Wall([ceiling_poly], name="ceiling")
+    floor = Wall([floor_poly], name=floor_name)
+    ceiling = Wall([ceiling_poly], name=ceiling_name)
 
     # Make sure all polygon normals point outwards the zone.
     # Compare the order of wall vertices to the order
