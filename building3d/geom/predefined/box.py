@@ -22,7 +22,19 @@ def box(
     Rotation is currently not supported.
 
     The corner `(min(x), min(y), min(z))` will be located at `translate`.
+
+    The polygon and wall names are hardcoded:
+    - floor
+    - wall-0
+    - wall-1
+    - wall-2
+    - wall-3
+    - roof
+
+    Both, the solid and the zone are named `name` (random if not given).
     """
+    # TODO: Add rotation
+
     stretch = (x, y, z)
     p0 = Point(0.0, 0.0, 0.0) * stretch + translate
     p1 = Point(1.0, 0.0, 0.0) * stretch + translate
