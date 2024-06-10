@@ -76,6 +76,9 @@ def test_building_mesh_disjoint(show=False):
 
 
 def test_get_object():
+    """The tested function is recursive, so this test covers
+    the `get_object` method in all: Building, Zone, Solid, Wall."""
+
     zone = box(1, 1, 1, (0, 0, 0), name="test_name")
     bdg = Building(name="building")
     bdg.add_zone(zone)
@@ -92,11 +95,11 @@ def test_get_object():
     obj = bdg.get_object("test_name")
     assert type(obj) is Zone
 
-    with pytest.raises(ValueError):
-        obj = bdg.get_object("xxx")
+    obj = bdg.get_object("xxx")
+    assert obj is None
 
-    with pytest.raises(ValueError):
-        obj = bdg.get_object("test_name/test_name/floor/xxx")
+    obj = bdg.get_object("test_name/test_name/floor/xxx")
+    assert obj is None
 
     with pytest.raises(ValueError):
         obj = bdg.get_object("test_name/test_name/floor/floor/xxx")

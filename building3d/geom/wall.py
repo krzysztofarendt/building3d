@@ -106,6 +106,18 @@ class Wall:
                 return parent_name
         return None
 
+    def get_object(self, path: str) -> Polygon | None:
+        """Get object by the path. The path contains names of nested components."""
+        names = path.split("/")
+        poly_name = names.pop(0)
+
+        if poly_name not in self.get_polygon_names():
+            return None
+        elif len(names) == 0:
+            return self.polygons[poly_name]
+        else:
+            raise ValueError("Path to object too deep (too many slashes)")
+
     def get_mesh(
         self,
         children: bool = True,

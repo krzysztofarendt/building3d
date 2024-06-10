@@ -79,6 +79,18 @@ class Zone:
                     return wall
         raise GeometryError(f"Wall {wall_name} not found")
 
+    def get_object(self, path: str) -> Solid | Wall | None:
+        """Get object by the path. The path contains names of nested components."""
+        names = path.split("/")
+        solid_name = names.pop(0)
+
+        if solid_name not in self.get_solid_names():
+            return None
+        elif len(names) == 0:
+            return self.solids[solid_name]
+        else:
+            return self.solids[solid_name].get_object("/".join(names))
+
     def get_mesh(
         self,
         children: bool = True,

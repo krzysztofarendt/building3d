@@ -48,85 +48,17 @@ class Building:
         """Get list of zones."""
         return list(self.zones.values())
 
-    # TODO: Below function could be split across all levels (Zone/Solid/Wall/Polygon)
-    def get_object(self, path: str) -> Zone | Solid | Wall | Polygon:
+    def get_object(self, path: str) -> Zone | Solid | Wall | Polygon | None:
         """Get object by the path. The path contains names of nested components."""
         names = path.split("/")
+        zone_name = names.pop(0)
 
-        zone_name = None
-        solid_name = None
-        wall_name = None
-        poly_name = None
-
-        i = 0
-        while len(names) > 0:
-            n = names.pop(0)
-            if i == 0:
-                zone_name = n
-            elif i == 1:
-                solid_name = n
-            elif i == 2:
-                wall_name = n
-            elif i == 3:
-                poly_name = n
-            else:
-                raise ValueError(f"Name too long, too many slashes: {path}")
-            i += 1
-
-        if zone_name is not None:
-            matching_zones = [z for z in self.get_zones() if z.name == zone_name]
-            if len(matching_zones) == 0:
-                raise ValueError(f"Zone not found {zone_name}")
-            elif len(matching_zones) > 1:
-                raise ValueError(f"Zone not unique {zone_name}")
-            zone = matching_zones[0]
+        if zone_name not in self.get_zone_names():
+            return None
+        elif len(names) == 0:
+            return self.zones[zone_name]
         else:
-            zone = None
-
-        if solid_name is not None and zone is not None:
-            matching_solids = [s for s in zone.get_solids() if s.name == solid_name]
-            if len(matching_solids) == 0:
-                raise ValueError(f"Solid not found {solid_name}")
-            elif len(matching_solids) > 1:
-                raise ValueError(f"Solid not unique {solid_name}")
-            solid = matching_solids[0]
-        else:
-            solid = None
-
-        if wall_name is not None and solid is not None:
-            matching_walls = [w for w in solid.get_walls() if w.name == wall_name]
-            if len(matching_walls) == 0:
-                raise ValueError(f"Wall not found {wall_name}")
-            elif len(matching_walls) > 1:
-                raise ValueError(f"Wall not unique {wall_name}")
-            wall = matching_walls[0]
-        else:
-            wall = None
-
-        if poly_name is not None and wall is not None:
-            matching_polys = [p for p in wall.get_polygons(children=True) if p.name == poly_name]
-            if len(matching_polys) == 0:
-                raise ValueError(f"Polygon not found {poly_name}")
-            elif len(matching_polys) > 1:
-                raise ValueError(f"Polygon not unique {poly_name}")
-            poly = matching_polys[0]
-        else:
-            poly = None
-
-        return_queue = [
-            (poly_name, poly),
-            (wall_name, wall),
-            (solid_name, solid),
-            (zone_name, zone),
-        ]
-
-        for name, obj in return_queue:
-            if name is None:
-                continue
-            else:
-                return obj
-
-        raise ValueError(f"Object not found: {path}")
+            return self.zones[zone_name].get_object("/".join(names))
 
     def volume(self) -> float:
         """Calculate building volume as the sum of zone volumes."""

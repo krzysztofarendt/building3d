@@ -67,6 +67,18 @@ class Solid:
             poly.extend(wall.get_polygons(children=children))
         return poly
 
+    def get_object(self, path: str) -> Wall | Polygon | None:
+        """Get object by the path. The path contains names of nested components."""
+        names = path.split("/")
+        wall_name = names.pop(0)
+
+        if wall_name not in self.get_wall_names():
+            return None
+        elif len(names) == 0:
+            return self.walls[wall_name]
+        else:
+            return self.walls[wall_name].get_object("/".join(names))
+
     def get_mesh(
         self,
         children: bool = True,
