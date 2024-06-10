@@ -95,11 +95,11 @@ def test_get_object():
     obj = bdg.get_object("test_name")
     assert type(obj) is Zone
 
-    obj = bdg.get_object("xxx")
-    assert obj is None
+    with pytest.raises(ValueError):
+        obj = bdg.get_object("xxx")
 
-    obj = bdg.get_object("test_name/test_name/floor/xxx")
-    assert obj is None
+    with pytest.raises(ValueError):
+        obj = bdg.get_object("test_name/test_name/floor/xxx")
 
     with pytest.raises(ValueError):
         obj = bdg.get_object("test_name/test_name/floor/floor/xxx")

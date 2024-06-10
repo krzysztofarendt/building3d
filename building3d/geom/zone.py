@@ -86,7 +86,7 @@ class Zone:
         solid_name = names.pop(0)
 
         if solid_name not in self.get_solid_names():
-            return None
+            raise ValueError(f"Solid not found: {solid_name}")
         elif len(names) == 0:
             return self.solids[solid_name]
         else:

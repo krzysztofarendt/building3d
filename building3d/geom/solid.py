@@ -73,7 +73,7 @@ class Solid:
         wall_name = names.pop(0)
 
         if wall_name not in self.get_wall_names():
-            return None
+            raise ValueError(f"Wall not found: {wall_name}")
         elif len(names) == 0:
             return self.walls[wall_name]
         else:

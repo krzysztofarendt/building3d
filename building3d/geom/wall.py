@@ -114,13 +114,13 @@ class Wall:
         polygon_names_all = self.get_polygon_names(children=True)
 
         if poly_name not in polygon_names_all:
-            return None
+            raise ValueError(f"Polygon not found: {poly_name}")
         elif len(names) == 1:  # searching for subpolygon
             subpoly_name = names[0]
             if subpoly_name in polygon_names_all:
                 return self.polygons[subpoly_name]
             else:
-                return None
+                raise ValueError(f"Subpolygon not found: {subpoly_name}")
         elif len(names) == 0:
             return self.polygons[poly_name]
         else:

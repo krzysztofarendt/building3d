@@ -54,7 +54,7 @@ class Building:
         zone_name = names.pop(0)
 
         if zone_name not in self.get_zone_names():
-            return None
+            raise ValueError(f"Zone {zone_name} not found")
         elif len(names) == 0:
             return self.zones[zone_name]
         else:
