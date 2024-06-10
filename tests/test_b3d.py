@@ -21,7 +21,7 @@ def test_b3d():
 
         # Add window (subpolygon)
         # TODO: High-level API for adding subpolygons is needed
-        wall = zone_1.get_wall(zone_1.name + "-wall-wall0")  # Hardcoded name in box()
+        wall = zone_1.find_wall("wall-0")  # Hardcoded name in box()
         wall.add_polygon(
             Polygon(
                 [
@@ -32,14 +32,14 @@ def test_b3d():
                 ],
                 name="window",
             ),
-            parent=zone_1.name + "-poly-wall0",  # Hardcoded name in box()
+            parent="wall-0",  # Hardcoded name in box()
         )
 
         zone_2 = box(1, 1, 1, (1, 0, 0), name="Zone_2")
         zones = [zone_1, zone_2]
         building = Building(name="building")
         for z in zones:
-            building.add_zone_instance(z)
+            building.add_zone(z)
 
         building.generate_simulation_mesh(delta=0.3, include_volumes=True)
 
@@ -49,18 +49,18 @@ def test_b3d():
         # Check geometry
         assert np.isclose(building.volume(), b_copy.volume())
         assert building.name == b_copy.name
-        for zname in building.zones.keys():
-            assert zname in b_copy.zones.keys()
-            for sname in building.zones[zname].solids.keys():
-                assert sname in b_copy.zones[zname].solids.keys()
+        for zname in building.get_zone_names():
+            assert zname in b_copy.get_zone_names()
+            for sname in building.zones[zname].get_solid_names():
+                assert sname in b_copy.zones[zname].get_solid_names()
                 vol1 = building.zones[zname].solids[sname].volume
                 vol2 = b_copy.zones[zname].solids[sname].volume
                 assert np.isclose(vol1, vol2)
-                for wall in building.zones[zname].solids[sname].walls:
-                    b_copy_walls = b_copy.zones[zname].solids[sname].walls
+                for wall in building.zones[zname].solids[sname].get_walls():
+                    b_copy_walls = b_copy.zones[zname].solids[sname].get_walls()
                     assert wall.name in [w.name for w in b_copy_walls]
-                    for pname in wall.polygons.keys():
-                        assert pname in wall.polygons.keys()
+                    for pname in wall.get_polygon_names():
+                        assert pname in wall.get_polygon_names()
 
         # Check mesh
         assert len(building.mesh.polymesh.vertices) == len(

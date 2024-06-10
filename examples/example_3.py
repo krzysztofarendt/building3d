@@ -1,3 +1,4 @@
+import building3d.logger
 from building3d.display.plot_building import plot_building
 from building3d.display.plot_mesh import plot_mesh
 from building3d.geom.building import Building
@@ -6,11 +7,11 @@ from building3d.io.b3d import write_b3d
 from building3d.mesh.quality.mesh_stats import mesh_stats
 
 if __name__ == "__main__":
-    zone = box(2.0, 5.0, 3.0)
+    zone = box(2.0, 5.0, 3.0, name="example_3_zone")
 
     # Save to B3D
     building = Building(name="example_3")
-    building.add_zone_instance(zone)
+    building.add_zone(zone)
     building.generate_simulation_mesh(delta=0.5, include_volumes=True)
 
     print(mesh_stats(building.mesh.polymesh.vertices, building.mesh.polymesh.faces))

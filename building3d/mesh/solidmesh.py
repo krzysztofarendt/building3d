@@ -25,7 +25,7 @@ class SolidMesh:
         self.delta = delta
 
         # Solids to be meshed
-        self.solids = {}
+        self.solids = {}  # {Solid.uid: Solid}
 
         # Attributes filled with data by self.generate()
         self.vertices = []
@@ -60,7 +60,9 @@ class SolidMesh:
 
         All solid boundary polygons are also added (if they were not already added manually).
         """
-        self.solids[sld.name] = sld
+        if sld.uid in self.solids.keys():
+            raise MeshError(f"Solid {sld.uid} already exists")
+        self.solids[sld.uid] = sld
 
     def generate(self, boundary_vertices: dict[str, list[Point]] = {}):
         """Generate mesh for all added polygons and solids."""

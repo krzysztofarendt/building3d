@@ -1,4 +1,4 @@
-.PHONY: format lint lint-full test coverage count count-tests example_1 example_2 example_3 test_publish publish
+.PHONY: format lint lint-full test coverage count count-tests example_1 example_2 example_3 examples test_publish publish
 
 format:
 	black $(shell ls **/*.py)
@@ -30,6 +30,13 @@ example_2:
 
 example_3:
 	python examples/example_3.py
+
+examples:
+	python examples/example_1.py
+	python examples/example_2.py
+	python examples/example_3.py
+	python examples/read_teapot.py
+	python examples/read_write_dotbim.py
 
 test_publish:
 	-rm -r logs/

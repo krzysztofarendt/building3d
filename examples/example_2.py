@@ -8,6 +8,7 @@ from building3d.display.plot_mesh import plot_mesh
 from building3d.geom.building import Building
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
+from building3d.geom.solid import Solid
 from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
 from building3d.io.b3d import read_b3d
@@ -88,8 +89,10 @@ def example_2():
     floor_0 = Wall([floor_0_poly], "floor_0")
     ceiling = Wall([ceiling_poly], "ceiling")
 
+    solid_fl0 = Solid([wall_a, wall_bcd, floor_0, ceiling], name="solid_floor_0")
+
     zone = Zone()
-    zone.add_solid("solid_floor_0", [wall_a, wall_bcd, floor_0, ceiling])
+    zone.add_solid(solid_fl0)
 
     # Floor 1
     floor_1_poly = Polygon([p_aab, p_abb, p_bbb, p_bab], "floor_1_poly")
@@ -101,11 +104,12 @@ def example_2():
     floor_1 = Wall([floor_1_poly], "floor_1")
     roof = Wall([roof_a_poly, roof_b_poly, roof_c_poly, roof_d_poly], "roof")
 
-    zone.add_solid("solid_floor_1", [floor_1, roof])
+    solid_fl1 = Solid([floor_1, roof], name="solid_floor_1")
+    zone.add_solid(solid_fl1)
 
     # Make building instance
     building = Building(name="example_2")
-    building.add_zone_instance(zone)
+    building.add_zone(zone)
 
     # Generate mesh
     start_time = time.time()

@@ -16,6 +16,7 @@ from building3d.mesh.triangulation import delaunay_triangulation
 from building3d import random_within
 from building3d.config import MESH_JOGGLE
 from building3d.config import MESH_DELTA
+from building3d.config import TETRA_MAX_TRIES
 
 
 logger = logging.getLogger(__name__)
@@ -58,7 +59,7 @@ def get_invalid_points(
     restricted: list[int],
     min_volume: float,
 ) -> list[int]:
-    """Return a list of indices of vertices at imbalanced mesh.
+    """Return a list of indices of vertices connected to imbalanced elements.
 
     An element is invalid if:
     - volumes of connected elements are imbalanced
@@ -142,12 +143,13 @@ def delaunay_tetrahedralization(
     # -> boundary_vertices, boundary_faces
     if len(boundary_vmap.keys()) == 0:
         logger.debug("Need to create boundary mesh via triangulation of the surrounding polygons")
-        for poly in sld.polygons():
-            polymesh_vertices, _ = delaunay_triangulation(poly, delta=delta)
-            for pt in polymesh_vertices:
-                if pt not in boundary_vertices:
-                    boundary_vertices.append(pt)
-                    boundary_pts.add(pt)
+        for wall in sld.get_walls():
+            for poly in wall.get_polygons(children=False):
+                polymesh_vertices, _ = delaunay_triangulation(poly, delta=delta)
+                for pt in polymesh_vertices:
+                    if pt not in boundary_vertices:
+                        boundary_vertices.append(pt)
+                        boundary_pts.add(pt)
     else:
         logger.debug("Will take boundary vertices provided by the user")
         for _, poly_points in boundary_vmap.items():
@@ -191,7 +193,7 @@ def delaunay_tetrahedralization(
                 if sld.is_point_inside(pt):
                     # Check if point is not too close to the boundary polygons
                     distance_to_boundary_ok = True
-                    for poly in sld.polygons():
+                    for poly in sld.get_polygons():
                         if poly.distance_point_to_polygon(pt) < delta / 2:
                             # It is too close to at least one polygon, so shouldn't be used
                             distance_to_boundary_ok = False
@@ -209,6 +211,10 @@ def delaunay_tetrahedralization(
 
     while not mesh_ok:
         pass_num += 1
+        logger.debug(f"Meshing pass number {pass_num}")
+
+        if pass_num > TETRA_MAX_TRIES:
+            raise MeshError(f"Meshing failed after {pass_num} passes")
 
         # Delaunay
         pts_arr = np.array([[p.x, p.y, p.z] for p in vertices])
@@ -243,7 +249,7 @@ def delaunay_tetrahedralization(
                 zero_volume_index.append(i)
 
         if len(zero_volume_index) > 0:  # TODO: Remove
-            print("!!! ZERO VOLUME ELEMENTS REMOVED !!! I DID NOT KNOW IT EVERY HAPPENS! :)")
+            print("!!! ZERO VOLUME ELEMENTS REMOVED !!! I DID NOT KNOW IT EVER HAPPENS! :)")
 
         logger.debug(f"Number of removed zero volume elements = {len(zero_volume_index)}")
         tetrahedra = [el for i, el in enumerate(tetrahedra) if i not in zero_volume_index]
@@ -302,7 +308,7 @@ def delaunay_tetrahedralization(
     assert len(unique_indices) == len(vertices), "Not all vertices have been used for mesh!"
 
     # Are all solid vertices present in the mesh?
-    for pt in sld.vertices():
+    for pt in sld.get_vertices():
         assert pt in vertices, f"Solid point missing: {pt}"
 
     # Do all interior elements have 4 neighbors?

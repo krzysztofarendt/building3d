@@ -80,7 +80,7 @@ def test_zone_from_solids():
 
     zone = Zone()
     solid1 = Solid(walls=[wall_a, wall_bcd, floor_0, ceiling], name="solid_floor_0")
-    zone.add_solid_instance(solid1)
+    zone.add_solid(solid1)
 
     # Floor 1
     floor_1_poly = Polygon([p_aab, p_abb, p_bbb, p_bab], "floor_1_poly")
@@ -93,12 +93,12 @@ def test_zone_from_solids():
     roof = Wall([roof_a_poly, roof_b_poly, roof_c_poly, roof_d_poly], "roof")
 
     solid2 = Solid(walls=[floor_1, roof], name="solid_floor_1")
-    zone.add_solid_instance(solid2)
+    zone.add_solid(solid2)
 
     assert len(zone.solids) == 2
-    assert len(zone.solids[solid1.name].polygons()) == 6
-    assert len(zone.solids[solid2.name].polygons()) == 5
+    assert len(zone.solids[solid1.name].get_polygons()) == 6
+    assert len(zone.solids[solid2.name].get_polygons()) == 5
 
     # Make building instance
     building = Building(name="example_2")
-    building.add_zone_instance(zone)
+    building.add_zone(zone)

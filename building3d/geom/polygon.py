@@ -16,6 +16,7 @@ from building3d.geom.triangle import triangle_area
 from building3d.geom.triangle import is_point_inside as is_point_inside_triangle
 from building3d.geom.triangle import triangulate
 from building3d import random_id
+from building3d import validate_name
 from building3d.config import GEOM_EPSILON
 from building3d.util.roll_back import roll_back
 
@@ -35,8 +36,9 @@ class Polygon:
     """
     def __init__(
         self,
-        points: list[Point],
+        points: list[Point] = [],
         name: str | None = None,
+        uid: str | None = None,
         triangles: list[tuple[int, ...]] = [],
     ):
         """Make polygon.
@@ -46,6 +48,7 @@ class Polygon:
         Args:
             points: list of coplanar points, at least 3
             name: polygon name, will be random if `None`
+            uid: polygon uid, will be random if `None`
             triangles: polygon faces (if known)
 
         Return:
@@ -55,9 +58,13 @@ class Polygon:
             name = random_id()
         logger.debug(f"Creating polygon: {name}")
 
-        self.name = name
+        self.name = validate_name(name)
+        if uid is None:
+            self.uid = random_id()
+        else:
+            self.uid = uid
 
-        self.points = list(points)
+        self.points: list[Point] = list(points)
         logger.debug(f"Points added: {self.points}")
 
         # Verify geometry (>= 3 coplanar points)
@@ -93,17 +100,26 @@ class Polygon:
         self.area = self._area()
 
     def copy(self, new_name: str | None = None):
-        """Return a deep copy of itself.
+        """Return a copy of itself (with a new name).
 
         Args:
-            new_name: polygon name (must be unique)
+            new_name: polygon name (must be unique within a Wall)
 
         Return:
             Polygon
         """
-        if new_name is None:
-            new_name = random_id()
         return Polygon([Point(p.x, p.y, p.z) for p in self.points], name=new_name)
+
+    def flip(self, new_name: str | None = None):
+        """Copy and flip the polygon. Changes the name.
+
+        Args:
+            new_name: polygon name (must be unique within a Wall)
+
+        Return:
+            Polygon
+        """
+        return Polygon(self.points[::-1], name=new_name)
 
     def points_as_array(self) -> np.ndarray:
         """Returns a copy of the points as a numpy array."""

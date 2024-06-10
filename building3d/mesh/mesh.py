@@ -37,8 +37,9 @@ class Mesh:
         All solid boundary polygons are added automatically.
         """
         self.solidmesh.add_solid(sld)
-        for poly in sld.polygons():
-            self.add_polygon(poly)
+        for wall in sld.get_walls():
+            for poly in wall.get_polygons(children=False):
+                self.add_polygon(poly)
 
     def add_zone(self, zone: Zone):
         """Add zone. It will add all solids and polygons of the zone."""

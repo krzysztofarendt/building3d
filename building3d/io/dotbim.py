@@ -5,8 +5,8 @@ import json
 import dotbimpy
 import numpy as np
 
-from building3d import random_id
 from building3d.geom.building import Building
+from building3d.geom.zone import Zone
 from building3d.geom.solid import Solid
 from building3d.geom.wall import Wall
 from building3d.geom.polygon import Polygon
@@ -27,10 +27,10 @@ def write_dotbim(path: str, bdg: Building) -> None:
     meshes = []
     elements = []
 
-    for zone in bdg.zones.values():
-        for sld in zone.solids.values():
-            for wall in sld.walls:
-                for poly in wall.get_polygons(only_parents=False):
+    for zone in bdg.get_zones():
+        for sld in zone.get_solids():
+            for wall in sld.get_walls():
+                for poly in wall.get_polygons(children=True):
                     verts, faces = poly.points, poly.triangles
                     coordinates = points_to_flat_list(verts)
                     indices = np.array(faces).flatten().tolist()
@@ -44,12 +44,16 @@ def write_dotbim(path: str, bdg: Building) -> None:
 
                     # Element properties
                     color = dotbimpy.Color(r=255, g=255, b=255, a=255)
-                    guid = random_id()  # NOTE: GUID not used by Building3D
+                    guid = poly.uid
                     info = {
-                        "Zone": zone.name,
-                        "Solid": sld.name,
-                        "Wall": wall.name,
-                        "Polygon": poly.name,
+                        "zone_name": zone.name,
+                        "zone_uid": zone.uid,
+                        "solid_name": sld.name,
+                        "solid_uid": sld.uid,
+                        "wall_name": wall.name,
+                        "wall_uid": wall.uid,
+                        "polygon_name": poly.name,
+                        "polygon_uid": poly.uid,
                     }
                     rotation = dotbimpy.Rotation(qx=0, qy=0, qz=0, qw=1.0)
                     type = poly.name
@@ -74,8 +78,9 @@ def write_dotbim(path: str, bdg: Building) -> None:
 
     # File meta data
     file_info = {
-        "Building": bdg.name,
-        "GeneratedBy": TOOL_NAME
+        "building_name": bdg.name,
+        "building_uid": bdg.uid,
+        "generated_by": TOOL_NAME
     }
 
     # Instantiate and save File object
@@ -95,9 +100,9 @@ def read_dotbim(path: str) -> Building:
         bim = json.load(f)
 
     error_msg = ".bim format not compatible with Building3D"
-    if not "GeneratedBy" in bim["info"].keys():
+    if not "generated_by" in bim["info"].keys():
         raise KeyError(error_msg)
-    elif bim["info"]["GeneratedBy"] != TOOL_NAME:
+    elif bim["info"]["generated_by"] != TOOL_NAME:
         raise ValueError(error_msg)
 
     # Get mesh
@@ -114,13 +119,18 @@ def read_dotbim(path: str) -> Building:
         }
 
     # Get metadata
-    bname = bim["info"]["Building"]
+    bname = bim["info"]["building_name"]
+    buid = bim["info"]["building_uid"]
     for el in bim["elements"]:
         mid = el["mesh_id"]
-        data[mid]["Zone"] = el["info"]["Zone"]
-        data[mid]["Solid"] = el["info"]["Solid"]
-        data[mid]["Wall"] = el["info"]["Wall"]
-        data[mid]["Polygon"] = el["info"]["Polygon"]
+        data[mid]["zone_name"] = el["info"]["zone_name"]
+        data[mid]["zone_uid"] = el["info"]["zone_uid"]
+        data[mid]["solid_name"] = el["info"]["solid_name"]
+        data[mid]["solid_uid"] = el["info"]["solid_uid"]
+        data[mid]["wall_name"] = el["info"]["wall_name"]
+        data[mid]["wall_uid"] = el["info"]["wall_uid"]
+        data[mid]["polygon_name"] = el["info"]["polygon_name"]
+        data[mid]["polygon_uid"] = el["info"]["polygon_uid"]
 
     # Construct the model dictionary
     def ddict():
@@ -129,31 +139,47 @@ def read_dotbim(path: str) -> Building:
 
     model = recursive_default_dict()
     for poly_num in data.keys():
-        poly_name = data[poly_num]["Polygon"]
-        wall_name = data[poly_num]["Wall"]
-        solid_name = data[poly_num]["Solid"]
-        zone_name = data[poly_num]["Zone"]
+        poly_name = data[poly_num]["polygon_name"]
+        poly_uid = data[poly_num]["polygon_uid"]
+        wall_name = data[poly_num]["wall_name"]
+        wall_uid = data[poly_num]["wall_uid"]
+        solid_name = data[poly_num]["solid_name"]
+        solid_uid = data[poly_num]["solid_uid"]
+        zone_name = data[poly_num]["zone_name"]
+        zone_uid = data[poly_num]["zone_uid"]
 
-        model[bname][zone_name][solid_name][wall_name][poly_name]["vertices"] = \
-            data[poly_num]["vertices"]
-        model[bname][zone_name][solid_name][wall_name][poly_name]["faces"] = \
-            data[poly_num]["faces"]  # NOTE: Not used in reconstruction
+        zkey = (zone_uid, zone_name)
+        skey = (solid_uid, solid_name)
+        wkey = (wall_uid, wall_name)
+        pkey = (poly_uid, poly_name)
+
+        model[bname][zkey][skey][wkey][pkey]["vertices"] = data[poly_num]["vertices"]
+        # NOTE: faces not used in reconstruction
+        model[bname][zkey][skey][wkey][pkey]["faces"] = data[poly_num]["faces"]
 
     # Reconstruct the Building instance
-    building = Building(name=bname)
-    for zname in model[bname].keys():
+    building = Building(name=bname, uid=buid)
+    for zkey in model[bname].keys():
+        zuid, zname = zkey
         solids = []
-        for sname in model[bname][zname].keys():
+        for skey in model[bname][zkey].keys():
+            suid, sname = skey
             walls = []
-            for wname in model[bname][zname][sname].keys():
+            for wkey in model[bname][zkey][skey].keys():
+                wuid, wname = wkey
                 polys = []
-                for pname in model[bname][zname][sname][wname].keys():
+                for pkey in model[bname][zkey][skey][wkey].keys():
+                    puid, pname = pkey
                     polys.append(Polygon(
-                        points=model[bname][zname][sname][wname][pname]["vertices"],
+                        points=model[bname][zkey][skey][wkey][pkey]["vertices"],
                         name=pname,
+                        uid=puid,
                     ))
-                walls.append(Wall(polygons=polys, name=wname))
-            solids.append(Solid(walls=walls, name=sname))
-        building.add_zone(name=zname, solids=solids)
+                walls.append(Wall(polygons=polys, name=wname, uid=wuid))
+            solids.append(Solid(walls=walls, name=sname, uid=suid))
+        zone = Zone(name=zname, uid=zuid)
+        for sld in solids:
+            zone.add_solid(sld)
+        building.add_zone(zone)
 
     return building

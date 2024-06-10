@@ -5,7 +5,7 @@ from building3d.geom.zone import Zone
 
 
 def plot_zone(zone: Zone):
-    verts, faces = zone.get_mesh(only_parents=False)
+    verts, faces = zone.get_mesh(children=True)
 
     # Reformat points and faces
     varr = points_to_array(verts)

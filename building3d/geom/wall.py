@@ -2,6 +2,7 @@
 import numpy as np
 
 from building3d import random_id
+from building3d import validate_name
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
 from building3d.geom.exceptions import GeometryError
@@ -15,27 +16,81 @@ class Wall:
 
     Wall is used to model 1D phenomena (e.g. heat transfer).
     """
-    def __init__(self, polygons: list[Polygon] = [], name: str | None = None):
+    def __init__(
+        self,
+        polygons: list[Polygon] = [],
+        name: str | None = None,
+        uid: str | None = None,
+    ):
+        """Initialize the wall.
+
+        Args:
+            polygons: list of Polygon instances
+            name: name of the wall, random if None
+            uid: unique id of the wall, random if None
+        """
         if name is None:
             name = random_id()
 
-        self.name = name
-        self.polygons: dict[str, Polygon] = {}  # Dict of polygons and subpolygons
-        self.polygraph: dict[str, list[str]] = {}  # Graph with parent and subpolygons
+        self.name = validate_name(name)
+        if uid is not None:
+            self.uid = uid
+        else:
+            self.uid = random_id()
+
+        self.polygons: dict[str, Polygon] = {}  # {Polygon.name: Polygon}
+
+        # Graph of polygons and subpolygons
+        # Keys are parent polygons, keys are subpolygons
+        # Subpolygons are never added to keys
+        self.polygraph: dict[str, list[str]] = {}  # {Polygon.name: [Polygon.name, ...]}
 
         for poly in polygons:
             self.add_polygon(poly)
 
-    def get_parent_names(self) -> list[str]:
-        """Return list of parent polygon names."""
-        return list(self.polygraph.keys())
+    def add_polygon(self, poly: Polygon, parent: str | None = None):
+        """Add polygon to the wall.
 
-    def get_polygons(self, only_parents=True) -> list[Polygon]:
-        """Return list of all polygons (parents and optionally subpolygons)."""
-        if only_parents:
-            return [self.polygons[name] for name in self.get_parent_names()]
+        A polygon can be a top-level (parent) polygon or a subpolygon.
+        Only 1 level of subpolygons is allowed, i.e. a polygon cannot be
+        a subpolygon to another subpolygon.
+
+        A subpolygon must be entirely inside its parent polygon.
+
+        Args:
+            poly: polygon to be added
+            parent: name of parent polygon if this is a subpolygon (default None)
+        """
+        if poly.name in self.polygons.keys():
+            raise GeometryError(f"Polygon {poly.name} already exists in the wall")
+
+        self.polygons[poly.name] = poly
+        if parent is None:
+            # This might be a parent polygon
+            self.polygraph[poly.name] = []
         else:
-            return list(self.polygons.values())
+            # Add this polygon to its parent
+            self.polygraph[parent].append(poly.name)
+
+            # Assert polygon is inside parent polygon
+            for p in poly.points:
+                if not self.polygons[parent].is_point_inside(p):
+                    raise GeometryError(f"Polygon {poly.name} is not entirely inside {parent}")
+
+        # Sanity check
+        if parent is not None:
+            assert poly.name not in self.polygraph.keys(), "Subpolygon cannot be a parent polygon"
+
+    def get_polygon_names(self, children=False) -> list[str]:
+        """Return list of parent polygon names."""
+        if children is False:
+            return list(self.polygraph.keys())
+        else:
+            return list(self.polygons.keys())
+
+    def get_polygons(self, children=False) -> list[Polygon]:
+        """Return list of all polygons (parents and optionally subpolygons)."""
+        return [self.polygons[name] for name in self.get_polygon_names(children=children)]
 
     def get_subpolygons(self, parent: str) -> list[Polygon]:
         """Return list of subpolygons of the given parent polygon."""
@@ -51,42 +106,36 @@ class Wall:
                 return parent_name
         return None
 
-    def add_polygon(self, poly: Polygon, parent: str | None = None):
-        """Add polygon to the wall.
+    def get_object(self, path: str) -> Polygon | None:
+        """Get object by the path. The path contains names of nested components."""
+        names = path.split("/")
+        poly_name = names.pop(0)
 
-        A polygon can be a top-level (parent) polygon or a subpolygon.
-        Only 1 level of subpolygons is allowed, i.e. a polygon cannot be
-        a subpolygon to another subpolygon.
+        polygon_names_all = self.get_polygon_names(children=True)
 
-        A subpolygon must be entirely inside its parent polygon.
-
-        Args:
-            poly: polygon to be added
-            parent: name of parent polygon if this is a subpolygon (default None)
-        """
-        self.polygons[poly.name] = poly
-        if parent is None:
-            # This might be a parent polygon
-            self.polygraph[poly.name] = []
+        if poly_name not in polygon_names_all:
+            raise ValueError(f"Polygon not found: {poly_name}")
+        elif len(names) == 1:  # searching for subpolygon
+            subpoly_name = names[0]
+            if subpoly_name in polygon_names_all:
+                return self.polygons[subpoly_name]
+            else:
+                raise ValueError(f"Subpolygon not found: {subpoly_name}")
+        elif len(names) == 0:
+            return self.polygons[poly_name]
         else:
-            # Add this polygon to its parent
-            self.polygraph[parent].append(poly.name)
-
-            # Assert polygon is inside parent polygon
-            for p in poly.points:
-                if not self.polygons[parent].is_point_inside(p):
-                    raise GeometryError(f"Polygon {poly.name} is not entirely inside {parent}")
+            raise ValueError("Path to object too deep (too many slashes)")
 
     def get_mesh(
         self,
-        only_parents: bool = True,
+        children: bool = True,
     ) -> tuple[list[Point], list[tuple[int, ...]]]:
         """Get vertices and faces of this wall's polygons.
 
         This function returns faces generated by the ear-clipping algorithm.
 
         Args:
-            only_parents: if True, only the parent polygons are returned
+            children: if True, parent and subpolygons are returned
 
         Return:
             tuple of vertices and faces
@@ -94,7 +143,7 @@ class Wall:
         verts = []
         faces = []
 
-        for poly in self.get_polygons(only_parents=only_parents):
+        for poly in self.get_polygons(children=children):
             offset = len(verts)
             verts.extend(poly.points)
             f = np.array(poly.triangles) + offset

@@ -20,7 +20,7 @@ def test_dotbim():
         zones = [zone_1, zone_2]
         building = Building(name="building")
         for z in zones:
-            building.add_zone_instance(z)
+            building.add_zone(z)
 
         write_dotbim(path, building)
 

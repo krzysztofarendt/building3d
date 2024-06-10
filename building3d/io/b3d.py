@@ -5,6 +5,8 @@ Its structure is based on the relationships between the classes:
 Building, Zone, Solid, Wall, Polygon, Point.
 E.g. a zone is part of a building, a solid is part of a zone, and a wall is part of a solid.
 
+Element `uid`s are not saved. They are randomly generated when reading the file.
+
 Format:
 {
     "name": Building.name,
@@ -79,10 +81,10 @@ def write_b3d(path: str, bdg: Building) -> None:
     bdict["name"] = bdg.name
 
     # Zones (geometry)
-    for zone in bdg.zones.values():
-        for solid in zone.solids.values():
-            for wall in solid.walls:  # TODO: walls should be a dict, to keep consistency
-                for poly in wall.polygons.values():
+    for zone in bdg.get_zones():
+        for solid in zone.get_solids():
+            for wall in solid.get_walls():
+                for poly in wall.get_polygons(children=True):
                     points = points_to_nested_list(poly.points)
                     triangles = poly.triangles
                     bdict["zones"][zone.name][solid.name][wall.name][poly.name]["points"] \
@@ -152,9 +154,9 @@ def read_b3d(path: str) -> Building:
                 walls.append(wall)
 
             solid = Solid(walls=walls, name=sname)
-            zone.add_solid_instance(solid)  # TODO: Parent solids not implemented yet
+            zone.add_solid(solid)
 
-        building.add_zone_instance(zone)
+        building.add_zone(zone)
 
     # Read polygon mesh
     polymesh = PolyMesh(bdict["mesh"]["polymesh"]["delta"])
