@@ -88,11 +88,12 @@ make example_3
 - [x] Tidy up methods in Building, Zone, Solid, Wall - they should be similar
 - [x] Add method `get_object(path/to/object)`, e.g. `Building.get_object("zone_name/solid_name/wall_name/polygon_name")`
 - [x] Finish `floor_plan()`
-- [ ] `Solid` should find polygons with reversed order of vertices and fix it
+- [ ] More complex example based on `floor_plan()`
 - [ ] Export mesh to VTK format to enable convertions with meshio: https://vtk.org/wp-content/uploads/2015/04/file-formats.pdf
 - [ ] Figure out subpolygon meshing and general usage
 - [ ] `example_1` fails with `delta=0.5` and it takes 5 minutes to generate the mesh
 - [ ] `Polygon.__eq__()` can return wrong result for some non-convex polygons
+- [x] ~~`Solid` should find polygons with reversed order of vertices and fix it~~ - do not know how to do it
 
 Other cool projects:
 - https://gitlab.com/drj11/pypng

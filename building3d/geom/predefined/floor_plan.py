@@ -86,8 +86,11 @@ def floor_plan(
         if wall_num < 0:
             raise ValueError(f"Wall name not found: {wall_name}")
 
-        wall_left_pt = floor_pts[wall_num]
-        wall_right_pt = floor_pts[wall_num + 1]
+        left_index = wall_num
+        right_index = wall_num + 1 if wall_num + 1 < len(wall_names) else 0
+
+        wall_left_pt = floor_pts[left_index]
+        wall_right_pt = floor_pts[right_index]
 
         left = create_point_between_2_points_at_distance(
             p1 = wall_left_pt,
@@ -136,6 +139,11 @@ def floor_plan(
         floor_pts = [p + translate for p in floor_pts]
         ceiling_pts = [p + translate for p in ceiling_pts]
         z0 = translate[2]
+
+        for ap_name in aperture_pts.keys():
+            original_points = aperture_pts[ap_name][1]
+            translated_points = [p + translate for p in original_points]
+            aperture_pts[ap_name][1] = translated_points
     else:
         z0 = 0
 

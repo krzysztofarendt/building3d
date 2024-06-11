@@ -147,12 +147,55 @@ def test_floor_plan_with_apertures(show=False):
         "window-1a": ("w1", 0.3, 0.0, 0.1, 0.8),
         "window-1b": ("w1", 0.7, 0.2, 0.2, 0.6),
         "window-2": ("w2", 0.5, 0.3, 0.8, 0.5),
+        "window-3": ("w3", 0.5, 0.3, 0.8, 0.5),
     }
 
     zone = floor_plan(
         plan,
         height=h,
         name="room",
+        wall_names=["w0", "w1", "w2", "w3"],
+        floor_name="floor",
+        ceiling_name="ceiling",
+        apertures=apertures,
+    )
+
+    vol = list(zone.get_solids())[0].volume
+    assert np.isclose(vol, 5 * 5 * 1)
+
+    obj = zone.get_object("room")
+    assert type(obj) is Solid
+    obj = zone.get_object("room/w0")
+    assert type(obj) is Wall
+    obj = zone.get_object("room/w0/window-0")
+    assert type(obj) is Polygon
+    obj = zone.get_object("room/w1/window-1a")
+    assert type(obj) is Polygon
+    obj = zone.get_object("room/w1/window-1b")
+    assert type(obj) is Polygon
+    obj = zone.get_object("room/w2/window-2")
+    assert type(obj) is Polygon
+
+    if show:
+        plot_objects(zone)
+
+
+def test_floor_plan_with_apertures_and_translation(show=False):
+    plan = [(0, 0), (5, 0), (5, 5), (0, 5)]
+    h = 1
+    apertures = {
+        "window-0": ("w0", 0.5, 0.3, 0.3, 0.5),
+        "window-1a": ("w1", 0.3, 0.0, 0.1, 0.8),
+        "window-1b": ("w1", 0.7, 0.2, 0.2, 0.6),
+        "window-2": ("w2", 0.5, 0.3, 0.8, 0.5),
+        "window-3": ("w3", 0.5, 0.3, 0.8, 0.5),
+    }
+
+    zone = floor_plan(
+        plan,
+        height=h,
+        name="room",
+        translate=(0, 0, 10),
         wall_names=["w0", "w1", "w2", "w3"],
         floor_name="floor",
         ceiling_name="ceiling",
