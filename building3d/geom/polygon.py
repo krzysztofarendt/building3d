@@ -121,6 +121,96 @@ class Polygon:
         """
         return Polygon(self.points[::-1], name=new_name)
 
+    def slice(
+        self,
+        points: list[Point],
+        name1: str,
+        pt1: Point,
+        name2: str,
+        pt2: Point):
+        """Slice a polygon into two parts.
+
+        Args:
+            points: list of points
+            name1: name of the first part
+            pt1: some point used to identify the first part
+            name2: name of the second part
+            pt2: some point used to identify the second part
+
+        Return:
+            (Polygon, Polygon)
+        """
+        # Make sure all slicing points or within this polygon
+        for p in points:
+            if not self.is_point_inside(p):
+                raise GeometryError(
+                    f"At least on of the points is not inside the polygon {self.name}: {p}"
+                )
+
+        # Make sure there are exactly 2 points which lie on one or two edges
+        edge_points = []
+        for sl_num, p in enumerate(points):
+            for edge_num, (ep1, ep2) in enumerate(self.edges):
+                d_to_edge = distance_point_to_edge(ptest=p, p1=ep1, p2=ep2)
+                if np.isclose(d_to_edge, 0):
+                    edge_points.append((sl_num, edge_num))
+
+        if len(edge_points) > 2:
+            raise GeometryError(
+                f"Too many ({len(edge_points)}) slicing points are touching the polygon's edges"
+            )
+        if len(edge_points) < 2:
+            raise GeometryError(
+                "Too few slicing ({len(edge_points)}) points are touching the polygon's edges"
+            )
+
+        slice_beg = edge_points[0][0]
+        slice_end = edge_points[1][0]
+        edge_num_1 = edge_points[0][1]
+        edge_num_2 = edge_points[1][1]
+
+        # Reorder slice points from beginning to end
+        slice_points = []
+        i = slice_beg
+        while len(slice_points) < len(points):
+            slice_points.append(points[i])
+            i += 1
+            if i >= len(points):
+                i = 0
+
+        assert slice_points[-1] == points[slice_end], "Point reordering failed?"
+
+        # Create two polygons through slicing
+        if edge_num_1 == edge_num_2:
+            # Slicing starts and ends at the same edge
+            # poly_1 is composed of slice_points only
+            poly_1 = Polygon(slice_points, name=name1)
+
+            # poly_2 is composed of both, own points and sliced points
+            points_2 = []
+            slice_points_included = False
+            for p in self.points:
+                points_2.append(p)
+
+                if p in self.edges[edge_num_1]:
+                    # Slicing ocurred at this edge - need to add slice_points
+                    if not slice_points_included:
+                        for sp in slice_points:
+                            points_2.append(sp)
+                        slice_points_included = True
+
+            poly_2 = Polygon(points_2, name=name2)
+
+        else:
+            # Slicing starts and ends at different edges
+            ... # TODO
+            raise NotImplementedError("This functionality is not implemented yet")
+
+        # Determine which polygon is name1 and which name2, based on pt1 and pt2
+        ...  # TODO
+
+        return (poly_1, poly_2)  # TODO: unit test needed
+
     def points_as_array(self) -> np.ndarray:
         """Returns a copy of the points as a numpy array."""
         return points_to_array(self.points)
