@@ -6,6 +6,15 @@ from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
 
 
+def test_num_edges():
+    p1 = Point(0.0, 0.0, 0.0)
+    p2 = Point(1.0, 0.0, 0.0)
+    p3 = Point(1.0, 1.0, 0.0)
+    p4 = Point(0.0, 1.0, 0.0)
+    poly = Polygon([p1, p2, p3, p4])
+    assert len(poly.edges) == 4
+
+
 def test_too_few_points():
     p0 = Point(0.0, 0.0, 0.0)
     p1 = Point(1.0, 0.0, 0.0)
@@ -411,6 +420,80 @@ def test_polygon_flip():
     assert np.isclose(flipped.area, poly.area)
     assert flipped.centroid == poly.centroid
     assert np.isclose(flipped.normal, -poly.normal).all()
+
+
+def test_polygon_slice_start_and_end_at_same_edge():
+    p1 = Point(0.0, 0.0, 0.0)
+    p2 = Point(1.0, 0.0, 0.0)
+    p3 = Point(1.0, 1.0, 0.0)
+    p4 = Point(0.0, 1.0, 0.0)
+    poly = Polygon([p1, p2, p3, p4])
+
+    slicing_points = [
+        Point(0.3, 0.0, 0.0),
+        Point(0.3, 0.5, 0.0),
+        Point(0.6, 0.5, 0.0),
+        Point(0.6, 0.0, 0.0),
+    ]
+    poly1, poly2 = poly.slice(
+        slicing_points,
+        name1="poly1",
+        pt1=Point(0.0, 0.0, 0.0),
+        name2="poly2",
+        pt2=Point(0.45, 0.25, 0.0),
+    )
+
+    assert np.isclose(poly1.normal, poly.normal).all()
+    assert np.isclose(poly2.normal, poly.normal).all()
+    assert np.isclose(poly.area, poly1.area + poly2.area)
+
+
+def test_polygon_slice_start_and_end_at_different_edges():
+    p1 = Point(0.0, 0.0, 0.0)
+    p2 = Point(1.0, 0.0, 0.0)
+    p3 = Point(1.0, 1.0, 0.0)
+    p4 = Point(0.0, 1.0, 0.0)
+    poly = Polygon([p1, p2, p3, p4])
+
+    slicing_points = [
+        Point(0.5, 0.0, 0.0),
+        Point(0.5, 1.0, 0.0),
+    ]
+    poly1, poly2 = poly.slice(
+        slicing_points,
+        name1="poly1",
+        pt1=Point(0.0, 0.0, 0.0),
+        name2="poly2",
+        pt2=Point(0.45, 0.25, 0.0),
+    )
+
+    assert np.isclose(poly1.normal, poly.normal).all()
+    assert np.isclose(poly2.normal, poly.normal).all()
+    assert np.isclose(poly.area, poly1.area + poly2.area)
+
+
+def test_polygon_slice_start_at_a_vertex():
+    p1 = Point(0.0, 0.0, 0.0)
+    p2 = Point(1.0, 0.0, 0.0)
+    p3 = Point(1.0, 1.0, 0.0)
+    p4 = Point(0.0, 1.0, 0.0)
+    poly = Polygon([p1, p2, p3, p4])
+
+    slicing_points = [
+        Point(0.0, 0.0, 0.0),
+        Point(1.0, 1.0, 0.0),
+    ]
+    poly1, poly2 = poly.slice(
+        slicing_points,
+        name1="poly1",
+        pt1=Point(1.0, 0.0, 0.0),
+        name2="poly2",
+        pt2=Point(0.0, 1.0, 0.0),
+    )
+
+    assert np.isclose(poly1.normal, poly.normal).all()
+    assert np.isclose(poly2.normal, poly.normal).all()
+    assert np.isclose(poly.area, poly1.area + poly2.area)
 
 
 if __name__ == "__main__":

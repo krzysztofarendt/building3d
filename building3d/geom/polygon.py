@@ -203,11 +203,70 @@ class Polygon:
 
         else:
             # Slicing starts and ends at different edges
-            ... # TODO
-            raise NotImplementedError("This functionality is not implemented yet")
+            # Polygon 1
+            points_1 = []
+            slicing_points_added = False
+            discard_edges = []
+            edge_inc = 1 if edge_num_2 > edge_num_1 else -1
+            for n in range(edge_num_1 + 1, edge_num_2, edge_inc):
+                discard_edges.append(n)
+
+            discard_points = []
+            for edge_num in discard_edges:
+                discard_points.extend([self.edges[edge_num][0], self.edges[edge_num][1]])
+
+            for p in self.points:
+                if p in discard_points:
+                    continue
+
+                points_1.append(p)
+
+                if not slicing_points_added:
+                    if p in self.edges[edge_num_1] or p in self.edges[edge_num_2]:
+                        # Slicing ocurred at this edge - need to add slice_points
+                        for sp in slice_points:
+                            points_1.append(sp)
+                            slicing_points_added = True
+
+            poly_1 = Polygon(points_1, name=name1)
+
+            # Polygon 2
+            points_2 = []
+            slicing_points_added = False
+
+            discard_edges = [
+                ed for ed in range(len(self.edges)) if ed not in discard_edges
+                and ed not in (edge_num_1, edge_num_2)
+            ]
+
+            discard_points = []
+            for edge_num in discard_edges:
+                discard_points.extend([self.edges[edge_num][0], self.edges[edge_num][1]])
+
+            for p in self.points:
+                if p in discard_points:
+                    continue
+
+                points_2.append(p)
+
+                if not slicing_points_added:
+                    if p in self.edges[edge_num_1] or p in self.edges[edge_num_2]:
+                        # Slicing ocurred at this edge - need to add slice_points
+                        for sp in slice_points:
+                            points_2.append(sp)
+                            slicing_points_added = True
+
+            poly_2 = Polygon(points_2, name=name2)
 
         # Determine which polygon is name1 and which name2, based on pt1 and pt2
         ...  # TODO
+
+        # Check normals and flip polygons if different
+        if not np.isclose(poly_1.normal, self.normal).all():
+            poly_1 = poly_1.flip(poly_1.name)
+
+        if not np.isclose(poly_2.normal, self.normal).all():
+            poly_2 = poly_2.flip(poly_2.name)
 
         return (poly_1, poly_2)  # TODO: unit test needed
 
@@ -458,6 +517,8 @@ class Polygon:
                 wall_line_segments.append(tuple(segment))
                 segment = []
                 i -= 1
+
+        wall_line_segments.append((self.points[-1], self.points[0]))
 
         return wall_line_segments
 
