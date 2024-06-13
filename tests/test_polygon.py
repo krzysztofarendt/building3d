@@ -491,6 +491,7 @@ def test_polygon_slice_start_and_end_at_a_vertex():
     p4 = Point(0.0, 1.0, 0.0)
     poly = Polygon([p1, p2, p3, p4])
 
+    # Three slicing points
     slicing_points = [
         Point(0.0, 0.0, 0.0),
         Point(0.5, 0.5, 0.0),
@@ -507,6 +508,64 @@ def test_polygon_slice_start_and_end_at_a_vertex():
     assert np.isclose(poly1.normal, poly.normal).all()
     assert np.isclose(poly2.normal, poly.normal).all()
     assert np.isclose(poly.area, poly1.area + poly2.area)
+
+    # Two slicing points
+    slicing_points = [
+        Point(0.0, 0.0, 0.0),
+        Point(1.0, 1.0, 0.0),
+    ]
+    poly1, poly2 = poly.slice(
+        slicing_points,
+        name1="poly1",
+        pt1=Point(1.0, 0.0, 0.0),
+        name2="poly2",
+        pt2=Point(0.0, 1.0, 0.0),
+    )
+
+    assert np.isclose(poly1.normal, poly.normal).all()
+    assert np.isclose(poly2.normal, poly.normal).all()
+    assert np.isclose(poly.area, poly1.area + poly2.area)
+
+
+def test_polygon_slice_start_at_vertex_end_at_edge():
+    p1 = Point(0.0, 0.0, 0.0)
+    p2 = Point(1.0, 0.0, 0.0)
+    p3 = Point(1.0, 1.0, 0.0)
+    p4 = Point(0.0, 1.0, 0.0)
+    poly = Polygon([p1, p2, p3, p4])
+
+    # Three slicing points
+    slicing_points = [
+        Point(0.0, 0.0, 0.0),
+        Point(0.5, 0.5, 0.0),
+        Point(0.5, 1.0, 0.0),
+    ]
+    poly1, poly2 = poly.slice(
+        slicing_points,
+        name1="poly1",
+        pt1=Point(1.0, 0.0, 0.0),
+        name2="poly2",
+        pt2=Point(0.0, 1.0, 0.0),
+    )
+
+    assert np.isclose(poly1.normal, poly.normal).all()
+    assert np.isclose(poly2.normal, poly.normal).all()
+    assert np.isclose(poly.area, poly1.area + poly2.area)
+
+
+def test_polygon_slice_with_1_point_raises_error():
+    p1 = Point(0.0, 0.0, 0.0)
+    p2 = Point(1.0, 0.0, 0.0)
+    p3 = Point(1.0, 1.0, 0.0)
+    p4 = Point(0.0, 1.0, 0.0)
+    poly = Polygon([p1, p2, p3, p4])
+
+    # Three slicing points
+    slicing_points = [
+        Point(0.5, 0.5, 0.0),
+    ]
+    with pytest.raises(GeometryError):
+        _ = poly.slice(slicing_points, name1="1", pt1=p1, name2="2", pt2=p2)
 
 
 if __name__ == "__main__":
