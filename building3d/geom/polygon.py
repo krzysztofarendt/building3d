@@ -258,11 +258,23 @@ class Polygon:
 
             inc_2 = inc_1 * -1
 
-            for i in range(next_1, last_1 + inc_1, inc_1):
-                points_1.append(self.points[i])
+            while next_1 != last_1:
+                points_1.append(self.points[next_1])
+                next_1 += inc_1
+                if next_1 < 0:
+                    next_1 = len(self.points) - 1
+                elif next_1 > len(self.points) - 1:
+                    next_1 = 0
+            points_1.append(self.points[next_1])
 
-            for i in range(next_2, last_2 + inc_2, inc_2):
-                points_2.append(self.points[i])
+            while next_2 != last_2:
+                points_2.append(self.points[next_2])
+                next_2 += inc_2
+                if next_2 < 0:
+                    next_2 = len(self.points) - 1
+                elif next_2 > len(self.points) - 1:
+                    next_2 = 0
+            points_2.append(self.points[next_2])
 
             poly_1 = Polygon(points_1, name=name1)
             poly_2 = Polygon(points_2, name=name1)

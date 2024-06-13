@@ -622,5 +622,5 @@ def test_polygon_slice_with_1_point_raises_error():
 
 if __name__ == "__main__":
     # test_polygon_slice_start_and_end_at_a_vertex()
-    # test_polygon_slice_start_and_end_at_different_edges_vertical()
-    test_polygon_slice_start_and_end_at_different_edges_horizontal_5points()
+    test_polygon_slice_start_and_end_at_different_edges_vertical()
+    # test_polygon_slice_start_and_end_at_different_edges_horizontal_5points()
