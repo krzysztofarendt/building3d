@@ -497,4 +497,4 @@ def test_polygon_slice_start_at_a_vertex():
 
 
 if __name__ == "__main__":
-    test_distance_point_to_polygon()
+    test_polygon_slice_start_at_a_vertex()
