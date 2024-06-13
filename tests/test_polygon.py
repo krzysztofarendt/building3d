@@ -6,6 +6,18 @@ from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
 
 
+def test_multiple_points_along_single_edge():
+    # These points have been causing some errors in the past
+    # because some are placed along a single edge if if they are
+    # used for calculating the normal vector, its length was 0.
+    p0 = Point(x=0.00, y=0.00, z=0.00)
+    p1 = Point(x=0.00, y=1.00, z=0.00)
+    p2 = Point(x=1.00, y=1.00, z=0.00)
+    p3 = Point(x=0.50, y=0.50, z=0.00)
+    poly = Polygon([p0, p1, p2, p3])
+    poly = poly.flip()  # This was causing error in the past
+
+
 def test_num_edges():
     p1 = Point(0.0, 0.0, 0.0)
     p2 = Point(1.0, 0.0, 0.0)
@@ -472,7 +484,7 @@ def test_polygon_slice_start_and_end_at_different_edges():
     assert np.isclose(poly.area, poly1.area + poly2.area)
 
 
-def test_polygon_slice_start_at_a_vertex():
+def test_polygon_slice_start_and_end_at_a_vertex():
     p1 = Point(0.0, 0.0, 0.0)
     p2 = Point(1.0, 0.0, 0.0)
     p3 = Point(1.0, 1.0, 0.0)
@@ -481,6 +493,7 @@ def test_polygon_slice_start_at_a_vertex():
 
     slicing_points = [
         Point(0.0, 0.0, 0.0),
+        Point(0.5, 0.5, 0.0),
         Point(1.0, 1.0, 0.0),
     ]
     poly1, poly2 = poly.slice(
@@ -497,4 +510,4 @@ def test_polygon_slice_start_at_a_vertex():
 
 
 if __name__ == "__main__":
-    test_polygon_slice_start_at_a_vertex()
+    test_polygon_slice_start_and_end_at_a_vertex()
