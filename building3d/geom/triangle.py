@@ -142,6 +142,9 @@ def triangulate(points: list[Point], normal: np.ndarray) -> list[tuple[int, ...]
         points: list of points defining the polygon
         normal: vector normal to the polygon
     """
+    if np.isclose(length(normal), 0):
+        raise TriangulationError("Normal vector cannot have zero length")
+
     vertices = [(i, p) for i, p in enumerate(points)]
     triangles = []
     pos = 0
