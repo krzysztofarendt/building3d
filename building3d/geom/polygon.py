@@ -306,7 +306,43 @@ class Polygon:
 
         elif case == 4:
             # 4) Slicing points start and end at two different vertices
-            raise NotImplementedError("Case 4 is not implemented yet")
+            # poly_1
+            pi_start = 0
+            pi_end = 0
+            for i in range(len(self.points)):
+                if self.points[i] == points[0]:
+                    pi_start = i
+                if self.points[i] == points[-1]:
+                    pi_end = i
+
+            points_1 = []
+            current = pi_start
+            last = pi_end
+            while current != last:
+                points_1.append(self.points[current])
+                current += 1
+                if current > len(self.points) - 1:
+                    current = 0
+
+            for i in range(len(points) - 1, 0, -1):
+                points_1.append(points[i])
+
+            poly_1 = Polygon(points_1, name=name1)
+
+            # poly_2 must go the other way around
+            points_2 = []
+            current = pi_start
+            last = pi_end
+            while current != last:
+                points_2.append(self.points[current])
+                current -= 1
+                if current < 0:
+                    current = len(self.points) - 1
+
+            for i in range(len(points) - 1, 0, -1):
+                points_2.append(points[i])
+
+            poly_2 = Polygon(points_2, name=name2)
 
         else:
             raise NotImplementedError(f"Case {case} not implemented yet")
@@ -321,6 +357,7 @@ class Polygon:
 
         if not np.isclose(poly_2.normal, self.normal).all():
             poly_2 = poly_2.flip(poly_2.name)
+
 
         return (poly_1, poly_2)  # TODO: unit test needed
 
