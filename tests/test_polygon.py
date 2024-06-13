@@ -460,13 +460,14 @@ def test_polygon_slice_start_and_end_at_same_edge():
     assert np.isclose(poly.area, poly1.area + poly2.area)
 
 
-def test_polygon_slice_start_and_end_at_different_edges():
+def test_polygon_slice_start_and_end_at_different_edges_vertical():
     p1 = Point(0.0, 0.0, 0.0)
     p2 = Point(1.0, 0.0, 0.0)
     p3 = Point(1.0, 1.0, 0.0)
     p4 = Point(0.0, 1.0, 0.0)
     poly = Polygon([p1, p2, p3, p4])
 
+    # Vertical slicing line
     slicing_points = [
         Point(0.5, 0.0, 0.0),
         Point(0.5, 1.0, 0.0),
@@ -477,6 +478,57 @@ def test_polygon_slice_start_and_end_at_different_edges():
         pt1=Point(0.0, 0.0, 0.0),
         name2="poly2",
         pt2=Point(0.45, 0.25, 0.0),
+    )
+
+    assert np.isclose(poly1.normal, poly.normal).all()
+    assert np.isclose(poly2.normal, poly.normal).all()
+    assert np.isclose(poly.area, poly1.area + poly2.area)
+
+
+def test_polygon_slice_start_and_end_at_different_edges_horizontal():
+    p1 = Point(0.0, 0.0, 0.0)
+    p2 = Point(1.0, 0.0, 0.0)
+    p3 = Point(1.0, 1.0, 0.0)
+    p4 = Point(0.0, 1.0, 0.0)
+    poly = Polygon([p1, p2, p3, p4])
+
+    # Horizontal slicing line
+    slicing_points = [
+        Point(0.0, 0.5, 0.0),
+        Point(1.0, 0.5, 0.0),
+    ]
+    poly1, poly2 = poly.slice(
+        slicing_points,
+        name1="poly1",
+        pt1=Point(0.0, 0.0, 0.0),
+        name2="poly2",
+        pt2=Point(0.0, 1.0, 0.0),
+    )
+
+    assert np.isclose(poly1.normal, poly.normal).all()
+    assert np.isclose(poly2.normal, poly.normal).all()
+    assert np.isclose(poly.area, poly1.area + poly2.area)
+
+
+def test_polygon_slice_start_and_end_at_different_edges_horizontal_5points():
+    p1 = Point(0.0, 0.0, 0.0)
+    p2 = Point(1.0, 0.0, 0.0)
+    p3 = Point(1.0, 1.0, 0.0)
+    p4 = Point(0.2, 1.0, 0.0)
+    p5 = Point(0.0, 1.0, 0.0)
+    poly = Polygon([p1, p2, p3, p4, p5])
+
+    # Horizontal slicing line
+    slicing_points = [
+        Point(0.0, 0.5, 0.0),
+        Point(1.0, 0.5, 0.0),
+    ]
+    poly1, poly2 = poly.slice(
+        slicing_points,
+        name1="poly1",
+        pt1=Point(0.0, 0.0, 0.0),
+        name2="poly2",
+        pt2=Point(0.0, 1.0, 0.0),
     )
 
     assert np.isclose(poly1.normal, poly.normal).all()
@@ -569,4 +621,6 @@ def test_polygon_slice_with_1_point_raises_error():
 
 
 if __name__ == "__main__":
-    test_polygon_slice_start_and_end_at_a_vertex()
+    # test_polygon_slice_start_and_end_at_a_vertex()
+    # test_polygon_slice_start_and_end_at_different_edges_vertical()
+    test_polygon_slice_start_and_end_at_different_edges_horizontal_5points()
