@@ -447,17 +447,21 @@ def test_polygon_slice_start_and_end_at_same_edge():
         Point(0.6, 0.5, 0.0),
         Point(0.6, 0.0, 0.0),
     ]
+    poly1_pt = Point(0.0, 0.0, 0.0)
+    poly2_pt = Point(0.45, 0.25, 0.0)
     poly1, poly2 = poly.slice(
         slicing_points,
         name1="poly1",
-        pt1=Point(0.0, 0.0, 0.0),
+        pt1=poly1_pt,
         name2="poly2",
-        pt2=Point(0.45, 0.25, 0.0),
+        pt2=poly2_pt,
     )
 
     assert np.isclose(poly1.normal, poly.normal).all()
     assert np.isclose(poly2.normal, poly.normal).all()
     assert np.isclose(poly.area, poly1.area + poly2.area)
+    assert poly1.is_point_inside(poly1_pt)
+    assert poly2.is_point_inside(poly2_pt)
 
 
 def test_polygon_slice_start_and_end_at_different_edges_vertical():
