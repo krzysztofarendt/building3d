@@ -476,17 +476,21 @@ def test_polygon_slice_start_and_end_at_different_edges_vertical():
         Point(0.5, 0.0, 0.0),
         Point(0.5, 1.0, 0.0),
     ]
+    poly1_pt = Point(0.0, 0.0, 0.0)
+    poly2_pt = Point(1.0, 0.5, 0.0)
     poly1, poly2 = poly.slice(
         slicing_points,
         name1="poly1",
-        pt1=Point(0.0, 0.0, 0.0),
+        pt1=poly1_pt,
         name2="poly2",
-        pt2=Point(0.45, 0.25, 0.0),
+        pt2=poly2_pt,
     )
 
     assert np.isclose(poly1.normal, poly.normal).all()
     assert np.isclose(poly2.normal, poly.normal).all()
     assert np.isclose(poly.area, poly1.area + poly2.area)
+    assert poly1.is_point_inside(poly1_pt)
+    assert poly2.is_point_inside(poly2_pt)
 
 
 def test_polygon_slice_start_and_end_at_different_edges_horizontal():
@@ -501,17 +505,21 @@ def test_polygon_slice_start_and_end_at_different_edges_horizontal():
         Point(0.0, 0.5, 0.0),
         Point(1.0, 0.5, 0.0),
     ]
+    poly1_pt = Point(0.0, 0.0, 0.0)
+    poly2_pt = Point(0.0, 1.0, 0.0)
     poly1, poly2 = poly.slice(
         slicing_points,
         name1="poly1",
-        pt1=Point(0.0, 0.0, 0.0),
+        pt1=poly1_pt,
         name2="poly2",
-        pt2=Point(0.0, 1.0, 0.0),
+        pt2=poly2_pt,
     )
 
     assert np.isclose(poly1.normal, poly.normal).all()
     assert np.isclose(poly2.normal, poly.normal).all()
     assert np.isclose(poly.area, poly1.area + poly2.area)
+    assert poly1.is_point_inside(poly1_pt)
+    assert poly2.is_point_inside(poly2_pt)
 
 
 def test_polygon_slice_start_and_end_at_different_edges_horizontal_5points():
@@ -527,17 +535,21 @@ def test_polygon_slice_start_and_end_at_different_edges_horizontal_5points():
         Point(0.0, 0.5, 0.0),
         Point(1.0, 0.5, 0.0),
     ]
+    poly1_pt = Point(0.0, 0.0, 0.0)
+    poly2_pt = Point(0.0, 1.0, 0.0)
     poly1, poly2 = poly.slice(
         slicing_points,
         name1="poly1",
-        pt1=Point(0.0, 0.0, 0.0),
+        pt1=poly1_pt,
         name2="poly2",
-        pt2=Point(0.0, 1.0, 0.0),
+        pt2=poly2_pt,
     )
 
     assert np.isclose(poly1.normal, poly.normal).all()
     assert np.isclose(poly2.normal, poly.normal).all()
     assert np.isclose(poly.area, poly1.area + poly2.area)
+    assert poly1.is_point_inside(poly1_pt)
+    assert poly2.is_point_inside(poly2_pt)
 
 
 def test_polygon_slice_start_and_end_at_a_vertex():
@@ -553,34 +565,43 @@ def test_polygon_slice_start_and_end_at_a_vertex():
         Point(0.5, 0.5, 0.0),
         Point(1.0, 1.0, 0.0),
     ]
+    poly1_pt = Point(1.0, 0.0, 0.0)
+    poly2_pt = Point(0.0, 1.0, 0.0)
     poly1, poly2 = poly.slice(
         slicing_points,
         name1="poly1",
-        pt1=Point(1.0, 0.0, 0.0),
+        pt1=poly1_pt,
         name2="poly2",
-        pt2=Point(0.0, 1.0, 0.0),
+        pt2=poly2_pt,
     )
 
     assert np.isclose(poly1.normal, poly.normal).all()
     assert np.isclose(poly2.normal, poly.normal).all()
     assert np.isclose(poly.area, poly1.area + poly2.area)
+    assert poly1.is_point_inside(poly1_pt)
+    assert poly2.is_point_inside(poly2_pt)
+
 
     # Two slicing points
     slicing_points = [
         Point(0.0, 0.0, 0.0),
         Point(1.0, 1.0, 0.0),
     ]
+    poly1_pt = Point(1.0, 0.0, 0.0)
+    poly2_pt = Point(0.0, 1.0, 0.0)
     poly1, poly2 = poly.slice(
         slicing_points,
         name1="poly1",
-        pt1=Point(1.0, 0.0, 0.0),
+        pt1=poly1_pt,
         name2="poly2",
-        pt2=Point(0.0, 1.0, 0.0),
+        pt2=poly2_pt,
     )
 
     assert np.isclose(poly1.normal, poly.normal).all()
     assert np.isclose(poly2.normal, poly.normal).all()
     assert np.isclose(poly.area, poly1.area + poly2.area)
+    assert poly1.is_point_inside(poly1_pt)
+    assert poly2.is_point_inside(poly2_pt)
 
 
 def test_polygon_slice_start_at_vertex_end_at_edge():
@@ -596,17 +617,21 @@ def test_polygon_slice_start_at_vertex_end_at_edge():
         Point(0.5, 0.5, 0.0),
         Point(0.5, 1.0, 0.0),
     ]
+    poly1_pt = Point(1.0, 0.0, 0.0)
+    poly2_pt = Point(0.0, 1.0, 0.0)
     poly1, poly2 = poly.slice(
         slicing_points,
         name1="poly1",
-        pt1=Point(1.0, 0.0, 0.0),
+        pt1=poly1_pt,
         name2="poly2",
-        pt2=Point(0.0, 1.0, 0.0),
+        pt2=poly2_pt,
     )
 
     assert np.isclose(poly1.normal, poly.normal).all()
     assert np.isclose(poly2.normal, poly.normal).all()
     assert np.isclose(poly.area, poly1.area + poly2.area)
+    assert poly1.is_point_inside(poly1_pt)
+    assert poly2.is_point_inside(poly2_pt)
 
 
 def test_polygon_slice_with_1_point_raises_error():
@@ -624,7 +649,43 @@ def test_polygon_slice_with_1_point_raises_error():
         _ = poly.slice(slicing_points, name1="1", pt1=p1, name2="2", pt2=p2)
 
 
+def test_polygon_slice_with_wrong_pt1_pt2_raises_error():
+    p1 = Point(0.0, 0.0, 0.0)
+    p2 = Point(1.0, 0.0, 0.0)
+    p3 = Point(1.0, 1.0, 0.0)
+    p4 = Point(0.0, 1.0, 0.0)
+    poly = Polygon([p1, p2, p3, p4])
+
+    # Three slicing points
+    slicing_points = [
+        Point(0.0, 0.0, 0.0),
+        Point(0.5, 1.0, 0.0),
+    ]
+    poly1_pt = Point(0.0, 0.0, 0.0)
+    poly2_pt = Point(0.5, 1.0, 0.0)
+    with pytest.raises(GeometryError):
+        _ = poly.slice(
+            slicing_points,
+            name1="poly1",
+            pt1=poly1_pt,
+            name2="poly2",
+            pt2=poly2_pt,
+        )
+
+    poly1_pt = Point(9.0, 0.0, 0.0)
+    poly2_pt = Point(0.5, 1.0, 9.0)
+    with pytest.raises(GeometryError):
+        _ = poly.slice(
+            slicing_points,
+            name1="poly1",
+            pt1=poly1_pt,
+            name2="poly2",
+            pt2=poly2_pt,
+        )
+
+
 if __name__ == "__main__":
     # test_polygon_slice_start_and_end_at_a_vertex()
-    test_polygon_slice_start_and_end_at_different_edges_vertical()
+    # test_polygon_slice_start_and_end_at_different_edges_vertical()
     # test_polygon_slice_start_and_end_at_different_edges_horizontal_5points()
+    test_polygon_slice_start_and_end_at_same_edge()

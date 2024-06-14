@@ -409,9 +409,31 @@ class Polygon:
         else:
             raise NotImplementedError(f"Case {case} not implemented yet")
 
-
         # Determine which polygon is name1 and which name2, based on pt1 and pt2
-        ...  # TODO
+        pt1_in_poly1 = poly_1.is_point_inside(pt1)
+        pt1_in_poly2 = poly_2.is_point_inside(pt1)
+        pt2_in_poly1 = poly_1.is_point_inside(pt2)
+        pt2_in_poly2 = poly_2.is_point_inside(pt2)
+
+        if pt1_in_poly1 and pt1_in_poly2:
+            raise GeometryError(
+                f"{pt1=} is inside both of the sliced polygons"
+            )
+        elif pt2_in_poly1 and pt2_in_poly2:
+            raise GeometryError(
+                f"{pt2=} is inside both of the sliced polygons"
+            )
+        elif pt1_in_poly1 and pt2_in_poly2:
+            pass  # OK, no need to swap poly1 with poly2
+        elif pt2_in_poly1 and pt1_in_poly2:
+            points_1 = poly_1.points
+            points_2 = poly_2.points
+            poly_1 = Polygon(points_2, name=name1)
+            poly_2 = Polygon(points_1, name=name2)
+        else:
+            raise GeometryError(
+                f"{pt1=} or {pt2=} is not inside any of the sliced polygons"
+            )
 
         # Check normals and flip polygons if different
         if not np.isclose(poly_1.normal, self.normal).all():
