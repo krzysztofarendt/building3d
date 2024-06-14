@@ -37,6 +37,7 @@ def test_distance_point_to_edge():
     ptest2 = Point(1.0, 0.5, 0.0)  # distance = 1
     ptest3 = Point(1.0, 1.0, 0.0)  # distance = 1
     ptest4 = Point(1.0, 2.0, 0.0)  # distance = np.sqrt(2)
+    ptest5 = Point(0.0, 0.5, 0.0)  # distance = 0
 
     d = distance_point_to_edge(ptest1, p1, p2)
     assert np.isclose(d, 1)
@@ -46,3 +47,5 @@ def test_distance_point_to_edge():
     assert np.isclose(d, 1)
     d = distance_point_to_edge(ptest4, p1, p2)
     assert np.isclose(d, np.sqrt(2))
+    d = distance_point_to_edge(ptest5, p1, p2)
+    assert np.isclose(d, 0)

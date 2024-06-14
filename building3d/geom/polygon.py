@@ -121,6 +121,329 @@ class Polygon:
         """
         return Polygon(self.points[::-1], name=new_name)
 
+    def slice(
+        self,
+        points: list[Point],
+        name1: str,
+        pt1: Point,
+        name2: str,
+        pt2: Point):
+        """Slice a polygon into two parts.
+
+        Args:
+            points: list of points
+            name1: name of the first part
+            pt1: some point used to identify the first part
+            name2: name of the second part
+            pt2: some point used to identify the second part
+
+        Return:
+            (Polygon, Polygon)
+        """
+        # Make sure there is enough slicing points (at least 2)
+        if len(points) < 2:
+            raise GeometryError("Cannot slice the polygon using less than 2 points")
+
+        # Make sure all slicing points are within this polygon
+        for p in points:
+            if not self.is_point_inside(p):
+                raise GeometryError(
+                    f"At least on of the points is not inside the polygon {self.name}: {p}"
+                )
+
+        # Possible cases:
+        # 1) slicing points start and end at two different edges
+        # 2) slicing points start and end at the same edge
+        # 3) slicing points start at a vertex and end at some edge (or vice versa)
+        # 4) Slicing points start and end at two different vertices
+
+        # Find out which case is it
+        # {slicing_point_index: (location_string, location_index)}
+        # location_index is either vertex index or edge index
+        sl_pt_loc = {}
+        num_at_vertex = 0
+        num_at_edge = 0
+        num_interior = 0
+        sl_edges = set()
+        sl_vertices = set()
+
+        for slp_i, slp in enumerate(points):
+            for p_i, p in enumerate(self.points):
+                if p == slp:
+                    sl_pt_loc[slp_i] = ("at_vertex", p_i)
+                    num_at_vertex += 1
+                    sl_vertices.add(p_i)
+                    break
+
+            if slp_i in sl_pt_loc.keys():
+                continue
+
+            for edge_num, (ep1, ep2) in enumerate(self.edges):
+                d_to_edge = distance_point_to_edge(ptest=slp, p1=ep1, p2=ep2)
+                if np.isclose(d_to_edge, 0):
+                    sl_pt_loc[slp_i] = ("at_edge", edge_num)
+                    num_at_edge += 1
+                    sl_edges.add(edge_num)
+
+            if slp_i in sl_pt_loc.keys():
+                continue
+            else:
+                sl_pt_loc[slp_i] = ("interior", None)
+                num_interior += 1
+
+        assert num_at_vertex + num_at_edge + num_interior == len(points), \
+            "Slicing point location counting must have a bug"
+
+        if sl_pt_loc[0][0] == "interior":
+            raise GeometryError("First slicing point must start at an edge or a vertex")
+        if sl_pt_loc[len(points) - 1][0] == "interior":
+            raise GeometryError("Last slicing point must end at an edge or a vertex")
+
+        case = None
+        if num_at_edge == 2 and len(sl_edges) == 2:
+            # 1) slicing points start and end at two different edges
+            case = 1
+        elif num_at_edge == 2 and len(sl_edges) == 1:
+            # 2) slicing points start and end at the same edge
+            case = 2
+        elif num_at_edge == 1 and num_at_vertex == 1:
+            # 3) slicing points start at a vertex and end at some edge (or vice versa)
+            case = 3
+        elif num_at_vertex == 2 and len(sl_vertices) == 2:
+            # 4) Slicing points start and end at two different vertices
+            case = 4
+        else:
+            raise NotImplementedError(
+                f"Algorithm not prepared for such a case ({case}):\n"
+                f"{len(points)=}\n"
+                f"{num_at_edge=}\n"
+                f"{num_at_vertex=}\n"
+                f"{sl_edges=}\n"
+                f"{sl_vertices=}\n"
+            )
+
+        # Create two polygons through slicing
+        if case == 1:
+            # 1) slicing points start and end at two different edges
+            assert sl_pt_loc[0][0] == "at_edge"
+            assert sl_pt_loc[len(points) - 1][0] == "at_edge"
+            edge_num_1 = sl_pt_loc[0][1]
+            edge_num_2 = sl_pt_loc[len(points) - 1][1]
+
+            # Polygon 1 and Polygon 2
+            points_1 = []
+            points_1.extend(points)
+            points_2 = []
+            points_2.extend(points)
+
+            next_1 = 0
+            next_2 = 0
+            last_1 = 0
+            last_2 = 0
+
+            for i in range(len(self.points)):
+                if self.points[i] == self.edges[edge_num_2][0]:
+                    next_1 = i
+                if self.points[i] == self.edges[edge_num_2][1]:
+                    next_2 = i
+                if self.points[i] == self.edges[edge_num_1][1]:
+                    last_1 = i
+                if self.points[i] == self.edges[edge_num_1][0]:
+                    last_2 = i
+
+            if next_1 < next_2 or next_2 == 0:
+                inc_1 = -1
+            else:
+                inc_1 = -1
+
+            inc_2 = inc_1 * -1  # Polygon 2 goes the other way around
+
+            while next_1 != last_1:
+                points_1.append(self.points[next_1])
+                next_1 += inc_1
+                if next_1 < 0:
+                    next_1 = len(self.points) - 1
+                elif next_1 > len(self.points) - 1:
+                    next_1 = 0
+            points_1.append(self.points[next_1])
+
+            while next_2 != last_2:
+                points_2.append(self.points[next_2])
+                next_2 += inc_2
+                if next_2 < 0:
+                    next_2 = len(self.points) - 1
+                elif next_2 > len(self.points) - 1:
+                    next_2 = 0
+            points_2.append(self.points[next_2])
+
+            poly_1 = Polygon(points_1, name=name1)
+            poly_2 = Polygon(points_2, name=name1)
+
+        elif case == 2:
+            # 2) slicing points start and end at the same edge
+            edge_num = sl_edges.pop()
+
+            # Polygon 1 is composed of slice_points only
+            poly_1 = Polygon(points, name=name1)
+
+            # Polygon 2 is composed of both, own points and sliced points
+            points_2 = []
+            slice_points_included = False
+            for p in self.points:
+                points_2.append(p)
+
+                if p in self.edges[edge_num]:
+                    # Slicing ocurred at this edge - need to add slice_points
+                    if not slice_points_included:
+                        for sp in points:
+                            points_2.append(sp)
+                        slice_points_included = True
+
+            poly_2 = Polygon(points_2, name=name2)
+
+        elif case == 3:
+            # 3) slicing points start at a vertex and end at some edge (or vice versa)
+            edge_num = sl_edges.pop()
+            assert len(sl_edges) == 0, "Should be no edges left in this case"
+
+            # Determine if first point starts at vertex or the last point ends at vertex
+            if sl_pt_loc[0][0] == "at_vertex":
+                start_at_vertex = True
+                assert sl_pt_loc[len(points) - 1][0] == "at_edge"
+            else:
+                start_at_vertex = False
+                assert sl_pt_loc[len(points) - 1][0] == "at_vertex"
+
+            points_1 = []
+            points_2 = []
+            if start_at_vertex:
+                points_1.extend(points)
+                points_2.extend(points)
+            else:
+                points_1.extend(points[::-1])
+                points_2.extend(points[::-1])
+
+            next_1 = 0
+            next_2 = 0
+            last_1 = 0
+            last_2 = 0
+
+            for i in range(len(self.points)):
+                if self.points[i] == self.edges[edge_num][0]:
+                    next_1 = i
+                if self.points[i] == self.edges[edge_num][1]:
+                    next_2 = i
+                if self.points[i] == points_1[0]:
+                    last_1 = i
+                if self.points[i] == points_2[0]:
+                    last_2 = i
+
+            assert last_1 == last_2, "They should both end up at the same vertex"
+
+            if next_1 < next_2 or next_2 == 0:
+                inc_1 = -1
+            else:
+                inc_1 = -1
+
+            inc_2 = inc_1 * -1  # Polygon 2 goes the other way around
+
+            while next_1 != last_1:
+                points_1.append(self.points[next_1])
+                next_1 += inc_1
+                if next_1 < 0:
+                    next_1 = len(self.points) - 1
+                elif next_1 > len(self.points) - 1:
+                    next_1 = 0
+
+            while next_2 != last_2:
+                points_2.append(self.points[next_2])
+                next_2 += inc_2
+                if next_2 < 0:
+                    next_2 = len(self.points) - 1
+                elif next_2 > len(self.points) - 1:
+                    next_2 = 0
+
+            poly_1 = Polygon(points_1, name=name1)
+            poly_2 = Polygon(points_2, name=name1)
+
+        elif case == 4:
+            # 4) Slicing points start and end at two different vertices
+            # Polygon 1
+            pi_start = 0
+            pi_end = 0
+            for i in range(len(self.points)):
+                if self.points[i] == points[0]:
+                    pi_start = i
+                if self.points[i] == points[-1]:
+                    pi_end = i
+
+            points_1 = []
+            current = pi_start
+            last = pi_end
+            while current != last:
+                points_1.append(self.points[current])
+                current += 1
+                if current > len(self.points) - 1:
+                    current = 0
+
+            for i in range(len(points) - 1, 0, -1):
+                points_1.append(points[i])
+
+            poly_1 = Polygon(points_1, name=name1)
+
+            # Polygon 2 must go the other way around ####
+            points_2 = []                               #
+            current = pi_start                          #
+            last = pi_end                               #
+            while current != last:                      #
+                points_2.append(self.points[current])   #
+                current -= 1 # <------------------------#
+                if current < 0:
+                    current = len(self.points) - 1
+
+            for i in range(len(points) - 1, 0, -1):
+                points_2.append(points[i])
+
+            poly_2 = Polygon(points_2, name=name2)
+
+        else:
+            raise NotImplementedError(f"Case {case} not implemented yet")
+
+        # Determine which polygon is name1 and which name2, based on pt1 and pt2
+        pt1_in_poly1 = poly_1.is_point_inside(pt1)
+        pt1_in_poly2 = poly_2.is_point_inside(pt1)
+        pt2_in_poly1 = poly_1.is_point_inside(pt2)
+        pt2_in_poly2 = poly_2.is_point_inside(pt2)
+
+        if pt1_in_poly1 and pt1_in_poly2:
+            raise GeometryError(
+                f"{pt1=} is inside both of the sliced polygons"
+            )
+        elif pt2_in_poly1 and pt2_in_poly2:
+            raise GeometryError(
+                f"{pt2=} is inside both of the sliced polygons"
+            )
+        elif pt1_in_poly1 and pt2_in_poly2:
+            pass  # OK, no need to swap poly1 with poly2
+        elif pt2_in_poly1 and pt1_in_poly2:
+            points_1 = poly_1.points
+            points_2 = poly_2.points
+            poly_1 = Polygon(points_2, name=name1)
+            poly_2 = Polygon(points_1, name=name2)
+        else:
+            raise GeometryError(
+                f"{pt1=} or {pt2=} is not inside any of the sliced polygons"
+            )
+
+        # Check normals and flip polygons if different
+        if not np.isclose(poly_1.normal, self.normal).all():
+            poly_1 = poly_1.flip(poly_1.name)
+
+        if not np.isclose(poly_2.normal, self.normal).all():
+            poly_2 = poly_2.flip(poly_2.name)
+
+        return (poly_1, poly_2)
+
     def points_as_array(self) -> np.ndarray:
         """Returns a copy of the points as a numpy array."""
         return points_to_array(self.points)
@@ -368,6 +691,8 @@ class Polygon:
                 wall_line_segments.append(tuple(segment))
                 segment = []
                 i -= 1
+
+        wall_line_segments.append((self.points[-1], self.points[0]))
 
         return wall_line_segments
 
