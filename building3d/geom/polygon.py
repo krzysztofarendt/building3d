@@ -256,7 +256,7 @@ class Polygon:
             else:
                 inc_1 = -1
 
-            inc_2 = inc_1 * -1
+            inc_2 = inc_1 * -1  # Polygon 2 goes the other way around
 
             while next_1 != last_1:
                 points_1.append(self.points[next_1])
@@ -305,7 +305,66 @@ class Polygon:
             # 3) slicing points start at a vertex and end at some edge (or vice versa)
             edge_num = sl_edges.pop()
             assert len(sl_edges) == 0, "Should be no edges left in this case"
-            raise NotImplementedError
+
+            # Determine if first point starts at vertex or the last point ends at vertex
+            if sl_pt_loc[0][0] == "at_vertex":
+                start_at_vertex = True
+                assert sl_pt_loc[len(points) - 1][0] == "at_edge"
+            else:
+                start_at_vertex = False
+                assert sl_pt_loc[len(points) - 1][0] == "at_vertex"
+
+            points_1 = []
+            points_2 = []
+            if start_at_vertex:
+                points_1.extend(points)
+                points_2.extend(points)
+            else:
+                points_1.extend(points[::-1])
+                points_2.extend(points[::-1])
+
+            next_1 = 0
+            next_2 = 0
+            last_1 = 0
+            last_2 = 0
+
+            for i in range(len(self.points)):
+                if self.points[i] == self.edges[edge_num][0]:
+                    next_1 = i
+                if self.points[i] == self.edges[edge_num][1]:
+                    next_2 = i
+                if self.points[i] == points_1[0]:
+                    last_1 = i
+                if self.points[i] == points_2[0]:
+                    last_2 = i
+
+            assert last_1 == last_2, "They should both end up at the same vertex"
+
+            if next_1 < next_2 or next_2 == 0:
+                inc_1 = -1
+            else:
+                inc_1 = -1
+
+            inc_2 = inc_1 * -1  # Polygon 2 goes the other way around
+
+            while next_1 != last_1:
+                points_1.append(self.points[next_1])
+                next_1 += inc_1
+                if next_1 < 0:
+                    next_1 = len(self.points) - 1
+                elif next_1 > len(self.points) - 1:
+                    next_1 = 0
+
+            while next_2 != last_2:
+                points_2.append(self.points[next_2])
+                next_2 += inc_2
+                if next_2 < 0:
+                    next_2 = len(self.points) - 1
+                elif next_2 > len(self.points) - 1:
+                    next_2 = 0
+
+            poly_1 = Polygon(points_1, name=name1)
+            poly_2 = Polygon(points_2, name=name1)
 
         elif case == 4:
             # 4) Slicing points start and end at two different vertices
