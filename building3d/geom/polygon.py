@@ -125,10 +125,11 @@ class Polygon:
     def slice(
         self,
         points: list[Point],
-        name1: str,
-        pt1: Point,
-        name2: str,
-        pt2: Point):
+        name1: str | None = None,
+        pt1: Point | None = None,
+        name2: str | None = None,
+        pt2: Point | None = None,
+    ):
         """Slice a polygon into two parts.
 
         Args:
@@ -151,6 +152,11 @@ class Polygon:
                 raise GeometryError(
                     f"At least on of the points is not inside the polygon {self.name}: {p}"
                 )
+
+        if name1 is None:
+            name1 = random_id()
+        if name2 is None:
+            name2 = random_id()
 
         # Possible cases:
         # 1) slicing points start and end at two different edges
@@ -411,30 +417,31 @@ class Polygon:
             raise NotImplementedError(f"Case {case} not implemented yet")
 
         # Determine which polygon is name1 and which name2, based on pt1 and pt2
-        pt1_in_poly1 = poly_1.is_point_inside(pt1)
-        pt1_in_poly2 = poly_2.is_point_inside(pt1)
-        pt2_in_poly1 = poly_1.is_point_inside(pt2)
-        pt2_in_poly2 = poly_2.is_point_inside(pt2)
+        if pt1 is not None and pt2 is not None:
+            pt1_in_poly1 = poly_1.is_point_inside(pt1)
+            pt1_in_poly2 = poly_2.is_point_inside(pt1)
+            pt2_in_poly1 = poly_1.is_point_inside(pt2)
+            pt2_in_poly2 = poly_2.is_point_inside(pt2)
 
-        if pt1_in_poly1 and pt1_in_poly2:
-            raise GeometryError(
-                f"{pt1=} is inside both of the sliced polygons"
-            )
-        elif pt2_in_poly1 and pt2_in_poly2:
-            raise GeometryError(
-                f"{pt2=} is inside both of the sliced polygons"
-            )
-        elif pt1_in_poly1 and pt2_in_poly2:
-            pass  # OK, no need to swap poly1 with poly2
-        elif pt2_in_poly1 and pt1_in_poly2:
-            points_1 = poly_1.points
-            points_2 = poly_2.points
-            poly_1 = Polygon(points_2, name=name1)
-            poly_2 = Polygon(points_1, name=name2)
-        else:
-            raise GeometryError(
-                f"{pt1=} or {pt2=} is not inside any of the sliced polygons"
-            )
+            if pt1_in_poly1 and pt1_in_poly2:
+                raise GeometryError(
+                    f"{pt1=} is inside both of the sliced polygons"
+                )
+            elif pt2_in_poly1 and pt2_in_poly2:
+                raise GeometryError(
+                    f"{pt2=} is inside both of the sliced polygons"
+                )
+            elif pt1_in_poly1 and pt2_in_poly2:
+                pass  # OK, no need to swap poly1 with poly2
+            elif pt2_in_poly1 and pt1_in_poly2:
+                points_1 = poly_1.points
+                points_2 = poly_2.points
+                poly_1 = Polygon(points_2, name=name1)
+                poly_2 = Polygon(points_1, name=name2)
+            else:
+                raise GeometryError(
+                    f"{pt1=} or {pt2=} is not inside any of the sliced polygons"
+                )
 
         # Check normals and flip polygons if different
         if not np.isclose(poly_1.normal, self.normal).all():

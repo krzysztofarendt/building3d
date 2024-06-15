@@ -510,6 +510,13 @@ def test_polygon_slice_start_and_end_at_different_edges_vertical():
     assert poly1.is_point_inside(poly1_pt)
     assert poly2.is_point_inside(poly2_pt)
 
+    # Try without name and pt arguments
+    poly1, poly2 = poly.slice(slicing_points)
+
+    assert np.isclose(poly1.normal, poly.normal).all()
+    assert np.isclose(poly2.normal, poly.normal).all()
+    assert np.isclose(poly.area, poly1.area + poly2.area)
+
 
 def test_polygon_slice_start_and_end_at_different_edges_horizontal():
     p1 = Point(0.0, 0.0, 0.0)
