@@ -6,14 +6,14 @@ from building3d.geom.zone import Zone
 from building3d.geom.solid import Solid
 
 
-def box(
+def box_solid(
     x: float,
     y: float,
     z: float,
     translate: tuple[float, float, float] = (0.0, 0.0, 0.0),
     name: str | None = None,
-) -> Zone:
-    """Return a zone with given dimensions, located at translate.
+) -> Solid:
+    """Return a solid with given dimensions, located at translate.
 
     `x` is the dimension along the X axis.
     `y` is the dimension along the Y axis.
@@ -31,7 +31,7 @@ def box(
     - wall-3
     - roof
 
-    Both, the solid and the zone are named `name` (random if not given).
+    The solid will be named `name` (random if not given).
     """
     # TODO: Add rotation
 
@@ -60,6 +60,38 @@ def box(
     wall_rf = Wall([poly_rf], name=f"roof")
 
     solid = Solid(walls=[wall_fl, wall_w0, wall_w1, wall_w2, wall_w3, wall_rf], name=name)
+
+    return solid
+
+
+def box(
+    x: float,
+    y: float,
+    z: float,
+    translate: tuple[float, float, float] = (0.0, 0.0, 0.0),
+    name: str | None = None,
+) -> Zone:
+    """Return a solid with given dimensions, located at translate.
+
+    `x` is the dimension along the X axis.
+    `y` is the dimension along the Y axis.
+    `z` is the dimension along the Z axis.
+
+    Rotation is currently not supported.
+
+    The corner `(min(x), min(y), min(z))` will be located at `translate`.
+
+    The polygon and wall names are hardcoded:
+    - floor
+    - wall-0
+    - wall-1
+    - wall-2
+    - wall-3
+    - roof
+
+    Both, the solid and the zone are named `name` (random if not given).
+    """
+    solid = box_solid(x, y, z, translate=translate, name=name)
     zone = Zone(name=name)
     zone.add_solid(solid)
 
