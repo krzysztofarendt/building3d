@@ -76,6 +76,9 @@ if __name__ == "__main__":
 
         building.add_zone(zone)
 
+    building.generate_simulation_mesh(delta=1)
+
     plot_building(building)
+    plot_mesh(building.mesh)
     write_b3d("example_4.b3d", building)
     write_dotbim("example_4.bim", building)

@@ -74,26 +74,13 @@ make example_3
 
 # TODO:
 
-- [x] Add predefined geometry: box
-- [x] STL export/import
-- [x] Try PyVista instead of mayavi2
-- [x] Plot subpolygons
-- [x] Building = set of zones
-- [x] Read/write to .bim
-- [x] Export/import to/from STL (and other formats?)
-- [x] Github Actions
-- [x] Benchmark against https://github.com/pyvista/tetgen
-- [x] Add `Mesh.add_building()`
-- [x] Own file format `*.b3d`
-- [x] Tidy up methods in Building, Zone, Solid, Wall - they should be similar
-- [x] Add method `get_object(path/to/object)`, e.g. `Building.get_object("zone_name/solid_name/wall_name/polygon_name")`
-- [x] Finish `floor_plan()`
-- [ ] More complex example based on `floor_plan()`
+- [ ] Connecting solids with different dimensions through polygon slicing
+- [ ] Polygon slice extrusion
+- [ ] Predefined wedge geometry
+- [ ] Ray-tracing for light
+- [ ] Extend ray-tracing to sound (scattering, diffraction)
+- [ ] Finite Volume Method
 - [ ] Export mesh to VTK format to enable convertions with meshio: https://vtk.org/wp-content/uploads/2015/04/file-formats.pdf
-- [ ] Figure out subpolygon meshing and general usage
-- [ ] `example_1` fails with `delta=0.5` and it takes 5 minutes to generate the mesh
-- [ ] `Polygon.__eq__()` can return wrong result for some non-convex polygons
-- [x] ~~`Solid` should find polygons with reversed order of vertices and fix it~~ - do not know how to do it
 
 Other cool projects:
 - https://gitlab.com/drj11/pypng
@@ -103,3 +90,4 @@ Other cool projects:
 - https://github.com/Kitware/trame
 - https://github.com/meshpro/pygalmesh
 - https://github.com/nschloe/meshio
+- https://reuk.github.io/wayverb/
