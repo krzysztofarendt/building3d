@@ -384,13 +384,31 @@ def test_copy():
     assert not (poly_a is poly_b)
 
 
-def test_is_facing_polygon():
+def test_is_facing_polygon_exact():
     p1 = Point(0.0, 4.0, -1.0)
     p2 = Point(1.0, -1.0, 2.0)
     p3 = Point(0.0, -2.0, 3.0)
     poly_a = Polygon([p1, p2, p3])
     poly_b = Polygon([p3, p2, p1])
-    assert poly_a.is_facing_polygon(poly_b)
+    assert poly_a.is_facing_polygon(poly_b)  # exact=True by default
+    assert poly_a.is_facing_polygon(poly_b, exact=True)
+    assert poly_a.is_facing_polygon(poly_b, exact=False)
+
+
+def test_is_facing_polygon_different_sizes():
+    p1 = Point(0.0, 0.0, 0.0)
+    p2 = Point(1.0, 0.0, 0.0)
+    p3 = Point(1.0, 1.0, 0.0)
+    poly_a = Polygon([p1, p2, p3])
+
+    scale = (2, 2, 2)
+    p1 = Point(0.0, 0.0, 0.0) * scale
+    p2 = Point(1.0, 0.0, 0.0) * scale
+    p3 = Point(1.0, 1.0, 0.0) * scale
+    poly_b = Polygon([p3, p2, p1])
+    assert not poly_a.is_facing_polygon(poly_b)  # exact=True by default
+    assert not poly_a.is_facing_polygon(poly_b, exact=True)
+    assert poly_a.is_facing_polygon(poly_b, exact=False)
 
 
 def test_equality():

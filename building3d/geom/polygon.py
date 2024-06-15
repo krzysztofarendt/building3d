@@ -18,6 +18,7 @@ from building3d.geom.triangle import triangulate
 from building3d import random_id
 from building3d import validate_name
 from building3d.config import GEOM_EPSILON
+from building3d.config import GEOM_RTOL
 from building3d.util.roll_back import roll_back
 
 
@@ -647,18 +648,38 @@ class Polygon:
         else:
             return False
 
-    def is_facing_polygon(self, poly) -> bool:
+    def is_facing_polygon(self, poly, exact=True) -> bool:
         """Checks if this polygon is facing another polygon.
 
         Returns True if all points of two polygons are equal and their normals
         are pointing towards each other.
+
+        If exact is True, all points of two polygons must be equal (order may be different).
+        If exact is False, the methods checks only in points are coplanar and
+        normal vectors are opposite.
+
+        Args:
+            poly: another polygon
+            exact: if True, all points of adjacent polygons must be equal
         """
-        this_points = set(self.points)
-        other_points = set(poly.points)
-        if this_points == other_points:
-            if np.isclose(self.normal * -1, poly.normal).all():
+        if exact:
+            this_points = set(self.points)
+            other_points = set(poly.points)
+            if this_points == other_points:
+                if np.isclose(self.normal * -1, poly.normal).all():
+                    return True
+            return False
+        else:
+            this_points = self.points
+            other_points = poly.points
+            all_points = this_points + other_points
+            points_coplanar = are_points_coplanar(*all_points)
+            normals_opposite = np.isclose(self.normal, poly.normal * -1, rtol=GEOM_RTOL).all()
+
+            if points_coplanar and normals_opposite:
                 return True
-        return False
+            else:
+                return False
 
     def _triangulate(self) -> list[tuple[int, ...]]:
         """Return a list of triangles (i, j, k) using the ear clipping algorithm.
