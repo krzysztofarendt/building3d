@@ -63,6 +63,7 @@ make coverage
 make example_1
 make example_2
 make example_3
+make example_4
 ```
 
 # Notes
@@ -72,14 +73,14 @@ make example_3
 - Professional meshing tools (gmsh, tetgen, CGAL), however, are licensed under GPL/LGPL/AGPL,
   while I strive to keep this package under the MIT license
 
-# TODO:
+# Roadmap
 
 - [ ] Connecting solids with different dimensions through polygon slicing
 - [ ] Polygon slice extrusion
 - [ ] Predefined wedge geometry
 - [ ] Ray-tracing for light
 - [ ] Extend ray-tracing to sound (scattering, diffraction)
-- [ ] Finite Volume Method
+- [ ] Finite Contro/Volume Method
 - [ ] Export mesh to VTK format to enable convertions with meshio: https://vtk.org/wp-content/uploads/2015/04/file-formats.pdf
 
 Other cool projects:
