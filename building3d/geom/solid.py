@@ -172,11 +172,24 @@ class Solid:
                 return True
         return False
 
-    def is_adjacent_to_solid(self, sld) -> bool:
-        """Checks if this solid is adjacent to another solid."""
+    def is_adjacent_to_solid(self, sld, exact: bool = True) -> bool:
+        """Checks if this solid is adjacent to another solid.
+
+        The argument `exact` has the same meaning as in Polygon.is_facing_polygon().
+        If `exact` is True, all points of adjacent polygons must be equal.
+        If `exact` is False, the method checks only in points are coplanar and
+        normal vectors are opposite.
+
+        Args:
+            sld: other solid
+            exact: if True, the solid must be exactly adjacent
+
+        Return:
+            True if the solids are adjacent
+        """
         for this_poly in self.get_polygons():
             for other_poly in sld.get_polygons():
-                if this_poly.is_facing_polygon(other_poly):
+                if this_poly.is_facing_polygon(other_poly, exact=exact):
                     return True
         return False
 
