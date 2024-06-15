@@ -64,7 +64,7 @@ class Zone:
         """Get list of solids."""
         return list(self.solids.values())
 
-    def get_wall_names(self) -> list[str]:  # TODO: Rename or remove?
+    def get_wall_names(self) -> list[str]:
         """Get list of wall names."""
         return [name for sld in self.get_solids() for name in sld.get_wall_names()]
 
