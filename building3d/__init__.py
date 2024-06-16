@@ -14,6 +14,11 @@ def random_id(size: int | None = None) -> str:
     When `size` is `None`, the maximum length of the output is 36,
     because UUIDs have 4 additional hyphens.
     """
+    if size is not None and size > 32:
+        raise ValueError("The maximum length of the output is 36")
+    elif size is not None and size <= 0:
+        raise ValueError("The size must be greater than 0")
+
     uid = str(uuid.uuid4())
     if size is None:
         return uid
@@ -28,9 +33,3 @@ def random_within(lim=1.0):
         return 0.0
     else:
         return 2 * lim * (np.random.random() - 0.5)
-
-
-def validate_name(name: str) -> str:
-    if "/" in name:
-        raise ValueError("Slash '/' not allowed in object names")
-    return name
