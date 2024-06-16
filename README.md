@@ -80,7 +80,7 @@ make example_4
 - [ ] Predefined wedge geometry
 - [ ] Ray-tracing for light
 - [ ] Extend ray-tracing to sound (scattering, diffraction)
-- [ ] Finite Control/Volume Method for energy simulation
+- [ ] Finite/Control Volume Method for energy simulation
 - [ ] Export mesh to VTK format to enable convertions with meshio: https://vtk.org/wp-content/uploads/2015/04/file-formats.pdf
 
 Other cool projects:
