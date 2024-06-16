@@ -207,16 +207,16 @@ class Polygon:
             raise GeometryError("Last slicing point must end at an edge or a vertex")
 
         case = None
-        if num_at_edge == 2 and len(sl_edges) == 2:
+        if num_at_edge == 2 and len(sl_edges) == 2 and num_at_vertex == 0:
             # 1) slicing points start and end at two different edges
             case = 1
-        elif num_at_edge == 2 and len(sl_edges) == 1:
+        elif num_at_edge == 2 and len(sl_edges) == 1 and num_at_vertex == 0:
             # 2) slicing points start and end at the same edge
             case = 2
         elif num_at_edge == 1 and num_at_vertex == 1:
             # 3) slicing points start at a vertex and end at some edge (or vice versa)
             case = 3
-        elif num_at_vertex == 2 and len(sl_vertices) == 2:
+        elif num_at_vertex == 2 and len(sl_vertices) == 2 and num_at_edge == 0:
             # 4) Slicing points start and end at two different vertices
             case = 4
         else:
@@ -284,7 +284,7 @@ class Polygon:
             points_2.append(self.points[next_2])
 
             poly_1 = Polygon(points_1, name=name1)
-            poly_2 = Polygon(points_2, name=name1)
+            poly_2 = Polygon(points_2, name=name2)
 
         elif case == 2:
             # 2) slicing points start and end at the same edge
@@ -371,7 +371,7 @@ class Polygon:
                     next_2 = 0
 
             poly_1 = Polygon(points_1, name=name1)
-            poly_2 = Polygon(points_2, name=name1)
+            poly_2 = Polygon(points_2, name=name2)
 
         elif case == 4:
             # 4) Slicing points start and end at two different vertices
