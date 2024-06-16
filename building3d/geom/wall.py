@@ -2,7 +2,7 @@
 import numpy as np
 
 from building3d import random_id
-from building3d import validate_name
+from building3d.geom.paths.validate_name import validate_name
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
 from building3d.geom.exceptions import GeometryError

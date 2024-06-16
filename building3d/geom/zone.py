@@ -2,7 +2,8 @@
 import numpy as np
 
 from building3d import random_id
-from building3d import validate_name
+from building3d.geom.paths.validate_name import validate_name
+from building3d.geom.paths.object_path import object_path
 from building3d.geom.point import Point
 from building3d.geom.solid import Solid
 from building3d.geom.wall import Wall
@@ -72,12 +73,12 @@ class Zone:
         """Get list of wall instances."""
         return [w for sld in self.get_solids() for w in sld.get_walls()]
 
-    def find_wall(self, wall_name: str) -> Wall:  # TODO: Rename or remove?
-        """Get wall by name. Will search in all solids."""
+    def find_wall(self, wall_name: str) -> str:
+        """Find wall by name. Return path suitable for get_object(). Will search in all solids."""
         for sld in self.get_solids():
             for wall in sld.get_walls():
                 if wall.name == wall_name:
-                    return wall
+                    return object_path(solid=sld, wall=wall)
         raise GeometryError(f"Wall {wall_name} not found")
 
     def get_object(self, path: str) -> Solid | Wall | Polygon | None:

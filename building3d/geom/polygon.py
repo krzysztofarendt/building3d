@@ -16,7 +16,7 @@ from building3d.geom.triangle import triangle_area
 from building3d.geom.triangle import is_point_inside as is_point_inside_triangle
 from building3d.geom.triangle import triangulate
 from building3d import random_id
-from building3d import validate_name
+from building3d.geom.paths.validate_name import validate_name
 from building3d.config import GEOM_EPSILON
 from building3d.config import GEOM_RTOL
 from building3d.util.roll_back import roll_back

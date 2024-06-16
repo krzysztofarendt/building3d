@@ -5,7 +5,7 @@ from typing import Sequence
 import numpy as np
 
 from building3d import random_id
-from building3d import validate_name
+from building3d.geom.paths.validate_name import validate_name
 from building3d.geom.exceptions import GeometryError
 from building3d.geom.wall import Wall
 from building3d.geom.point import Point
