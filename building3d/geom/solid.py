@@ -5,6 +5,7 @@ from typing import Sequence
 import numpy as np
 
 from building3d import random_id
+from building3d.geom.paths.object_path import object_path
 from building3d.geom.paths.validate_name import validate_name
 from building3d.geom.exceptions import GeometryError
 from building3d.geom.wall import Wall
@@ -66,6 +67,14 @@ class Solid:
         for wall in self.get_walls():
             poly.extend(wall.get_polygons(children=children))
         return poly
+
+    def find_polygon(self, poly_name: str) -> str:
+        """Find polygon by name. Return path suitable for get_object(). Will search in all walls."""
+        for wall in self.get_walls():
+            for poly in wall.get_polygons():
+                if poly.name == poly_name:
+                    return object_path(wall=wall, poly=poly)
+        raise GeometryError(f"Polygon {poly_name} not found")
 
     def get_object(self, path: str) -> Wall | Polygon | None:
         """Get object by the path. The path contains names of nested components."""
