@@ -92,13 +92,14 @@ class Polygon:
                     triangulation_successful = True
                 except TriangulationError as e:
                     logger.warning(self.name + ": " + str(e))
-                    logger.debug("Will try to reorder vertices")
+                    logger.warning("Will try to reorder vertices")
                     self.points = roll_back(self.points)
                 n_try += 1
 
         self.centroid = self._centroid()
         self.edges = self._edges()
         self.area = self._area()
+        logger.info(f"Polygon created: {self}")
 
     def copy(self, new_name: str | None = None):
         """Return a copy of itself (with a new name).
@@ -208,6 +209,7 @@ class Polygon:
         if sl_pt_loc[len(points) - 1][0] == "interior":
             raise GeometryError("Last slicing point must end at an edge or a vertex")
 
+        breakpoint()
         case = None
         if num_at_edge == 2 and len(sl_edges) == 2 and num_at_vertex == 0:
             # 1) slicing points start and end at two different edges
