@@ -111,21 +111,25 @@ def stitch_solids(
             sup_slicing_points = [pairs[0][0], pairs[0][1], pairs[1][1], pairs[1][0]]
 
             ref_poly = Polygon(sup_slicing_points)
+            # One of the resulting polygons is likely non-convex,
+            # so expect triangulation warning messages during the below operation
             poly1_sup, poly1_main = poly1.slice(
                 sup_slicing_points,
                 name1 = f"{poly1.name}-sup",
                 pt1 = ref_poly.some_interior_point(),
                 name2 = f"{poly1.name}-main",  # This one will be sliced further
-            )  # TODO: TriangulationError raised multiple times -> debug
+            )
 
             # Make the main slice, needed to stitch poly2 to poly1
             ref_poly = Polygon(slicing_points)
+            # One of the resulting polygons is likely non-convex,
+            # so expect triangulation warning messages during the below operation
             poly1_int, poly1_ext = poly1_main.slice(
                 slicing_points,
                 name1 = f"{poly1.name}-{poly2.name}",
                 pt1 = ref_poly.some_interior_point(),
                 name2 = f"{poly1.name}",
-            )  # TODO: TriangulationError raised multiple times -> debug
+            )
 
         # Replace poly1 with the new polygons
         poly_path = sld1.find_polygon(poly1.name)

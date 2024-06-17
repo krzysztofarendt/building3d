@@ -209,7 +209,6 @@ class Polygon:
         if sl_pt_loc[len(points) - 1][0] == "interior":
             raise GeometryError("Last slicing point must end at an edge or a vertex")
 
-        breakpoint()
         case = None
         if num_at_edge == 2 and len(sl_edges) == 2 and num_at_vertex == 0:
             # 1) slicing points start and end at two different edges
