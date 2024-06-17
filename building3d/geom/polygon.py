@@ -132,6 +132,8 @@ class Polygon:
     ):
         """Slice a polygon into two parts.
 
+        If `name1` and `name2` are given, at least one `pt1` or `pt2` must be provided.
+
         Args:
             points: list of points
             name1: name of the first part
@@ -417,31 +419,44 @@ class Polygon:
             raise NotImplementedError(f"Case {case} not implemented yet")
 
         # Determine which polygon is name1 and which name2, based on pt1 and pt2
-        if pt1 is not None and pt2 is not None:
+        if pt1 is not None:
             pt1_in_poly1 = poly_1.is_point_inside(pt1)
             pt1_in_poly2 = poly_2.is_point_inside(pt1)
-            pt2_in_poly1 = poly_1.is_point_inside(pt2)
-            pt2_in_poly2 = poly_2.is_point_inside(pt2)
-
             if pt1_in_poly1 and pt1_in_poly2:
                 raise GeometryError(
                     f"{pt1=} is inside both of the sliced polygons"
                 )
-            elif pt2_in_poly1 and pt2_in_poly2:
-                raise GeometryError(
-                    f"{pt2=} is inside both of the sliced polygons"
-                )
-            elif pt1_in_poly1 and pt2_in_poly2:
+            elif pt1_in_poly1:
                 pass  # OK, no need to swap poly1 with poly2
-            elif pt2_in_poly1 and pt1_in_poly2:
+            elif pt1_in_poly2:
                 points_1 = poly_1.points
                 points_2 = poly_2.points
                 poly_1 = Polygon(points_2, name=name1)
                 poly_2 = Polygon(points_1, name=name2)
             else:
                 raise GeometryError(
-                    f"{pt1=} or {pt2=} is not inside any of the sliced polygons"
+                    f"{pt1=} is not inside any of the sliced polygons"
                 )
+        elif pt2 is not None:
+            pt2_in_poly1 = poly_1.is_point_inside(pt2)
+            pt2_in_poly2 = poly_2.is_point_inside(pt2)
+            if pt2_in_poly1 and pt2_in_poly2:
+                raise GeometryError(
+                    f"{pt2=} is inside both of the sliced polygons"
+                )
+            elif pt2_in_poly2:
+                pass  # OK, no need to swap poly1 with poly2
+            elif pt2_in_poly1:
+                points_1 = poly_1.points
+                points_2 = poly_2.points
+                poly_1 = Polygon(points_2, name=name1)
+                poly_2 = Polygon(points_1, name=name2)
+            else:
+                raise GeometryError(
+                    f"{pt2=} is not inside any of the sliced polygons"
+                )
+        else:
+            pass
 
         # Check normals and flip polygons if different
         if not np.isclose(poly_1.normal, self.normal).all():
@@ -767,6 +782,17 @@ class Polygon:
         # Check if all points are coplanar
         if not are_points_coplanar(*self.points):
             raise GeometryError(f"Points of polygon aren't coplanar")
+
+    def some_interior_point(self) -> Point:
+        """Return some point laying inside this polygon.
+
+        Such point is sometimes needed to distuingish inside from outside.
+        """
+        p0 = self.points[self.triangles[0][0]]
+        p1 = self.points[self.triangles[0][1]]
+        p2 = self.points[self.triangles[0][2]]
+        some_pt = triangle_centroid(p0, p1, p2)
+        return some_pt
 
     def _centroid(self) -> Point:
         """Calculate the center of mass.
