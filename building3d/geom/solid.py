@@ -235,6 +235,7 @@ class Solid:
 
         return abs(total_volume)
 
+    # TODO: This test is not sufficient. It can pass even if the solid is not closed.
     def _verify(self, throw: bool = False) -> None:
         """Verify geometry correctness.
 
