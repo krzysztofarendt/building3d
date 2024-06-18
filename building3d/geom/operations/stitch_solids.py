@@ -132,25 +132,10 @@ def stitch_solids(
             )
 
         # Replace poly1 with the new polygons
-        poly_path = sld1.find_polygon(poly1.name)
-        parent_wall = poly_path.split(PATH_SEP)[0]  # Parent wall
-
-        walls = sld1.get_walls()
-        new_walls = []
-        for w in walls:
-            if w.name != parent_wall:
-                new_walls.append(w)
-            else:
-                polygons = w.get_polygons()
-                new_polygons = [p for p in polygons if p.name != poly1.name]
-                new_polygons.extend([poly1_ext, poly1_int])
-                if poly1_sup is not None:
-                    new_polygons.append(poly1_sup)
-                wall = Wall(new_polygons, name=w.name, uid=w.uid)
-                new_walls.append(wall)
-
-        sld1_new = Solid(new_walls, name=sld1.name, uid=sld1.uid)
-        assert np.isclose(sld1_new.volume, sld1.volume)
+        new_polys = [poly1_ext, poly1_int]
+        if poly1_sup is not None:
+            new_polys.append(poly1_sup)
+        sld1_new = replace_polygons_in_solid(sld1, to_replace=poly1, new_polys=new_polys)
 
         return sld1_new, sld2
 
@@ -166,3 +151,35 @@ def stitch_solids(
 
     else:
         raise NotImplementedError(f"Case {case} was not implemented.")
+
+
+def replace_polygons_in_solid(sld: Solid, to_replace: Polygon, new_polys: list[Polygon]) -> Solid:
+    """Replaces a polygon in the solid with a list of new polygons.
+
+    Args:
+        sld: solid
+        to_replace: polygon to replace
+        new_polys: list of new polygons
+
+    Return:
+        new solid
+    """
+    poly_path = sld.find_polygon(to_replace.name)
+    parent_wall = poly_path.split(PATH_SEP)[0]  # Parent wall
+
+    walls = sld.get_walls()
+    new_walls = []
+    for w in walls:
+        if w.name != parent_wall:
+            new_walls.append(w)
+        else:
+            polygons = w.get_polygons()
+            new_polygons = [p for p in polygons if p.name != to_replace.name]
+            new_polygons.extend(new_polys)
+            wall = Wall(new_polygons, name=w.name, uid=w.uid)
+            new_walls.append(wall)
+
+    sld1_new = Solid(new_walls, name=sld.name, uid=sld.uid)
+    assert np.isclose(sld1_new.volume, sld.volume)
+
+    return sld
