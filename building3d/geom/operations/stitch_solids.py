@@ -65,63 +65,11 @@ def stitch_solids(
 
     elif case == 2:
         # 2) poly1 is bigger, the poly2 polygon is fully within poly1 -> slice poly1
-        # Divide poly1 into 2 smaller polygons, one of them facing poly2
-        slicing_points = [pt for pt in poly2.points if pt not in poly1.points]
-        poly1_sup = None  # Placeholder for the supplementary slice (needed in case 2b)
-
-        try:
-            # If it is 2b, it will raise GeometryError, because the first and last
-            # points do not touch any vertex or edges
-            ref_poly = Polygon(slicing_points)
-            poly1_int, poly1_ext = poly1.slice(
-                slicing_points,
-                name1 = f"{poly1.name}-1",
-                pt1 = ref_poly.some_interior_point(),
-                name2 = f"{poly1.name}-2",
-            )
-
-        except GeometryError:
-            # If it is 2b, poly1 must be sliced twice.
-            # First let's find closest points - they will be used to slice poly1
-            pairs = find_n_closest_points_between_2_polygons(poly1, poly2, n=2)
-
-            # Make the supplementary slice of poly1 using the closest points between polygons
-            # [poly1 vertex 1, poly2 vertex 1, poly2 vertex 2, poly1 vertex 2]
-            sup_slicing_points = [pairs[0][0], pairs[0][1], pairs[1][1], pairs[1][0]]
-
-            ref_poly = Polygon(sup_slicing_points)
-            # One of the resulting polygons is likely non-convex,
-            # so expect triangulation warning messages during the below operation
-            poly1_sup, poly1_main = poly1.slice(
-                sup_slicing_points,
-                name1 = f"{poly1.name}-sup",
-                pt1 = ref_poly.some_interior_point(),
-                name2 = f"{poly1.name}-main",  # This one will be sliced further
-            )
-
-            # Make the main slice, needed to stitch poly2 to poly1
-            ref_poly = Polygon(slicing_points)
-            # One of the resulting polygons is likely non-convex,
-            # so expect triangulation warning messages during the below operation
-            poly1_int, poly1_ext = poly1_main.slice(
-                slicing_points,
-                name1 = f"{poly1.name}-{poly2.name}",
-                pt1 = ref_poly.some_interior_point(),
-                name2 = f"{poly1.name}",
-            )
-
-        # Replace poly1 with the new polygons
-        new_polys = [poly1_ext, poly1_int]
-        if poly1_sup is not None:
-            new_polys.append(poly1_sup)
-        sld1_new = replace_polygons_in_solid(sld1, to_replace=poly1, new_polys=new_polys)
-
-        return sld1_new, sld2
+        return _case_2(sld1, poly1, sld2, poly2)
 
     elif case == 3:
         # 3) poly2 is bigger, the poly1 polygon is fully within poly2 -> slice poly2
-        ...  # TODO: Almost the same as case2 -> re-use the code
-        raise NotImplementedError(f"Case {case} was not implemented.")
+        return _case_3(sld1, poly1, sld2, poly2)
 
     elif case == 4:
         # 4) They are partially overlapping -> slice both
@@ -200,3 +148,65 @@ def replace_polygons_in_solid(sld: Solid, to_replace: Polygon, new_polys: list[P
     assert np.isclose(sld1_new.volume, sld.volume)
 
     return sld
+
+# =============================================
+# Auxiliary functions to limit boilerplate code
+# =============================================
+def _case_3(sld1: Solid, poly1: Polygon, sld2: Solid, poly2: Polygon) -> tuple[Solid, Solid]:
+    """It is case 2 reversed!"""
+    return _case_2(sld2, poly2, sld1, poly1)
+
+
+def _case_2(sld1: Solid, poly1: Polygon, sld2: Solid, poly2: Polygon) -> tuple[Solid, Solid]:
+    # Divide poly1 into 2 smaller polygons, one of them facing poly2
+    slicing_points = [pt for pt in poly2.points if pt not in poly1.points]
+    poly1_sup = None  # Placeholder for the supplementary slice (needed in case 2b)
+
+    try:
+        # If it is 2b, it will raise GeometryError, because the first and last
+        # points do not touch any vertex or edges
+        ref_poly = Polygon(slicing_points)
+        poly1_int, poly1_ext = poly1.slice(
+            slicing_points,
+            name1 = f"{poly1.name}-1",
+            pt1 = ref_poly.some_interior_point(),
+            name2 = f"{poly1.name}-2",
+        )
+
+    except GeometryError:
+        # If it is 2b, poly1 must be sliced twice.
+        # First let's find closest points - they will be used to slice poly1
+        pairs = find_n_closest_points_between_2_polygons(poly1, poly2, n=2)
+
+        # Make the supplementary slice of poly1 using the closest points between polygons
+        # [poly1 vertex 1, poly2 vertex 1, poly2 vertex 2, poly1 vertex 2]
+        sup_slicing_points = [pairs[0][0], pairs[0][1], pairs[1][1], pairs[1][0]]
+
+        ref_poly = Polygon(sup_slicing_points)
+        # One of the resulting polygons is likely non-convex,
+        # so expect triangulation warning messages during the below operation
+        poly1_sup, poly1_main = poly1.slice(
+            sup_slicing_points,
+            name1 = f"{poly1.name}-sup",
+            pt1 = ref_poly.some_interior_point(),
+            name2 = f"{poly1.name}-main",  # This one will be sliced further
+        )
+
+        # Make the main slice, needed to stitch poly2 to poly1
+        ref_poly = Polygon(slicing_points)
+        # One of the resulting polygons is likely non-convex,
+        # so expect triangulation warning messages during the below operation
+        poly1_int, poly1_ext = poly1_main.slice(
+            slicing_points,
+            name1 = f"{poly1.name}-{poly2.name}",
+            pt1 = ref_poly.some_interior_point(),
+            name2 = f"{poly1.name}",
+        )
+
+    # Replace poly1 with the new polygons
+    new_polys = [poly1_ext, poly1_int]
+    if poly1_sup is not None:
+        new_polys.append(poly1_sup)
+    sld1_new = replace_polygons_in_solid(sld1, to_replace=poly1, new_polys=new_polys)
+
+    return sld1_new, sld2
