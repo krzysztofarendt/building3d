@@ -164,7 +164,7 @@ def find_n_closest_points_between_2_polygons(
             points_used.add(closest_p2)
 
         if len(pairs) == n:
-            # Just two pairs are needed to make the supplementary slice of poly1
+            # Just n pairs was requested
             break
 
     return pairs
