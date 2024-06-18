@@ -3,6 +3,7 @@ import numpy as np
 from building3d.geom.vector import length
 from building3d.geom.vector import vector
 from building3d.geom.paths import PATH_SEP
+from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
 from building3d.geom.solid import Solid
 from building3d.geom.wall import Wall
@@ -82,29 +83,7 @@ def stitch_solids(
         except GeometryError:
             # If it is 2b, poly1 must be sliced twice.
             # First let's find closest points - they will be used to slice poly1
-            dist_p1_p2 = {}  # {Point of poly1: (distance, Point of poly2)}
-            for p1 in poly1.points:
-                if p1 not in dist_p1_p2:
-                    dist_p1_p2[p1] = []
-                for p2 in poly2.points:
-                    d = length(vector(p1, p2))
-                    dist_p1_p2[p1].append((d, p2))
-
-            for p1 in dist_p1_p2.keys():
-                dist_p1_p2[p1] = sorted(dist_p1_p2[p1])
-
-            pairs = []
-            points_used = set()
-            for p1, closest in dist_p1_p2.items():
-                _, closest_p2 = closest[0]
-                if p1 not in points_used and closest_p2 not in points_used:
-                    pairs.append((p1, closest_p2))
-                    points_used.add(p1)
-                    points_used.add(closest_p2)
-
-                if len(pairs) == 2:
-                    # Just two pairs are needed to make the supplementary slice of poly1
-                    break
+            pairs = find_n_closest_points_between_2_polygons(poly1, poly2, n=2)
 
             # Make the supplementary slice of poly1 using the closest points between polygons
             # [poly1 vertex 1, poly2 vertex 1, poly2 vertex 2, poly1 vertex 2]
@@ -151,6 +130,44 @@ def stitch_solids(
 
     else:
         raise NotImplementedError(f"Case {case} was not implemented.")
+
+
+def find_n_closest_points_between_2_polygons(
+    poly1: Polygon,
+    poly2: Polygon,
+    n: int,
+) -> list[tuple[Point, Point]]:
+    """Return a list of pairs of closest points between 2 polygons.
+
+    The pairs are sorted based on distance in the ascending order.
+    The number of pairs to return is n.
+    Each point can be used once, i.e. each pair is unique.
+    """
+    dist_p1_p2 = {}  # {Point of poly1: (distance, Point of poly2)}
+    for p1 in poly1.points:
+        if p1 not in dist_p1_p2:
+            dist_p1_p2[p1] = []
+        for p2 in poly2.points:
+            d = length(vector(p1, p2))
+            dist_p1_p2[p1].append((d, p2))
+
+    for p1 in dist_p1_p2.keys():
+        dist_p1_p2[p1] = sorted(dist_p1_p2[p1])
+
+    pairs = []
+    points_used = set()
+    for p1, closest in dist_p1_p2.items():
+        _, closest_p2 = closest[0]
+        if p1 not in points_used and closest_p2 not in points_used:
+            pairs.append((p1, closest_p2))
+            points_used.add(p1)
+            points_used.add(closest_p2)
+
+        if len(pairs) == n:
+            # Just two pairs are needed to make the supplementary slice of poly1
+            break
+
+    return pairs
 
 
 def replace_polygons_in_solid(sld: Solid, to_replace: Polygon, new_polys: list[Polygon]) -> Solid:
