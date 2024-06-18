@@ -74,6 +74,7 @@ def stitch_solids(
     elif case == 4:
         # 4) They are partially overlapping -> slice both
         ...
+
         raise NotImplementedError(f"Case {case} was not implemented.")
 
     else:
@@ -152,11 +153,6 @@ def replace_polygons_in_solid(sld: Solid, to_replace: Polygon, new_polys: list[P
 # =============================================
 # Auxiliary functions to limit boilerplate code
 # =============================================
-def _case_3(sld1: Solid, poly1: Polygon, sld2: Solid, poly2: Polygon) -> tuple[Solid, Solid]:
-    """It is case 2 reversed!"""
-    return _case_2(sld2, poly2, sld1, poly1)
-
-
 def _case_2(sld1: Solid, poly1: Polygon, sld2: Solid, poly2: Polygon) -> tuple[Solid, Solid]:
     # Divide poly1 into 2 smaller polygons, one of them facing poly2
     slicing_points = [pt for pt in poly2.points if pt not in poly1.points]
@@ -210,3 +206,8 @@ def _case_2(sld1: Solid, poly1: Polygon, sld2: Solid, poly2: Polygon) -> tuple[S
     sld1_new = replace_polygons_in_solid(sld1, to_replace=poly1, new_polys=new_polys)
 
     return sld1_new, sld2
+
+
+def _case_3(sld1: Solid, poly1: Polygon, sld2: Solid, poly2: Polygon) -> tuple[Solid, Solid]:
+    """It is case 2 reversed!"""
+    return _case_2(sld2, poly2, sld1, poly1)
