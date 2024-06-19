@@ -1,5 +1,6 @@
 import numpy as np
 
+from building3d.geom.line import line_segment_intersection
 from building3d.geom.vector import length
 from building3d.geom.vector import vector
 from building3d.geom.paths import PATH_SEP
@@ -69,11 +70,24 @@ def stitch_solids(
 
     elif case == 3:
         # 3) poly2 is bigger, the poly1 polygon is fully within poly2 -> slice poly2
-        return _case_3(sld1, poly1, sld2, poly2)
+        # It is case 3 reversed!
+        sld2, sld1 = _case_2(sld2, poly2, sld1, poly1)
+        return sld1, sld2
+
 
     elif case == 4:
         # 4) They are partially overlapping -> slice both
-        ...
+        # TODO: Need to use line_segment_intersection() to find slicing points
+        # Find the pair of intersecting edges
+        intersect_edges = {}
+        for pa1, pb1 in poly1.edges:
+            for pa2, pb2 in poly2.edges:
+                pcross = line_segment_intersection(pa1, pb1, pa2, pb2)
+                if pcross is None:
+                    continue
+                else:
+                    intersect_edges[pcross] = {"poly1": (pa1, pb1), "poly2": (pa2, pb2)}
+        print(intersect_edges)
 
         raise NotImplementedError(f"Case {case} was not implemented.")
 
@@ -145,8 +159,8 @@ def replace_polygons_in_solid(sld: Solid, to_replace: Polygon, new_polys: list[P
             wall = Wall(new_polygons, name=w.name, uid=w.uid)
             new_walls.append(wall)
 
-    sld1_new = Solid(new_walls, name=sld.name, uid=sld.uid)
-    assert np.isclose(sld1_new.volume, sld.volume)
+    sld_new = Solid(new_walls, name=sld.name, uid=sld.uid)
+    assert np.isclose(sld_new.volume, sld.volume)
 
     return sld
 
@@ -154,6 +168,7 @@ def replace_polygons_in_solid(sld: Solid, to_replace: Polygon, new_polys: list[P
 # Auxiliary functions to limit boilerplate code
 # =============================================
 def _case_2(sld1: Solid, poly1: Polygon, sld2: Solid, poly2: Polygon) -> tuple[Solid, Solid]:
+    # 2) poly1 is bigger, the poly2 polygon is fully within poly1 -> slice poly1
     # Divide poly1 into 2 smaller polygons, one of them facing poly2
     slicing_points = [pt for pt in poly2.points if pt not in poly1.points]
     poly1_sup = None  # Placeholder for the supplementary slice (needed in case 2b)
@@ -206,8 +221,3 @@ def _case_2(sld1: Solid, poly1: Polygon, sld2: Solid, poly2: Polygon) -> tuple[S
     sld1_new = replace_polygons_in_solid(sld1, to_replace=poly1, new_polys=new_polys)
 
     return sld1_new, sld2
-
-
-def _case_3(sld1: Solid, poly1: Polygon, sld2: Solid, poly2: Polygon) -> tuple[Solid, Solid]:
-    """It is case 2 reversed!"""
-    return _case_2(sld2, poly2, sld1, poly1)

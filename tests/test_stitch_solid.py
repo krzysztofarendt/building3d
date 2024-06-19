@@ -93,4 +93,4 @@ def test_stitch_solids_diff_sizes_vertices_one_inside_the_other():
 
 
 if __name__ == "__main__":
-    test_stitch_solids_diff_sizes_vertices_and_edges_not_touching()
+    test_stitch_solids_diff_sizes_vertices_touching()
