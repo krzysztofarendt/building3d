@@ -1,5 +1,6 @@
 import numpy as np
 
+from building3d.util.roll_back import roll_back
 from building3d.geom.line import line_segment_intersection
 from building3d.geom.vector import length
 from building3d.geom.vector import vector
@@ -15,6 +16,7 @@ def stitch_solids(
     sld1: Solid,
     sld2: Solid,
 ) -> tuple[Solid, Solid]:
+    """Slice adjacent polygons of two solids so that they share vertices and edges."""
 
     # Check if the solids are adjacent
     if not sld1.is_adjacent_to_solid(sld2, exact=False):
@@ -74,22 +76,9 @@ def stitch_solids(
         sld2, sld1 = _case_2(sld2, poly2, sld1, poly1)
         return sld1, sld2
 
-
     elif case == 4:
         # 4) They are partially overlapping -> slice both
-        # TODO: Need to use line_segment_intersection() to find slicing points
-        # Find the pair of intersecting edges
-        intersect_edges = {}
-        for pa1, pb1 in poly1.edges:
-            for pa2, pb2 in poly2.edges:
-                pcross = line_segment_intersection(pa1, pb1, pa2, pb2)
-                if pcross is None:
-                    continue
-                else:
-                    intersect_edges[pcross] = {"poly1": (pa1, pb1), "poly2": (pa2, pb2)}
-        print(intersect_edges)
-
-        raise NotImplementedError(f"Case {case} was not implemented.")
+        return _case_4(sld1, poly1, sld2, poly2)
 
     else:
         raise NotImplementedError(f"Case {case} was not implemented.")
@@ -221,3 +210,54 @@ def _case_2(sld1: Solid, poly1: Polygon, sld2: Solid, poly2: Polygon) -> tuple[S
     sld1_new = replace_polygons_in_solid(sld1, to_replace=poly1, new_polys=new_polys)
 
     return sld1_new, sld2
+
+
+def _case_4(sld1: Solid, poly1: Polygon, sld2: Solid, poly2: Polygon) -> tuple[Solid, Solid]:
+    # 4) They are partially overlapping -> slice both
+
+    # Need to use line_segment_intersection() to find slicing points
+    # Slicing poly2 is similar to slicing poly1 (mirror-like symmetry)
+    def slice_a_using_b(sld_a, poly_a, poly_b):
+        slicing_poly_a = []
+        added = set()
+        index = {}
+        max_index = -1
+        i = 0
+        for pab, pbb in poly_b.edges:
+            for paa, pba in poly_a.edges:
+                pcross = line_segment_intersection(pab, pbb, paa, pba)
+                if pcross is None:
+                    continue
+                else:
+                    if pcross not in added:
+                        slicing_poly_a.append(pcross)
+                        added.add(pcross)
+                        index[pcross] = i
+                        if i > max_index:
+                            max_index = i
+                        i += 1
+            if pab not in added:
+                if poly_a.is_point_inside(pab):
+                    slicing_poly_a.append(pab)
+                    added.add(pab)
+                    i += 1
+
+        try:
+            poly_a_int, poly_a_ext = poly_a.slice(slicing_poly_a)
+        except GeometryError:
+            # TODO: This must be tested with polygons with more vertices
+            slicing_poly_a = roll_back(slicing_poly_a)            # TODO: TEST IT MORE!
+            slicing_poly_a = slicing_poly_a[::-1]                 # TODO: TEST IT MORE!
+            poly_a_int, poly_a_ext = poly_a.slice(slicing_poly_a) # TODO: TEST IT MORE!
+
+        sld_a_new = replace_polygons_in_solid(
+            sld_a,
+            to_replace=poly_a,
+            new_polys=[poly_a_int, poly_a_ext],
+        )
+        return sld_a_new
+
+    sld1_new = slice_a_using_b(sld1, poly1, poly2)
+    sld2_new = slice_a_using_b(sld2, poly2, poly1)
+
+    return sld1_new, sld2_new

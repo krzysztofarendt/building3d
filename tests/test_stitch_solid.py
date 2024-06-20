@@ -92,5 +92,55 @@ def test_stitch_solids_diff_sizes_vertices_one_inside_the_other():
         _, _ = stitch_solids(b1, b2)
 
 
+def test_stitch_solids_overlapping():
+    # b1 = box_solid(1, 1, 1, name="b1")
+    # b2 = box_solid(1, 1, 1, (1, 0.5, 0.5), name="b2")
+    # b1_new, b2_new = stitch_solids(b1, b2)
+
+    # assert b1.name == b1_new.name
+    # assert b1.uid == b1_new.uid
+    # assert np.isclose(b1.volume, b1_new.volume)
+
+    # assert b2.name == b2_new.name
+    # assert b2.uid == b2_new.uid
+    # assert np.isclose(b2.volume, b2_new.volume)
+
+    # b1 = box_solid(1, 1, 1, name="b1")
+    # b2 = box_solid(0.5, 0.5, 0.5, (1, 0.5, 0.25), name="b2")
+    # b1_new, b2_new = stitch_solids(b1, b2)  # TODO: This case does not work
+
+    # assert b1.name == b1_new.name
+    # assert b1.uid == b1_new.uid
+    # assert np.isclose(b1.volume, b1_new.volume)
+
+    # assert b2.name == b2_new.name
+    # assert b2.uid == b2_new.uid
+    # assert np.isclose(b2.volume, b2_new.volume)
+
+    b1 = box_solid(1, 1, 1, name="b1")
+    b2 = box_solid(0.5, 0.5, 0.5, (1, 0.75, 0.25), name="b2")
+    b1_new, b2_new = stitch_solids(b1, b2)  # TODO: This case does not work
+
+    assert b1.name == b1_new.name
+    assert b1.uid == b1_new.uid
+    assert np.isclose(b1.volume, b1_new.volume)
+
+    assert b2.name == b2_new.name
+    assert b2.uid == b2_new.uid
+    assert np.isclose(b2.volume, b2_new.volume)
+
+    # b1 = box_solid(1, 1, 1, name="b1")
+    # b2 = box_solid(1, 1, 1, (1, 0.5, 0.0), name="b2") # TODO: Polygon.slice() can't do this yet
+    # b1_new, b2_new = stitch_solids(b1, b2)
+
+    # assert b1.name == b1_new.name
+    # assert b1.uid == b1_new.uid
+    # assert np.isclose(b1.volume, b1_new.volume)
+
+    # assert b2.name == b2_new.name
+    # assert b2.uid == b2_new.uid
+    # assert np.isclose(b2.volume, b2_new.volume)
+
+
 if __name__ == "__main__":
-    test_stitch_solids_diff_sizes_vertices_touching()
+    test_stitch_solids_overlapping()
