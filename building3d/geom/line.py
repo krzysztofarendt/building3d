@@ -198,7 +198,7 @@ def line_segment_intersection(pa1: Point, pb1: Point, pa2: Point, pb2: Point) ->
 
     Return None if:
     - line segments are not intersecting
-    - line segments are coincident (their direction vectors are equal)
+    - line segments are parallel or coincident (their direction vectors are equal)
     """
     d1 = pb1.vector() - pa1.vector()
     d2 = pb2.vector() - pa2.vector()
