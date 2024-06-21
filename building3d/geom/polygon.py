@@ -135,6 +135,25 @@ class Polygon:
 
         If `name1` and `name2` are given, at least one `pt1` or `pt2` must be provided.
 
+        Slicing rules:
+        - exactly 2 points must be touching a vertex or an edge
+        - these points must be the first one and the last one
+
+        =================================================================================
+        Idea for improvement:
+        - iterate over `points`
+        - remove all points touching an edge except the last one before interior points
+        - do the same for the tail
+        - if there are no interior points, then edge/vertex switching has to be detected
+          to distinguish head from tail
+        =================================================================================
+
+        Possible cases:
+        1) slicing points start and end at two different edges
+        2) slicing points start and end at the same edge
+        3) slicing points start at a vertex and end at some edge (or vice versa)
+        4) Slicing points start and end at two different vertices
+
         Args:
             points: list of points
             name1: name of the first part
@@ -160,12 +179,6 @@ class Polygon:
             name1 = random_id()
         if name2 is None:
             name2 = random_id()
-
-        # Possible cases:
-        # 1) slicing points start and end at two different edges
-        # 2) slicing points start and end at the same edge
-        # 3) slicing points start at a vertex and end at some edge (or vice versa)
-        # 4) Slicing points start and end at two different vertices
 
         # Find out which case is it
         # {slicing_point_index: (location_string, location_index)}
@@ -225,11 +238,11 @@ class Polygon:
         else:
             raise NotImplementedError(
                 f"Algorithm not prepared for such a case ({case}):\n"
-                f"{len(points)=}\n"
-                f"{num_at_edge=}\n"
-                f"{num_at_vertex=}\n"
-                f"{sl_edges=}\n"
-                f"{sl_vertices=}\n"
+                f"- number of slicing points = {len(points)}\n"
+                f"- number of slicing points touching edges = {num_at_edge}\n"
+                f"- number of slicing points touching vertices = {num_at_vertex}\n"
+                f"- edges to be used in the slice: {sl_edges}\n"
+                f"- vertices to be used in the slice: {sl_vertices}\n"
             )
 
         # Create two polygons through slicing
