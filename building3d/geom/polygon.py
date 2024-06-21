@@ -183,36 +183,34 @@ class Polygon:
         # Find out which case is it
         # {slicing_point_index: (location_string, location_index)}
         # location_index is either vertex index or edge index
-        sl_pt_loc = {}
-        num_at_vertex = 0
-        num_at_edge = 0
-        num_interior = 0
-        sl_edges = set()
-        sl_vertices = set()
+        def slicing_point_location(slicing_pts, poly_pts):
+            sl_pt_loc = {}
+            for slp_i, slp in enumerate(slicing_pts):
+                for p_i, p in enumerate(poly_pts):
+                    if p == slp:
+                        sl_pt_loc[slp_i] = ("at_vertex", p_i)
+                        break
 
-        for slp_i, slp in enumerate(points):
-            for p_i, p in enumerate(self.points):
-                if p == slp:
-                    sl_pt_loc[slp_i] = ("at_vertex", p_i)
-                    num_at_vertex += 1
-                    sl_vertices.add(p_i)
-                    break
+                if slp_i in sl_pt_loc.keys():
+                    continue
 
-            if slp_i in sl_pt_loc.keys():
-                continue
+                for edge_num, (ep1, ep2) in enumerate(self.edges):
+                    d_to_edge = distance_point_to_edge(ptest=slp, p1=ep1, p2=ep2)
+                    if np.isclose(d_to_edge, 0):
+                        sl_pt_loc[slp_i] = ("at_edge", edge_num)
 
-            for edge_num, (ep1, ep2) in enumerate(self.edges):
-                d_to_edge = distance_point_to_edge(ptest=slp, p1=ep1, p2=ep2)
-                if np.isclose(d_to_edge, 0):
-                    sl_pt_loc[slp_i] = ("at_edge", edge_num)
-                    num_at_edge += 1
-                    sl_edges.add(edge_num)
+                if slp_i in sl_pt_loc.keys():
+                    continue
+                else:
+                    sl_pt_loc[slp_i] = ("interior", None)
+            return sl_pt_loc
 
-            if slp_i in sl_pt_loc.keys():
-                continue
-            else:
-                sl_pt_loc[slp_i] = ("interior", None)
-                num_interior += 1
+        sl_pt_loc = slicing_point_location(slicing_pts=points, poly_pts=self.points)
+        num_at_vertex = sum([1 for loc, _ in sl_pt_loc.values() if loc == "at_vertex"])
+        num_at_edge = sum([1 for loc, _ in sl_pt_loc.values() if loc == "at_edge"])
+        num_interior = sum([1 for loc, _ in sl_pt_loc.values() if loc == "interior"])
+        sl_edges = set([index for loc, index in sl_pt_loc.values() if loc == "at_edge"])
+        sl_vertices = set([index for loc, index in sl_pt_loc.values() if loc == "at_vertex"])
 
         assert num_at_vertex + num_at_edge + num_interior == len(points), \
             "Slicing point location counting must have a bug"
@@ -221,6 +219,119 @@ class Polygon:
             raise GeometryError("First slicing point must start at an edge or a vertex")
         if sl_pt_loc[len(points) - 1][0] == "interior":
             raise GeometryError("Last slicing point must end at an edge or a vertex")
+
+        # Clean slicing points: remove heading or trailing vertex/edge points
+        new_points = []
+        for i in range(len(points)):
+            this_pt = points[i]
+            this_loc_type, this_loc_ix = sl_pt_loc[i]
+
+            if i > 0:
+                prev_loc_type, prev_loc_ix = sl_pt_loc[i - 1]
+            else:
+                prev_loc_type = None
+                prev_loc_ix = None
+
+            if i < len(points) - 1:
+                next_pt = points[i + 1]
+                next_loc_type, next_loc_ix = sl_pt_loc[i + 1]
+            else:
+                next_pt = None
+                next_loc_type = None
+                next_loc_ix = None
+
+            neglect_subsequent = False
+
+            if neglect_subsequent is True:
+                continue
+            elif this_loc_type == "interior":
+                new_points.append(this_pt)
+            elif next_loc_type == "interior":
+                new_points.append(this_pt)
+            elif (
+                prev_loc_type is not None
+                and prev_loc_type == "interior"
+                and this_loc_type in ("at_vertex", "at_edge")
+            ):
+                new_points.append(this_pt)
+                neglect_subsequent = True
+            elif this_loc_type == "at_vertex" and next_loc_type == "at_vertex":
+                if num_at_vertex == 2:
+                    new_points.append(this_pt)
+                else:
+                    continue
+            elif this_loc_type == "at_vertex" and prev_loc_type == "at_vertex":
+                if num_at_vertex == 2:
+                    new_points.append(this_pt)
+                else:
+                    continue
+            elif this_loc_type == "at_edge" and next_loc_type == "at_edge":
+                if this_loc_ix != next_loc_ix:
+                    new_points.append(this_pt)
+                else:
+                    continue
+            elif (
+                this_loc_type == "at_edge"
+                and next_loc_type is None
+                and prev_loc_type == "at_edge"
+                and prev_loc_ix is not None
+                and prev_loc_ix != this_loc_ix
+            ):
+                new_points.append(this_pt)
+            elif (
+                this_loc_type == "at_vertex"
+                and next_loc_type == "at_edge"
+                and next_loc_ix is not None
+            ):
+                d = distance_point_to_edge(
+                    ptest = this_pt,
+                    p1 = self.edges[next_loc_ix][0],
+                    p2 = self.edges[next_loc_ix][1],
+                )
+                if np.isclose(d, 0):
+                    continue
+                else:
+                    new_points.append(this_pt)
+            elif (
+                this_loc_type == "at_edge"
+                and next_loc_type == "at_vertex"
+                and next_pt is not None
+            ):
+                d = distance_point_to_edge(
+                    ptest = next_pt,
+                    p1 = self.edges[this_loc_ix][0],
+                    p2 = self.edges[this_loc_ix][1],
+                )
+                if np.isclose(d, 0):
+                    continue
+                else:
+                    new_points.append(this_pt)
+            else:
+                continue
+                # breakpoint()
+                # raise RuntimeError("This should never happen. Bug, if happened.")
+
+        points = new_points
+        del new_points
+
+        sl_pt_loc = slicing_point_location(slicing_pts=points, poly_pts=self.points)
+        num_at_vertex = sum([1 for loc, _ in sl_pt_loc.values() if loc == "at_vertex"])
+        num_at_edge = sum([1 for loc, _ in sl_pt_loc.values() if loc == "at_edge"])
+        num_interior = sum([1 for loc, _ in sl_pt_loc.values() if loc == "interior"])
+        sl_edges = set([index for loc, index in sl_pt_loc.values() if loc == "at_edge"])
+        sl_vertices = set([index for loc, index in sl_pt_loc.values() if loc == "at_vertex"])
+
+        assert num_at_vertex + num_at_edge + num_interior == len(points), \
+            "Slicing point location counting must have a bug"
+
+        if sl_pt_loc[0][0] == "interior":
+            raise GeometryError("First slicing point must start at an edge or a vertex")
+        if sl_pt_loc[len(points) - 1][0] == "interior":
+            raise GeometryError("Last slicing point must end at an edge or a vertex")
+
+        # Make sure there is enough slicing points (at least 2) - done second time!
+        if len(points) < 2:
+            raise GeometryError("Cannot slice the polygon using less than 2 points")
 
         case = None
         if num_at_edge == 2 and len(sl_edges) == 2 and num_at_vertex == 0:
