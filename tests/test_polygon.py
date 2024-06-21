@@ -668,13 +668,15 @@ def test_polygon_slice_multiple_points_at_edge():  # TODO
 
     # Three slicing points
     slicing_points = [
-        Point(0.0, 0.0, 0.0),
-        Point(0.1, 0.0, 0.0),
-        Point(0.2, 0.0, 0.0),
-        Point(0.5, 0.5, 0.0),
-        Point(0.5, 1.0, 0.0),
-        Point(0.6, 1.0, 0.0),
+        Point(0.0, 0.0, 0.0),  # At vertex (edge is overidden with vertex)
+        Point(0.1, 0.0, 0.0),  # At edge
+        Point(0.2, 0.0, 0.0),  # At edge
+        Point(0.5, 0.5, 0.0),  # Interior
+        Point(0.5, 1.0, 0.0),  # At edge
+        Point(0.6, 1.0, 0.0),  # At edge
     ]
+    # Total number at edge = 4
+    # Total number at vertex = 1
     poly1_pt = Point(1.0, 0.0, 0.0)
     poly2_pt = Point(0.0, 1.0, 0.0)
     poly1, poly2 = poly.slice(
@@ -746,4 +748,6 @@ if __name__ == "__main__":
     # test_polygon_slice_start_and_end_at_a_vertex()
     # test_polygon_slice_start_and_end_at_different_edges_vertical()
     # test_polygon_slice_start_and_end_at_different_edges_horizontal_5points()
-    test_polygon_slice_start_and_end_at_same_edge()
+    # test_polygon_slice_start_and_end_at_same_edge()
+    # test_polygon_slice_multiple_points_at_edge()
+    test_polygon_slice_with_wrong_pt1_pt2_raises_error()
