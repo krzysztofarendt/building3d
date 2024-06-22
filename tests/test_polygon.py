@@ -749,5 +749,5 @@ if __name__ == "__main__":
     # test_polygon_slice_start_and_end_at_different_edges_vertical()
     # test_polygon_slice_start_and_end_at_different_edges_horizontal_5points()
     # test_polygon_slice_start_and_end_at_same_edge()
-    # test_polygon_slice_multiple_points_at_edge()
-    test_polygon_slice_with_wrong_pt1_pt2_raises_error()
+    test_polygon_slice_multiple_points_at_edge()
+    # test_polygon_slice_with_wrong_pt1_pt2_raises_error()
