@@ -139,7 +139,7 @@ class Polygon:
         - exactly 2 points must be touching a vertex or an edge
         - these points must be the first one and the last one
 
-        =================================================================================
+        ================================================================================= # Seems to be done - verify!
         Idea for improvement:
         - iterate over `points`
         - remove all points touching an edge except the last one before interior points
@@ -181,31 +181,7 @@ class Polygon:
             name2 = random_id()
 
         # Find out which case is it
-        # {slicing_point_index: (location_string, location_index)}
-        # location_index is either vertex index or edge index
-        def slicing_point_location(slicing_pts, poly_pts):
-            sl_pt_loc = {}
-            for slp_i, slp in enumerate(slicing_pts):
-                for p_i, p in enumerate(poly_pts):
-                    if p == slp:
-                        sl_pt_loc[slp_i] = ("at_vertex", p_i)
-                        break
-
-                if slp_i in sl_pt_loc.keys():
-                    continue
-
-                for edge_num, (ep1, ep2) in enumerate(self.edges):
-                    d_to_edge = distance_point_to_edge(ptest=slp, p1=ep1, p2=ep2)
-                    if np.isclose(d_to_edge, 0):
-                        sl_pt_loc[slp_i] = ("at_edge", edge_num)
-
-                if slp_i in sl_pt_loc.keys():
-                    continue
-                else:
-                    sl_pt_loc[slp_i] = ("interior", None)
-            return sl_pt_loc
-
-        sl_pt_loc = slicing_point_location(slicing_pts=points, poly_pts=self.points)
+        sl_pt_loc = self._slicing_point_location(slicing_pts=points, poly_pts=self.points)
         num_at_vertex = sum([1 for loc, _ in sl_pt_loc.values() if loc == "at_vertex"])
         num_at_edge = sum([1 for loc, _ in sl_pt_loc.values() if loc == "at_edge"])
         num_interior = sum([1 for loc, _ in sl_pt_loc.values() if loc == "interior"])
@@ -314,7 +290,7 @@ class Polygon:
         points = new_points
         del new_points
 
-        sl_pt_loc = slicing_point_location(slicing_pts=points, poly_pts=self.points)
+        sl_pt_loc = self._slicing_point_location(slicing_pts=points, poly_pts=self.points)
         num_at_vertex = sum([1 for loc, _ in sl_pt_loc.values() if loc == "at_vertex"])
         num_at_edge = sum([1 for loc, _ in sl_pt_loc.values() if loc == "at_edge"])
         num_interior = sum([1 for loc, _ in sl_pt_loc.values() if loc == "interior"])
@@ -591,6 +567,35 @@ class Polygon:
             poly_2 = poly_2.flip(poly_2.name)
 
         return (poly_1, poly_2)
+
+    def _slicing_point_location(self, slicing_pts: list[Point], poly_pts: list[Point]) -> dict:
+        """Return the location of each slicing points.
+
+        The returned dict has the following format:
+        `{slicing_point_index: (location_string, location_index)}`.
+        `location_index` is either vertex index or edge index.
+        """
+        sl_pt_loc = {}
+        for slp_i, slp in enumerate(slicing_pts):
+            for p_i, p in enumerate(poly_pts):
+                if p == slp:
+                    sl_pt_loc[slp_i] = ("at_vertex", p_i)
+                    break
+
+            if slp_i in sl_pt_loc.keys():
+                continue
+
+            for edge_num, (ep1, ep2) in enumerate(self.edges):
+                d_to_edge = distance_point_to_edge(ptest=slp, p1=ep1, p2=ep2)
+                if np.isclose(d_to_edge, 0):
+                    sl_pt_loc[slp_i] = ("at_edge", edge_num)
+
+            if slp_i in sl_pt_loc.keys():
+                continue
+            else:
+                sl_pt_loc[slp_i] = ("interior", None)
+        return sl_pt_loc
+
 
     def points_as_array(self) -> np.ndarray:
         """Returns a copy of the points as a numpy array."""
