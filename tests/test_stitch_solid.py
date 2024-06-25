@@ -152,4 +152,4 @@ def test_stitch_solids_overlapping_4():
 
 
 if __name__ == "__main__":
-    test_stitch_solids_overlapping_2()
+    test_stitch_solids_overlapping_4()

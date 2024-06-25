@@ -57,8 +57,7 @@ def stitch_solids(
     elif poly2.area > poly1.area and poly1_points_in_poly2.all():
         case = 3
     else:
-        assert poly1_points_in_poly2.any()
-        assert poly2_points_in_poly1.any()
+        assert poly1_points_in_poly2.any() or poly2_points_in_poly1.any()
         case = 4  # They must be partially overlapping
 
     # Slice the facing polygons
@@ -214,15 +213,13 @@ def _case_2(sld1: Solid, poly1: Polygon, sld2: Solid, poly2: Polygon) -> tuple[S
 
 def _case_4(sld1: Solid, poly1: Polygon, sld2: Solid, poly2: Polygon) -> tuple[Solid, Solid]:
     # 4) They are partially overlapping -> slice both
+    # TODO: This function should be tested with polygons with more vertices (than 4)
 
     # Need to use line_segment_intersection() to find slicing points
     # Slicing poly2 is similar to slicing poly1 (mirror-like symmetry)
     def slice_a_using_b(sld_a, poly_a, poly_b):
         slicing_poly_a = []
         added = set()
-        index = {}
-        max_index = -1
-        i = 0
         for pab, pbb in poly_b.edges:
             for paa, pba in poly_a.edges:
                 pcross = line_segment_intersection(pab, pbb, paa, pba)
@@ -232,29 +229,36 @@ def _case_4(sld1: Solid, poly1: Polygon, sld2: Solid, poly2: Polygon) -> tuple[S
                     if pcross not in added:
                         slicing_poly_a.append(pcross)
                         added.add(pcross)
-                        index[pcross] = i
-                        if i > max_index:
-                            max_index = i
-                        i += 1
-            if pab not in added:
-                if poly_a.is_point_inside(pab):
-                    slicing_poly_a.append(pab)
-                    added.add(pab)
-                    i += 1
+            if pbb not in added:
+                if poly_a.is_point_inside(pbb):
+                    slicing_poly_a.append(pbb)
+                    added.add(pbb)
 
-        try:
-            poly_a_int, poly_a_ext = poly_a.slice(slicing_poly_a)
-        except GeometryError:
-            # TODO: This must be tested with polygons with more vertices
-            slicing_poly_a = roll_back(slicing_poly_a)            # TODO: TEST IT MORE!
-            slicing_poly_a = slicing_poly_a[::-1]                 # TODO: TEST IT MORE!
-            poly_a_int, poly_a_ext = poly_a.slice(slicing_poly_a) # TODO: TEST IT MORE!
+        # Try slicing poly_a
+        poly_a_int, poly_a_ext = None, None
+        num_tries = 0
+        max_num_tries = len(slicing_poly_a)
+        while num_tries < max_num_tries:
+            try:
+                poly_a_int, poly_a_ext = poly_a.slice(slicing_poly_a)
+                break  # Slicing successful
+            except GeometryError as err:
+                # Slicing unsuccessful, will try to shift the points
+                # until the first slicing point is at the edge or vertex
+                if num_tries >= max_num_tries:
+                    raise err
+                slicing_poly_a = roll_back(slicing_poly_a)
+            num_tries += 1
 
-        sld_a_new = replace_polygons_in_solid(
-            sld_a,
-            to_replace=poly_a,
-            new_polys=[poly_a_int, poly_a_ext],
-        )
+        if poly_a_int is not None and poly_a_ext is not None:
+            sld_a_new = replace_polygons_in_solid(
+                sld_a,
+                to_replace=poly_a,
+                new_polys=[poly_a_int, poly_a_ext],
+            )
+        else:
+            raise ValueError(f"New polygons not assigned, so cannot replace {poly_a} in {sld_a}")
+
         return sld_a_new
 
     sld1_new = slice_a_using_b(sld1, poly1, poly2)
