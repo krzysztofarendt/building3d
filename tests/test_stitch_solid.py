@@ -137,7 +137,6 @@ def test_stitch_solids_overlapping_3():
 
 
 def test_stitch_solids_overlapping_4():
-    # TODO: This case does not work, because none of poly1 points is inside poly2. This is not case 4.
     b1 = box_solid(1, 1, 1, name="b1")
     b2 = box_solid(0.5, 0.5, 0.5, (1, 0.75, 0.25), name="b2")
     b1_new, b2_new = stitch_solids(b1, b2)
@@ -150,6 +149,19 @@ def test_stitch_solids_overlapping_4():
     assert b2.uid == b2_new.uid
     assert np.isclose(b2.volume, b2_new.volume)
 
+    # Switch b1 <-> b2
+    b1 = box_solid(0.5, 0.5, 0.5, (1, 0.75, 0.25), name="b1")
+    b2 = box_solid(1, 1, 1, name="b2")
+    b1_new, b2_new = stitch_solids(b1, b2)
+
+    assert b1.name == b1_new.name
+    assert b1.uid == b1_new.uid
+    assert np.isclose(b1.volume, b1_new.volume)
+
+    assert b2.name == b2_new.name
+    assert b2.uid == b2_new.uid
+    assert np.isclose(b2.volume, b2_new.volume)
+
 
 if __name__ == "__main__":
-    test_stitch_solids_overlapping_4()
+    test_stitch_solids_overlapping_3()
