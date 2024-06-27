@@ -216,7 +216,7 @@ def _case_4(sld1: Solid, poly1: Polygon, sld2: Solid, poly2: Polygon) -> tuple[S
     # TODO: This function should be tested with polygons with more vertices (than 4)
 
     # Need to use line_segment_intersection() to find slicing points
-    # Slicing poly2 is similar to slicing poly1 (mirror-like symmetry)
+    # Slicing poly2 is similar to slicing poly1 (symmetry)
     def slice_a_using_b(sld_a, poly_a, poly_b):
         slicing_poly_a = []
         added = set()
@@ -240,6 +240,7 @@ def _case_4(sld1: Solid, poly1: Polygon, sld2: Solid, poly2: Polygon) -> tuple[S
         max_num_tries = len(slicing_poly_a)
         while num_tries < max_num_tries:
             try:
+                breakpoint()
                 poly_a_int, poly_a_ext = poly_a.slice(slicing_poly_a)
                 break  # Slicing successful
             except GeometryError as err:
