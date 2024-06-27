@@ -73,3 +73,14 @@ def is_point_colinear(p1: Point, p2: Point, ptest: Point) -> bool:
         return True
     else:
         return False
+
+
+def are_vectors_colinear(v1: tuple[Point, Point], v2: tuple[Point, Point]) -> bool:
+    """Checks if two vectors are colinear."""
+    if (
+        is_point_colinear(v1[0], v1[1], v2[0]) and
+        is_point_colinear(v1[0], v1[1], v2[1])
+    ):
+        return True
+    else:
+        return False
