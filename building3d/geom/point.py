@@ -11,9 +11,9 @@ class Point:
     """Point is a simple class with three attributes: x, y, z."""
 
     def __init__(self, x: float, y: float, z: float):
-        self.x = x
-        self.y = y
-        self.z = z
+        self.x = float(x)
+        self.y = float(y)
+        self.z = float(z)
 
     def copy(self):
         """Return a copy of itself.
@@ -25,6 +25,9 @@ class Point:
 
     def vector(self) -> np.ndarray:
         return np.array([self.x, self.y, self.z])
+
+    def dist_to_origin(self) -> float:
+        return np.sqrt(self.x ** 2 + self.y ** 2 + self.z ** 2)
 
     def add(self, vec: Sequence | np.ndarray):
         if len(vec) != 3:
@@ -101,3 +104,27 @@ class Point:
         y = np.round(self.y, POINT_NUM_DEC)
         z = np.round(self.z, POINT_NUM_DEC)
         return hash((x, y, z))
+
+    def __gt__(self, other):
+        if self.dist_to_origin() > other.dist_to_origin():
+            return True
+        else:
+            return False
+
+    def __lt__(self, other):
+        if self.dist_to_origin() < other.dist_to_origin():
+            return True
+        else:
+            return False
+
+    def __ge__(self, other):
+        if self.dist_to_origin() >= other.dist_to_origin():
+            return True
+        else:
+            return False
+
+    def __le__(self, other):
+        if self.dist_to_origin() <= other.dist_to_origin():
+            return True
+        else:
+            return False

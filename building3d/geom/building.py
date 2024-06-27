@@ -4,7 +4,7 @@ from __future__ import annotations
 import numpy as np
 
 from building3d import random_id
-from building3d import validate_name
+from building3d.geom.paths.validate_name import validate_name
 from building3d.geom.point import Point
 from building3d.geom.zone import Zone
 from building3d.geom.solid import Solid

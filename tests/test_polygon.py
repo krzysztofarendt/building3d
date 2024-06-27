@@ -384,13 +384,31 @@ def test_copy():
     assert not (poly_a is poly_b)
 
 
-def test_is_facing_polygon():
+def test_is_facing_polygon_exact():
     p1 = Point(0.0, 4.0, -1.0)
     p2 = Point(1.0, -1.0, 2.0)
     p3 = Point(0.0, -2.0, 3.0)
     poly_a = Polygon([p1, p2, p3])
     poly_b = Polygon([p3, p2, p1])
-    assert poly_a.is_facing_polygon(poly_b)
+    assert poly_a.is_facing_polygon(poly_b)  # exact=True by default
+    assert poly_a.is_facing_polygon(poly_b, exact=True)
+    assert poly_a.is_facing_polygon(poly_b, exact=False)
+
+
+def test_is_facing_polygon_different_sizes():
+    p1 = Point(0.0, 0.0, 0.0)
+    p2 = Point(1.0, 0.0, 0.0)
+    p3 = Point(1.0, 1.0, 0.0)
+    poly_a = Polygon([p1, p2, p3])
+
+    scale = (2, 2, 2)
+    p1 = Point(0.0, 0.0, 0.0) * scale
+    p2 = Point(1.0, 0.0, 0.0) * scale
+    p3 = Point(1.0, 1.0, 0.0) * scale
+    poly_b = Polygon([p3, p2, p1])
+    assert not poly_a.is_facing_polygon(poly_b)  # exact=True by default
+    assert not poly_a.is_facing_polygon(poly_b, exact=True)
+    assert poly_a.is_facing_polygon(poly_b, exact=False)
 
 
 def test_equality():
@@ -492,6 +510,13 @@ def test_polygon_slice_start_and_end_at_different_edges_vertical():
     assert poly1.is_point_inside(poly1_pt)
     assert poly2.is_point_inside(poly2_pt)
 
+    # Try without name and pt arguments
+    poly1, poly2 = poly.slice(slicing_points)
+
+    assert np.isclose(poly1.normal, poly.normal).all()
+    assert np.isclose(poly2.normal, poly.normal).all()
+    assert np.isclose(poly.area, poly1.area + poly2.area)
+
 
 def test_polygon_slice_start_and_end_at_different_edges_horizontal():
     p1 = Point(0.0, 0.0, 0.0)
@@ -500,7 +525,7 @@ def test_polygon_slice_start_and_end_at_different_edges_horizontal():
     p4 = Point(0.0, 1.0, 0.0)
     poly = Polygon([p1, p2, p3, p4])
 
-    # Horizontal slicing line
+    # horizontal slicing line
     slicing_points = [
         Point(0.0, 0.5, 0.0),
         Point(1.0, 0.5, 0.0),
@@ -634,6 +659,41 @@ def test_polygon_slice_start_at_vertex_end_at_edge():
     assert poly2.is_point_inside(poly2_pt)
 
 
+def test_polygon_slice_multiple_points_at_edge():  # TODO
+    p1 = Point(0.0, 0.0, 0.0)
+    p2 = Point(1.0, 0.0, 0.0)
+    p3 = Point(1.0, 1.0, 0.0)
+    p4 = Point(0.0, 1.0, 0.0)
+    poly = Polygon([p1, p2, p3, p4])
+
+    # Three slicing points
+    slicing_points = [
+        Point(0.0, 0.0, 0.0),  # At vertex (edge is overidden with vertex)
+        Point(0.1, 0.0, 0.0),  # At edge
+        Point(0.2, 0.0, 0.0),  # At edge
+        Point(0.5, 0.5, 0.0),  # Interior
+        Point(0.5, 1.0, 0.0),  # At edge
+        Point(0.6, 1.0, 0.0),  # At edge
+    ]
+    # Total number at edge = 4
+    # Total number at vertex = 1
+    poly1_pt = Point(1.0, 0.0, 0.0)
+    poly2_pt = Point(0.0, 1.0, 0.0)
+    poly1, poly2 = poly.slice(
+        slicing_points,
+        name1="poly1",
+        pt1=poly1_pt,
+        name2="poly2",
+        pt2=poly2_pt,
+    )
+
+    assert np.isclose(poly1.normal, poly.normal).all()
+    assert np.isclose(poly2.normal, poly.normal).all()
+    assert np.isclose(poly.area, poly1.area + poly2.area)
+    assert poly1.is_point_inside(poly1_pt)
+    assert poly2.is_point_inside(poly2_pt)
+
+
 def test_polygon_slice_with_1_point_raises_error():
     p1 = Point(0.0, 0.0, 0.0)
     p2 = Point(1.0, 0.0, 0.0)
@@ -688,4 +748,6 @@ if __name__ == "__main__":
     # test_polygon_slice_start_and_end_at_a_vertex()
     # test_polygon_slice_start_and_end_at_different_edges_vertical()
     # test_polygon_slice_start_and_end_at_different_edges_horizontal_5points()
-    test_polygon_slice_start_and_end_at_same_edge()
+    # test_polygon_slice_start_and_end_at_same_edge()
+    test_polygon_slice_multiple_points_at_edge()
+    # test_polygon_slice_with_wrong_pt1_pt2_raises_error()

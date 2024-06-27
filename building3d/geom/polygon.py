@@ -16,8 +16,9 @@ from building3d.geom.triangle import triangle_area
 from building3d.geom.triangle import is_point_inside as is_point_inside_triangle
 from building3d.geom.triangle import triangulate
 from building3d import random_id
-from building3d import validate_name
+from building3d.geom.paths.validate_name import validate_name
 from building3d.config import GEOM_EPSILON
+from building3d.config import GEOM_RTOL
 from building3d.util.roll_back import roll_back
 
 
@@ -91,13 +92,14 @@ class Polygon:
                     triangulation_successful = True
                 except TriangulationError as e:
                     logger.warning(self.name + ": " + str(e))
-                    logger.debug("Will try to reorder vertices")
+                    logger.warning("Will try to reorder vertices")
                     self.points = roll_back(self.points)
                 n_try += 1
 
         self.centroid = self._centroid()
         self.edges = self._edges()
         self.area = self._area()
+        logger.info(f"Polygon created: {self}")
 
     def copy(self, new_name: str | None = None):
         """Return a copy of itself (with a new name).
@@ -124,11 +126,26 @@ class Polygon:
     def slice(
         self,
         points: list[Point],
-        name1: str,
-        pt1: Point,
-        name2: str,
-        pt2: Point):
+        name1: str | None = None,
+        pt1: Point | None = None,
+        name2: str | None = None,
+        pt2: Point | None = None,
+    ):
         """Slice a polygon into two parts.
+
+        If `name1` and `name2` are given, at least one `pt1` or `pt2` must be provided.
+
+        Slicing rules:
+        - the first and the last slicing point must be touching a vertex or an edge
+        - if more is touching vertex/edge at the beginning of the list, they are removed
+          so that the list starts with a single vertex/edge touching point
+        - the same applies to the end of the slicing points list
+
+        Possible cases:
+        1) slicing points start and end at two different edges
+        2) slicing points start and end at the same edge
+        3) slicing points start at a vertex and end at some edge (or vice versa)
+        4) Slicing points start and end at two different vertices
 
         Args:
             points: list of points
@@ -151,75 +168,50 @@ class Polygon:
                     f"At least on of the points is not inside the polygon {self.name}: {p}"
                 )
 
-        # Possible cases:
-        # 1) slicing points start and end at two different edges
-        # 2) slicing points start and end at the same edge
-        # 3) slicing points start at a vertex and end at some edge (or vice versa)
-        # 4) Slicing points start and end at two different vertices
+        if name1 is None:
+            name1 = random_id()
+        if name2 is None:
+            name2 = random_id()
+
+        # Clean slicing points: remove heading or trailing vertex/edge points
+        points = self._remove_trailing_boundary_touching_points(points)
 
         # Find out which case is it
-        # {slicing_point_index: (location_string, location_index)}
-        # location_index is either vertex index or edge index
-        sl_pt_loc = {}
-        num_at_vertex = 0
-        num_at_edge = 0
-        num_interior = 0
-        sl_edges = set()
-        sl_vertices = set()
-
-        for slp_i, slp in enumerate(points):
-            for p_i, p in enumerate(self.points):
-                if p == slp:
-                    sl_pt_loc[slp_i] = ("at_vertex", p_i)
-                    num_at_vertex += 1
-                    sl_vertices.add(p_i)
-                    break
-
-            if slp_i in sl_pt_loc.keys():
-                continue
-
-            for edge_num, (ep1, ep2) in enumerate(self.edges):
-                d_to_edge = distance_point_to_edge(ptest=slp, p1=ep1, p2=ep2)
-                if np.isclose(d_to_edge, 0):
-                    sl_pt_loc[slp_i] = ("at_edge", edge_num)
-                    num_at_edge += 1
-                    sl_edges.add(edge_num)
-
-            if slp_i in sl_pt_loc.keys():
-                continue
-            else:
-                sl_pt_loc[slp_i] = ("interior", None)
-                num_interior += 1
+        sl_pt_loc = self._slicing_point_location(points)
+        num_at_vertex = sum([1 for loc, _ in sl_pt_loc.values() if loc == "at_vertex"])
+        num_at_edge = sum([1 for loc, _ in sl_pt_loc.values() if loc == "at_edge"])
+        num_interior = sum([1 for loc, _ in sl_pt_loc.values() if loc == "interior"])
+        sl_edges = set([index for loc, index in sl_pt_loc.values() if loc == "at_edge"])
+        sl_vertices = set([index for loc, index in sl_pt_loc.values() if loc == "at_vertex"])
 
         assert num_at_vertex + num_at_edge + num_interior == len(points), \
             "Slicing point location counting must have a bug"
 
-        if sl_pt_loc[0][0] == "interior":
-            raise GeometryError("First slicing point must start at an edge or a vertex")
-        if sl_pt_loc[len(points) - 1][0] == "interior":
-            raise GeometryError("Last slicing point must end at an edge or a vertex")
+        # Make sure there is enough slicing points (at least 2)
+        if len(points) < 2:
+            raise GeometryError("Cannot slice the polygon using less than 2 points")
 
         case = None
-        if num_at_edge == 2 and len(sl_edges) == 2:
+        if num_at_edge == 2 and len(sl_edges) == 2 and num_at_vertex == 0:
             # 1) slicing points start and end at two different edges
             case = 1
-        elif num_at_edge == 2 and len(sl_edges) == 1:
+        elif num_at_edge == 2 and len(sl_edges) == 1 and num_at_vertex == 0:
             # 2) slicing points start and end at the same edge
             case = 2
         elif num_at_edge == 1 and num_at_vertex == 1:
             # 3) slicing points start at a vertex and end at some edge (or vice versa)
             case = 3
-        elif num_at_vertex == 2 and len(sl_vertices) == 2:
+        elif num_at_vertex == 2 and len(sl_vertices) == 2 and num_at_edge == 0:
             # 4) Slicing points start and end at two different vertices
             case = 4
         else:
             raise NotImplementedError(
                 f"Algorithm not prepared for such a case ({case}):\n"
-                f"{len(points)=}\n"
-                f"{num_at_edge=}\n"
-                f"{num_at_vertex=}\n"
-                f"{sl_edges=}\n"
-                f"{sl_vertices=}\n"
+                f"- number of slicing points = {len(points)}\n"
+                f"- number of slicing points touching edges = {num_at_edge}\n"
+                f"- number of slicing points touching vertices = {num_at_vertex}\n"
+                f"- edges to be used in the slice: {sl_edges}\n"
+                f"- vertices to be used in the slice: {sl_vertices}\n"
             )
 
         # Create two polygons through slicing
@@ -277,7 +269,7 @@ class Polygon:
             points_2.append(self.points[next_2])
 
             poly_1 = Polygon(points_1, name=name1)
-            poly_2 = Polygon(points_2, name=name1)
+            poly_2 = Polygon(points_2, name=name2)
 
         elif case == 2:
             # 2) slicing points start and end at the same edge
@@ -364,7 +356,7 @@ class Polygon:
                     next_2 = 0
 
             poly_1 = Polygon(points_1, name=name1)
-            poly_2 = Polygon(points_2, name=name1)
+            poly_2 = Polygon(points_2, name=name2)
 
         elif case == 4:
             # 4) Slicing points start and end at two different vertices
@@ -410,30 +402,44 @@ class Polygon:
             raise NotImplementedError(f"Case {case} not implemented yet")
 
         # Determine which polygon is name1 and which name2, based on pt1 and pt2
-        pt1_in_poly1 = poly_1.is_point_inside(pt1)
-        pt1_in_poly2 = poly_2.is_point_inside(pt1)
-        pt2_in_poly1 = poly_1.is_point_inside(pt2)
-        pt2_in_poly2 = poly_2.is_point_inside(pt2)
-
-        if pt1_in_poly1 and pt1_in_poly2:
-            raise GeometryError(
-                f"{pt1=} is inside both of the sliced polygons"
-            )
-        elif pt2_in_poly1 and pt2_in_poly2:
-            raise GeometryError(
-                f"{pt2=} is inside both of the sliced polygons"
-            )
-        elif pt1_in_poly1 and pt2_in_poly2:
-            pass  # OK, no need to swap poly1 with poly2
-        elif pt2_in_poly1 and pt1_in_poly2:
-            points_1 = poly_1.points
-            points_2 = poly_2.points
-            poly_1 = Polygon(points_2, name=name1)
-            poly_2 = Polygon(points_1, name=name2)
+        if pt1 is not None:
+            pt1_in_poly1 = poly_1.is_point_inside(pt1)
+            pt1_in_poly2 = poly_2.is_point_inside(pt1)
+            if pt1_in_poly1 and pt1_in_poly2:
+                raise GeometryError(
+                    f"{pt1=} is inside both of the sliced polygons"
+                )
+            elif pt1_in_poly1:
+                pass  # OK, no need to swap poly1 with poly2
+            elif pt1_in_poly2:
+                points_1 = poly_1.points
+                points_2 = poly_2.points
+                poly_1 = Polygon(points_2, name=name1)
+                poly_2 = Polygon(points_1, name=name2)
+            else:
+                raise GeometryError(
+                    f"{pt1=} is not inside any of the sliced polygons"
+                )
+        elif pt2 is not None:
+            pt2_in_poly1 = poly_1.is_point_inside(pt2)
+            pt2_in_poly2 = poly_2.is_point_inside(pt2)
+            if pt2_in_poly1 and pt2_in_poly2:
+                raise GeometryError(
+                    f"{pt2=} is inside both of the sliced polygons"
+                )
+            elif pt2_in_poly2:
+                pass  # OK, no need to swap poly1 with poly2
+            elif pt2_in_poly1:
+                points_1 = poly_1.points
+                points_2 = poly_2.points
+                poly_1 = Polygon(points_2, name=name1)
+                poly_2 = Polygon(points_1, name=name2)
+            else:
+                raise GeometryError(
+                    f"{pt2=} is not inside any of the sliced polygons"
+                )
         else:
-            raise GeometryError(
-                f"{pt1=} or {pt2=} is not inside any of the sliced polygons"
-            )
+            pass
 
         # Check normals and flip polygons if different
         if not np.isclose(poly_1.normal, self.normal).all():
@@ -443,6 +449,175 @@ class Polygon:
             poly_2 = poly_2.flip(poly_2.name)
 
         return (poly_1, poly_2)
+
+    def _slicing_point_location(self, slicing_pts: list[Point]) -> dict:
+        """Return the location of each slicing point.
+
+        The returned dict has the following format:
+        `{slicing_point_index: (location_string, location_index)}`.
+        `location_index` is either vertex index or edge index.
+        `location_string` is `at_vertex`, `at_edge`, or `interior`.
+        """
+        if len(slicing_pts) == 0:
+            raise GeometryError("No slicing points passed")
+
+        sl_pt_loc = {}
+        for slp_i, slp in enumerate(slicing_pts):
+            for p_i, p in enumerate(self.points):
+                if p == slp:
+                    sl_pt_loc[slp_i] = ("at_vertex", p_i)
+                    break
+
+            if slp_i in sl_pt_loc.keys():
+                continue
+
+            for edge_num, (ep1, ep2) in enumerate(self.edges):
+                d_to_edge = distance_point_to_edge(ptest=slp, p1=ep1, p2=ep2)
+                if np.isclose(d_to_edge, 0):
+                    sl_pt_loc[slp_i] = ("at_edge", edge_num)
+
+            if slp_i in sl_pt_loc.keys():
+                continue
+            else:
+                sl_pt_loc[slp_i] = ("interior", None)
+
+        if sl_pt_loc[0][0] == "interior":
+            raise GeometryError("First slicing point must start at an edge or a vertex")
+        if sl_pt_loc[len(slicing_pts) - 1][0] == "interior":
+            raise GeometryError("Last slicing point must end at an edge or a vertex")
+
+
+        return sl_pt_loc
+
+    def _remove_trailing_boundary_touching_points(self, slicing_pts: list[Point]) -> list[Point]:
+        """Remove all heading and trailing slicing points touching a vertex or an edge.
+
+        The returned list of points starts with a single vertex touching polygon's
+        vertex or edge and ends with a single vertex touching an edge or a vertex.
+        """
+        sl_pt_loc = self._slicing_point_location(slicing_pts)
+        num_at_vertex = sum([1 for loc, _ in sl_pt_loc.values() if loc == "at_vertex"])
+        num_at_edge = sum([1 for loc, _ in sl_pt_loc.values() if loc == "at_edge"])
+        num_interior = sum([1 for loc, _ in sl_pt_loc.values() if loc == "interior"])
+
+        new_points = []
+        for i in range(len(slicing_pts)):
+            # Collect point, location type, and location index for previous, this, and next point
+            this_pt = slicing_pts[i]
+            this_loc_type, this_loc_ix = sl_pt_loc[i]
+
+            if i > 0:
+                prev_loc_type, prev_loc_ix = sl_pt_loc[i - 1]
+            else:
+                prev_loc_type = None
+                prev_loc_ix = None
+
+            if i < len(slicing_pts) - 1:
+                next_pt = slicing_pts[i + 1]
+                next_loc_type, next_loc_ix = sl_pt_loc[i + 1]
+            else:
+                next_pt = None
+                next_loc_type = None
+                next_loc_ix = None
+
+            neglect_subsequent = False
+
+            # Check if this point should be kept or removed
+            if neglect_subsequent is True:
+                continue
+            elif this_loc_type == "interior":
+                new_points.append(this_pt)
+            elif next_loc_type == "interior":
+                new_points.append(this_pt)
+            elif (
+                prev_loc_type is not None
+                and prev_loc_type == "interior"
+                and this_loc_type in ("at_vertex", "at_edge")
+            ):
+                new_points.append(this_pt)
+                neglect_subsequent = True
+            elif this_loc_type == "at_vertex" and next_loc_type == "at_vertex":
+                if num_at_vertex == 2:
+                    # It means there are no interior points
+                    assert num_interior == 0
+                    new_points.append(this_pt)
+                else:
+                    continue
+            elif this_loc_type == "at_vertex" and prev_loc_type == "at_vertex":
+                if num_at_vertex == 2:
+                    # It means there are no interior points
+                    assert num_interior == 0
+                    new_points.append(this_pt)
+                else:
+                    continue
+            elif this_loc_type == "at_edge" and next_loc_type == "at_edge":
+                if this_loc_ix != next_loc_ix:
+                    # It means there are no interior points
+                    assert num_interior == 0
+                    new_points.append(this_pt)
+                else:
+                    continue
+            elif (
+                this_loc_type == "at_edge"
+                and next_loc_type is None
+                and prev_loc_type == "at_edge"
+                and prev_loc_ix is not None
+                and prev_loc_ix != this_loc_ix
+            ):
+                # It means there are no interior points
+                # and this is the last slicing point
+                assert num_interior == 0
+                new_points.append(this_pt)
+            elif (
+                this_loc_type == "at_edge"
+                and next_loc_type is None
+                and prev_loc_type == "at_edge"
+                and prev_loc_ix is not None
+                and prev_loc_ix == this_loc_ix
+            ):
+                # It means there must be some interior points
+                # and this is the last slicing point
+                # and this and previous points lay on the same edge
+                # so this one must be removed
+                assert num_interior > 0
+                continue
+            elif (
+                this_loc_type in ("at_vertex", "at_edge")
+                and next_loc_type != "interior"
+            ):
+                continue
+            elif (
+                this_loc_type == "at_vertex"
+                and next_loc_type == "at_edge"
+                and next_loc_ix is not None
+            ):
+                d = distance_point_to_edge(
+                    ptest = this_pt,
+                    p1 = self.edges[next_loc_ix][0],
+                    p2 = self.edges[next_loc_ix][1],
+                )
+                if np.isclose(d, 0):
+                    continue
+                else:
+                    new_points.append(this_pt)
+            elif (
+                this_loc_type == "at_edge"
+                and next_loc_type == "at_vertex"
+                and next_pt is not None
+            ):
+                d = distance_point_to_edge(
+                    ptest = next_pt,
+                    p1 = self.edges[this_loc_ix][0],
+                    p2 = self.edges[this_loc_ix][1],
+                )
+                if np.isclose(d, 0):
+                    continue
+                else:
+                    new_points.append(this_pt)
+            else:
+                raise RuntimeError("This should never happen. Some case is not considered (bug!).")
+
+        return new_points
 
     def points_as_array(self) -> np.ndarray:
         """Returns a copy of the points as a numpy array."""
@@ -647,18 +822,41 @@ class Polygon:
         else:
             return False
 
-    def is_facing_polygon(self, poly) -> bool:
+    def is_facing_polygon(self, poly, exact: bool = True) -> bool:
         """Checks if this polygon is facing another polygon.
 
         Returns True if all points of two polygons are equal and their normals
         are pointing towards each other.
+
+        If exact is True, all points of two polygons must be equal (order may be different).
+        If exact is False, the method checks only in points are coplanar and
+        normal vectors are opposite.
+
+        Args:
+            poly: another polygon
+            exact: if True, all points of adjacent polygons must be equal
+
+        Return:
+            True if the polygons are facing each other
         """
-        this_points = set(self.points)
-        other_points = set(poly.points)
-        if this_points == other_points:
-            if np.isclose(self.normal * -1, poly.normal).all():
+        if exact:
+            this_points = set(self.points)
+            other_points = set(poly.points)
+            if this_points == other_points:
+                if np.isclose(self.normal * -1, poly.normal).all():
+                    return True
+            return False
+        else:
+            this_points = self.points
+            other_points = poly.points
+            all_points = this_points + other_points
+            points_coplanar = are_points_coplanar(*all_points)
+            normals_opposite = np.isclose(self.normal, poly.normal * -1, rtol=GEOM_RTOL).all()
+
+            if points_coplanar and normals_opposite:
                 return True
-        return False
+            else:
+                return False
 
     def _triangulate(self) -> list[tuple[int, ...]]:
         """Return a list of triangles (i, j, k) using the ear clipping algorithm.
@@ -736,6 +934,17 @@ class Polygon:
         # Check if all points are coplanar
         if not are_points_coplanar(*self.points):
             raise GeometryError(f"Points of polygon aren't coplanar")
+
+    def some_interior_point(self) -> Point:
+        """Return some point laying inside this polygon.
+
+        Such point is sometimes needed to distuingish inside from outside.
+        """
+        p0 = self.points[self.triangles[0][0]]
+        p1 = self.points[self.triangles[0][1]]
+        p2 = self.points[self.triangles[0][2]]
+        some_pt = triangle_centroid(p0, p1, p2)
+        return some_pt
 
     def _centroid(self) -> Point:
         """Calculate the center of mass.

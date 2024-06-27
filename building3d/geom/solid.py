@@ -5,7 +5,8 @@ from typing import Sequence
 import numpy as np
 
 from building3d import random_id
-from building3d import validate_name
+from building3d.geom.paths.object_path import object_path
+from building3d.geom.paths.validate_name import validate_name
 from building3d.geom.exceptions import GeometryError
 from building3d.geom.wall import Wall
 from building3d.geom.point import Point
@@ -66,6 +67,14 @@ class Solid:
         for wall in self.get_walls():
             poly.extend(wall.get_polygons(children=children))
         return poly
+
+    def find_polygon(self, poly_name: str) -> str:
+        """Find polygon by name. Return path suitable for get_object(). Will search in all walls."""
+        for wall in self.get_walls():
+            for poly in wall.get_polygons():
+                if poly.name == poly_name:
+                    return object_path(wall=wall, poly=poly)
+        raise GeometryError(f"Polygon {poly_name} not found")
 
     def get_object(self, path: str) -> Wall | Polygon | None:
         """Get object by the path. The path contains names of nested components."""
@@ -172,11 +181,24 @@ class Solid:
                 return True
         return False
 
-    def is_adjacent_to_solid(self, sld) -> bool:
-        """Checks if this solid is adjacent to another solid."""
+    def is_adjacent_to_solid(self, sld, exact: bool = True) -> bool:
+        """Checks if this solid is adjacent to another solid.
+
+        The argument `exact` has the same meaning as in Polygon.is_facing_polygon().
+        If `exact` is True, all points of adjacent polygons must be equal.
+        If `exact` is False, the method checks only in points are coplanar and
+        normal vectors are opposite.
+
+        Args:
+            sld: other solid
+            exact: if True, the solid must be exactly adjacent
+
+        Return:
+            True if the solids are adjacent
+        """
         for this_poly in self.get_polygons():
             for other_poly in sld.get_polygons():
-                if this_poly.is_facing_polygon(other_poly):
+                if this_poly.is_facing_polygon(other_poly, exact=exact):
                     return True
         return False
 
@@ -213,6 +235,7 @@ class Solid:
 
         return abs(total_volume)
 
+    # TODO: This test is not sufficient. It can pass even if the solid is not closed.
     def _verify(self, throw: bool = False) -> None:
         """Verify geometry correctness.
 

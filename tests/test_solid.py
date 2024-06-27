@@ -192,6 +192,71 @@ def test_is_adjacent():
     assert not sld_3.is_adjacent_to_solid(sld_1)
 
 
+def test_is_adjacent_exact_false():
+    p0 = Point(0.0, 0.0, 0.0)
+    p1 = Point(1.0, 0.0, 0.0)
+    p2 = Point(1.0, 1.0, 0.0)
+    p3 = Point(0.0, 1.0, 0.0)
+    p4 = Point(0.0, 0.0, 1.0)
+    p5 = Point(1.0, 0.0, 1.0)
+    p6 = Point(1.0, 1.0, 1.0)
+    p7 = Point(0.0, 1.0, 1.0)
+
+    floor_1 = Wall([Polygon([p0, p3, p2, p1])])
+    wall0_1 = Wall([Polygon([p0, p1, p5, p4])])
+    wall1_1 = Wall([Polygon([p1, p2, p6, p5])])
+    wall2_1 = Wall([Polygon([p3, p7, p6, p2])])
+    wall3_1 = Wall([Polygon([p0, p4, p7, p3])])
+    ceiling_1 = Wall([Polygon([p4, p5, p6, p7])])
+    sld_1 = Solid([floor_1, wall0_1, wall1_1, wall2_1, wall3_1, ceiling_1])
+
+    scale = (2, 2, 2)
+    move = (-2, 0, 0)
+    p0 = Point(0.0, 0.0, 0.0) * scale + move
+    p1 = Point(1.0, 0.0, 0.0) * scale + move
+    p2 = Point(1.0, 1.0, 0.0) * scale + move
+    p3 = Point(0.0, 1.0, 0.0) * scale + move
+    p4 = Point(0.0, 0.0, 1.0) * scale + move
+    p5 = Point(1.0, 0.0, 1.0) * scale + move
+    p6 = Point(1.0, 1.0, 1.0) * scale + move
+    p7 = Point(0.0, 1.0, 1.0) * scale + move
+
+    floor_2 = Wall([Polygon([p0, p3, p2, p1])])
+    wall0_2 = Wall([Polygon([p0, p1, p5, p4])])
+    wall1_2 = Wall([Polygon([p1, p2, p6, p5])])
+    wall2_2 = Wall([Polygon([p3, p7, p6, p2])])
+    wall3_2 = Wall([Polygon([p0, p4, p7, p3])])
+    ceiling_2 = Wall([Polygon([p4, p5, p6, p7])])
+    sld_2 = Solid([floor_2, wall0_2, wall1_2, wall2_2, wall3_2, ceiling_2])
+
+    assert sld_1.is_adjacent_to_solid(sld_2, exact=False)
+    assert not sld_2.is_adjacent_to_solid(sld_1)
+    assert not sld_2.is_adjacent_to_solid(sld_1, exact=True)
+
+    scale = (2, 2, 2)
+    move = (-2.01, 0, 0)  # 1 cm too far to be adjacent
+    p0 = Point(0.0, 0.0, 0.0) * scale + move
+    p1 = Point(1.0, 0.0, 0.0) * scale + move
+    p2 = Point(1.0, 1.0, 0.0) * scale + move
+    p3 = Point(0.0, 1.0, 0.0) * scale + move
+    p4 = Point(0.0, 0.0, 1.0) * scale + move
+    p5 = Point(1.0, 0.0, 1.0) * scale + move
+    p6 = Point(1.0, 1.0, 1.0) * scale + move
+    p7 = Point(0.0, 1.0, 1.0) * scale + move
+
+    floor_2 = Wall([Polygon([p0, p3, p2, p1])])
+    wall0_2 = Wall([Polygon([p0, p1, p5, p4])])
+    wall1_2 = Wall([Polygon([p1, p2, p6, p5])])
+    wall2_2 = Wall([Polygon([p3, p7, p6, p2])])
+    wall3_2 = Wall([Polygon([p0, p4, p7, p3])])
+    ceiling_2 = Wall([Polygon([p4, p5, p6, p7])])
+    sld_2 = Solid([floor_2, wall0_2, wall1_2, wall2_2, wall3_2, ceiling_2])
+
+    assert not sld_1.is_adjacent_to_solid(sld_2, exact=False)
+    assert not sld_2.is_adjacent_to_solid(sld_1)
+    assert not sld_2.is_adjacent_to_solid(sld_1, exact=True)
+
+
 def test_equality():
     p0 = Point(0.0, 0.0, 0.0)
     p1 = Point(1.0, 0.0, 0.0)
