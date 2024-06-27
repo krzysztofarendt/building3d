@@ -39,6 +39,7 @@ def test_stitch_solids_diff_sizes_vertices_and_edges_not_touching():
     assert b1.name == b1_new.name
     assert b1.uid == b1_new.uid
     assert np.isclose(b1.volume, b1_new.volume)
+    assert len(b1.get_polygons()) < len(b1_new.get_polygons())
 
     assert b2.name == b2_new.name
     assert b2.uid == b2_new.uid
@@ -53,6 +54,7 @@ def test_stitch_solids_diff_sizes_edge_touching():
     assert b1.name == b1_new.name
     assert b1.uid == b1_new.uid
     assert np.isclose(b1.volume, b1_new.volume)
+    assert len(b1.get_polygons()) < len(b1_new.get_polygons())
 
     assert b2.name == b2_new.name
     assert b2.uid == b2_new.uid
@@ -67,6 +69,7 @@ def test_stitch_solids_diff_sizes_vertices_touching():
     assert b1.name == b1_new.name
     assert b1.uid == b1_new.uid
     assert np.isclose(b1.volume, b1_new.volume)
+    assert len(b1.get_polygons()) < len(b1_new.get_polygons())
 
     assert b2.name == b2_new.name
     assert b2.uid == b2_new.uid
@@ -83,6 +86,7 @@ def test_stitch_solids_diff_sizes_vertices_touching():
     assert b2.name == b2_new.name
     assert b2.uid == b2_new.uid
     assert np.isclose(b2.volume, b2_new.volume)
+    assert len(b2.get_polygons()) < len(b2_new.get_polygons())
 
 
 def test_stitch_solids_diff_sizes_vertices_one_inside_the_other():
@@ -100,10 +104,12 @@ def test_stitch_solids_overlapping_1():
     assert b1.name == b1_new.name
     assert b1.uid == b1_new.uid
     assert np.isclose(b1.volume, b1_new.volume)
+    assert len(b1.get_polygons()) < len(b1_new.get_polygons())
 
     assert b2.name == b2_new.name
     assert b2.uid == b2_new.uid
     assert np.isclose(b2.volume, b2_new.volume)
+    assert len(b2.get_polygons()) < len(b2_new.get_polygons())
 
 
 def test_stitch_solids_overlapping_2():
@@ -115,10 +121,12 @@ def test_stitch_solids_overlapping_2():
     assert b1.name == b1_new.name
     assert b1.uid == b1_new.uid
     assert np.isclose(b1.volume, b1_new.volume)
+    assert len(b1.get_polygons()) < len(b1_new.get_polygons())
 
     assert b2.name == b2_new.name
     assert b2.uid == b2_new.uid
     assert np.isclose(b2.volume, b2_new.volume)
+    assert len(b2.get_polygons()) == len(b2_new.get_polygons())
 
 
 def test_stitch_solids_overlapping_3():
@@ -130,10 +138,12 @@ def test_stitch_solids_overlapping_3():
     assert b1.name == b1_new.name
     assert b1.uid == b1_new.uid
     assert np.isclose(b1.volume, b1_new.volume)
+    assert len(b1.get_polygons()) < len(b1_new.get_polygons())
 
     assert b2.name == b2_new.name
     assert b2.uid == b2_new.uid
     assert np.isclose(b2.volume, b2_new.volume)
+    assert len(b2.get_polygons()) < len(b2_new.get_polygons())
 
 
 def test_stitch_solids_overlapping_4():
@@ -144,10 +154,12 @@ def test_stitch_solids_overlapping_4():
     assert b1.name == b1_new.name
     assert b1.uid == b1_new.uid
     assert np.isclose(b1.volume, b1_new.volume)
+    assert len(b1.get_polygons()) < len(b1_new.get_polygons())
 
     assert b2.name == b2_new.name
     assert b2.uid == b2_new.uid
     assert np.isclose(b2.volume, b2_new.volume)
+    assert len(b2.get_polygons()) < len(b2_new.get_polygons())
 
     # Switch b1 <-> b2
     b1 = box_solid(0.5, 0.5, 0.5, (1, 0.75, 0.25), name="b1")
@@ -157,10 +169,12 @@ def test_stitch_solids_overlapping_4():
     assert b1.name == b1_new.name
     assert b1.uid == b1_new.uid
     assert np.isclose(b1.volume, b1_new.volume)
+    assert len(b1.get_polygons()) < len(b1_new.get_polygons())
 
     assert b2.name == b2_new.name
     assert b2.uid == b2_new.uid
     assert np.isclose(b2.volume, b2_new.volume)
+    assert len(b2.get_polygons()) < len(b2_new.get_polygons())
 
 
 if __name__ == "__main__":

@@ -150,7 +150,7 @@ def replace_polygons_in_solid(sld: Solid, to_replace: Polygon, new_polys: list[P
     sld_new = Solid(new_walls, name=sld.name, uid=sld.uid)
     assert np.isclose(sld_new.volume, sld.volume)
 
-    return sld
+    return sld_new
 
 # =============================================
 # Auxiliary functions to limit boilerplate code
@@ -206,6 +206,7 @@ def _case_2(sld1: Solid, poly1: Polygon, sld2: Solid, poly2: Polygon) -> tuple[S
     new_polys = [poly1_ext, poly1_int]
     if poly1_sup is not None:
         new_polys.append(poly1_sup)
+
     sld1_new = replace_polygons_in_solid(sld1, to_replace=poly1, new_polys=new_polys)
 
     return sld1_new, sld2
