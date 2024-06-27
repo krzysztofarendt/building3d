@@ -75,7 +75,7 @@ make example_4
 
 # Roadmap
 
-- [ ] Connecting solids with different dimensions through polygon slicing
+- [ ] Connecting solids with different dimensions through polygon slicing -> Add examples then mark done
 - [ ] Polygon slice extrusion
 - [ ] Predefined wedge geometry
 - [ ] Ray-tracing for light
