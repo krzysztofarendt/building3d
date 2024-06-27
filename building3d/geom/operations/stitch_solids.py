@@ -226,7 +226,7 @@ def _case_4(sld1: Solid, poly1: Polygon, sld2: Solid, poly2: Polygon) -> tuple[S
                 if pcross is None:
                     continue
                 else:
-                    if pcross not in added:
+                    if pcross not in added and pcross not in poly_a.points:
                         slicing_poly_a.append(pcross)
                         added.add(pcross)
             if pbb not in added:
@@ -240,7 +240,6 @@ def _case_4(sld1: Solid, poly1: Polygon, sld2: Solid, poly2: Polygon) -> tuple[S
         max_num_tries = len(slicing_poly_a)
         while num_tries < max_num_tries:
             try:
-                breakpoint()
                 poly_a_int, poly_a_ext = poly_a.slice(slicing_poly_a)
                 break  # Slicing successful
             except GeometryError as err:
