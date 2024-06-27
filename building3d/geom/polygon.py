@@ -983,6 +983,9 @@ class Polygon:
     def __str__(self):
         return f"Polygon(name={self.name}, points={[p for p in self.points]})"
 
+    def __repr__(self):
+        return self.__str__()
+
     def __eq__(self, other):
         """Checks if all points of two polygons are equal."""
         if not np.isclose(self.normal, other.normal, atol=GEOM_EPSILON).all():
