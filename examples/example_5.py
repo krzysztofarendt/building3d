@@ -1,0 +1,27 @@
+from building3d.geom.predefined.box import box_solid
+from building3d.geom.operations.stitch_solids import stitch_solids
+from building3d.geom.zone import Zone
+from building3d.geom.building import Building
+from building3d.display.plot_objects import plot_objects
+
+
+if __name__ == "__main__":
+    solid_1 = box_solid(5, 5, 3, name="solid_1")
+    solid_2 = box_solid(3, 3, 2, (5, 1, 0), name="solid_2")
+    solid_3 = box_solid(3, 3, 2, (0, 5, 0), name="solid_3")
+    solid_4 = box_solid(3, 3, 2, (1, 1, 3), name="solid_4")
+    solid_5 = box_solid(1, 1, 1, (0.5, 0.5, 5), name="solid_5")
+    solid_1, solid_2 = stitch_solids(solid_1, solid_2)
+    solid_1, solid_3 = stitch_solids(solid_1, solid_3)
+    solid_1, solid_4 = stitch_solids(solid_1, solid_4)
+    solid_4, solid_5 = stitch_solids(solid_4, solid_5)
+    zone = Zone("zone")
+    zone.add_solid(solid_1)
+    zone.add_solid(solid_2)
+    zone.add_solid(solid_3)
+    zone.add_solid(solid_4)
+    zone.add_solid(solid_5)
+    building = Building(name="building")
+    building.add_zone(zone)
+
+    plot_objects(building)
