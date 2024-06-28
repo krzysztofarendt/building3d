@@ -81,3 +81,11 @@ def test_copy():
     p2 = p1.copy()
     assert p1 == p2
     assert not (p1 is p2)
+
+
+def test_equality():
+    p1 = Point(1, 2, 3)
+    p2 = Point(1, 2, 3)
+    p3 = Point(1.0001, 2.0001, 3.0001)
+    assert p1 == p2
+    assert p1 != p3

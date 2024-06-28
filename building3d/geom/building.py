@@ -117,3 +117,18 @@ class Building:
             self.mesh.add_zone(zone)
 
         self.mesh.generate(solidmesh=include_volumes)
+
+    def __eq__(self, other) -> bool:
+        """Returns True if all zones of this and other are equal."""
+        if len(self.zones.values()) != len(other.zones.values()):
+            return False
+        else:
+            num_matches = 0
+            for this_zone in self.zones.values():
+                for other_zone in other.zones.values():
+                    if this_zone == other_zone:
+                        num_matches += 1
+                        break
+            if num_matches != len(self.zones.values()):
+                return False
+            return True

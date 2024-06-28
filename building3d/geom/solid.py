@@ -287,8 +287,8 @@ class Solid:
             return False
         else:
             num_matches = 0
-            for this_wall in self.walls:
-                for other_wall in other.walls:
+            for this_wall in self.walls.values():
+                for other_wall in other.walls.values():
                     if this_wall == other_wall:
                         num_matches += 1
                         break

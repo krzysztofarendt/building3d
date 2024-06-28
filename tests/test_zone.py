@@ -11,3 +11,15 @@ def test_zone_get_mesh():
     col_verts, col_faces = collapse_points(verts, faces)
     assert len(col_faces) == len(faces)
     assert len(col_verts) == 8
+
+
+def test_equality():
+    z1 = box(1, 1, 1)
+    z2 = box(1, 1, 1)
+    assert z1 == z2
+
+    z3 = box(1, 1, 1, (1, 1, 1))
+    assert z1 != z3
+
+    z4 = box(1.0001, 1, 1)
+    assert z1 != z4
