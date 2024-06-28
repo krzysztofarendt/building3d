@@ -105,6 +105,27 @@ def test_get_object():
         obj = bdg.get_object("test_name/test_name/floor/floor/xxx")
 
 
+def test_equality():
+    z1 = box(1, 1, 1)
+    b1 = Building()
+    b1.add_zone(z1)
+
+    z2 = box(1, 1, 1)
+    b2 = Building()
+    b2.add_zone(z2)
+    assert b1 == b2
+
+    z3 = box(1, 1, 1, (1, 1, 1))
+    b3 = Building()
+    b3.add_zone(z3)
+    assert b1 != b3
+
+    b4 = Building()
+    b4.add_zone(z1)
+
+    assert b4 == b1
+
+
 if __name__ == "__main__":
     test_building_mesh_adjacent(show=True)
     test_building_mesh_disjoint(show=True)
