@@ -1,7 +1,7 @@
 import numpy as np
 
-from building3d.geom.predefined.walls import vertical_wall
-from building3d.geom.predefined.walls import vertical_wall_with_aperture
+from building3d.geom.predefined.walls.walls import vertical_wall
+from building3d.geom.predefined.walls.walls import vertical_wall_with_aperture
 
 
 def test_wall_orientation():
