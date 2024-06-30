@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 def floor_plan(
-    plan: list[tuple[float, float]],
+    plan: list[tuple[float, float]] | list[tuple[int, int]],
     height: float,
     translate: tuple[float, float, float] = (0.0, 0.0, 0.0),
     rot_angle: float = 0.0,
@@ -25,8 +25,8 @@ def floor_plan(
     floor_name: str = "floor",
     ceiling_name: str = "ceiling",
     apertures: dict[str, tuple[str, float, float, float, float]] = {},
-) -> Zone:
-    """Make a zone from a floor plan (list of (x, y) points).
+) -> Solid:
+    """Make a solid volume from a floor plan (list of (x, y) points).
 
     If wall_names is not provided, the names will be "wall-0", "wall-1", etc.
     If floor_name and ceiling_name are not provided, they will be "floor" and "ceiling".
@@ -44,7 +44,7 @@ def floor_plan(
         apertures: dict of {aperture_name: (wall_name, center, bottom, width, height)}
 
     Return:
-        Zone
+        Solid
     """
     # Define the rotation vector (it is hardcoded, floor and ceiling must be horizontal)
     rot_vec = np.array([0.0, 0.0, 1.0])
@@ -248,10 +248,7 @@ def floor_plan(
     walls.append(floor)
     walls.append(ceiling)
 
-    # Make solid and zone
+    # Make a solid and return
     solid = Solid(walls, name=name)
 
-    zone = Zone(name=name)
-    zone.add_solid(solid)
-
-    return zone
+    return solid

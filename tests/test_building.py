@@ -5,15 +5,19 @@ from building3d.config import GEOM_RTOL
 from building3d.display.plot_mesh import plot_mesh
 from building3d.geom.building import Building
 from building3d.geom.polygon import Polygon
-from building3d.geom.predefined.box import box
+from building3d.geom.predefined.solids.box import box
 from building3d.geom.solid import Solid
 from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
 
 
 def test_building_volume_adjacent():
-    zone_1 = box(1, 1, 1, (0, 0, 0))
-    zone_2 = box(1, 1, 1, (1, 0, 0))  # This zone is adjacent to zone_1
+    solid_1 = box(1, 1, 1, (0, 0, 0))
+    solid_2 = box(1, 1, 1, (1, 0, 0))  # This zone is adjacent to zone_1
+    zone_1 = Zone()
+    zone_2 = Zone()
+    zone_1.add_solid(solid_1)
+    zone_2.add_solid(solid_2)
     zones = [zone_1, zone_2]
 
     expected_volume = 1.0 * len(zones)
@@ -25,8 +29,12 @@ def test_building_volume_adjacent():
 
 
 def test_building_volume_disjoint():
-    zone_1 = box(1, 1, 1, (0, 0, 0))
-    zone_2 = box(1, 1, 1, (2, 2, 2))  # This zone is not adjacent to zone_1
+    solid_1 = box(1, 1, 1, (0, 0, 0))
+    solid_2 = box(1, 1, 1, (2, 2, 2))  # This zone is not adjacent to zone_1
+    zone_1 = Zone()
+    zone_2 = Zone()
+    zone_1.add_solid(solid_1)
+    zone_2.add_solid(solid_2)
     zones = [zone_1, zone_2]
 
     expected_volume = 1.0 * len(zones)
@@ -38,8 +46,12 @@ def test_building_volume_disjoint():
 
 
 def test_building_mesh_adjacent(show=False):
-    zone_1 = box(1, 1, 1, (0, 0, 0))
-    zone_2 = box(1, 1, 1, (1, 0, 0))  # This zone is adjacent to zone_1
+    solid_1 = box(1, 1, 1, (0, 0, 0))
+    solid_2 = box(1, 1, 1, (1, 0, 0))  # This zone is adjacent to zone_1
+    zone_1 = Zone()
+    zone_2 = Zone()
+    zone_1.add_solid(solid_1)
+    zone_2.add_solid(solid_2)
     zones = [zone_1, zone_2]
 
     bdg = Building(name="building")
@@ -57,8 +69,12 @@ def test_building_mesh_adjacent(show=False):
 
 
 def test_building_mesh_disjoint(show=False):
-    zone_1 = box(1, 1, 1, (0, 0, 0))
-    zone_2 = box(1, 1, 1, (2, 2, 2))  # This zone is not adjacent to zone_1
+    solid_1 = box(1, 1, 1, (0, 0, 0))
+    solid_2 = box(1, 1, 1, (2, 2, 2))  # This zone is not adjacent to zone_1
+    zone_1 = Zone()
+    zone_2 = Zone()
+    zone_1.add_solid(solid_1)
+    zone_2.add_solid(solid_2)
     zones = [zone_1, zone_2]
 
     bdg = Building(name="building")
@@ -79,7 +95,9 @@ def test_get_object():
     """The tested function is recursive, so this test covers
     the `get_object` method in all: Building, Zone, Solid, Wall."""
 
-    zone = box(1, 1, 1, (0, 0, 0), name="test_name")
+    sld = box(1, 1, 1, (0, 0, 0), name="test_name")
+    zone = Zone(name="test_name")
+    zone.add_solid(sld)
     bdg = Building(name="building")
     bdg.add_zone(zone)
 
@@ -106,16 +124,22 @@ def test_get_object():
 
 
 def test_equality():
-    z1 = box(1, 1, 1)
+    s1 = box(1, 1, 1)
+    z1 = Zone()
+    z1.add_solid(s1)
     b1 = Building()
     b1.add_zone(z1)
 
-    z2 = box(1, 1, 1)
+    s2 = box(1, 1, 1)
+    z2 = Zone()
+    z2.add_solid(s2)
     b2 = Building()
     b2.add_zone(z2)
     assert b1 == b2
 
-    z3 = box(1, 1, 1, (1, 1, 1))
+    s3 = box(1, 1, 1, (1, 1, 1))
+    z3 = Zone()
+    z3.add_solid(s3)
     b3 = Building()
     b3.add_zone(z3)
     assert b1 != b3

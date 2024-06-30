@@ -2,12 +2,15 @@ import building3d.logger
 from building3d.display.plot_building import plot_building
 from building3d.display.plot_mesh import plot_mesh
 from building3d.geom.building import Building
-from building3d.geom.predefined.box import box
+from building3d.geom.zone import Zone
+from building3d.geom.predefined.solids.box import box
 from building3d.io.b3d import write_b3d
 from building3d.mesh.quality.mesh_stats import mesh_stats
 
 if __name__ == "__main__":
-    zone = box(2.0, 5.0, 3.0, name="example_3_zone")
+    solid = box(2.0, 5.0, 3.0, name="example_3_zone")
+    zone = Zone()
+    zone.add_solid(solid)
 
     # Save to B3D
     building = Building(name="example_3")

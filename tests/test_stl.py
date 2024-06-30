@@ -2,7 +2,8 @@ import tempfile
 
 import numpy as np
 
-from building3d.geom.predefined.box import box
+from building3d.geom.predefined.solids.box import box
+from building3d.geom.zone import Zone
 from building3d.io.stl import read_stl
 from building3d.io.stl import write_stl
 
@@ -11,7 +12,9 @@ def test_stl():
     """Saves and reads STL, checks if the zone is the same."""
 
     with tempfile.TemporaryDirectory() as tmpdirname:
-        zone = box(1.0, 1.0, 1.0)
+        solid = box(1.0, 1.0, 1.0)
+        zone = Zone()
+        zone.add_solid(solid)
         stl_path = tmpdirname + "/" + zone.name + ".stl"
         write_stl(stl_path, zone)
 

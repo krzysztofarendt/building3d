@@ -4,7 +4,8 @@ import numpy as np
 
 from building3d.config import GEOM_RTOL
 from building3d.geom.building import Building
-from building3d.geom.predefined.box import box
+from building3d.geom.zone import Zone
+from building3d.geom.predefined.solids.box import box
 from building3d.io.dotbim import read_dotbim
 from building3d.io.dotbim import write_dotbim
 
@@ -15,8 +16,13 @@ def test_dotbim():
     with tempfile.TemporaryDirectory() as tmpdirname:
         path = tmpdirname + "/" + "building.bim"
 
-        zone_1 = box(1, 1, 1, (0, 0, 0), name="Zone_1")
-        zone_2 = box(1, 1, 1, (1, 0, 0), name="Zone_2")
+        solid_1 = box(1, 1, 1, (0, 0, 0), name="Zone_1")
+        solid_2 = box(1, 1, 1, (1, 0, 0), name="Zone_2")
+        zone_1 = Zone()
+        zone_2 = Zone()
+        zone_1.add_solid(solid_1)
+        zone_2.add_solid(solid_2)
+
         zones = [zone_1, zone_2]
         building = Building(name="building")
         for z in zones:
