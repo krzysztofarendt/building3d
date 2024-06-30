@@ -14,11 +14,14 @@ import time
 import numpy as np
 import pandas as pd
 
-from building3d.geom.predefined.box import box
+from building3d.geom.predefined.solids.box import box
+from building3d.geom.zone import Zone
 from building3d.mesh.mesh import Mesh
 
 if __name__ == "__main__":
-    zone = box(1.0, 1.0, 1.0)
+    solid = box(1.0, 1.0, 1.0)
+    zone = Zone()
+    zone.add_solid(solid)
 
     delta_grid = np.array([0.5, 0.4, 0.3, 0.25, 0.2, 0.15, 0.125, 0.1])
     num_elements = np.zeros(len(delta_grid))

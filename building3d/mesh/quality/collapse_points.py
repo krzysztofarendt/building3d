@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 def collapse_points(
     vertices: list[Point],
-    elements: list[tuple[int]],
+    elements: list[tuple[int, ...]],
 ) -> tuple[list[Point], list[tuple[int, ...]]]:
     """Merge overlapping points.
 

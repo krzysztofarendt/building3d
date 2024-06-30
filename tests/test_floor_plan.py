@@ -2,15 +2,18 @@ import numpy as np
 
 from building3d.display.plot_objects import plot_objects
 from building3d.geom.polygon import Polygon
-from building3d.geom.predefined.floor_plan import floor_plan
+from building3d.geom.predefined.solids.floor_plan import floor_plan
+from building3d.geom.zone import Zone
 from building3d.geom.solid import Solid
 from building3d.geom.wall import Wall
 
 
 def test_floor_plan(show=False):
-    plan = [(0, 0), (5, 0), (5, 5), (0, 5)]
+    plan = [(0., 0.), (5., 0.), (5., 5.), (0., 5.)]
     h = 2
-    zone = floor_plan(plan, height=h)
+    solid = floor_plan(plan, height=h)
+    zone = Zone()
+    zone.add_solid(solid)
     vol = list(zone.get_solids())[0].volume
     assert np.isclose(vol, 5 * 5 * 2)
 
@@ -47,10 +50,12 @@ def test_floor_plan(show=False):
 
 
 def test_floor_plan_reversed(show=False):
-    plan = [(0, 0), (5, 0), (5, 5), (0, 5)]
+    plan = [(0., 0.), (5., 0.), (5., 5.), (0., 5.)]
     plan = plan[::-1]
     h = 2
-    zone = floor_plan(plan, height=h)
+    solid = floor_plan(plan, height=h)
+    zone = Zone()
+    zone.add_solid(solid)
     vol = list(zone.get_solids())[0].volume
     assert np.isclose(vol, 5 * 5 * 2)
 
@@ -87,13 +92,15 @@ def test_floor_plan_reversed(show=False):
 
 
 def test_floor_plan_rotated(show=False):
-    plan = [(0, 0), (5, 0), (5, 5), (0, 5)]
+    plan = [(0., 0.), (5., 0.), (5., 5.), (0., 5.)]
     h = 1
-    zone = floor_plan(
+    solid = floor_plan(
         plan,
         height=h,
         rot_angle=np.pi / 4,
     )
+    zone = Zone()
+    zone.add_solid(solid)
 
     vol = list(zone.get_solids())[0].volume
     assert np.isclose(vol, 5 * 5 * 1)
@@ -105,11 +112,13 @@ def test_floor_plan_rotated(show=False):
 def test_floor_plan_translated(show=False):
     plan = [(0, 0), (5, 0), (5, 5), (0, 5)]
     h = 3
-    zone = floor_plan(
+    solid = floor_plan(
         plan,
         height=h,
         translate=(10, 10, 10),
     )
+    zone = Zone()
+    zone.add_solid(solid)
 
     vertices, _ = zone.get_mesh()
     for v in vertices:
@@ -125,12 +134,14 @@ def test_floor_plan_translated(show=False):
 def test_floor_plan_rotated_and_translated(show=False):
     plan = [(0, 0), (5, 0), (5, 5), (0, 5)]
     h = 1
-    zone = floor_plan(
+    solid = floor_plan(
         plan,
         height=h,
         translate=(10, 10, 10),
         rot_angle=np.pi / 4,
     )
+    zone = Zone()
+    zone.add_solid(solid)
 
     vol = list(zone.get_solids())[0].volume
     assert np.isclose(vol, 5 * 5 * 1)
@@ -150,7 +161,7 @@ def test_floor_plan_with_apertures(show=False):
         "window-3": ("w3", 0.5, 0.3, 0.8, 0.5),
     }
 
-    zone = floor_plan(
+    solid = floor_plan(
         plan,
         height=h,
         name="room",
@@ -159,6 +170,8 @@ def test_floor_plan_with_apertures(show=False):
         ceiling_name="ceiling",
         apertures=apertures,
     )
+    zone = Zone()
+    zone.add_solid(solid)
 
     vol = list(zone.get_solids())[0].volume
     assert np.isclose(vol, 5 * 5 * 1)
@@ -191,7 +204,7 @@ def test_floor_plan_with_apertures_and_translation(show=False):
         "window-3": ("w3", 0.5, 0.3, 0.8, 0.5),
     }
 
-    zone = floor_plan(
+    solid = floor_plan(
         plan,
         height=h,
         name="room",
@@ -201,6 +214,8 @@ def test_floor_plan_with_apertures_and_translation(show=False):
         ceiling_name="ceiling",
         apertures=apertures,
     )
+    zone = Zone()
+    zone.add_solid(solid)
 
     vol = list(zone.get_solids())[0].volume
     assert np.isclose(vol, 5 * 5 * 1)

@@ -1,9 +1,12 @@
-from building3d.geom.predefined.box import box
+from building3d.geom.predefined.solids.box import box
+from building3d.geom.zone import Zone
 from building3d.mesh.quality.collapse_points import collapse_points
 
 
 def test_zone_get_mesh():
-    zone = box(1, 1, 1)
+    solid = box(1, 1, 1)
+    zone = Zone()
+    zone.add_solid(solid)
     verts, faces = zone.get_mesh()
     assert len(faces) == 6 * 2
     assert len(verts) == 6 * 4
@@ -14,12 +17,21 @@ def test_zone_get_mesh():
 
 
 def test_equality():
-    z1 = box(1, 1, 1)
-    z2 = box(1, 1, 1)
+    s1 = box(1, 1, 1)
+    s2 = box(1, 1, 1)
+    z1 = Zone()
+    z2 = Zone()
+    z1.add_solid(s1)
+    z2.add_solid(s2)
+
     assert z1 == z2
 
-    z3 = box(1, 1, 1, (1, 1, 1))
+    s3 = box(1, 1, 1, (1, 1, 1))
+    z3 = Zone()
+    z3.add_solid(s3)
     assert z1 != z3
 
-    z4 = box(1.0001, 1, 1)
+    s4 = box(1.0001, 1, 1)
+    z4 = Zone()
+    z4.add_solid(s4)
     assert z1 != z4
