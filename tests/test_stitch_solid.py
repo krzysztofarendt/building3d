@@ -1,10 +1,9 @@
+import numpy as np
 import pytest
 
-import numpy as np
-
 from building3d.geom.exceptions import GeometryError
-from building3d.geom.predefined.solids.box import box
 from building3d.geom.operations.stitch_solids import stitch_solids
+from building3d.geom.predefined.solids.box import box
 
 
 def test_stitch_solids_same_size():

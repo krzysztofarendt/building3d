@@ -5,8 +5,8 @@ import numpy as np
 from building3d.geom.building import Building
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
-from building3d.geom.zone import Zone
 from building3d.geom.predefined.solids.box import box
+from building3d.geom.zone import Zone
 from building3d.io.b3d import read_b3d
 from building3d.io.b3d import write_b3d
 

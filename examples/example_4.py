@@ -2,12 +2,11 @@ import building3d.logger
 from building3d.display.plot_building import plot_building
 from building3d.display.plot_mesh import plot_mesh
 from building3d.geom.building import Building
-from building3d.geom.zone import Zone
 from building3d.geom.predefined.solids.floor_plan import floor_plan
+from building3d.geom.zone import Zone
 from building3d.io.b3d import write_b3d
 from building3d.io.dotbim import write_dotbim
 from building3d.mesh.quality.mesh_stats import mesh_stats
-
 
 if __name__ == "__main__":
 
@@ -55,24 +54,42 @@ if __name__ == "__main__":
             "window-E-{floor_num}a": (f"wall-E-{floor_num}", 1 / 4, 0.3, 0.1, 0.6),
             "window-E-{floor_num}b": (f"wall-E-{floor_num}", 1 / 2, 0.3, 0.1, 0.6),
             "window-E-{floor_num}c": (f"wall-E-{floor_num}", 3 / 4, 0.3, 0.1, 0.6),
-            "window-N-right-wing-{floor_num}a": (f"wall-N-right-wing-{floor_num}", 0.5, 0.3, 0.5, 0.6),
-            "window-patio-center-{floor_num}a": (f"wall-patio-center-{floor_num}", 0.5, 0.3, 0.5, 0.6),
-            "window-N-left-wing-{floor_num}a": (f"wall-N-left-wing-{floor_num}", 0.5, 0.3, 0.5, 0.6),
+            "window-N-right-wing-{floor_num}a": (
+                f"wall-N-right-wing-{floor_num}",
+                0.5,
+                0.3,
+                0.5,
+                0.6,
+            ),
+            "window-patio-center-{floor_num}a": (
+                f"wall-patio-center-{floor_num}",
+                0.5,
+                0.3,
+                0.5,
+                0.6,
+            ),
+            "window-N-left-wing-{floor_num}a": (
+                f"wall-N-left-wing-{floor_num}",
+                0.5,
+                0.3,
+                0.5,
+                0.6,
+            ),
             "window-W-{floor_num}a": (f"wall-W-{floor_num}", 1 / 4, 0.3, 0.1, 0.6),
             "window-W-{floor_num}b": (f"wall-W-{floor_num}", 1 / 2, 0.3, 0.1, 0.6),
             "window-W-{floor_num}c": (f"wall-W-{floor_num}", 3 / 4, 0.3, 0.1, 0.6),
         }
 
         solid = floor_plan(
-            plan = plan,
-            height = height,
-            translate = translate,
-            rot_angle = rot_angle,
-            name = name,
-            wall_names = wall_names,
-            floor_name = floor_name,
-            ceiling_name = ceiling_name,
-            apertures = apertures,
+            plan=plan,
+            height=height,
+            translate=translate,
+            rot_angle=rot_angle,
+            name=name,
+            wall_names=wall_names,
+            floor_name=floor_name,
+            ceiling_name=ceiling_name,
+            apertures=apertures,
         )
         zone = Zone()
         zone.add_solid(solid)

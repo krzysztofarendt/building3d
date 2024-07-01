@@ -1,9 +1,8 @@
-from building3d.geom.predefined.solids.box import box
-from building3d.geom.operations.stitch_solids import stitch_solids
-from building3d.geom.zone import Zone
-from building3d.geom.building import Building
 from building3d.display.plot_objects import plot_objects
-
+from building3d.geom.building import Building
+from building3d.geom.operations.stitch_solids import stitch_solids
+from building3d.geom.predefined.solids.box import box
+from building3d.geom.zone import Zone
 
 if __name__ == "__main__":
     solid_1 = box(5, 5, 3, name="solid_1")

@@ -1,14 +1,14 @@
 import pytest
 
-from building3d.geom.paths.validate_name import validate_name
-from building3d.geom.paths.object_path import object_path
-from building3d.geom.paths import PATH_SEP
 from building3d.geom.building import Building
-from building3d.geom.zone import Zone
+from building3d.geom.paths import PATH_SEP
+from building3d.geom.paths.object_path import object_path
+from building3d.geom.paths.validate_name import validate_name
+from building3d.geom.point import Point
+from building3d.geom.polygon import Polygon
 from building3d.geom.solid import Solid
 from building3d.geom.wall import Wall
-from building3d.geom.polygon import Polygon
-from building3d.geom.point import Point
+from building3d.geom.zone import Zone
 
 
 def test_validate_name():
@@ -31,7 +31,9 @@ def test_object_path():
     p2 = Point(1, 1, 0)
     poly = Polygon([p0, p1, p2], name="polygon")
     wall = Wall([poly], name="wall")
-    solid = Solid([wall], name="solid", verify=False)  # It is not a valid solid, so don't verify
+    solid = Solid(
+        [wall], name="solid", verify=False
+    )  # It is not a valid solid, so don't verify
     zone = Zone(name="zone", verify=False)  # It is not a valid zone, so don't verify
     zone.add_solid(solid)
     building = Building(name="building")
@@ -43,7 +45,9 @@ def test_object_path():
         wall=wall,
         poly=poly,
     )
-    assert path == "zone" + PATH_SEP + "solid" + PATH_SEP + "wall" + PATH_SEP + "polygon"
+    assert (
+        path == "zone" + PATH_SEP + "solid" + PATH_SEP + "wall" + PATH_SEP + "polygon"
+    )
 
     path = object_path(
         solid=solid,

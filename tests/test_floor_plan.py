@@ -3,13 +3,13 @@ import numpy as np
 from building3d.display.plot_objects import plot_objects
 from building3d.geom.polygon import Polygon
 from building3d.geom.predefined.solids.floor_plan import floor_plan
-from building3d.geom.zone import Zone
 from building3d.geom.solid import Solid
 from building3d.geom.wall import Wall
+from building3d.geom.zone import Zone
 
 
 def test_floor_plan(show=False):
-    plan = [(0., 0.), (5., 0.), (5., 5.), (0., 5.)]
+    plan = [(0.0, 0.0), (5.0, 0.0), (5.0, 5.0), (0.0, 5.0)]
     h = 2
     solid = floor_plan(plan, height=h)
     zone = Zone()
@@ -50,7 +50,7 @@ def test_floor_plan(show=False):
 
 
 def test_floor_plan_reversed(show=False):
-    plan = [(0., 0.), (5., 0.), (5., 5.), (0., 5.)]
+    plan = [(0.0, 0.0), (5.0, 0.0), (5.0, 5.0), (0.0, 5.0)]
     plan = plan[::-1]
     h = 2
     solid = floor_plan(plan, height=h)
@@ -92,7 +92,7 @@ def test_floor_plan_reversed(show=False):
 
 
 def test_floor_plan_rotated(show=False):
-    plan = [(0., 0.), (5., 0.), (5., 5.), (0., 5.)]
+    plan = [(0.0, 0.0), (5.0, 0.0), (5.0, 5.0), (0.0, 5.0)]
     h = 1
     solid = floor_plan(
         plan,

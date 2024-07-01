@@ -606,7 +606,6 @@ def test_polygon_slice_start_and_end_at_a_vertex():
     assert poly1.is_point_inside(poly1_pt)
     assert poly2.is_point_inside(poly2_pt)
 
-
     # Two slicing points
     slicing_points = [
         Point(0.0, 0.0, 0.0),
