@@ -75,7 +75,8 @@ make example_4
 
 # Roadmap
 
-- [ ] Connecting solids with different dimensions through polygon slicing -> Add examples then mark done
+- [x] Connecting solids with different dimensions through polygon slicing -> Add examples then mark done
+- [ ] Export to OBJ: https://fegemo.github.io/cefet-cg/attachments/obj-spec.pdf
 - [ ] Polygon slice extrusion
 - [ ] Predefined wedge geometry
 - [ ] Ray-tracing for light
