@@ -85,7 +85,7 @@ class Polygon:
             n_try = 0
             while not triangulation_successful:
                 if n_try > max_num_tries:
-                    raise TriangulationError(f"Cannot triangulate the polygon {self.name}")
+                    raise TriangulationError(f"Cannot triangulate {self}")
                 try:
                     self.normal = self._normal()
                     self.triangles = self._triangulate()
@@ -95,6 +95,9 @@ class Polygon:
                     logger.warning("Will try to reorder vertices")
                     self.points = roll_back(self.points)
                 n_try += 1
+
+            if n_try > 1:
+                logger.warning("Vertex reordering helped!")
 
         self.centroid = self._centroid()
         self.edges = self._edges()
@@ -279,19 +282,27 @@ class Polygon:
             poly_1 = Polygon(points, name=name1)
 
             # Polygon 2 is composed of both, own points and sliced points
-            points_2 = []
-            slice_points_included = False
-            for p in self.points:
-                points_2.append(p)
+            def make_poly_2(points):
+                points_2 = []
+                slice_points_included = False
+                for p in self.points:
+                    points_2.append(p)
+                    if p in self.edges[edge_num]:
+                        # Slicing ocurred at this edge - need to add slice_points
+                        if not slice_points_included:
+                            for sp in points:
+                                points_2.append(sp)
+                            slice_points_included = True
+                poly_2 = Polygon(points_2, name=name2)
+                return poly_2
 
-                if p in self.edges[edge_num]:
-                    # Slicing ocurred at this edge - need to add slice_points
-                    if not slice_points_included:
-                        for sp in points:
-                            points_2.append(sp)
-                        slice_points_included = True
-
-            poly_2 = Polygon(points_2, name=name2)
+            try:
+                poly_2 = make_poly_2(points)
+            except TriangulationError:
+                # Probably points are given in the wrong order
+                # The order of slicing points should be reversed w.r.t. input polygon
+                points = points[::-1]
+                poly_2 = make_poly_2(points)
 
         elif case == 3:
             # 3) slicing points start at a vertex and end at some edge (or vice versa)

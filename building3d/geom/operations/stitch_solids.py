@@ -195,12 +195,22 @@ def _case_2(sld1: Solid, poly1: Polygon, sld2: Solid, poly2: Polygon) -> tuple[S
         ref_poly = Polygon(slicing_points)
         # One of the resulting polygons is likely non-convex,
         # so expect triangulation warning messages during the below operation
-        poly1_int, poly1_ext = poly1_main.slice(
-            slicing_points,
-            name1 = f"{poly1.name}-{poly2.name}",
-            pt1 = ref_poly.some_interior_point(),
-            name2 = f"{poly1.name}",
-        )
+        num_tries = 0
+        max_tries = len(slicing_points)
+        while True:
+            try:
+                poly1_int, poly1_ext = poly1_main.slice(
+                    slicing_points,
+                    name1 = f"{poly1.name}-{poly2.name}",
+                    pt1 = ref_poly.some_interior_point(),
+                    name2 = f"{poly1.name}",
+                )
+                break
+            except GeometryError as err:
+                slicing_points = roll_back(slicing_points)
+                num_tries += 1
+                if num_tries > max_tries:
+                    raise err
 
     # Replace poly1 with the new polygons
     new_polys = [poly1_ext, poly1_int]
