@@ -474,7 +474,21 @@ def test_polygon_slice_start_and_end_at_same_edge():
         name2="poly2",
         pt2=poly2_pt,
     )
+    assert np.isclose(poly1.normal, poly.normal).all()
+    assert np.isclose(poly2.normal, poly.normal).all()
+    assert np.isclose(poly.area, poly1.area + poly2.area)
+    assert poly1.is_point_inside(poly1_pt)
+    assert poly2.is_point_inside(poly2_pt)
 
+    # Reversed order
+    slicing_points = slicing_points[::-1]
+    poly1, poly2 = poly.slice(
+        slicing_points,
+        name1="poly1",
+        pt1=poly1_pt,
+        name2="poly2",
+        pt2=poly2_pt,
+    )
     assert np.isclose(poly1.normal, poly.normal).all()
     assert np.isclose(poly2.normal, poly.normal).all()
     assert np.isclose(poly.area, poly1.area + poly2.area)
