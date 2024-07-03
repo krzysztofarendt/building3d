@@ -11,15 +11,20 @@ description = "Towards 3D building physics modeling"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    # Core dependencies
     "numpy",
     "numba",
     "pandas",
     "scipy",
-    "matplotlib",
-    "pyvista",
+    # File export
     "dotbimpy",
+    # Visualization
+    "matplotlib",
+    "pyvista[all,trame]",
+    "jupyterlab",
+    "ipywidgets",
 ]
-version = "0.0.3"
+version = "0.0.4"
 
 [project.optional-dependencies]
 dev = ["pytest", "pytest-cov", "black", "isort", "flake8", "twine", "build"]
