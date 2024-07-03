@@ -6,7 +6,6 @@ import numpy as np
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
 from building3d.geom.wall import Wall
-from building3d.geom.zone import Zone
 from building3d.geom.solid import Solid
 from building3d.geom.rotate import rotate_points_around_vector
 from building3d.geom.line import create_point_between_2_points_at_distance
