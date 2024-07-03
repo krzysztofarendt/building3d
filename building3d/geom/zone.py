@@ -18,13 +18,12 @@ class Zone:
 
     Zone is used to model 3D phenomena (e.g. ray tracing, heat transfer, CFD).
     """
-    def __init__(self, name: str | None = None, uid: str | None = None, verify: bool = True):
+    def __init__(self, name: str | None = None, uid: str | None = None):
         """Initialize the zone.
 
         Args:
             name: name of the zone
             uid: unique id of the zone, random if None
-            verify: if True it will verify the geometry
         """
         if name is None:
             name = random_id()
@@ -34,7 +33,6 @@ class Zone:
         else:
             self.uid = random_id()
         self.solids: dict[str, Solid] = {}  # {Solid.name: Solid}
-        self.verify = verify
 
     def add_solid(self, sld: Solid) -> None:
         """Add a Solid instance to the zone.

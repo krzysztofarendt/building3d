@@ -34,7 +34,7 @@ def test_object_path():
     solid = Solid(
         [wall], name="solid", verify=False
     )  # It is not a valid solid, so don't verify
-    zone = Zone(name="zone", verify=False)  # It is not a valid zone, so don't verify
+    zone = Zone(name="zone")
     zone.add_solid(solid)
     building = Building(name="building")
     building.add_zone(zone)
