@@ -164,11 +164,10 @@ def _case_2(sld1: Solid, poly1: Polygon, sld2: Solid, poly2: Polygon) -> tuple[S
     try:
         # If it is 2b, it will raise GeometryError, because the first and last
         # points do not touch any vertex or edges
-        ref_poly = Polygon(slicing_points)
         poly1_int, poly1_ext = poly1.slice(
             slicing_points,
             name1 = f"{poly1.name}-1",
-            pt1 = ref_poly.some_interior_point(),
+            pt1 = poly2.some_interior_point(),
             name2 = f"{poly1.name}-2",
         )
 
@@ -192,7 +191,6 @@ def _case_2(sld1: Solid, poly1: Polygon, sld2: Solid, poly2: Polygon) -> tuple[S
         )
 
         # Make the main slice, needed to stitch poly2 to poly1
-        ref_poly = Polygon(slicing_points)
         # One of the resulting polygons is likely non-convex,
         # so expect triangulation warning messages during the below operation
         num_tries = 0
@@ -202,7 +200,7 @@ def _case_2(sld1: Solid, poly1: Polygon, sld2: Solid, poly2: Polygon) -> tuple[S
                 poly1_int, poly1_ext = poly1_main.slice(
                     slicing_points,
                     name1 = f"{poly1.name}-{poly2.name}",
-                    pt1 = ref_poly.some_interior_point(),
+                    pt1 = poly2.some_interior_point(),
                     name2 = f"{poly1.name}",
                 )
                 break

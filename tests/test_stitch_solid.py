@@ -60,6 +60,21 @@ def test_stitch_solids_diff_sizes_edge_touching():
     assert np.isclose(b2.volume, b2_new.volume)
 
 
+def test_stitch_solids_diff_sizes_2_corners():
+    b1 = box(1, 1, 1, name="b1")
+    b2 = box(1, 1, 0.1, (1, 0, 0), name="b2")
+    b1_new, b2_new = stitch_solids(b1, b2)
+
+    assert b1.name == b1_new.name
+    assert b1.uid == b1_new.uid
+    assert np.isclose(b1.volume, b1_new.volume)
+    assert len(b1.get_polygons()) < len(b1_new.get_polygons())
+
+    assert b2.name == b2_new.name
+    assert b2.uid == b2_new.uid
+    assert np.isclose(b2.volume, b2_new.volume)
+
+
 def test_stitch_solids_diff_sizes_vertices_touching():
     b1 = box(1, 1, 1, name="b1")
     b2 = box(0.5, 0.5, 0.5, (1, 0, 0), name="b2")
@@ -177,4 +192,4 @@ def test_stitch_solids_overlapping_4():
 
 
 if __name__ == "__main__":
-    test_stitch_solids_overlapping_3()
+    test_stitch_solids_diff_sizes_2_corners()
