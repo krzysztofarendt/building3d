@@ -38,3 +38,5 @@ if __name__ == "__main__":
     building.stitch_solids()
     plot_objects(building)
 
+    # Plot again, but use random color for each solid
+    plot_objects(*zone.get_solids())
