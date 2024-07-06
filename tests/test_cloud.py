@@ -57,9 +57,8 @@ def test_are_points_coplanar():
     assert are_points_coplanar(p0, p1, p2) is True
     assert are_points_coplanar(p0, p1, p3) is True
     assert are_points_coplanar(p1, p2, p3) is True
-    with pytest.raises(GeometryError):
-        _ = are_points_coplanar(p0, p1)
-        _ = are_points_coplanar(p0)
+    assert are_points_coplanar(p0, p1) is True
+    assert are_points_coplanar(p0) is True
     assert are_points_coplanar(p0, p1, p2, p4) is False
     assert are_points_coplanar(p0, p1, p2, p3, p4) is False
 
