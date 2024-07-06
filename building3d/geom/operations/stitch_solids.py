@@ -57,7 +57,7 @@ def stitch_solids(
     elif poly2.area > poly1.area and poly1_points_in_poly2.all():
         case = 3
     else:
-        assert poly1_points_in_poly2.any() or poly2_points_in_poly1.any()
+        assert (poly1_points_in_poly2.any() or poly2_points_in_poly1.any())
         case = 4  # They must be partially overlapping
 
     # Slice the facing polygons
