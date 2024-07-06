@@ -4,7 +4,10 @@ from __future__ import annotations
 import numpy as np
 
 from building3d import random_id
+from building3d.geom.operations.stitch_solids import stitch_solids
+from building3d.geom.paths.object_path import object_path
 from building3d.geom.paths.validate_name import validate_name
+from building3d.geom.paths import PATH_SEP
 from building3d.geom.point import Point
 from building3d.geom.zone import Zone
 from building3d.geom.solid import Solid
@@ -59,6 +62,50 @@ class Building:
             return self.zones[zone_name]
         else:
             return self.zones[zone_name].get_object("/".join(names))
+
+    def find_adjacent_solids(self) -> dict[str, list[str]]:
+        """Return a dict mapping adjacent solids.
+
+        The keys of the returned dict are solid paths, i.e. "zone_name/solid_name".
+        The values are lists of adjacent solid paths.
+        """
+        zones = self.get_zones()
+        adjacent = {}
+        for i in range(len(zones)):
+            for j in range(i, len(zones)):
+                solids_i = zones[i].get_solids()
+                solids_j = zones[j].get_solids()
+                for si in solids_i:
+                    for sj in solids_j:
+                        if si.is_adjacent_to_solid(sj, exact=False):
+                            path_to_si = object_path(zones[i], si)
+                            path_to_sj = object_path(zones[j], sj)
+                            if path_to_si in adjacent:
+                                adjacent[path_to_si].append(path_to_sj)
+                            else:
+                                adjacent[path_to_si] = [path_to_sj]
+        return adjacent
+
+    def stitch_solids(self):
+        """Find adjacent solids and stitch them."""
+        adj_solids = self.find_adjacent_solids()
+        done = []
+
+        for sld_path in adj_solids.keys():
+            for adj_sld_path in adj_solids[sld_path]:
+                z1_name, sld_name = sld_path.split(PATH_SEP)
+                z2_name, adj_sld_name = adj_sld_path.split(PATH_SEP)
+
+                if set([sld_name, adj_sld_name]) not in done:
+                    new_sld, new_adj_sld = stitch_solids(
+                        sld1=self.zones[z1_name].solids[sld_name],
+                        sld2=self.zones[z2_name].solids[adj_sld_name],
+                    )
+
+                    self.zones[z1_name].solids[sld_name] = new_sld
+                    self.zones[z2_name].solids[adj_sld_name] = new_adj_sld
+
+                    done.append(set([sld_name, adj_sld_name]))
 
     def volume(self) -> float:
         """Calculate building volume as the sum of zone volumes."""
