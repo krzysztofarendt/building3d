@@ -1,33 +1,41 @@
+import numpy as np
 import pyvista as pv
 
 from building3d.geom.cloud import points_to_array
 
 
+def random_rgb_color() -> list[float]:
+    """Return a random RGB color for the PyVista plotter."""
+    return np.random.random(3).tolist()
+
+
 def plot_objects(*objects):
     """Plot multiple objects (like Building, Zone, Solid, Wall).
 
-    The objects must have a method `get_mesh()`.
+    The objects must have a method `get_mesh()` which returns `(vertices, faces)`.
+    `faces` can be None. In such case, only `vertices` are plotted.
     """
-    verts_all = []
-    faces_all = []
+    pl = pv.Plotter()
 
     for obj in objects:
         verts, faces = obj.get_mesh(children=True)
-        offset = len(verts_all)
+        varr = points_to_array(verts)
+        if faces is not None and len(faces) > 0:
+            farr = []
+            for f in faces:
+                farr.extend([3, f[0], f[1], f[2]])
+            mesh = pv.PolyData(varr, faces=farr)
+        else:
+            mesh = pv.PolyData(varr)
 
-        verts_all.extend(verts)
-        for f in faces:
-            faces_all.append((f[0] + offset, f[1] + offset, f[2] + offset))
+        if len(objects) > 1:
+            col = random_rgb_color()
+        else:
+            col = [1.0, 1.0, 1.0]
 
-    # Reformat points and faces
-    varr = points_to_array(verts_all)
-    farr = []
-    for f in faces_all:
-        farr.extend([3, f[0], f[1], f[2]])
+        if faces is None or len(faces) == 0:
+            pl.add_mesh(mesh, opacity=1.0, point_size=20, color="black")
+        else:
+            pl.add_mesh(mesh, show_edges=True, opacity=0.7, color=col)
 
-    assert len(varr) > 0, "No points available, plotting is impossible"
-    assert len(farr) > 0, "No faces specified, plotting is impossible"
-
-    # Plot with PyVista
-    mesh = pv.PolyData(varr, faces=farr)
-    mesh.plot(show_edges=True, opacity=0.9)
+    pl.show()
