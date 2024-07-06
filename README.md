@@ -3,6 +3,8 @@
 
 # building3d
 
+![building3d_temp_logo](https://github.com/krzysztofarendt/building3d/assets/16005748/6cc84976-792a-44f2-aaef-bb6297ab9ec8)
+
 I'm not sure where this project is heading, so there is not documentation yet.
 
 # Assumptions
