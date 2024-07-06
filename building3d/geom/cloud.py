@@ -58,9 +58,6 @@ def are_points_in_set(pts: list[Point], are_in: list[Point]) -> bool:
 def are_points_coplanar(*pts: Point, tol: float = GEOM_EPSILON) -> bool:
     """Check if all points lay on the same surface."""
 
-    if len(pts) < 3:
-        raise GeometryError("Less than 3 points provided to the function")
-
     if len(set(pts)) <= 3:
         # If the number of unique points is less or equal 3, they must be coplanar
         return True
