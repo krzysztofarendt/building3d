@@ -317,7 +317,3 @@ def test_solid_get_mesh():
 
     assert len(verts) == num_verts
     assert len(faces) == num_faces
-
-
-if __name__ == "__main__":
-    test_is_adjacent_exact_false_using_boxes()
