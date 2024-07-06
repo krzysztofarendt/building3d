@@ -44,7 +44,7 @@ class Zone:
         if len(self.solids) > 1:
             adjacent = False
             for _, existing_sld in self.solids.items():
-                if sld.is_adjacent_to_solid(existing_sld):
+                if sld.is_adjacent_to_solid(existing_sld, exact=False):
                     adjacent = True
             if not adjacent:
                 raise GeometryError(

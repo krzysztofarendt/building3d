@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 
 from building3d.config import GEOM_EPSILON
+from building3d.geom.predefined.solids.box import box
 from building3d.geom.exceptions import GeometryError
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
@@ -255,6 +256,15 @@ def test_is_adjacent_exact_false():
     assert not sld_1.is_adjacent_to_solid(sld_2, exact=False)
     assert not sld_2.is_adjacent_to_solid(sld_1)
     assert not sld_2.is_adjacent_to_solid(sld_1, exact=True)
+
+
+def test_is_adjacent_for_coplanar_but_not_touching():
+    # These solids have polygons that are coplanar and with opposite normals
+    # but they are not touching, so they are not adjacent
+    solid_1 = box(3, 3, 2, (1, 1, 3), name="solid_1")
+    solid_2 = box(1, 1, 1, (5, 0, 0), name="solid_2")
+    assert solid_1.is_adjacent_to_solid(solid_2, exact=True) is False
+    assert solid_1.is_adjacent_to_solid(solid_2, exact=False) is False
 
 
 def test_equality():

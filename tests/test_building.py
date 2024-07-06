@@ -150,6 +150,71 @@ def test_equality():
     assert b4 == b1
 
 
+def test_building_find_adjacent_solids():
+    # Geometry from examples/example_5.py
+    solid_1 = box(5, 5, 3, name="s1")
+    solid_2 = box(3, 3, 2, (5, 1, 0), name="s2")
+    solid_3 = box(3, 3, 2, (0, 5, 0), name="s3")
+    solid_4 = box(3, 3, 2, (1, 1, 3), name="s4")
+    solid_5 = box(1, 1, 1, (0.5, 0.5, 5), name="s5")
+    solid_6 = box(1, 1, 1, (5, 0, 0), name="s6")
+    zone = Zone("z")
+    zone.add_solid(solid_1)
+    zone.add_solid(solid_2)
+    zone.add_solid(solid_3)
+    zone.add_solid(solid_4)
+    zone.add_solid(solid_5)
+    zone.add_solid(solid_6)
+    building = Building(name="building")
+    building.add_zone(zone)
+    adj = building.find_adjacent_solids()
+    assert "z/s2" in adj["z/s1"]
+    assert "z/s1" in adj["z/s2"]
+
+    assert "z/s3" in adj["z/s1"]
+    assert "z/s1" in adj["z/s3"]
+
+    assert "z/s4" in adj["z/s1"]
+    assert "z/s1" in adj["z/s4"]
+
+    assert "z/s5" in adj["z/s4"]
+    assert "z/s4" in adj["z/s5"]
+
+    assert "z/s6" in adj["z/s1"]
+    assert "z/s1" in adj["z/s6"]
+
+    assert "z/s6" in adj["z/s2"]
+    assert "z/s2" in adj["z/s6"]
+
+
+def test_building_stitch_solids():
+    # Geometry from examples/example_5.py
+    solid_1 = box(5, 5, 3, name="s1")
+    original_number_of_polys = len(solid_1.get_polygons())
+
+    solid_2 = box(3, 3, 2, (5, 1, 0), name="s2")
+    solid_3 = box(3, 3, 2, (0, 5, 0), name="s3")
+    solid_4 = box(3, 3, 2, (1, 1, 3), name="s4")
+    solid_5 = box(1, 1, 1, (0.5, 0.5, 5), name="s5")
+    solid_6 = box(1, 1, 1, (5, 0, 0), name="s6")
+    zone = Zone("z")
+    zone.add_solid(solid_1)
+    zone.add_solid(solid_2)
+    zone.add_solid(solid_3)
+    zone.add_solid(solid_4)
+    zone.add_solid(solid_5)
+    zone.add_solid(solid_6)
+    building = Building(name="building")
+    building.add_zone(zone)
+    building.stitch_solids()  # Just testing if there are no errors
+
+    # Testing if solid s1 has more polygons after stitching
+    s1 = building.get_object("z/s1")
+    assert isinstance(s1, Solid)
+    new_number_of_polys = len(s1.get_polygons())
+    assert new_number_of_polys > original_number_of_polys
+
+
 if __name__ == "__main__":
     test_building_mesh_adjacent(show=True)
     test_building_mesh_disjoint(show=True)

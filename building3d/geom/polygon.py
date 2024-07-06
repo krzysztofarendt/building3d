@@ -840,8 +840,8 @@ class Polygon:
         are pointing towards each other.
 
         If exact is True, all points of two polygons must be equal (order may be different).
-        If exact is False, the method checks only in points are coplanar and
-        normal vectors are opposite.
+        If exact is False, the method checks only if polygons are overlapping, points are coplanar
+        and normal vectors are opposite.
 
         Args:
             poly: another polygon
@@ -861,10 +861,16 @@ class Polygon:
             this_points = self.points
             other_points = poly.points
             all_points = this_points + other_points
+            # Condition 1: points must be  coplanar
             points_coplanar = are_points_coplanar(*all_points)
+            # Condition 2: normal vectors must be opposite
             normals_opposite = np.isclose(self.normal, poly.normal * -1, rtol=GEOM_RTOL).all()
+            # Condition 3: polygons must be overlapping
+            this_in_other = np.array([self.is_point_inside(p) for p in other_points])
+            other_in_this = np.array([poly.is_point_inside(p) for p in this_points])
+            overlap = this_in_other.any() or other_in_this.any()
 
-            if points_coplanar and normals_opposite:
+            if points_coplanar and normals_opposite and overlap:
                 return True
             else:
                 return False

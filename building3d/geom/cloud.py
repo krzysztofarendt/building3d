@@ -1,9 +1,11 @@
 import numpy as np
 
 from building3d.geom.vector import normal
+from building3d.geom.vector import is_point_colinear
 from building3d.geom.point import Point
 from building3d.config import GEOM_EPSILON
 from building3d.geom.exceptions import GeometryError
+from building3d.util.roll_back import roll_back
 
 
 def points_to_array(pts: list[Point]) -> np.ndarray:
@@ -56,13 +58,25 @@ def are_points_in_set(pts: list[Point], are_in: list[Point]) -> bool:
 def are_points_coplanar(*pts: Point, tol: float = GEOM_EPSILON) -> bool:
     """Check if all points lay on the same surface."""
 
-    if len(pts) < 3:
-        raise GeometryError("Less than 3 points provided to the function")
-
-    if len(pts) == 3:
+    if len(set(pts)) <= 3:
+        # If the number of unique points is less or equal 3, they must be coplanar
         return True
 
-    vec_n = normal(pts[0], pts[1], pts[2])
+    vec_n = np.array([0, 0, 0])
+    num_tries = 0
+    max_tries = len(pts)
+    while np.allclose(vec_n, 0):
+        vec_n = normal(pts[0], pts[1], pts[2])
+        if (np.abs(vec_n) > tol).any():
+            break
+        else:
+            assert is_point_colinear(pts[0], pts[1], pts[2]), \
+                "This case must mean they are colinear. If not, debugging needed."
+            pts = tuple(roll_back(list(pts)))
+        num_tries += 1
+        if num_tries > max_tries:
+            # All points are colinear, so they are also coplanar
+            return True
 
     # Plane equation:
     # ax + by + cz + d = 0
