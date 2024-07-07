@@ -1,15 +1,25 @@
+from typing import Protocol
+
 import numpy as np
 import pyvista as pv
 
 from building3d.geom.cloud import points_to_array
+from building3d.geom.point import Point
+from building3d.display.colors import random_rgb_color
 
 
-def random_rgb_color() -> list[float]:
-    """Return a random RGB color for the PyVista plotter."""
-    return np.random.random(3).tolist()
+class Plottable(Protocol):
+    def get_mesh(self, children) -> tuple[list[Point], list[list[int]]]:
+        ...
+
+    def get_lines(self) -> tuple[list[Point], list[list[int]]]:
+        ...
+
+    def get_points(self) -> list[Point]:
+        ...
 
 
-def plot_objects(*objects):
+def plot_objects(*objects: Plottable):
     """Plot multiple objects (like Building, Zone, Solid, Wall, RayCluster).
 
     The object must have at least one of the following methods:
