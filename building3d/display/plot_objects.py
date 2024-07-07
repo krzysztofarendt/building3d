@@ -1,6 +1,3 @@
-from typing import Protocol
-
-import numpy as np
 import pyvista as pv
 
 from building3d.geom.cloud import points_to_array
@@ -8,18 +5,7 @@ from building3d.geom.point import Point
 from building3d.display.colors import random_rgb_color
 
 
-class Plottable(Protocol):
-    def get_mesh(self, children) -> tuple[list[Point], list[list[int]]]:
-        ...
-
-    def get_lines(self) -> tuple[list[Point], list[list[int]]]:
-        ...
-
-    def get_points(self) -> list[Point]:
-        ...
-
-
-def plot_objects(*objects: Plottable):
+def plot_objects(*objects):
     """Plot multiple objects (like Building, Zone, Solid, Wall, RayCluster).
 
     The object must have at least one of the following methods:
