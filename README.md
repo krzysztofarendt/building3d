@@ -3,9 +3,10 @@
 
 # building3d
 
-![building3d_temp_logo](https://github.com/krzysztofarendt/building3d/assets/16005748/6cc84976-792a-44f2-aaef-bb6297ab9ec8)
+I'm not sure where this project is heading, so there is not documentation yet, but it looks as follows:
 
-I'm not sure where this project is heading, so there is not documentation yet.
+![building3d_temp_logo](https://github.com/krzysztofarendt/building3d/assets/16005748/6cc84976-792a-44f2-aaef-bb6297ab9ec8)
+![building3d_temp_logo_2](https://github.com/krzysztofarendt/building3d/assets/16005748/34704921-7f62-407f-a587-81f749a86cdd)
 
 # Assumptions
 
