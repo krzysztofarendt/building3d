@@ -42,6 +42,6 @@ def random_between(lo: float, hi: float) -> float:
         hi = lo
         lo = ans
     v = np.random.random()
-    v *= v * (hi - lo)
+    v *= hi - lo
     v += lo
     return v
