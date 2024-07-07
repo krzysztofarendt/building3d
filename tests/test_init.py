@@ -21,4 +21,12 @@ def test_random_within():
         if i == 0:
             assert r == 0
         else:
-            assert r > -i and r < i
+            assert r >= -i and r < i
+
+
+def test_random_between():
+    x0 = building3d.random_within(10)
+    x1 = building3d.random_within(10)
+    for _ in range(100):
+        r = building3d.random_between(x0, x1)
+        assert r >= min(x0, x1) and r < max(x0, x1)

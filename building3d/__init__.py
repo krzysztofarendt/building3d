@@ -27,9 +27,21 @@ def random_id(size: int | None = None) -> str:
         return uid[:size]
 
 
-def random_within(lim=1.0):
-    """Return random float within range (-lim, +lim)"""
+def random_within(lim=1.0) -> float:
+    """Return random float within range [-lim, +lim)"""
     if lim == 0:
         return 0.0
     else:
         return 2 * lim * (np.random.random() - 0.5)
+
+
+def random_between(lo: float, hi: float) -> float:
+    """Return random float within range [lo, hi)"""
+    if lo > hi:
+        ans = hi
+        hi = lo
+        lo = ans
+    v = np.random.random()
+    v *= v * (hi - lo)
+    v += lo
+    return v
