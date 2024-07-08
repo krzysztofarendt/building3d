@@ -7,7 +7,15 @@ from building3d.simulators.rays.cluster import RayCluster
 
 
 class RaySimulator(BaseSimulator):
+    """Simulator class for ray tracing.
 
+    Controls:
+    - time steps
+    - source and receiver
+    - reflections
+    - absorption
+    - when to finish
+    """
     def __init__(
         self,
         building: Building,

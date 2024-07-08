@@ -7,6 +7,10 @@ from building3d.geom.vector import length
 
 
 class Ray:
+    """Single ray knowing its position, velocity and time step.
+
+    `Ray` doesn't know anything about surrounding objects.
+    """
     buffer_size: int = 10  # how many past positions to remember
 
     def __init__(self, position: Point, time_step: float = 1e-3):

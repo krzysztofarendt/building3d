@@ -4,6 +4,17 @@ from .ray import Ray
 
 
 class RayCluster:
+    """Collection of `Ray` instances.
+
+    This class holds a collection of rays.
+    It has methods for:
+    - creating new rays at a given source
+    - moving forward with the simulation
+    - returning geometry for plotting with `plot_objects()`
+
+    `RayCluster` doesn't know anything about surrounding objects.
+    The information about the surrounding obstacles is defined in `RaySimulator`.
+    """
     def __init__(self, speed: float, time_step: float):
         self.speed = speed
         self.time_step = time_step
