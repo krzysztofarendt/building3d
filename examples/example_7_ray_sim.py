@@ -11,9 +11,14 @@ if __name__ == "__main__":
     ylim = 5
     zlim = 3
     solid_1 = box(xlim, ylim, zlim, name="solid_1")
+    xlim = 5
+    ylim = 5
+    zlim = 3
+    solid_2 = box(xlim, ylim, zlim, (5, 0, 0), name="solid_2")
 
     zone = Zone("zone")
     zone.add_solid(solid_1)
+    zone.add_solid(solid_2)
 
     building = Building(name="building")
     building.add_zone(zone)
