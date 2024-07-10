@@ -20,6 +20,10 @@ class RayCluster:
         self.time_step = time_step
         self.rays = []
 
+    @property
+    def size(self) -> int:
+        return len(self.rays)
+
     def add_rays(self, source: Point, num_rays: int):
         for _ in range(num_rays):
             r = Ray(source, self.time_step)

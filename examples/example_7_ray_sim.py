@@ -28,7 +28,7 @@ if __name__ == "__main__":
         source = Point(1, 1, 1),
         receiver = Point(3, 3, 2),
         receiver_radius = 1,
-        num_rays = 10000,
+        num_rays = 1000,
         speed = 343.0,
         time_step = 1e-4,
     )

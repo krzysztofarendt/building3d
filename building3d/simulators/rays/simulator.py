@@ -1,3 +1,5 @@
+from tqdm import tqdm
+
 from building3d.types.recursive_default_dict import recursive_default_dict
 from building3d.geom.building import Building
 from building3d import random_between
@@ -6,6 +8,8 @@ from building3d.simulators.basesimulator import BaseSimulator
 from building3d.simulators.rays.ray import Ray
 from building3d.simulators.rays.cluster import RayCluster
 from building3d.geom.paths import PATH_SEP
+from building3d.geom.paths.object_path import object_path
+from building3d.geom.paths.object_path import split_path
 
 
 class RaySimulator(BaseSimulator):
@@ -39,13 +43,51 @@ class RaySimulator(BaseSimulator):
         self.r_cluster.add_rays(source=source, num_rays=num_rays)
 
         self.transparent_polys = self.find_transparent_polygons(building)
+        print(self.transparent_polys)
 
-        # TODO: Decide if subpolygons are of any use here
-        # TODO: Add specular reflections
+        # Find the location of the rays inside the building (zone_name/solid_name)
+        self.location = []
+        path_to_solid = ""
+        for z in building.get_zones():
+            for s in z.get_solids():
+                if s.is_point_inside(source):
+                    path_to_solid = object_path(zone=z, solid=s)
+                    self.location = [path_to_solid for _ in range(self.r_cluster.size)]
+
+        # Find the next blocking surface (polygon)
+        # Directions of rays are already known, so we can look at all polygons in the current solid
+        # This will enable to track only one polygon per ray until the ray hits the surface
+        zname, sname = split_path(path_to_solid)
+        z = building.zones[zname]
+        s = z.solids[sname]
+
+        self.next_surface = []
+        print("Finding next blocking surface for each ray...")  # TODO: Add logger
+        for r in tqdm(self.r_cluster.rays):
+            found = False
+            for w in s.get_walls():
+                for p in w.get_polygons():
+                    if p.is_point_inside_projection(r.position, r.velocity, fwd_only=False):
+                        self.next_surface.append(object_path(zone=z, solid=s, wall=w, poly=p))
+                        found = True
+                        break
+                if found:
+                    break
+
+        print(self.next_surface)
+        # TODO:
+        # - Decide if properties (transparency, absorption, scattering)
+        #   should be stored here or in Wall
+        # - Decide if subpolygons are of any use here
+        # - Add specular reflections
         ...
 
     def forward(self):
         # Find solid for each point
+
+        # Find first blocking surface
+        ...
+
         self.r_cluster.forward()
 
     def find_transparent_polygons(self, building: Building) -> list[str]:
@@ -54,7 +96,6 @@ class RaySimulator(BaseSimulator):
         A polygon is transparent if it separates two adjacent solids within a single zone.
         """
         graph = building.get_graph()
-        print(graph)
 
         transparent_polys = []
         added = set()
