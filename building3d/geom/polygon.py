@@ -722,6 +722,10 @@ class Polygon:
     def is_point_inside_margin(self, p: Point, margin: float) -> bool:
         """Checks whether a point lies within a polygon's inline.
 
+        Returns `True` if:
+        - point is inside the polygon and
+        - distance from this point to the nearest edge is larger than `margin`
+
         Args:
             p: point to be checked
             margin: distance from the boundary to the inline

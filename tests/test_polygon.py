@@ -757,6 +757,19 @@ def test_polygon_slice_with_wrong_pt1_pt2_raises_error():
         )
 
 
+def test_is_point_inside_margin():
+    p1 = Point(0.0, 0.0, 0.0)
+    p2 = Point(1.0, 0.0, 0.0)
+    p3 = Point(1.0, 1.0, 0.0)
+    p4 = Point(0.0, 1.0, 0.0)
+    poly = Polygon([p1, p2, p3, p4])
+
+    ptest = Point(0.1, 0.1, 0.0)
+    assert poly.is_point_inside_margin(ptest, 0.099)
+    assert not poly.is_point_inside_margin(ptest, 0.11)
+
+
+
 if __name__ == "__main__":
     # test_polygon_slice_start_and_end_at_a_vertex()
     # test_polygon_slice_start_and_end_at_different_edges_vertical()
