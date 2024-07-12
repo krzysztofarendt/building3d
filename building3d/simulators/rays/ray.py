@@ -13,7 +13,7 @@ class Ray:
     """
     buffer_size: int = 50  # how many past positions to remember
 
-    def __init__(self, position: Point, time_step: float = 1e-3):
+    def __init__(self, position: Point, time_step: float):
         self.position = position
         self.time_step = time_step
         self.speed = 0.0

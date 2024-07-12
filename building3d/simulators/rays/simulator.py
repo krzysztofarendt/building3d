@@ -31,7 +31,7 @@ class RaySimulator(BaseSimulator):
         receiver_radius: float,
         num_rays: int = 1000,
         speed: float = 343.0,
-        time_step: float = 1e-3,
+        time_step: float = 1e-4,
     ):
         self.building = building
         self.source = source
@@ -39,6 +39,7 @@ class RaySimulator(BaseSimulator):
         self.receiver_radius = receiver_radius
         self.speed = speed
         self.time_step = time_step
+        self.min_distance = speed * time_step * 1.01
 
         self.r_cluster = RayCluster(speed=speed, time_step=time_step)
         self.r_cluster.add_rays(source=source, num_rays=num_rays)
@@ -95,9 +96,13 @@ class RaySimulator(BaseSimulator):
 
     def forward(self):
         # If distance below threshold, reflect (change direction)
-        ...  # TODO
+        for i in range(self.r_cluster.size):
+            if self.dist[i] < self.min_distance:
+                # TODO: Reflect if not transparent
+                ...
+                print(f"Reflect {i}")
 
-        # For those that were reflected, update next surface
+        # For those that were reflected or moved through transparent surf., update next surface
         ...  # TODO
 
         # Move rays forward
