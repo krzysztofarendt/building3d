@@ -2,6 +2,7 @@ from tqdm import tqdm
 
 from building3d.types.recursive_default_dict import recursive_default_dict
 from building3d.geom.building import Building
+from building3d.geom.polygon import Polygon
 from building3d import random_between
 from building3d.geom.point import Point
 from building3d.simulators.basesimulator import BaseSimulator
@@ -65,6 +66,7 @@ class RaySimulator(BaseSimulator):
         s = z.solids[sname]
 
         self.next_surface = []
+        self.dist = []
         print("Finding next blocking surface for each ray...")  # TODO: Add logger
         for r in tqdm(self.r_cluster.rays):
             found = False
@@ -72,6 +74,7 @@ class RaySimulator(BaseSimulator):
                 for p in w.get_polygons():
                     if p.is_point_inside_projection(r.position, r.velocity):
                         self.next_surface.append(object_path(zone=z, solid=s, wall=w, poly=p))
+                        self.dist.append(p.distance_point_to_polygon(r.position))
                         found = True
                         break
                 if found:
@@ -82,6 +85,7 @@ class RaySimulator(BaseSimulator):
                 raise RuntimeError("Some ray is not going towards any surface... (?)")
 
         print(self.next_surface)
+        print(self.dist)
         # TODO:
         # - Decide if properties (transparency, absorption, scattering)
         #   should be stored here or in Wall
@@ -90,12 +94,22 @@ class RaySimulator(BaseSimulator):
         ...
 
     def forward(self):
-        # Find solid for each point
+        # If distance below threshold, reflect (change direction)
+        ...  # TODO
 
-        # Find first blocking surface
-        ...
+        # For those that were reflected, update next surface
+        ...  # TODO
 
+        # Move rays forward
         self.r_cluster.forward()
+
+        # Update distance to next surface
+        for i in range(self.r_cluster.size):
+            poly = self.building.get_object(self.next_surface[i])
+            assert isinstance(poly, Polygon)
+            self.dist[i] = poly.distance_point_to_polygon(self.r_cluster.rays[i].position)
+
+        print(self.dist)
 
     def find_transparent_polygons(self, building: Building) -> list[str]:
         """Find and return the list of transparent polygons in the building.
