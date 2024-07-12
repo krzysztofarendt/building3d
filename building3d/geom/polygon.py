@@ -666,8 +666,7 @@ class Polygon:
         Note:
             For points not laying inside the orthogonal
             projection, the distance is calculated as the distance
-            to the closest polygon vertex.
-            TODO: Calculate distance to the nearest edge instead.
+            to the closest edge.
         """
         # Translate polygon's to the point p
         _, _, _, d = self.plane_equation_coefficients()
@@ -681,8 +680,13 @@ class Polygon:
         if self.is_point_inside_ortho_projection(p):
             return dist
         else:
-            # Find the closest vertex
-            return self.distance_point_to_polygon_points(p)
+            # Return distance to the closest edge
+            min_dist = np.inf
+            for ed in self.edges:
+                dist = distance_point_to_edge(p, ed[0], ed[1])
+                if dist < min_dist:
+                    min_dist = dist
+            return min_dist
 
     def distance_point_to_polygon_points(self, p: Point) -> float:
         """Return minimum distance between test point and polygon points."""
