@@ -206,6 +206,7 @@ def test_distance_point_to_polygon():
     ptest5 = Point(2.0, 1.0, 1.0)  # distance = np.sqrt(2)
     ptest6 = Point(-1.0, -1.0, 0.0)  # distance = np.sqrt(2)
     ptest7 = Point(0.9, 0.1, 3.0)  # distance = 3
+    ptest8 = Point(0.5, 2.0, 0.0)  # distance = 1 (TODO: must calc. dist. to edge, not to vertex)
 
     poly = Polygon([p0, p1, p2, p3])
 
@@ -223,6 +224,8 @@ def test_distance_point_to_polygon():
     assert np.isclose(d, np.sqrt(2))
     d = poly.distance_point_to_polygon(ptest7)
     assert np.isclose(d, 3)
+    d = poly.distance_point_to_polygon(ptest8)
+    assert np.isclose(d, 1)
 
     p0 = Point(1.0, 1.0, 0.0)
     p1 = Point(0.0, 1.0, 0.0)
