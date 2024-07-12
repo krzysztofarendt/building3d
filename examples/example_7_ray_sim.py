@@ -28,11 +28,11 @@ if __name__ == "__main__":
         source = Point(1, 1, 1),
         receiver = Point(3, 3, 2),
         receiver_radius = 1,
-        num_rays = 1000,
+        num_rays = 10,
         speed = 343.0,
         time_step = 1e-4,
     )
-    for i in range(50):
+    for i in range(10):
         raysim.forward()
 
     plot_objects(building, raysim.r_cluster)
