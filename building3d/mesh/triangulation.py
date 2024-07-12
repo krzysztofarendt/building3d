@@ -15,7 +15,7 @@ from building3d.geom.line import create_points_between_list_of_points
 from building3d.geom.triangle import triangle_area
 from building3d.geom.triangle import triangle_centroid
 from building3d.mesh.quality.min_triangle_area import minimum_triangle_area
-from building3d.config import GEOM_EPSILON
+from building3d.config import GEOM_ATOL
 from building3d.config import MESH_JOGGLE
 from building3d.config import MESH_DELTA
 from building3d.config import MESH_REL_DIST_TO_POINTS
@@ -216,7 +216,7 @@ def delaunay_triangulation(
 
     mesh_normal = face_normal(0)
 
-    if np.isclose(mesh_normal, poly.normal, atol=GEOM_EPSILON).all():
+    if np.isclose(mesh_normal, poly.normal, atol=GEOM_ATOL).all():
         # Vertex ordering is correct
         pass
     else:

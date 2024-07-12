@@ -17,7 +17,7 @@ from building3d.geom.triangle import is_point_inside as is_point_inside_triangle
 from building3d.geom.triangle import triangulate
 from building3d import random_id
 from building3d.geom.paths.validate_name import validate_name
-from building3d.config import GEOM_EPSILON
+from building3d.config import GEOM_ATOL
 from building3d.config import GEOM_RTOL
 from building3d.util.roll_back import roll_back
 
@@ -799,7 +799,7 @@ class Polygon:
         # Find the point projection along vec to the plane of the polygon
         denom = a * vec[0] + b * vec[1] + c * vec[2]
 
-        if np.abs(denom) < GEOM_EPSILON:
+        if np.abs(denom) < GEOM_ATOL:
             # Vector vec is colinear with the plane
             # The point lays inside this projection only if it is inside this polygon
             # logger.warning(f"Projection vector {vec} is colinear with the polygon {self.name}")
@@ -1009,7 +1009,7 @@ class Polygon:
 
     def __eq__(self, other):
         """Checks if all points of two polygons are equal."""
-        if not np.isclose(self.normal, other.normal, atol=GEOM_EPSILON).all():
+        if not np.isclose(self.normal, other.normal, atol=GEOM_ATOL).all():
             return False
         elif len(self.points) == len(other.points):
             other_set = set(other.points)

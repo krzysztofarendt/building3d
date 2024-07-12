@@ -3,7 +3,7 @@ import numpy as np
 from building3d.geom.vector import normal
 from building3d.geom.vector import is_point_colinear
 from building3d.geom.point import Point
-from building3d.config import GEOM_EPSILON
+from building3d.config import GEOM_ATOL
 from building3d.geom.exceptions import GeometryError
 from building3d.util.roll_back import roll_back
 
@@ -55,7 +55,7 @@ def are_points_in_set(pts: list[Point], are_in: list[Point]) -> bool:
     return pts_set.issubset(are_in_set)
 
 
-def are_points_coplanar(*pts: Point, tol: float = GEOM_EPSILON) -> bool:
+def are_points_coplanar(*pts: Point, tol: float = GEOM_ATOL) -> bool:
     """Check if all points lay on the same surface."""
 
     if len(set(pts)) <= 3:

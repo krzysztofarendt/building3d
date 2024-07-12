@@ -2,7 +2,7 @@ import numpy as np
 
 from building3d.geom.point import Point
 from building3d.geom.vector import length
-from building3d.config import GEOM_EPSILON
+from building3d.config import GEOM_ATOL
 
 
 
@@ -104,7 +104,7 @@ def create_points_between_list_of_points(
         pt1 = pts[cur]
         pt2 = pts[nxt]
         edge_len = length(pt2.vector() - pt1.vector())
-        num_segments = int(edge_len // (delta + GEOM_EPSILON))
+        num_segments = int(edge_len // (delta + GEOM_ATOL))
         new_pts = create_points_between_2_points(pt1, pt2, num_segments)
         for p in new_pts:
             is_far_from_all = True

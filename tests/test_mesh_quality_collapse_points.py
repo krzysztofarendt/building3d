@@ -1,6 +1,6 @@
 import numpy as np
 
-from building3d.config import GEOM_EPSILON
+from building3d.config import GEOM_ATOL
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
 from building3d.geom.vector import normal
@@ -65,7 +65,7 @@ def test_collapse_points():
                 p1 = mesh.vertices[face[1]]
                 p2 = mesh.vertices[face[2]]
                 vnorm = normal(p0, p1, p2)
-                assert np.isclose(vnorm, poly.normal, atol=GEOM_EPSILON).all()
+                assert np.isclose(vnorm, poly.normal, atol=GEOM_ATOL).all()
 
 
 if __name__ == "__main__":
