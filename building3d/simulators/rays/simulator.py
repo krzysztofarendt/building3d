@@ -46,13 +46,16 @@ class RaySimulator(BaseSimulator):
         print(self.transparent_polys)
 
         # Find the location of the rays inside the building (zone_name/solid_name)
-        self.location = []
+        self.location = None
         path_to_solid = ""
         for z in building.get_zones():
             for s in z.get_solids():
                 if s.is_point_inside(source):
                     path_to_solid = object_path(zone=z, solid=s)
                     self.location = [path_to_solid for _ in range(self.r_cluster.size)]
+
+        if self.location is None:
+            raise RuntimeError("Ray source outside solid.")
 
         # Find the next blocking surface (polygon)
         # Directions of rays are already known, so we can look at all polygons in the current solid
@@ -67,12 +70,16 @@ class RaySimulator(BaseSimulator):
             found = False
             for w in s.get_walls():
                 for p in w.get_polygons():
-                    if p.is_point_inside_projection(r.position, r.velocity, fwd_only=False):
+                    if p.is_point_inside_projection(r.position, r.velocity):
                         self.next_surface.append(object_path(zone=z, solid=s, wall=w, poly=p))
                         found = True
                         break
                 if found:
                     break
+            if not found:
+                # This should not happen, because all rays are initilized inside a solid
+                # and solids must be fully enclosed with polygons
+                raise RuntimeError("Some ray is not going towards any surface... (?)")
 
         print(self.next_surface)
         # TODO:
