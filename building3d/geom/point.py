@@ -3,7 +3,7 @@ from typing import Sequence
 
 import numpy as np
 
-from building3d.config import GEOM_EPSILON
+from building3d.config import GEOM_ATOL
 from building3d.config import POINT_NUM_DEC
 
 
@@ -46,9 +46,9 @@ class Point:
         return str(self)
 
     def __eq__(self, other):
-        x_eq = np.abs(self.x - other.x) < GEOM_EPSILON
-        y_eq = np.abs(self.y - other.y) < GEOM_EPSILON
-        z_eq = np.abs(self.z - other.z) < GEOM_EPSILON
+        x_eq = np.abs(self.x - other.x) < GEOM_ATOL
+        y_eq = np.abs(self.y - other.y) < GEOM_ATOL
+        z_eq = np.abs(self.z - other.z) < GEOM_ATOL
 
         if x_eq and y_eq and z_eq:
             return True

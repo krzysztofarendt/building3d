@@ -7,7 +7,7 @@ from .point import Point
 from .vector import angle
 from .vector import normal
 from .vector import length
-from building3d.config import GEOM_EPSILON
+from building3d.config import GEOM_ATOL
 
 
 logger = logging.getLogger(__name__)
@@ -79,7 +79,7 @@ def rotate_points_around_vector(
     """
     logger.debug(f"Rotating {len(points)} points around {u} using angle {phi}")
 
-    if length(u) < GEOM_EPSILON or abs(phi) < GEOM_EPSILON:
+    if length(u) < GEOM_ATOL or abs(phi) < GEOM_ATOL:
         # No need to rotate
         return points, np.ones((3, 3))
 
@@ -122,7 +122,7 @@ def rotate_points_to_plane(
 
     # Find rotation axis
     rotaxis = np.cross(p_norm, u)
-    if (np.abs(rotaxis) < GEOM_EPSILON).all():
+    if (np.abs(rotaxis) < GEOM_ATOL).all():
         # No need to rotate, the points are already at the correct plane
         phi = 0.0
         return points, rotaxis, phi

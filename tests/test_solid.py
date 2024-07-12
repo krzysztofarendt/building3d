@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from building3d.config import GEOM_EPSILON
+from building3d.config import GEOM_ATOL
 from building3d.geom.predefined.solids.box import box
 from building3d.geom.exceptions import GeometryError
 from building3d.geom.point import Point
@@ -127,7 +127,7 @@ def test_volume():
     ceiling = Wall([Polygon([p4, p5, p6, p7])])
 
     sld = Solid([floor, wall0, wall1, wall2, wall3, ceiling])
-    assert np.isclose(sld.volume, 2.0, atol=GEOM_EPSILON)
+    assert np.isclose(sld.volume, 2.0, atol=GEOM_ATOL)
 
 
 def test_is_adjacent():

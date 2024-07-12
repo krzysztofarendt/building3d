@@ -3,7 +3,7 @@ from numba import njit
 
 from building3d.geom.point import Point
 from building3d.geom.cloud import points_to_array
-from building3d.config import GEOM_EPSILON
+from building3d.config import GEOM_ATOL
 
 
 def find_neighbors(
@@ -40,7 +40,7 @@ def find_neighbors_numba_wrap(
     neighbors_arr = find_neighbors_numba(
         vertices = points_to_array(vertices),
         elements = np.array(elements),
-        epsilon = GEOM_EPSILON,
+        epsilon = GEOM_ATOL,
     )
     neighbors = []
     for ngb in neighbors_arr:
