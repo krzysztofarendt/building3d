@@ -11,7 +11,7 @@ class Ray:
 
     `Ray` doesn't know anything about surrounding objects.
     """
-    buffer_size: int = 10  # how many past positions to remember
+    buffer_size: int = 50  # how many past positions to remember
 
     def __init__(self, position: Point, time_step: float = 1e-3):
         self.position = position
