@@ -1,3 +1,5 @@
+from tqdm import tqdm
+
 from building3d.display.plot_objects import plot_objects
 from building3d.geom.building import Building
 from building3d.geom.predefined.solids.box import box
@@ -28,11 +30,11 @@ if __name__ == "__main__":
         source = Point(1, 1, 1),
         receiver = Point(3, 3, 2),
         receiver_radius = 1,
-        num_rays = 50,
+        num_rays = 500,
         speed = 343.0,
         time_step = 1e-4,
     )
-    for i in range(50):
+    for i in tqdm(range(300)):
         raysim.forward()
 
     plot_objects(building, raysim.r_cluster)

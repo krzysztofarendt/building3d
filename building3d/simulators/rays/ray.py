@@ -11,7 +11,7 @@ class Ray:
 
     `Ray` doesn't know anything about surrounding objects.
     """
-    buffer_size: int = 50  # how many past positions to remember
+    buffer_size: int = 500  # how many past positions to remember
 
     def __init__(self, position: Point, time_step: float):
         self.position = position
@@ -41,3 +41,10 @@ class Ray:
         d /= length(d)
         d *= self.speed
         self.velocity = d
+
+    def reflect(self, n):
+        # TODO: Could be moved to a numba-decorated function
+        assert np.isclose(length(n), 1)  # TODO: Remove
+        dot = np.dot(n, self.velocity)
+        reflected = self.velocity - 2 * dot * n
+        self.velocity = reflected

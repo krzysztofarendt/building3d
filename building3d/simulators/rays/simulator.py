@@ -48,7 +48,7 @@ class RaySimulator(BaseSimulator):
         print(self.transparent_polys)
 
         # Find the location of the rays inside the building (zone_name/solid_name)
-        self.location = None
+        self.location = []
         path_to_solid = ""
         for z in building.get_zones():
             for s in z.get_solids():
@@ -56,7 +56,7 @@ class RaySimulator(BaseSimulator):
                     path_to_solid = object_path(zone=z, solid=s)
                     self.location = [path_to_solid for _ in range(self.r_cluster.size)]
 
-        if self.location is None:
+        if len(self.location) == 0:
             raise RuntimeError("Ray source outside solid.")
 
         # Find the next blocking surface (polygon)
@@ -66,24 +66,13 @@ class RaySimulator(BaseSimulator):
         z = building.zones[zname]
         s = z.solids[sname]
 
-        self.next_surface = []
-        self.dist = []
+        # Initialize lists with next surfaces and respective distances
+        self.next_surface = ["" for _ in range(self.r_cluster.size)]
+        self.dist = [0.0 for _ in range(self.r_cluster.size)]
+
         print("Finding next blocking surface for each ray...")  # TODO: Add logger
-        for r in tqdm(self.r_cluster.rays):
-            found = False
-            for w in s.get_walls():
-                for p in w.get_polygons():
-                    if p.is_point_inside_projection(r.position, r.velocity):
-                        self.next_surface.append(object_path(zone=z, solid=s, wall=w, poly=p))
-                        self.dist.append(p.distance_point_to_polygon(r.position))
-                        found = True
-                        break
-                if found:
-                    break
-            if not found:
-                # This should not happen, because all rays are initilized inside a solid
-                # and solids must be fully enclosed with polygons
-                raise RuntimeError("Some ray is not going towards any surface... (?)")
+        for i in tqdm(range(self.r_cluster.size)):
+            self._update_next_surface(i)
 
         print(self.next_surface)
         print(self.dist)
@@ -98,12 +87,17 @@ class RaySimulator(BaseSimulator):
         # If distance below threshold, reflect (change direction)
         for i in range(self.r_cluster.size):
             if self.dist[i] < self.min_distance:
-                # TODO: Reflect if not transparent
-                ...
-                print(f"Reflect {i}")
+                # TODO: Consider transparent surfaces
+                #       - pass through
+                #       - update location
+                poly = self.building.get_object(self.next_surface[i])
+                assert isinstance(poly, Polygon)
+                self.r_cluster.rays[i].reflect(poly.normal)
 
-        # For those that were reflected or moved through transparent surf., update next surface
-        ...  # TODO
+                # For those that were reflected or moved through transparent surf.
+                # update next surface
+                self._update_next_surface(i)
+                ...  # TODO
 
         # Move rays forward
         self.r_cluster.forward()
@@ -114,7 +108,32 @@ class RaySimulator(BaseSimulator):
             assert isinstance(poly, Polygon)
             self.dist[i] = poly.distance_point_to_polygon(self.r_cluster.rays[i].position)
 
-        print(self.dist)
+        # print(self.dist)
+
+    def _update_next_surface(self, ray_index):
+        """Update self.next_surface and self.dist for self.r_cluster.rays[ray_index]."""
+        assert self.location is not None
+        path_to_solid = self.location[ray_index]
+        zname, sname = split_path(path_to_solid)
+        z = self.building.zones[zname]
+        s = z.solids[sname]
+        found = False
+
+        for w in s.get_walls():
+            for p in w.get_polygons():
+                r = self.r_cluster.rays[ray_index]
+                if p.is_point_inside_projection(r.position, r.velocity):
+                    self.next_surface[ray_index] = object_path(zone=z, solid=s, wall=w, poly=p)
+                    self.dist[ray_index] = p.distance_point_to_polygon(r.position)
+                    found = True
+                    break
+            if found:
+                break
+
+        if not found:
+            # This should not happen, because all rays are initilized inside a solid
+            # and solids must be fully enclosed with polygons
+            raise RuntimeError("Some ray is not going towards any surface... (?)")
 
     def find_transparent_polygons(self, building: Building) -> list[str]:
         """Find and return the list of transparent polygons in the building.
