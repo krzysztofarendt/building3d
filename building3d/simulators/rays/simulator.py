@@ -1,8 +1,8 @@
 from tqdm import tqdm
 
-from building3d.types.recursive_default_dict import recursive_default_dict
 from building3d.geom.building import Building
 from building3d.geom.polygon import Polygon
+from building3d.geom.solid import Solid
 from building3d import random_between
 from building3d.geom.point import Point
 from building3d.simulators.basesimulator import BaseSimulator
@@ -34,6 +34,9 @@ class RaySimulator(BaseSimulator):
         time_step: float = 1e-4,
     ):
         self.building = building
+        self.building_adj_polygons = building.get_graph()
+        self.building_adj_solids = building.find_adjacent_solids()
+
         self.source = source
         self.receiver = receiver
         self.receiver_radius = receiver_radius
@@ -44,8 +47,8 @@ class RaySimulator(BaseSimulator):
         self.r_cluster = RayCluster(speed=speed, time_step=time_step)
         self.r_cluster.add_rays(source=source, num_rays=num_rays)
 
-        self.transparent_polys = self.find_transparent_polygons(building)
-        print(self.transparent_polys)
+        self.transparent_polys = set(self.find_transparent_polygons())
+        print("Transparent surfaces:", self.transparent_polys)
 
         # Find the location of the rays inside the building (zone_name/solid_name)
         self.location = []
@@ -80,7 +83,6 @@ class RaySimulator(BaseSimulator):
         # - Decide if properties (transparency, absorption, scattering)
         #   should be stored here or in Wall
         # - Decide if subpolygons are of any use here
-        # - Add specular reflections
         ...
 
     def forward(self):
@@ -90,27 +92,36 @@ class RaySimulator(BaseSimulator):
                 # TODO: Consider transparent surfaces
                 #       - pass through
                 #       - update location
-                poly = self.building.get_object(self.next_surface[i])
-                assert isinstance(poly, Polygon)
-                self.r_cluster.rays[i].reflect(poly.normal)
+                if self.next_surface[i] in self.transparent_polys:
+                    # NOTE: This may run multiple times (before/after passing through)
+                    self._update_location(i)
+                else:
+                    # Reflect
+                    poly = self.building.get_object(self.next_surface[i])
+                    if isinstance(poly, Polygon):
+                        self.r_cluster.rays[i].reflect(poly.normal)
+                    else:
+                        raise ValueError(f"Incorrect polygon type: {poly}")
 
-                # For those that were reflected or moved through transparent surf.
-                # update next surface
+                # For those that were reflected or let through a transparent surface
+                # -> update next surface
                 self._update_next_surface(i)
-                ...  # TODO
 
         # Move rays forward
         self.r_cluster.forward()
 
         # Update distance to next surface
+        # TODO: OPTIMIZE! THIS DOES NOT HAVE TO BE RUN EVERY STEP FOR EVERY RAY!!!!!!!!!!!
         for i in range(self.r_cluster.size):
             poly = self.building.get_object(self.next_surface[i])
-            assert isinstance(poly, Polygon)
-            self.dist[i] = poly.distance_point_to_polygon(self.r_cluster.rays[i].position)
+            if isinstance(poly, Polygon):
+                self.dist[i] = poly.distance_point_to_polygon(self.r_cluster.rays[i].position)
+            else:
+                raise ValueError(f"Incorrect polygon type: {poly}")
 
         # print(self.dist)
 
-    def _update_next_surface(self, ray_index):
+    def _update_next_surface(self, ray_index) -> None:
         """Update self.next_surface and self.dist for self.r_cluster.rays[ray_index]."""
         assert self.location is not None
         path_to_solid = self.location[ray_index]
@@ -135,12 +146,24 @@ class RaySimulator(BaseSimulator):
             # and solids must be fully enclosed with polygons
             raise RuntimeError("Some ray is not going towards any surface... (?)")
 
-    def find_transparent_polygons(self, building: Building) -> list[str]:
+    def _update_location(self, ray_index) -> None:
+        """Update the solid that the ray is located in. Changes `self.location`."""
+        curr_solid = self.location[ray_index]
+        adjacent_solids = self.building_adj_solids[curr_solid]
+        for path_to_solid in adjacent_solids:
+            s = self.building.get_object(path_to_solid)
+            if isinstance(s, Solid):
+                if s.is_point_inside(self.r_cluster.rays[ray_index].position):
+                    self.location[ray_index] = path_to_solid
+            else:
+                raise ValueError(f"Incorrect solid type: {s}")
+
+    def find_transparent_polygons(self) -> list[str]:
         """Find and return the list of transparent polygons in the building.
 
         A polygon is transparent if it separates two adjacent solids within a single zone.
         """
-        graph = building.get_graph()
+        graph = self.building_adj_polygons
 
         transparent_polys = []
         added = set()

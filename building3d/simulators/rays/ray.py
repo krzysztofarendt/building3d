@@ -1,9 +1,20 @@
 from collections import deque
 
 import numpy as np
+import numba
 
 from building3d.geom.point import Point
 from building3d.geom.vector import length
+
+
+@numba.njit
+def reflect_ray(
+    velocity: np.ndarray,
+    surface_normal_vec: np.ndarray
+) -> np.ndarray:
+    dot = np.dot(surface_normal_vec, velocity)
+    reflected = velocity - 2 * dot * surface_normal_vec
+    return reflected
 
 
 class Ray:
@@ -42,9 +53,10 @@ class Ray:
         d *= self.speed
         self.velocity = d
 
-    def reflect(self, n):
-        # TODO: Could be moved to a numba-decorated function
-        assert np.isclose(length(n), 1)  # TODO: Remove
-        dot = np.dot(n, self.velocity)
-        reflected = self.velocity - 2 * dot * n
-        self.velocity = reflected
+    def reflect(self, n: np.ndarray) -> None:
+        """Bounce ray off a surface.
+
+        Args:
+            n: surface normal vector (should have unit length)
+        """
+        self.velocity = reflect_ray(self.velocity, n)
