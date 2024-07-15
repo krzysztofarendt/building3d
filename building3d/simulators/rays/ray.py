@@ -18,10 +18,6 @@ def reflect_ray(
 
 
 class Ray:
-    """Single ray knowing its position, velocity and time step.
-
-    `Ray` doesn't know anything about surrounding objects.
-    """
     buffer_size: int = 500  # how many past positions to remember
 
     def __init__(self, position: Point, time_step: float):
@@ -32,6 +28,16 @@ class Ray:
         self.past_positions = deque()
         for _ in range(Ray.buffer_size):
             self.past_positions.appendleft(self.position)
+
+        self.next_surf = ""
+
+    @property
+    def next_surface(self):
+        return self.next_surf
+
+    @next_surface.setter
+    def next_surface(self, value):
+        self.next_surf = value
 
     def forward(self):
         """Run one time step forward and update the position."""

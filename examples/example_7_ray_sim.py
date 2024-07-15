@@ -37,4 +37,4 @@ if __name__ == "__main__":
     for i in tqdm(range(300)):
         raysim.forward()
 
-    plot_objects(building, raysim.r_cluster)
+    plot_objects(building, raysim.rays)

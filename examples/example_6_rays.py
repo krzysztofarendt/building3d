@@ -5,7 +5,7 @@ from building3d.geom.predefined.solids.box import box
 from building3d.geom.zone import Zone
 from building3d.geom.point import Point
 from building3d.simulators.rays.ray import Ray
-from building3d.simulators.rays.cluster import RayCluster
+from building3d.simulators.rays.manyrays import ManyRays
 
 
 if __name__ == "__main__":
@@ -39,10 +39,10 @@ if __name__ == "__main__":
 
         rays.append(ray)
 
-    rc = RayCluster(speed=343.0, time_step=1e-3)
-    rc.rays = rays
+    mrays = ManyRays(speed=343.0, time_step=1e-3)
+    mrays.rays = rays
     num_steps = 5
     for _ in range(num_steps):
-        rc.forward()
+        mrays.forward()
 
-    plot_objects(building, rc)
+    plot_objects(building, mrays)

@@ -7,7 +7,7 @@ from building3d import random_between
 from building3d.geom.point import Point
 from building3d.simulators.basesimulator import BaseSimulator
 from building3d.simulators.rays.ray import Ray
-from building3d.simulators.rays.cluster import RayCluster
+from building3d.simulators.rays.manyrays import ManyRays
 from building3d.geom.paths import PATH_SEP
 from building3d.geom.paths.object_path import object_path
 from building3d.geom.paths.object_path import split_path
@@ -44,10 +44,10 @@ class RaySimulator(BaseSimulator):
         self.time_step = time_step
         self.min_distance = speed * time_step * 1.01
 
-        self.r_cluster = RayCluster(speed=speed, time_step=time_step)
-        self.r_cluster.add_rays(source=source, num_rays=num_rays)
+        self.rays = ManyRays(speed=speed, time_step=time_step)
+        self.rays.add_rays(source=source, num_rays=num_rays)
 
-        self.transparent_polys = set(self.find_transparent_polygons())
+        self.transparent_polys = set(self._find_transparent_polygons())
         print("Transparent surfaces:", self.transparent_polys)
 
         # Find the location of the rays inside the building (zone_name/solid_name)
@@ -57,7 +57,7 @@ class RaySimulator(BaseSimulator):
             for s in z.get_solids():
                 if s.is_point_inside(source):
                     path_to_solid = object_path(zone=z, solid=s)
-                    self.location = [path_to_solid for _ in range(self.r_cluster.size)]
+                    self.location = [path_to_solid for _ in range(len(self.rays))]
 
         if len(self.location) == 0:
             raise RuntimeError("Ray source outside solid.")
@@ -70,11 +70,12 @@ class RaySimulator(BaseSimulator):
         s = z.solids[sname]
 
         # Initialize lists with next surfaces and respective distances
-        self.next_surface = ["" for _ in range(self.r_cluster.size)]
-        self.dist = [0.0 for _ in range(self.r_cluster.size)]
+        self.next_surface = ["" for _ in range(len(self.rays))]
+        self.dist = [0.0 for _ in range(len(self.rays))]
+        self.delta_dist = [0.0 for _ in range(len(self.rays))]
 
         print("Finding next blocking surface for each ray...")  # TODO: Add logger
-        for i in tqdm(range(self.r_cluster.size)):
+        for i in tqdm(range(len(self.rays))):
             self._update_next_surface(i)
 
         print(self.next_surface)
@@ -87,7 +88,7 @@ class RaySimulator(BaseSimulator):
 
     def forward(self):
         # If distance below threshold, reflect (change direction)
-        for i in range(self.r_cluster.size):
+        for i in range(len(self.rays)):
             if self.dist[i] < self.min_distance:
                 # TODO: Consider transparent surfaces
                 #       - pass through
@@ -99,7 +100,7 @@ class RaySimulator(BaseSimulator):
                     # Reflect
                     poly = self.building.get_object(self.next_surface[i])
                     if isinstance(poly, Polygon):
-                        self.r_cluster.rays[i].reflect(poly.normal)
+                        self.rays[i].reflect(poly.normal)
                     else:
                         raise ValueError(f"Incorrect polygon type: {poly}")
 
@@ -108,21 +109,21 @@ class RaySimulator(BaseSimulator):
                 self._update_next_surface(i)
 
         # Move rays forward
-        self.r_cluster.forward()
+        self.rays.forward()
 
         # Update distance to next surface
         # TODO: OPTIMIZE! THIS DOES NOT HAVE TO BE RUN EVERY STEP FOR EVERY RAY!!!!!!!!!!!
-        for i in range(self.r_cluster.size):
+        for i in range(len(self.rays)):
             poly = self.building.get_object(self.next_surface[i])
             if isinstance(poly, Polygon):
-                self.dist[i] = poly.distance_point_to_polygon(self.r_cluster.rays[i].position)
+                self.dist[i] = poly.distance_point_to_polygon(self.rays[i].position)
             else:
                 raise ValueError(f"Incorrect polygon type: {poly}")
 
         # print(self.dist)
 
     def _update_next_surface(self, ray_index) -> None:
-        """Update self.next_surface and self.dist for self.r_cluster.rays[ray_index]."""
+        """Update self.next_surface and self.dist for self.rays[ray_index]."""
         assert self.location is not None
         path_to_solid = self.location[ray_index]
         zname, sname = split_path(path_to_solid)
@@ -132,7 +133,7 @@ class RaySimulator(BaseSimulator):
 
         for w in s.get_walls():
             for p in w.get_polygons():
-                r = self.r_cluster.rays[ray_index]
+                r = self.rays[ray_index]
                 if p.is_point_inside_projection(r.position, r.velocity):
                     self.next_surface[ray_index] = object_path(zone=z, solid=s, wall=w, poly=p)
                     self.dist[ray_index] = p.distance_point_to_polygon(r.position)
@@ -153,12 +154,12 @@ class RaySimulator(BaseSimulator):
         for path_to_solid in adjacent_solids:
             s = self.building.get_object(path_to_solid)
             if isinstance(s, Solid):
-                if s.is_point_inside(self.r_cluster.rays[ray_index].position):
+                if s.is_point_inside(self.rays[ray_index].position):
                     self.location[ray_index] = path_to_solid
             else:
                 raise ValueError(f"Incorrect solid type: {s}")
 
-    def find_transparent_polygons(self) -> list[str]:
+    def _find_transparent_polygons(self) -> list[str]:
         """Find and return the list of transparent polygons in the building.
 
         A polygon is transparent if it separates two adjacent solids within a single zone.

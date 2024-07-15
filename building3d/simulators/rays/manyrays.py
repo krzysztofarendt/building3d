@@ -3,7 +3,7 @@ from building3d.geom.point import Point
 from .ray import Ray
 
 
-class RayCluster:
+class ManyRays:
     """Collection of `Ray` instances.
 
     This class holds a collection of rays.
@@ -12,17 +12,13 @@ class RayCluster:
     - moving forward with the simulation
     - returning geometry for plotting with `plot_objects()`
 
-    `RayCluster` doesn't know anything about surrounding objects.
+    `ManyRays` doesn't know anything about surrounding objects.
     The information about the surrounding obstacles is defined in `RaySimulator`.
     """
     def __init__(self, speed: float, time_step: float):
         self.speed = speed
         self.time_step = time_step
         self.rays = []
-
-    @property
-    def size(self) -> int:
-        return len(self.rays)
 
     def add_rays(self, source: Point, num_rays: int):
         for _ in range(num_rays):
@@ -57,3 +53,18 @@ class RayCluster:
     def get_points(self) -> list[Point]:
         """Interface to building3d.display.plot_objects.plot_objects()"""
         return [r.position for r in self.rays]
+
+    def __len__(self):
+        return len(self.rays)
+
+    def __getitem__(self, key: int) -> Ray:
+        if not isinstance(key, int):
+            raise TypeError(f"Incorrect key type: {type(key)} (should be int)")
+        return self.rays[key]
+
+    def __setitem__(self, key: int, value: Ray) -> None:
+        if not isinstance(key, int):
+            raise TypeError(f"Incorrect key type: {type(key)} (should be int)")
+        if not isinstance(value, Ray):
+            raise TypeError(f"Incorrect value type: {type(key)} (should be Ray)")
+        self.rays[key] = value
