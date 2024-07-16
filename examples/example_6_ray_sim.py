@@ -30,11 +30,10 @@ if __name__ == "__main__":
         source = Point(1, 1, 1),
         receiver = Point(3, 3, 2),
         receiver_radius = 1,
-        num_rays = 10,
+        num_rays = 500,
         speed = 343.0,
         time_step = 1e-4,
     )
-    for i in tqdm(range(300)):
-        raysim.forward()
+    raysim.simulate(500)
 
     plot_objects(building, raysim.rays)
