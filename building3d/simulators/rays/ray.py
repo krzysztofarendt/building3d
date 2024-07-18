@@ -63,6 +63,16 @@ class Ray:
 
     # TODO: REFACTOR ============================================================
     def update_distance(self):
+        """Update distance to the target surface.
+
+        This function is sped up by avoiding recalculating the distance
+        at each step. The ray moves along straight lines and the surrounding
+        geometry does not change, so we can cache the distance increments.
+
+        The actual distance calculation must take place only after:
+        - reflection
+        - passing through a transparent surface (!!!TODO!!!)
+        """
         fast_calc = False
         if self.num_steps_after_reflect > 1:
             fast_calc = True

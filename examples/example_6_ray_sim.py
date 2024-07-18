@@ -17,7 +17,6 @@ if __name__ == "__main__":
     ylim = 5
     zlim = 3
     solid_2 = box(xlim, ylim, zlim, (5, 0, 0), name="solid_2")
-
     zone = Zone("zone")
     zone.add_solid(solid_1)
     # zone.add_solid(solid_2)
@@ -30,10 +29,10 @@ if __name__ == "__main__":
         source = Point(1, 1, 1),
         receiver = Point(3, 3, 2),
         receiver_radius = 1,
-        num_rays = 1000,
+        num_rays = 5000,
         speed = 343.0,
         time_step = 1e-4,
     )
-    raysim.simulate(300)
+    raysim.simulate(100)
 
     plot_objects(building, raysim.rays)
