@@ -127,13 +127,12 @@ class Building:
                     solids_j = zones[j].get_solids()
                     for si in solids_i:
                         for sj in solids_j:
+                            path_to_si = object_path(zones[i], si)
+                            path_to_sj = object_path(zones[j], sj)
+                            if path_to_si not in adjacent:
+                                adjacent[path_to_si] = []
                             if si.is_adjacent_to_solid(sj, exact=False):
-                                path_to_si = object_path(zones[i], si)
-                                path_to_sj = object_path(zones[j], sj)
-                                if path_to_si in adjacent:
-                                    adjacent[path_to_si].append(path_to_sj)
-                                else:
-                                    adjacent[path_to_si] = [path_to_sj]
+                                adjacent[path_to_si].append(path_to_sj)
             self.adj_solids = adjacent
             return adjacent
 

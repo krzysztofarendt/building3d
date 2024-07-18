@@ -1,10 +1,7 @@
 from building3d import random_between
 from building3d.geom.point import Point
 from building3d.geom.building import Building
-from building3d.geom.solid import Solid
-from building3d.geom.polygon import Polygon
 from building3d.geom.paths.object_path import object_path
-from building3d.geom.paths.object_path import split_path
 from .ray import Ray
 
 
@@ -23,24 +20,22 @@ class ManyRays:
         self.building_adj_solids = building.find_adjacent_solids()
         self.speed = speed
         self.time_step = time_step
-        self.min_distance = speed * time_step * 1.01
         self.rays: list[Ray] = []
 
     def add_rays(self, num_rays: int):
         for _ in range(num_rays):
-            r = Ray(self.source, self.building, self.time_step)
-            r.set_speed(self.speed)
+            r = Ray(
+                position=self.source,
+                building=self.building,
+                speed=self.speed,
+                time_step=self.time_step,
+            )
             r.set_direction(
                 dx = random_between(-1, 1),  # TODO: direction within xlim possible
                 dy = random_between(-1, 1),  # TODO: direction within ylim possible
                 dz = random_between(-1, 1),  # TODO: direction within zlim possible
             )
             self.rays.append(r)
-
-    def forward(self):
-        """Run one time step forward and update the position of all rays."""
-        for r in self.rays:
-            r.forward()
 
     def init_location(self):
         """Initialize the location for all rays based on the source's position."""
@@ -53,15 +48,9 @@ class ManyRays:
                     path_to_solid = object_path(zone=z, solid=s)
                     self.set_locations(path_to_solid)
 
-    def get_locations(self) -> list[str]:
-        loc = []
-        for r in self.rays:
-            loc.append(r.get_location())
-        return loc
-
     def set_locations(self, value: str):
         for i in range(len(self.rays)):
-            self.rays[i].set_location(value)
+            self.rays[i].location = value
 
     def get_lines(self) -> tuple[list[Point], list[list[int]]]:
         """Interface to building3d.display.plot_objects.plot_objects()"""

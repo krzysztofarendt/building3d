@@ -1,7 +1,6 @@
 from collections import deque
 
 import numpy as np
-import numba
 
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
@@ -10,125 +9,89 @@ from building3d.geom.solid import Solid
 from building3d.geom.vector import length
 from building3d.geom.paths.object_path import object_path
 from building3d.geom.paths.object_path import split_path
-
-
-@numba.njit
-def reflect_ray(
-    velocity: np.ndarray,
-    surface_normal_vec: np.ndarray
-) -> np.ndarray:
-    dot = np.dot(surface_normal_vec, velocity)
-    reflected = velocity - 2 * dot * surface_normal_vec
-    return reflected
+from building3d.geom.paths import PATH_SEP
+from .find_transparent import find_transparent
+from .get_location import get_location
+from .find_target import find_target
 
 
 class Ray:
-    buffer_size: int = 500  # how many past positions to remember
+    buffer_size: int = 300  # how many past positions to remember
+    transparent_polys = None
+    min_dist = 0.0
 
-    def __init__(self, position: Point, building: Building, time_step: float):
+    def __init__(
+            self,
+            position: Point,
+            building: Building,
+            speed: float = 343.0,
+            time_step: float = 1e-4,
+    ):
         self.position = position
         self.building = building
-        self.building_adj_polygons = building.get_graph()
-        self.building_adj_solids = building.find_adjacent_solids()
+
+        if Ray.transparent_polys is None:
+            Ray.transparent_polys = find_transparent(building)
+
         self.time_step = time_step
-        self.speed = 0.0
+        self.speed = speed
         self.velocity = np.array([0.0, 0.0, 0.0])
+        Ray.min_dist = speed * time_step * 1.1
+
         self.past_positions = deque()
         for _ in range(Ray.buffer_size):
             self.past_positions.appendleft(self.position)
 
-        self._target_surface: str = ""  # Path to polygon
-        self._distance = None  # Distance to target surface
-        self._prev_distance = 0.0
-        self._distance_increment = 0.0
-        self._location: str = ""  # Path to solid
+        self.location: str = ""
+        self.target_surface: str = ""
 
-    def update_target_surface(self):
-        path_to_solid = self.get_location()
-        zname, sname = split_path(path_to_solid)
-        z = self.building.zones[zname]
-        s = z.solids[sname]
-        found = False
+        self.dist = np.inf
+        self.dist_prev = np.inf
+        self.dist_inc = 0
+        self.num_steps_after_reflect = 0
+        self.stop = False
 
-        for w in s.get_walls():
-            for p in w.get_polygons():
-                if p.is_point_inside_projection(self.position, self.velocity):
-                    self.set_target_surface(object_path(zone=z, solid=s, wall=w, poly=p))
-                    found = True
-                    break
-            if found:
-                break
+    def update_location_and_target_surface(self):
+        """Updates self.location and self.target_surface."""
+        self.location = get_location(self.position, self.location, self.building)
+        self.target_surface = find_target(
+            position = self.position,
+            velocity = self.velocity,
+            location = self.location,
+            building = self.building,
+        )
 
-        if not found:
-            # This should not happen, because all rays are initilized inside a solid
-            # and solids must be fully enclosed with polygons
-            raise RuntimeError("Some ray is not going towards any surface... (?)")
-
-    def get_target_surface(self) -> str:
-        return self._target_surface
-
-    def set_target_surface(self, value: str):
-        self._target_surface = value
-
-    def update_location(self):
-        """Update ray's location (solid name). Look only at current and adjacent solids."""
-        curr_solid = self.get_location()
-        adjacent_solids = self.building_adj_solids[curr_solid]
-        adjacent_solids += [curr_solid]
-        for path_to_solid in adjacent_solids:
-            s = self.building.get_object(path_to_solid)
-            if isinstance(s, Solid):
-                if s.is_point_inside(self.position):
-                    self.set_location(path_to_solid)
-            else:
-                raise TypeError(f"Incorrect solid type: {s}")
-
-    def get_location(self) -> str:
-        assert self._location != "", "Location uninitialized"
-        return self._location
-
-    def set_location(self, value: str):
-        self._location = value
-
+    # TODO: REFACTOR ============================================================
     def update_distance(self):
-        # TODO: Use _distance_increment to speed up
+        fast_calc = False
+        if self.num_steps_after_reflect > 1:
+            fast_calc = True
 
-        poly = self.building.get_object(self.get_target_surface())
-        if not isinstance(poly, Polygon):
-            raise TypeError(f"Incorrect polygon type: {type(poly)}")
-        self.set_distance(poly.distance_point_to_polygon(self.position))
-
-    def get_distance(self) -> None | float:
-        return self._distance
-
-    def set_distance(self, value: float):
-        if self._distance is None or value > self._distance:
-            # Bounced off a surface, new target surface assigned
-            self._prev_distance = None
-            self._distance = value
-            self._distance_increment = None
+        if fast_calc:
+            self.dist_prev = self.dist
+            self.dist += self.dist_inc
+            # NOTE: After reflection nead an edge/corner, ray may go outside building!
+            #       Currently it is taken care of in RaySimulator.forward()
         else:
-            self._prev_distance = self._distance
-            self._distance = value
-            self._distance_increment = self._distance - self._prev_distance
-        assert self._distance_increment is None or self._distance_increment <= 0, \
-            f"Ray is moving away from the target surface? (dist_inc={self._distance_increment})"
+            poly = self.building.get_object(self.target_surface)
+            assert isinstance(poly, Polygon)
+            self.dist_prev = self.dist
+            self.dist = poly.distance_point_to_polygon(self.position)
+            self.dist_inc = self.dist - self.dist_prev
 
-    def get_distance_increment(self) -> None | float:
-        return self._distance_increment
+    # TODO: ======================================================================
 
     def forward(self):
         """Run one time step forward and update the position."""
         # Update current position
         self.position += self.velocity * self.time_step
+        self.update_distance()
+        self.num_steps_after_reflect += 1
 
         # Add current position to buffer
         self.past_positions.appendleft(self.position)
         if len(self.past_positions) > Ray.buffer_size:
             _ = self.past_positions.pop()
-
-    def set_speed(self, v: float) -> None:
-        self.speed = v
 
     def set_direction(self, dx: float, dy: float, dz: float) -> None:
         assert self.speed != 0, "This check is just for debugging"  # TODO: Remove
@@ -143,4 +106,19 @@ class Ray:
         Args:
             n: surface normal vector (should have unit length)
         """
-        self.velocity = reflect_ray(self.velocity, n)
+        speed_before = length(self.velocity)
+        dot = np.dot(n, self.velocity)
+        self.velocity = self.velocity - 2 * dot * n
+        speed_after = length(self.velocity)
+        assert np.isclose(speed_before, speed_after)
+        self.num_steps_after_reflect = 0
+
+    def __str__(self):
+        s = "Ray("
+        s += f"pos={self.position}, "
+        s += f"loc={self.location}, "
+        s += f"trg={self.target_surface}, "
+        s += f"dst={self.dist:.3f}, "
+        s += f"inc={self.dist_inc:.3f}, "
+        s += f"vel={self.velocity*self.time_step})"
+        return s

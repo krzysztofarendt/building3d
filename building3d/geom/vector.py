@@ -2,7 +2,6 @@
 import logging
 
 import numpy as np
-import numba
 
 from .point import Point
 
@@ -14,7 +13,6 @@ def vector(p1: Point, p2: Point) -> np.ndarray:
     return np.array([p2.x - p1.x, p2.y - p1.y, p2.z - p1.z])
 
 
-@numba.njit
 def length(v: np.ndarray) -> float:
     return np.sqrt(v[0] ** 2 + v[1] ** 2 + v[2] ** 2)
 
@@ -29,7 +27,6 @@ def normal(p0: Point, p1: Point, p2: Point) -> np.ndarray:
     return n
 
 
-@numba.njit
 def angle(v1: np.ndarray, v2: np.ndarray) -> float:
     """Calculate angle in radians between two vectors.
     """
@@ -45,7 +42,6 @@ def angle(v1: np.ndarray, v2: np.ndarray) -> float:
     return rad
 
 
-@numba.njit
 def angle_ccw(v1: np.ndarray, v2: np.ndarray, n: np.ndarray) -> float:  # TODO: is it used anywhere?
     """Calculate counter-clockwise angle in radians between two vectors.
     """
