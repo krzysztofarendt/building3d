@@ -1,5 +1,6 @@
 """Building class"""
 from __future__ import annotations
+import logging
 
 import numpy as np
 
@@ -15,6 +16,9 @@ from building3d.geom.wall import Wall
 from building3d.geom.polygon import Polygon
 import building3d.mesh.mesh as mesh
 from building3d.config import MESH_DELTA
+
+
+logger = logging.getLogger(__name__)
 
 
 class Building:
@@ -41,9 +45,12 @@ class Building:
         self.graph = {}
         self.adj_solids = {}
 
+        logger.info(f"Building created: {self}")
+
     def add_zone(self, zone: Zone) -> None:
         """Add a Zone instance."""
         self.zones[zone.name] = zone
+        logger.info(f"Zone {zone.name} added: {self}")
 
     def get_zone_names(self) -> list[str]:
         """Get list of zone names."""
@@ -81,13 +88,13 @@ class Building:
         else:
             graph = {}
             adjacent_solids = self.find_adjacent_solids()
-            found = False
 
             # For each polygon find the adjacent polygon (there can be only 1)
             for zone in self.get_zones():
                 for solid in zone.get_solids():
                     for wall in solid.get_walls():
                         for poly in wall.get_polygons():
+                            found = False
                             poly_path = PATH_SEP.join([zone.name, solid.name, wall.name, poly.name])
                             graph[poly_path] = None
                             # Find adjacent polygon (look only at the adjacent solids)
@@ -138,6 +145,9 @@ class Building:
 
     def stitch_solids(self):
         """Find adjacent solids and stitch them."""
+
+        logger.info(f"Stitching solids in building {self}")
+
         adj_solids = self.find_adjacent_solids()
         done = []
 
@@ -229,3 +239,9 @@ class Building:
             if num_matches != len(self.zones.values()):
                 return False
             return True
+
+    def __str__(self):
+        s = f"Building(name={self.name}, "
+        s += f"zones={self.get_zone_names()}, "
+        s += f"volume={self.volume():.2f})"
+        return s

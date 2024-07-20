@@ -1,4 +1,6 @@
 """Zone class"""
+import logging
+
 import numpy as np
 
 from building3d import random_id
@@ -9,6 +11,9 @@ from building3d.geom.solid import Solid
 from building3d.geom.wall import Wall
 from building3d.geom.polygon import Polygon
 from building3d.geom.exceptions import GeometryError
+
+
+logger = logging.getLogger(__name__)
 
 
 class Zone:
@@ -34,6 +39,8 @@ class Zone:
             self.uid = random_id()
         self.solids: dict[str, Solid] = {}  # {Solid.name: Solid}
 
+        logger.info(f"Zone created: {self}")
+
     def add_solid(self, sld: Solid) -> None:
         """Add a Solid instance to the zone.
 
@@ -54,6 +61,8 @@ class Zone:
 
         # Add solid
         self.solids[sld.name] = sld
+
+        logger.info(f"Solid {sld.name} added: {self}")
 
     def get_solid_names(self) -> list[str]:
         """Get list of solid names."""
@@ -138,3 +147,9 @@ class Zone:
             if num_matches != len(self.solids.values()):
                 return False
         return True
+
+    def __str__(self):
+        s = f"Zone(name={self.name}, "
+        s += f"solids={self.get_solid_names()}, "
+        s += f"volume={self.volume():.2f})"
+        return s

@@ -1,24 +1,25 @@
 from collections import deque
+import logging
 
 import numpy as np
 
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
 from building3d.geom.building import Building
-from building3d.geom.solid import Solid
 from building3d.geom.vector import length
-from building3d.geom.paths.object_path import object_path
-from building3d.geom.paths.object_path import split_path
 from building3d.geom.paths import PATH_SEP
-from .find_transparent import find_transparent
 from .get_location import get_location
 from .find_target import find_target
+from .find_transparent import find_transparent
+
+
+logger = logging.getLogger(__name__)
 
 
 class Ray:
-    buffer_size: int = 300  # how many past positions to remember
-    transparent_polys = None
-    min_dist = 0.0
+    buffer_size: int = 500  # how many past positions to remember
+    transparent = []
+    transparent_checked = False
 
     def __init__(
             self,
@@ -30,13 +31,12 @@ class Ray:
         self.position = position
         self.building = building
 
-        if Ray.transparent_polys is None:
-            Ray.transparent_polys = find_transparent(building)
-
         self.time_step = time_step
         self.speed = speed
         self.velocity = np.array([0.0, 0.0, 0.0])
-        Ray.min_dist = speed * time_step * 1.1
+
+        if not Ray.transparent_checked:
+            Ray.transparent = find_transparent(building)
 
         self.past_positions = deque()
         for _ in range(Ray.buffer_size):
@@ -48,20 +48,48 @@ class Ray:
         self.dist = np.inf
         self.dist_prev = np.inf
         self.dist_inc = 0
-        self.num_steps_after_reflect = 0
+        self.num_steps_after_contact = 0
         self.stop = False
 
-    def update_location_and_target_surface(self):
-        """Updates self.location and self.target_surface."""
-        self.location = get_location(self.position, self.location, self.building)
-        self.target_surface = find_target(
-            position = self.position,
-            velocity = self.velocity,
-            location = self.location,
-            building = self.building,
-        )
+        logger.debug(f"Ray created: {self}")
 
-    # TODO: REFACTOR ============================================================
+    def update_location(self):
+        logger.debug(f"Update location of: {self}")
+        try:
+
+            z, s, _, _ = self.target_surface.split(PATH_SEP)
+            target_solid = z + PATH_SEP + s
+
+            assert len(target_solid) > 0
+            assert len(self.location) > 0
+
+            self.location = get_location(self.position, self.building, target_solid, self.location)
+
+        except RuntimeError as e:
+            logging.error(str(e))
+            logging.error(f"Affected ray: {self}")
+            logging.shutdown()
+            raise e
+
+        logger.debug(f"Update ray location to: {self.location}")
+
+    def update_target_surface(self):
+        logger.debug(f"Update target surface for {self}")
+        try:
+            self.target_surface = find_target(
+                position = self.position,
+                velocity = self.velocity,
+                location = self.location,
+                building = self.building,
+                transparent = Ray.transparent,
+                checked_locations = set(),
+            )
+        except RuntimeError as e:
+            logging.error(str(e))
+            logging.error(f"Affected ray: {self}")
+            logging.shutdown()
+            raise e
+
     def update_distance(self):
         """Update distance to the target surface.
 
@@ -74,7 +102,7 @@ class Ray:
         - passing through a transparent surface (!!!TODO!!!)
         """
         fast_calc = False
-        if self.num_steps_after_reflect > 1:
+        if self.num_steps_after_contact > 1:
             fast_calc = True
 
         if fast_calc:
@@ -83,20 +111,20 @@ class Ray:
             # NOTE: After reflection nead an edge/corner, ray may go outside building!
             #       Currently it is taken care of in RaySimulator.forward()
         else:
+            logger.debug(f"Accurate distance calculation for {self}")
             poly = self.building.get_object(self.target_surface)
             assert isinstance(poly, Polygon)
             self.dist_prev = self.dist
             self.dist = poly.distance_point_to_polygon(self.position)
             self.dist_inc = self.dist - self.dist_prev
-
-    # TODO: ======================================================================
+            logger.debug(f"{self.dist=}, {self.dist_prev=}, {self.dist_inc=}")
 
     def forward(self):
-        """Run one time step forward and update the position."""
+        """Run one step forward and update the position."""
         # Update current position
         self.position += self.velocity * self.time_step
         self.update_distance()
-        self.num_steps_after_reflect += 1
+        self.num_steps_after_contact += 1
 
         # Add current position to buffer
         self.past_positions.appendleft(self.position)
@@ -116,12 +144,13 @@ class Ray:
         Args:
             n: surface normal vector (should have unit length)
         """
+        logger.debug(f"Reflect: {self}")
         speed_before = length(self.velocity)
         dot = np.dot(n, self.velocity)
         self.velocity = self.velocity - 2 * dot * n
         speed_after = length(self.velocity)
         assert np.isclose(speed_before, speed_after)
-        self.num_steps_after_reflect = 0
+        self.num_steps_after_contact = 0
 
     def __str__(self):
         s = "Ray("
@@ -132,3 +161,6 @@ class Ray:
         s += f"inc={self.dist_inc:.3f}, "
         s += f"vel={self.velocity*self.time_step})"
         return s
+
+    def __repr__(self):
+        return self.__str__()

@@ -57,7 +57,7 @@ class Polygon:
         """
         if name is None:
             name = random_id()
-        logger.debug(f"Creating polygon: {name}")
+        # logger.debug(f"Creating polygon: {name}")
 
         self.name = validate_name(name)
         if uid is None:
@@ -66,7 +66,7 @@ class Polygon:
             self.uid = uid
 
         self.points: list[Point] = list(points)
-        logger.debug(f"Points added: {self.points}")
+        # logger.debug(f"Points added: {self.points}")
 
         # Verify geometry (>= 3 coplanar points)
         self._verify()
@@ -102,7 +102,7 @@ class Polygon:
         self.centroid = self._centroid()
         self.edges = self._edges()
         self.area = self._area()
-        logger.info(f"Polygon created: {self}")
+        logger.debug(f"Polygon created: {self}")
 
     def copy(self, new_name: str | None = None):
         """Return a copy of itself (with a new name).
@@ -713,14 +713,17 @@ class Polygon:
         """Checks whether a point lies on the surface of the polygon."""
 
         if not self.is_point_coplanar(p):
+            logger.debug("Not inside, because not coplanar")
             return False
 
         for triangle_indices in self.triangles:
             tri = [self.points[i] for i in triangle_indices]
 
             if is_point_inside_triangle(p, tri[0], tri[1], tri[2]):
+                logger.debug("Point is inside the polygon")
                 return True
 
+        logger.debug("Not inside, because coplanar, but outside polygon boundary")
         return False
 
     def is_point_inside_margin(self, p: Point, margin: float) -> bool:
@@ -797,6 +800,7 @@ class Polygon:
         Return:
             True if the projected point hits the surface
         """
+        logger.debug(f"Checking if {p} moving along {vec} hits {self}")
         # Get coefficients of the plane equation
         a, b, c, d = self.plane_equation_coefficients()
 
@@ -807,6 +811,7 @@ class Polygon:
             # Vector vec is colinear with the plane
             # The point lays inside this projection only if it is inside this polygon
             # logger.warning(f"Projection vector {vec} is colinear with the polygon {self.name}")
+            logger.debug(f"{vec} is colinear with the polygon's plane. Will check if its inside.")
             return self.is_point_inside(p)
         else:
             # Projection crosses the surface of the plane
@@ -814,10 +819,11 @@ class Polygon:
 
             if fwd_only and s < 0:
                 # The plane is in the other direction than the one pointed by vec
+                logger.debug("The plane is in the other direction than the one pointed by vec")
                 return False
 
-            p = p.copy()
-            p += s * vec
+            p = p + s * vec
+            logger.debug(f"Check if projected point is inside the polygon: {p} ({p.x}, {p.y}, {p.z})")
             is_inside = self.is_point_inside(p)
             return is_inside
 

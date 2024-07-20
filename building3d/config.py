@@ -2,7 +2,7 @@ import logging
 
 # Log file
 LOG_FILE: str = "building3d.log"
-LOG_LEVEL = logging.DEBUG
+LOG_LEVEL = logging.INFO
 
 # GEOMETRY ====================================================================
 # General epsilon - used to avoid zero division etc.
@@ -10,13 +10,13 @@ LOG_LEVEL = logging.DEBUG
 EPSILON: float = 1e-9
 
 # Geometry absolute tolerance used for comparison operations
-GEOM_ATOL: float = 1e-10  # TODO: 1e-10 needed for teapot :)
+GEOM_ATOL: float = 1e-10  # At least 1e-10 needed for teapot :)
 
-# Geometry relative tolerance (0.25%)
-GEOM_RTOL: float = 0.0025
+# Geometry relative tolerance (0.1%)
+GEOM_RTOL: float = 0.001
 
 # Number of decimal digits for point coordinates used in hash
-POINT_NUM_DEC: int = 6
+POINT_NUM_DEC: int = 8
 
 # MESH ========================================================================
 # Mesh joggle - max distance to move vertices around
