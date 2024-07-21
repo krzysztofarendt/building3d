@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class Ray:
-    buffer_size: int = 500  # how many past positions to remember
+    buffer_size: int = 25  # how many past positions to remember
     transparent = []
     transparent_checked = False
 

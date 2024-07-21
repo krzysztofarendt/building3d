@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 import pyvista as pv
 
@@ -83,5 +84,8 @@ def plot_objects(objects: tuple, output_file = None) -> None:
         pl.show()
         logger.info(f"Image displayed")
     else:
+        parent_dir = Path(output_file).parent
+        if not parent_dir.exists():
+            parent_dir.mkdir(parents=True)
         pl.show(screenshot=output_file)
         logger.info(f"Image saved to {output_file}")

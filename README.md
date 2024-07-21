@@ -91,6 +91,7 @@ Validation:
 - https://www.comsol.com/blogs/validating-an-acoustic-ray-tracing-simulation-of-a-chamber-music-hall
 
 Other cool projects:
+- https://github.com/LCAV/pyroomacoustics
 - https://gitlab.com/drj11/pypng
 - https://glumpy.github.io/index.html
 - https://vispy.org/
