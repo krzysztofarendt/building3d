@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 import numpy as np
 from tqdm import tqdm
@@ -9,6 +10,7 @@ from building3d.geom.point import Point
 from building3d.simulators.basesimulator import BaseSimulator
 from building3d.simulators.rays.manyrays import ManyRays
 from .find_transparent import find_transparent
+from .raymovie import RayMovie
 
 
 logger = logging.getLogger(__name__)
@@ -33,6 +35,7 @@ class RaySimulator(BaseSimulator):
         num_rays: int = 1000,
         speed: float = 343.0,
         time_step: float = 1e-4,
+        movie_file: None | str = None,
     ):
         logger.info("RaySimulator initialization...")
 
@@ -71,6 +74,14 @@ class RaySimulator(BaseSimulator):
         #   should be stored here or in Wall
         # - Decide if subpolygons are of any use here
         ...
+
+        if movie_file is not None:
+            parent_dir = Path(movie_file).parent
+            if not parent_dir.exists():
+                parent_dir.mkdir(parents=True)
+            self.movie = RayMovie(filename=movie_file, building=building, rays=self.rays)
+        else:
+            self.movie = None
 
     def forward(self):
         logger.info(f"Processing time step {self.num_step}")
@@ -128,6 +139,9 @@ class RaySimulator(BaseSimulator):
 
         self.num_step += 1
 
+        if self.movie is not None:
+            self.movie.update()
+
     def simulate(self, steps: int):
         logger.info("Starting the simulation")
         print("Simulation...")
@@ -136,6 +150,9 @@ class RaySimulator(BaseSimulator):
 
         logger.info("Simulation finished")
         print("Simulation finished")
+
+        if self.movie is not None:
+            self.movie.save()
 
     def is_finished(self):  # TODO: Needed?
         return False

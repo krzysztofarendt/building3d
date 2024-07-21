@@ -21,6 +21,7 @@ dependencies = [
     # Visualization
     "matplotlib",
     "pyvista[all,trame]",
+    "imageio[ffmpeg]",
     "jupyterlab",
     "ipywidgets",
 ]
