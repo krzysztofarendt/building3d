@@ -7,6 +7,7 @@ from tqdm import tqdm
 from building3d.geom.building import Building
 from building3d.geom.polygon import Polygon
 from building3d.geom.point import Point
+from building3d.geom.paths.object_path import object_path
 from building3d.simulators.basesimulator import BaseSimulator
 from building3d.simulators.rays.manyrays import ManyRays
 from .find_transparent import find_transparent
@@ -60,7 +61,6 @@ class RaySimulator(BaseSimulator):
             speed=speed,
             time_step=time_step,
         )
-        self.rays.set_omnidirectional_source()
         self.lag = np.zeros(len(self.rays), dtype=np.uint8)
 
         print("Finding target surface for each ray...")

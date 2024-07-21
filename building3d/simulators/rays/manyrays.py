@@ -5,6 +5,7 @@ from building3d.geom.point import Point
 from building3d.geom.building import Building
 from building3d.geom.paths.object_path import object_path
 from .ray import Ray
+from .get_location import get_location
 
 
 logger = logging.getLogger(__name__)
@@ -24,50 +25,25 @@ class ManyRays:
 
         self.num_rays = num_rays
         self.source = source
-        self.building = building
-        self.building_adj_polygons = building.get_graph()
-        self.building_adj_solids = building.find_adjacent_solids()
-        self.speed = speed
-        self.time_step = time_step
         self.rays: list[Ray] = []
 
-    def set_omnidirectional_source(self):
-        logger.debug("Set omnidirectional source")
+        init_loc = get_location(p=source, building=building)
 
-        for _ in range(self.num_rays):
+        # Set omnidirectional source
+        for _ in range(num_rays):
             r = Ray(
-                position=self.source,
-                building=self.building,
-                speed=self.speed,
-                time_step=self.time_step,
+                position=source,
+                building=building,
+                speed=speed,
+                time_step=time_step,
             )
+            r.location = init_loc
             r.set_direction(
                 dx = random_between(-1, 1),  # TODO: direction within xlim possible
                 dy = random_between(-1, 1),  # TODO: direction within ylim possible
                 dz = random_between(-1, 1),  # TODO: direction within zlim possible
             )
             self.rays.append(r)
-        logger.debug(f"Number of generated rays = {len(self.rays)}")
-        self._init_location()
-
-    def _init_location(self):
-        """Initialize the location (path to solid) for all rays based on the source position.
-
-        This function is used to avoid costly finding of the source solid at the beginning
-        of a simulation. Since the initial source position is known for all rays,
-        it does not have to be calculated for each ray separately.
-        """
-        logger.debug("Initialize location for all rays")
-
-        if self.source is None:
-            raise TypeError("Source is uninitialized?")
-        path_to_solid = ""
-        for z in self.building.get_zones():
-            for s in z.get_solids():
-                if s.is_point_inside(self.source):
-                    path_to_solid = object_path(zone=z, solid=s)
-                    for i in range(len(self.rays)):
-                        self.rays[i].location = path_to_solid
 
     def get_lines(self) -> tuple[list[Point], list[list[int]]]:
         """Interface to building3d.display.plot_objects.plot_objects()"""

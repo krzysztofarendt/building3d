@@ -5,7 +5,6 @@ from building3d.geom.point import Point
 from building3d.geom.building import Building
 from building3d.geom.zone import Zone
 from building3d.geom.predefined.solids.box import box
-from building3d.geom.paths import PATH_SEP
 
 
 @pytest.fixture
@@ -34,7 +33,6 @@ def test_manyrays_init_location_single_solid(single_solid_building):
     num_rays = 10
     source = Point(0.5, 0.5, 0.5)
     rays = ManyRays(num_rays, source, single_solid_building)
-    rays.set_omnidirectional_source()
     assert len(rays) == num_rays
     for i in range(num_rays):
         assert rays[i].location == "zone/solid"
@@ -44,7 +42,6 @@ def test_manyrays_init_location_double_solid(double_solid_building):
     num_rays = 10
     source = Point(0.5, 0.5, 0.5)
     rays = ManyRays(num_rays, source, double_solid_building)
-    rays.set_omnidirectional_source()
     assert len(rays) == num_rays
     for i in range(num_rays):
         assert rays[i].location == "zone/solid-1"
@@ -52,7 +49,6 @@ def test_manyrays_init_location_double_solid(double_solid_building):
     num_rays = 10
     source = Point(1.5, 0.5, 0.5)
     rays = ManyRays(num_rays, source, double_solid_building)
-    rays.set_omnidirectional_source()
     assert len(rays) == num_rays
     for i in range(num_rays):
         assert rays[i].location == "zone/solid-2"
