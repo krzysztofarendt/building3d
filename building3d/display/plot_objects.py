@@ -1,3 +1,5 @@
+import logging
+
 import pyvista as pv
 
 from building3d.geom.cloud import points_to_array
@@ -5,15 +7,38 @@ from building3d.geom.point import Point
 from building3d.display.colors import random_rgb_color
 
 
-def plot_objects(*objects):
+logger = logging.getLogger(__name__)
+
+
+def plot_objects(objects: tuple, output_file = None) -> None:
     """Plot multiple objects (like Building, Zone, Solid, Wall, RayCluster).
 
     The object must have at least one of the following methods:
-    - get_mesh(children) - returning points and faces (children=True if include subpolygons)
-    - get_lines() - returning points and lines
-    - get_points() - returning points
+    - get_mesh(children) - returning points and faces -> tuple[list[Point], list[list[int]]]]
+    - get_lines() - returning points and lines -> tuple[list[Point], list[list[int]]]]
+    - get_points() - returning points -> list[Point]
+
+    If you want to include subpolygons in the mesh, get_mesh() must be called with children=True.
+
+    Args:
+        objects: objects to plot, described above
+        output_file: string with the path to output image, if None will show interactive plot
+
+    Return:
+        None
+
+    Raises:
+        ValueError: if len(objects) == 0
     """
-    pl = pv.Plotter()
+    logger.info(f"Start plotting {[str(obj) for obj in objects]}")
+
+    if len(objects) == 0:
+        raise ValueError("Nothing to plot. No objects passed.")
+
+    if output_file is None:
+        pl = pv.Plotter()
+    else:
+        pl = pv.Plotter(off_screen=True)
 
     for obj in objects:
 
@@ -54,4 +79,9 @@ def plot_objects(*objects):
             mesh = pv.PolyData(varr)
             pl.add_mesh(mesh, opacity=0.9, point_size=5, color=col)
 
-    pl.show()
+    if output_file is None:
+        pl.show()
+        logger.info(f"Image displayed")
+    else:
+        pl.show(screenshot=output_file)
+        logger.info(f"Image saved to {output_file}")

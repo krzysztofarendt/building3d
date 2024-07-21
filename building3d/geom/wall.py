@@ -168,7 +168,7 @@ class Wall:
         return True
 
     def __str__(self):
-        return f"Wall(name={self.name}, polygons={self.polygons})"
+        return f"Wall(name={self.name}, polygons={self.polygons}, id={hex(id(self))})"
 
     def __repr__(self):
         return self.__str__()

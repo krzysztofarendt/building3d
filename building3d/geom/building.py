@@ -243,5 +243,6 @@ class Building:
     def __str__(self):
         s = f"Building(name={self.name}, "
         s += f"zones={self.get_zone_names()}, "
-        s += f"volume={self.volume():.2f})"
+        s += f"volume={self.volume():.2f}, "
+        s += f"id={hex(id(self))})"
         return s

@@ -25,7 +25,7 @@ if __name__ == "__main__":
     zlim = H
     solid_3 = box(xlim, ylim, zlim, (L * 2, 0, 0), name="solid_3")
     xlim = L
-    ylim = W
+    ylim = 3 * W
     zlim = H
     solid_4 = box(xlim, ylim, zlim, (L, W, 0), name="solid_4")
     zone = Zone("zone")
@@ -37,8 +37,6 @@ if __name__ == "__main__":
     building = Building(name="building")
     building.add_zone(zone)
 
-    plot_objects(building)
-
     raysim = RaySimulator(
         building = building,
         source = Point(1, 1, 1),
@@ -48,4 +46,4 @@ if __name__ == "__main__":
     )
     raysim.simulate(500)
 
-    plot_objects(building, raysim.rays)
+    plot_objects((building, raysim.rays), output_file="ray_example.png")

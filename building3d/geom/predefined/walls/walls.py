@@ -186,4 +186,4 @@ if __name__ == "__main__":
         rot_angle=-np.pi / 4.0,
     )
 
-    plot_objects(w1, w2, w3)
+    plot_objects((w1, w2, w3))

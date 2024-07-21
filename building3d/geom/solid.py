@@ -279,7 +279,7 @@ class Solid:
             raise errors[0]
 
     def __str__(self):
-        return f"Solid({self.name=}, {self.walls=})"
+        return f"Solid({self.name=}, {self.walls=}, id={hex(id(self))})"
 
     def __eq__(self, other):
         """Return True if all walls of this and other are equal."""

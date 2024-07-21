@@ -101,3 +101,7 @@ class ManyRays:
         if not isinstance(value, Ray):
             raise TypeError(f"Incorrect value type: {type(key)} (should be Ray)")
         self.rays[key] = value
+
+    def __str__(self):
+        s = f"ManyRays(num_rays={self.num_rays}, source={self.source}, id={hex(id(self))})"
+        return s

@@ -713,17 +713,14 @@ class Polygon:
         """Checks whether a point lies on the surface of the polygon."""
 
         if not self.is_point_coplanar(p):
-            logger.debug("Not inside, because not coplanar")
             return False
 
         for triangle_indices in self.triangles:
             tri = [self.points[i] for i in triangle_indices]
 
             if is_point_inside_triangle(p, tri[0], tri[1], tri[2]):
-                logger.debug("Point is inside the polygon")
                 return True
 
-        logger.debug("Not inside, because coplanar, but outside polygon boundary")
         return False
 
     def is_point_inside_margin(self, p: Point, margin: float) -> bool:
@@ -1012,7 +1009,7 @@ class Polygon:
         return ctr
 
     def __str__(self):
-        return f"Polygon(name={self.name}, points={[p for p in self.points]})"
+        return f"Polygon(name={self.name}, points={[p for p in self.points]}, id={hex(id(self))})"
 
     def __repr__(self):
         return self.__str__()

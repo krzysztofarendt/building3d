@@ -159,7 +159,8 @@ class Ray:
         s += f"trg={self.target_surface}, "
         s += f"dst={self.dist:.3f}, "
         s += f"inc={self.dist_inc:.3f}, "
-        s += f"vel={self.velocity*self.time_step})"
+        s += f"vel={self.velocity*self.time_step}, "
+        s += f"id={hex(id(self))}"
         return s
 
     def __repr__(self):

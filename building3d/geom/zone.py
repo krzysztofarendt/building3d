@@ -151,5 +151,6 @@ class Zone:
     def __str__(self):
         s = f"Zone(name={self.name}, "
         s += f"solids={self.get_solid_names()}, "
-        s += f"volume={self.volume():.2f})"
+        s += f"volume={self.volume():.2f}, "
+        s += f"id={hex(id(self))})"
         return s
