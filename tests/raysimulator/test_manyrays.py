@@ -1,7 +1,5 @@
-import numpy as np
 import pytest
 
-from building3d.simulators.rays.find_target import find_target
 from building3d.simulators.rays.manyrays import ManyRays
 from building3d.geom.point import Point
 from building3d.geom.building import Building
@@ -18,6 +16,7 @@ def single_solid_building():
     bdg = Building()
     bdg.add_zone(zone)
     return bdg
+
 
 @pytest.fixture
 def double_solid_building():

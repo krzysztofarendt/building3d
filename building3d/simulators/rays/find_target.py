@@ -23,12 +23,12 @@ def find_target(
     """Find target surface for a moving particle in a building.
 
     This is a recursive function. If the target surface is in
-    the `transparent` list, it checks the adjacent solid recursively.
+    the `transparent` list, it checks the adjacent solids recursively.
 
     Args:
         position: particle poisition
         velocity: particle velocity
-        location: particle location (path to solid)
+        location: location to search (path to solid)
         building: building containing the solid
         transparent: list of transparent polygons (paths to polygons)
         checked_locations: set of solids that were already checked
@@ -44,9 +44,6 @@ def find_target(
     z = building.zones[zname]
     s = z.solids[sname]
     logger.debug(f"{location=}")
-
-    if not s.is_point_inside(position):
-        raise RuntimeError(f"Position {position} is outside the declared solid ({location})")
 
     for w in s.get_walls():
         for p in w.get_polygons():
