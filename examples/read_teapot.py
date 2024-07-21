@@ -9,4 +9,4 @@ from building3d.io.stl import read_stl
 
 if __name__ == "__main__":
     teapot = read_stl("resources/utah_teapot.stl")
-    plot_objects(teapot)
+    plot_objects((teapot, ))

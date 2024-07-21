@@ -18,4 +18,5 @@ if __name__ == "__main__":
         height = 1,
         translate = (0, 0, 2),
     )
-    plot_objects(room, *part_1, *part_2, *part_3)
+    objects = [room] + part_1 + part_2 + part_3
+    plot_objects(tuple(objects))

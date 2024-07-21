@@ -32,11 +32,11 @@ if __name__ == "__main__":
     building.add_zone(zone)
 
     # Plot model before stitching solids
-    plot_objects(building)
+    plot_objects((building, ))
 
     # Stitch and plot again
     building.stitch_solids()
-    plot_objects(building)
+    plot_objects((building, ))
 
     # Plot again, but use random color for each solid
-    plot_objects(*zone.get_solids())
+    plot_objects(tuple(zone.get_solids()))

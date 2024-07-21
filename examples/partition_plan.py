@@ -9,4 +9,4 @@ if __name__ == "__main__":
         translate = (0.0, 0.0, 0.0),
         rot_angle = 0.0,
     )
-    plot_objects(*walls)
+    plot_objects(tuple(walls))

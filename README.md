@@ -87,6 +87,9 @@ make example_4
 - [ ] Finite/Control Volume Method for energy simulation
 - [ ] Export mesh to VTK format to enable convertions with meshio: https://vtk.org/wp-content/uploads/2015/04/file-formats.pdf
 
+Validation:
+- https://www.comsol.com/blogs/validating-an-acoustic-ray-tracing-simulation-of-a-chamber-music-hall
+
 Other cool projects:
 - https://gitlab.com/drj11/pypng
 - https://glumpy.github.io/index.html

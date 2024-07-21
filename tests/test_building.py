@@ -215,6 +215,51 @@ def test_building_stitch_solids():
     assert new_number_of_polys > original_number_of_polys
 
 
+def test_building_get_graph_1_solid():
+    xlim = 5
+    ylim = 5
+    zlim = 3
+    solid_1 = box(xlim, ylim, zlim, name="solid_1")
+
+    zone = Zone("zone")
+    zone.add_solid(solid_1)
+
+    building = Building(name="building")
+    building.add_zone(zone)
+
+    g = building.get_graph()
+    num_adj = sum([1 for v in g.values() if v is not None])
+    assert num_adj == 0
+
+
+def test_building_get_graph_3_solid():
+    xlim = 5
+    ylim = 5
+    zlim = 3
+    solid_1 = box(xlim, ylim, zlim, name="solid_1")
+    xlim = 5
+    ylim = 5
+    zlim = 3
+    solid_2 = box(xlim, ylim, zlim, (5, 0, 0), name="solid_2")
+    xlim = 5
+    ylim = 5
+    zlim = 3
+    solid_3 = box(xlim, ylim, zlim, (5, 5, 0), name="solid_3")
+
+    zone = Zone("zone")
+    zone.add_solid(solid_1)
+    zone.add_solid(solid_2)
+    zone.add_solid(solid_3)
+
+    building = Building(name="building")
+    building.add_zone(zone)
+
+    g = building.get_graph()
+    num_adj = sum([1 for v in g.values() if v is not None])
+    assert num_adj == 4  # 2 shared surfaces, 1 polygon from each side -> 2 * 2 = 4
+
+
 if __name__ == "__main__":
-    test_building_mesh_adjacent(show=True)
-    test_building_mesh_disjoint(show=True)
+    # test_building_mesh_adjacent(show=True)
+    # test_building_mesh_disjoint(show=True)
+    test_building_get_graph_3_solid()
