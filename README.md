@@ -4,9 +4,9 @@
 # building3d
 
 I'm not sure where this project is heading, so there is not documentation yet, but it looks as follows:
-![building3d_temp_logo](https://github.com/krzysztofarendt/building3d/assets/16005748/6cc84976-792a-44f2-aaef-bb6297ab9ec8)
-![building3d_2024_07_14_ray_reflections_more](https://github.com/user-attachments/assets/af211812-f4d6-419a-9071-da6dfc636fb1)
-![building3d_2024_07_08_ray_tracing_before_reflections_added](https://github.com/user-attachments/assets/2fc818d1-5035-47f8-8cc1-0437bf96cf38)
+<video src='https://github.com/user-attachments/assets/792f6ec1-d5db-44da-820f-9eb4a1fd0ba4'>
+
+
 
 # Assumptions
 
