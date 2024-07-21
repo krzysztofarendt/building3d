@@ -45,6 +45,9 @@ def find_target(
     s = z.solids[sname]
     logger.debug(f"{location=}")
 
+    if not s.is_point_inside(position):
+        raise RuntimeError(f"Position {position} is outside the declared solid ({location})")
+
     for w in s.get_walls():
         for p in w.get_polygons():
             logger.debug(f"Checking {p=}")
