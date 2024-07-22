@@ -81,7 +81,7 @@ class RaySimulator(BaseSimulator):
         for i in range(len(self.rays)):
             self.rays[i].location = init_loc
 
-    def forward(self):
+    def forward(self):  # TODO: Move this logic to Ray.forward()
         logger.info(f"Processing time step {self.num_step}")
 
         # If distance below threshold, reflect (change direction)
@@ -96,8 +96,6 @@ class RaySimulator(BaseSimulator):
                 self.rays[i].update_target_surface()
                 self.rays[i].update_distance()
 
-            d = self.rays[i].dist
-
             # Schedule at least 1 step forward
             self.lag[i] = 1
 
@@ -105,8 +103,10 @@ class RaySimulator(BaseSimulator):
             # (there may be additional lag when the ray is reflected near a corner
             #  and can't immediately move, because it would go outside the building)
             while self.lag[i] > 0:
-                if d <= self.min_distance:
-                    logger.debug(f"Ray {i} needs to be reflected: {self.rays[i]}")
+                if self.rays[i].dist <= self.min_distance:
+                    logger.info(
+                        f"Ray {i} needs to be reflected: {self.rays[i]}"
+                    )
 
                     target_surface_name = self.rays[i].target_surface
                     assert target_surface_name not in self.transparent_surfs
@@ -121,9 +121,8 @@ class RaySimulator(BaseSimulator):
 
                     # Check if can move forward
                     # (don't if there is a risk of landing on the other side of the surface)
-                    d = self.rays[i].dist
-                    if d <= self.min_distance:
-                        logger.debug(f"Ray {i} too close the surface to move forward: {self.rays[i]}")
+                    if self.rays[i].dist <= self.min_distance:
+                        logger.info(f"Ray {i} too close the surface to move forward: {self.rays[i]}")
 
                         # Remember that this ray is 1 step behind due to corner reflection.
                         # This lag will have to be reduced by moving forward multiple times.

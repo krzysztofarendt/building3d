@@ -25,7 +25,7 @@ if __name__ == "__main__":
     zlim = H
     solid_3 = box(xlim, ylim, zlim, (L * 2, 0, 0), name="solid_3")
     xlim = L
-    ylim = 3 * W
+    ylim = W
     zlim = H
     solid_4 = box(xlim, ylim, zlim, (L, W, 0), name="solid_4")
     zone = Zone("zone")
@@ -42,9 +42,9 @@ if __name__ == "__main__":
         source = Point(1, 1, 1),
         receiver = Point(3, 3, 2),
         receiver_radius = 1,
-        num_rays = 50000,
+        num_rays = 30000,
         movie_file = "tmp/ray_simulation.mp4",  # .gif or .mp4
     )
-    raysim.simulate(350)
+    raysim.simulate(300)
 
     plot_objects((building, raysim.rays), output_file="tmp/ray_simulation_last_state.png")

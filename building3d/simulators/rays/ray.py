@@ -69,6 +69,7 @@ class Ray:
         except RuntimeError as e:
             logging.error(str(e))
             logging.error(f"Affected ray: {self}")
+            logging.info(f"Past ray positions: {self.past_positions}")
             logging.shutdown()
             raise e
 
@@ -153,13 +154,14 @@ class Ray:
 
     def __str__(self):
         s = "Ray("
+        s += f"id={hex(id(self))}, "
         s += f"pos={self.position}, "
         s += f"loc={self.location}, "
         s += f"trg={self.target_surface}, "
         s += f"dst={self.dist:.3f}, "
         s += f"inc={self.dist_inc:.3f}, "
-        s += f"vel={self.velocity*Ray.time_step}, "
-        s += f"id={hex(id(self))}"
+        s += f"vel={self.velocity*Ray.time_step}"
+        s += "}"
         return s
 
     def __repr__(self):
