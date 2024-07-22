@@ -12,6 +12,7 @@ from building3d.simulators.basesimulator import BaseSimulator
 from building3d.simulators.rays.manyrays import ManyRays
 from .find_transparent import find_transparent
 from .raymovie import RayMovie
+from .get_location import get_location
 
 
 logger = logging.getLogger(__name__)
@@ -58,16 +59,8 @@ class RaySimulator(BaseSimulator):
             num_rays=num_rays,
             building=building,
             source=source,
-            speed=speed,
-            time_step=time_step,
         )
         self.lag = np.zeros(len(self.rays), dtype=np.uint8)
-
-        print("Finding target surface for each ray...")
-        for i in tqdm(range(len(self.rays))):
-            logger.debug("=====================================================")
-            logger.debug(f"Updating target surface for ray {i} ({self.rays[i]})")
-            self.rays[i].update_target_surface()
 
         # TODO:
         # - Decide if properties (transparency, absorption, scattering)
@@ -83,15 +76,24 @@ class RaySimulator(BaseSimulator):
         else:
             self.movie = None
 
+    def set_initial_location(self):
+        init_loc = get_location(self.source, self.building)
+        for i in range(len(self.rays)):
+            self.rays[i].location = init_loc
+
     def forward(self):
         logger.info(f"Processing time step {self.num_step}")
 
         # If distance below threshold, reflect (change direction)
         max_allowed_lags = 10
 
+        if self.num_step == 0:
+            self.set_initial_location()
+
         for i in range(len(self.rays)):
             logger.debug(f"Process ray {i}: {self.rays[i]}")
             if self.num_step == 0:
+                self.rays[i].update_target_surface()
                 self.rays[i].update_distance()
 
             d = self.rays[i].dist
@@ -106,7 +108,6 @@ class RaySimulator(BaseSimulator):
                 if d <= self.min_distance:
                     logger.debug(f"Ray {i} needs to be reflected: {self.rays[i]}")
 
-                    # Reflection or move through transparent surface?
                     target_surface_name = self.rays[i].target_surface
                     assert target_surface_name not in self.transparent_surfs
 
@@ -121,7 +122,7 @@ class RaySimulator(BaseSimulator):
                     # Check if can move forward
                     # (don't if there is a risk of landing on the other side of the surface)
                     d = self.rays[i].dist
-                    if d < self.min_distance:
+                    if d <= self.min_distance:
                         logger.debug(f"Ray {i} too close the surface to move forward: {self.rays[i]}")
 
                         # Remember that this ray is 1 step behind due to corner reflection.
@@ -135,6 +136,7 @@ class RaySimulator(BaseSimulator):
                 # Move rays forward
                 logger.debug(f"Moving ray {i} forward")
                 self.rays[i].forward()
+                self.rays[i].update_distance()
                 self.lag[i] -= 1
 
         self.num_step += 1
@@ -144,7 +146,7 @@ class RaySimulator(BaseSimulator):
 
     def simulate(self, steps: int):
         logger.info("Starting the simulation")
-        print("Simulation...")
+        print("Simulation started")
         for _ in tqdm(range(steps)):
             self.forward()
 

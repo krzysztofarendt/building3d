@@ -35,7 +35,7 @@ class RayMovie:
         varr = points_to_array(verts)
         self.point_mesh = pv.PolyData(varr)
         red = [1.0, 0.0, 0.0]
-        self.plotter.add_mesh(self.point_mesh, opacity=0.9, point_size=5, color=red)
+        self.plotter.add_mesh(self.point_mesh, opacity=0.5, point_size=3, color=red)
 
         # Trailing lines
         line_verts, lines = self.rays.get_lines()
@@ -45,7 +45,7 @@ class RayMovie:
             larr.extend([len(l)])
             larr.extend(l)
         self.line_mesh = pv.PolyData(line_varr, lines=larr)
-        self.plotter.add_mesh(self.line_mesh, opacity=0.5, color=red)
+        self.plotter.add_mesh(self.line_mesh, opacity=0.25, color=red)
 
         # Start movie
         fps = 30

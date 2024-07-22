@@ -3,7 +3,6 @@ import logging
 from building3d import random_between
 from building3d.geom.point import Point
 from building3d.geom.building import Building
-from building3d.geom.paths.object_path import object_path
 from .ray import Ray
 from .get_location import get_location
 
@@ -12,14 +11,15 @@ logger = logging.getLogger(__name__)
 
 
 class ManyRays:
-    """Collection of `Ray` instances located in a `Building`."""
+    """Collection of `Ray` instances located in a `Building`.
+
+    Initializes rays and sets their initial location.
+    """
     def __init__(
         self,
         num_rays: int,
         source: Point,
         building: Building,
-        speed: float = 343.0,
-        time_step: float = 1e-4,
     ):
         logger.debug("ManyRays initialization")
 
@@ -34,8 +34,6 @@ class ManyRays:
             r = Ray(
                 position=source,
                 building=building,
-                speed=speed,
-                time_step=time_step,
             )
             r.location = init_loc
             r.set_direction(

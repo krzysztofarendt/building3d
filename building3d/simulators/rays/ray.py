@@ -21,18 +21,17 @@ class Ray:
     transparent = []
     transparent_checked = False
 
+    speed: float = 343.0
+    time_step: float = 1e-4
+
     def __init__(
-            self,
-            position: Point,
-            building: Building,
-            speed: float = 343.0,
-            time_step: float = 1e-4,
+        self,
+        position: Point,
+        building: Building,
     ):
         self.position = position
         self.building = building
 
-        self.time_step = time_step
-        self.speed = speed
         self.velocity = np.array([0.0, 0.0, 0.0])
 
         if not Ray.transparent_checked:
@@ -56,14 +55,16 @@ class Ray:
     def update_location(self):
         logger.debug(f"Update location of: {self}")
         try:
-
-            z, s, _, _ = self.target_surface.split(PATH_SEP)
-            target_solid = z + PATH_SEP + s
-
-            assert len(target_solid) > 0
-            assert len(self.location) > 0
-
-            self.location = get_location(self.position, self.building, target_solid, self.location)
+            # If target surface and/or last known solid are known, start searching with them
+            # Otherwise search in unknown order
+            if len(self.target_surface) > 0 and len(self.location) > 0:
+                z, s, _, _ = self.target_surface.split(PATH_SEP)
+                target_solid = z + PATH_SEP + s
+                self.location = get_location(self.position, self.building, target_solid, self.location)
+            elif len(self.location) > 0:
+                self.location = get_location(self.position, self.building, self.location)
+            else:
+                self.location = get_location(self.position, self.building)
 
         except RuntimeError as e:
             logging.error(str(e))
@@ -97,9 +98,7 @@ class Ray:
         at each step. The ray moves along straight lines and the surrounding
         geometry does not change, so we can cache the distance increments.
 
-        The actual distance calculation must take place only after:
-        - reflection
-        - passing through a transparent surface (!!!TODO!!!)
+        The actual distance calculation must take place only after reflection.
         """
         fast_calc = False
         if self.num_steps_after_contact > 1:
@@ -108,7 +107,7 @@ class Ray:
         if fast_calc:
             self.dist_prev = self.dist
             self.dist += self.dist_inc
-            # NOTE: After reflection nead an edge/corner, ray may go outside building!
+            # NOTE: After reflection near an edge/corner, ray may go outside building!
             #       Currently it is taken care of in RaySimulator.forward()
         else:
             logger.debug(f"Accurate distance calculation for {self}")
@@ -121,9 +120,7 @@ class Ray:
 
     def forward(self):
         """Run one step forward and update the position."""
-        # Update current position
-        self.position += self.velocity * self.time_step
-        self.update_distance()
+        self.position += self.velocity * Ray.time_step
         self.num_steps_after_contact += 1
 
         # Add current position to buffer
@@ -132,10 +129,9 @@ class Ray:
             _ = self.past_positions.pop()
 
     def set_direction(self, dx: float, dy: float, dz: float) -> None:
-        assert self.speed != 0, "This check is just for debugging"  # TODO: Remove
         d = np.array([float(dx), float(dy), float(dz)])
         d /= length(d)
-        d *= self.speed
+        d *= Ray.speed
         self.velocity = d
 
     def reflect(self, n: np.ndarray) -> None:
@@ -146,10 +142,13 @@ class Ray:
         """
         logger.debug(f"Reflect: {self}")
         speed_before = length(self.velocity)
+
         dot = np.dot(n, self.velocity)
         self.velocity = self.velocity - 2 * dot * n
+
         speed_after = length(self.velocity)
         assert np.isclose(speed_before, speed_after)
+
         self.num_steps_after_contact = 0
 
     def __str__(self):
@@ -159,7 +158,7 @@ class Ray:
         s += f"trg={self.target_surface}, "
         s += f"dst={self.dist:.3f}, "
         s += f"inc={self.dist_inc:.3f}, "
-        s += f"vel={self.velocity*self.time_step}, "
+        s += f"vel={self.velocity*Ray.time_step}, "
         s += f"id={hex(id(self))}"
         return s
 

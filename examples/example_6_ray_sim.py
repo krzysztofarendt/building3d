@@ -42,9 +42,9 @@ if __name__ == "__main__":
         source = Point(1, 1, 1),
         receiver = Point(3, 3, 2),
         receiver_radius = 1,
-        num_rays = 300,
+        num_rays = 50000,
         movie_file = "tmp/ray_simulation.mp4",  # .gif or .mp4
     )
-    raysim.simulate(250)
+    raysim.simulate(350)
 
     plot_objects((building, raysim.rays), output_file="tmp/ray_simulation_last_state.png")
