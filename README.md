@@ -4,9 +4,7 @@
 # building3d
 
 I'm not sure where this project is heading, so there is no documentation yet, but it looks as follows:
-<video src='https://github.com/user-attachments/assets/792f6ec1-d5db-44da-820f-9eb4a1fd0ba4'>
-
-
+<video src='https://github.com/user-attachments/assets/cb29fb3d-299e-4e1e-a090-a842505a699d'>
 
 # Assumptions
 
