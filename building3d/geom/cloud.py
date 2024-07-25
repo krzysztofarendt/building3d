@@ -4,7 +4,6 @@ from building3d.geom.vector import normal
 from building3d.geom.vector import is_point_colinear
 from building3d.geom.point import Point
 from building3d.config import GEOM_ATOL
-from building3d.geom.exceptions import GeometryError
 from building3d.util.roll_back import roll_back
 
 
