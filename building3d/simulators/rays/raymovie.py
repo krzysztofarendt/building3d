@@ -9,6 +9,14 @@ from .manyrays import ManyRays
 
 
 class RayMovie:
+    ray_opacity = 0.5
+    ray_trail_opacity = 0.25
+    ray_color = [1.0, 0.0, 0.0]  # red
+    ray_point_size = 3  # default 3, looks good if many rays
+    building_opacity = 0.5
+    building_color = [0.8, 0.8, 0.8]  # gray
+    fps = 30
+
     def __init__(self, filename: str, building: Building, rays: ManyRays):
         self.rays = rays
 
@@ -26,16 +34,24 @@ class RayMovie:
         for f in bdg_faces:
             bdg_farr.extend([3, f[0], f[1], f[2]])
         bdg_mesh = pv.PolyData(bdg_varr, faces=bdg_farr)
-        gray = [0.8, 0.8, 0.8]
-        self.plotter.add_mesh(bdg_mesh, show_edges=True, opacity=0.7, color=gray)
+        self.plotter.add_mesh(
+            bdg_mesh,
+            show_edges=True,
+            opacity=RayMovie.building_opacity,
+            color=RayMovie.building_color,
+        )
 
         # Draw rays (first frame)
         # Points
         verts = self.rays.get_points()
         varr = points_to_array(verts)
         self.point_mesh = pv.PolyData(varr)
-        red = [1.0, 0.0, 0.0]
-        self.plotter.add_mesh(self.point_mesh, opacity=0.9, point_size=5, color=red)
+        self.plotter.add_mesh(
+            self.point_mesh,
+            opacity=RayMovie.ray_opacity,
+            point_size=RayMovie.ray_point_size,
+            color=RayMovie.ray_color,
+        )
 
         # Trailing lines
         line_verts, lines = self.rays.get_lines()
@@ -45,29 +61,31 @@ class RayMovie:
             larr.extend([len(l)])
             larr.extend(l)
         self.line_mesh = pv.PolyData(line_varr, lines=larr)
-        self.plotter.add_mesh(self.line_mesh, opacity=0.5, color=red)
+        self.plotter.add_mesh(
+            self.line_mesh,
+            opacity=RayMovie.ray_trail_opacity,
+            color=RayMovie.ray_color,
+        )
 
         # Start movie
-        fps = 30
-
         ext = Path(filename).suffix.lower()
         if ext == ".gif":
-            self.plotter.open_gif(filename, fps=fps)
+            self.plotter.open_gif(filename, fps=RayMovie.fps)
         elif ext == ".mp4":
-            self.plotter.open_movie(filename, framerate=fps, quality=5)
+            self.plotter.open_movie(filename, framerate=RayMovie.fps, quality=5)
         else:
             raise ValueError(f"Movie extension not supported: {ext}")
 
     def update(self):
-        # Points
+        # Update points
         verts = self.rays.get_points()
         varr = points_to_array(verts)
         self.point_mesh.points = varr
-        # Trailing lines
+        # Update trailing lines
         line_verts, _ = self.rays.get_lines()
         line_varr = points_to_array(line_verts)
         self.line_mesh.points = line_varr
-
+        # Write next frame
         self.plotter.write_frame()
 
     def save(self):

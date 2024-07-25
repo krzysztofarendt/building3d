@@ -1,16 +1,15 @@
 import logging
 from pathlib import Path
 
-import numpy as np
 from tqdm import tqdm
 
+from building3d import random_between
 from building3d.geom.building import Building
-from building3d.geom.polygon import Polygon
 from building3d.geom.point import Point
 from building3d.simulators.basesimulator import BaseSimulator
 from building3d.simulators.rays.manyrays import ManyRays
-from .find_transparent import find_transparent
 from .raymovie import RayMovie
+from .find_location import find_location
 
 
 logger = logging.getLogger(__name__)
@@ -25,6 +24,7 @@ class RaySimulator(BaseSimulator):
     - reflections
     - absorption
     - when to finish
+    - exporting simulation movie or gif
     """
     def __init__(
         self,
@@ -33,23 +33,14 @@ class RaySimulator(BaseSimulator):
         receiver: Point,
         receiver_radius: float,
         num_rays: int = 1000,
-        speed: float = 343.0,
-        time_step: float = 1e-4,
         movie_file: None | str = None,
     ):
         logger.info("RaySimulator initialization...")
 
         self.building = building
-        self.building_adj_polygons = building.get_graph()
-        self.building_adj_solids = building.find_adjacent_solids()
-        self.transparent_surfs = find_transparent(building)
-
         self.source = source
         self.receiver = receiver
         self.receiver_radius = receiver_radius
-        self.speed = speed
-        self.time_step = time_step
-        self.min_distance = speed * time_step * 1.1
 
         self.num_step = 0
 
@@ -57,17 +48,7 @@ class RaySimulator(BaseSimulator):
             num_rays=num_rays,
             building=building,
             source=source,
-            speed=speed,
-            time_step=time_step,
         )
-        self.rays.set_omnidirectional_source()
-        self.lag = np.zeros(len(self.rays), dtype=np.uint8)
-
-        print("Finding target surface for each ray...")
-        for i in tqdm(range(len(self.rays))):
-            logger.debug("=====================================================")
-            logger.debug(f"Updating target surface for ray {i} ({self.rays[i]})")
-            self.rays[i].update_target_surface()
 
         # TODO:
         # - Decide if properties (transparency, absorption, scattering)
@@ -83,68 +64,46 @@ class RaySimulator(BaseSimulator):
         else:
             self.movie = None
 
-    def forward(self):
+    def set_initial_location(self):
+        """Overwrite the initial location for all rays to speed up the first step."""
+        init_loc = find_location(self.source, self.building)
+        for i in range(len(self.rays)):
+            self.rays[i].location = init_loc
+
+    def set_initial_direction(self):
+        """Set initial, random direction to all rays."""
+        for i in range(len(self.rays)):
+            self.rays[i].set_direction(
+                dx = random_between(-1, 1),  # TODO: direction within xlim possible
+                dy = random_between(-1, 1),  # TODO: direction within ylim possible
+                dz = random_between(-1, 1),  # TODO: direction within zlim possible
+            )
+
+    def forward(self) -> None:
+        """Process next simulation step."""
         logger.info(f"Processing time step {self.num_step}")
 
-        # If distance below threshold, reflect (change direction)
-        max_allowed_lags = 10
+        if self.num_step == 0:
+            self.set_initial_location()
+            self.set_initial_direction()  # currently, omnidirectional source
 
         for i in range(len(self.rays)):
-            logger.debug(f"Process ray {i}: {self.rays[i]}")
-            if self.num_step == 0:
-                self.rays[i].update_distance()
-
-            d = self.rays[i].dist
-
-            # Schedule at least 1 step forward
-            self.lag[i] = 1
-
-            # Move forward until lag is reduced to 0
-            # (there may be additional lag when the ray is reflected near a corner
-            #  and can't immediately move, because it would go outside the building)
-            while self.lag[i] > 0:
-                if d <= self.min_distance:
-                    logger.debug(f"Ray {i} needs to be reflected: {self.rays[i]}")
-
-                    # Reflection or move through transparent surface?
-                    target_surface_name = self.rays[i].target_surface
-                    assert target_surface_name not in self.transparent_surfs
-
-                    # Reflect
-                    poly = self.building.get_object(target_surface_name)
-                    assert isinstance(poly, Polygon)
-                    self.rays[i].reflect(poly.normal)
-                    self.rays[i].update_location()
-                    self.rays[i].update_target_surface()
-                    self.rays[i].update_distance()
-
-                    # Check if can move forward
-                    # (don't if there is a risk of landing on the other side of the surface)
-                    d = self.rays[i].dist
-                    if d < self.min_distance:
-                        logger.debug(f"Ray {i} too close the surface to move forward: {self.rays[i]}")
-
-                        # Remember that this ray is 1 step behind due to corner reflection.
-                        # This lag will have to be reduced by moving forward multiple times.
-                        self.lag[i] += 1
-                        continue
-
-                    if self.lag[i] >= max_allowed_lags:
-                        raise RuntimeError("Too many reflections caused too high ray lag")
-
-                # Move rays forward
-                logger.debug(f"Moving ray {i} forward")
-                self.rays[i].forward()
-                self.lag[i] -= 1
+            logger.debug(f"Processing ray {i}: {self.rays[i]}")
+            self.rays[i].forward()
 
         self.num_step += 1
 
         if self.movie is not None:
             self.movie.update()
 
-    def simulate(self, steps: int):
+    def simulate(self, steps: int) -> None:
+        """Simulate chosen number of steps and save a movie.
+
+        Args:
+            steps: number of steps to simulate
+        """
         logger.info("Starting the simulation")
-        print("Simulation...")
+        print("Simulation started")
         for _ in tqdm(range(steps)):
             self.forward()
 

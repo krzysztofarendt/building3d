@@ -113,6 +113,7 @@ class Polygon:
         Return:
             Polygon
         """
+        logger.debug(f"Creating a copy of the polygon {self}. New name = {new_name}")
         return Polygon([Point(p.x, p.y, p.z) for p in self.points], name=new_name)
 
     def flip(self, new_name: str | None = None):

@@ -8,9 +8,9 @@ from building3d.simulators.rays.simulator import RaySimulator
 
 
 if __name__ == "__main__":
-    L = 2
-    W = 2
-    H = 2
+    L = 3
+    W = 3
+    H = 3
 
     xlim = L
     ylim = W
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     zlim = H
     solid_3 = box(xlim, ylim, zlim, (L * 2, 0, 0), name="solid_3")
     xlim = L
-    ylim = 3 * W
+    ylim = W
     zlim = H
     solid_4 = box(xlim, ylim, zlim, (L, W, 0), name="solid_4")
     zone = Zone("zone")
@@ -45,6 +45,6 @@ if __name__ == "__main__":
         num_rays = 1000,
         movie_file = "tmp/ray_simulation.mp4",  # .gif or .mp4
     )
-    raysim.simulate(250)
+    raysim.simulate(300)
 
     plot_objects((building, raysim.rays), output_file="tmp/ray_simulation_last_state.png")

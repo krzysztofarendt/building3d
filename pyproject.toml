@@ -24,6 +24,8 @@ dependencies = [
     "imageio[ffmpeg]",
     "jupyterlab",
     "ipywidgets",
+    # Other
+    "tqdm",
 ]
 version = "0.0.4"
 
