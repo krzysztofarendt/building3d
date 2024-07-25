@@ -27,6 +27,7 @@ class RaySimulator(BaseSimulator):
     - reflections
     - absorption
     - when to finish
+    - exporting simulation movie or gif
     """
     def __init__(
         self,
@@ -81,62 +82,15 @@ class RaySimulator(BaseSimulator):
         for i in range(len(self.rays)):
             self.rays[i].location = init_loc
 
-    def forward(self):  # TODO: Move this logic to Ray.forward()
+    def forward(self):
         logger.info(f"Processing time step {self.num_step}")
-
-        # If distance below threshold, reflect (change direction)
-        max_allowed_lags = 10
 
         if self.num_step == 0:
             self.set_initial_location()
 
         for i in range(len(self.rays)):
-            logger.debug(f"Process ray {i}: {self.rays[i]}")
-            if self.num_step == 0:
-                self.rays[i].update_target_surface()
-                self.rays[i].update_distance()
-
-            # Schedule at least 1 step forward
-            self.lag[i] = 1
-
-            # Move forward until lag is reduced to 0
-            # (there may be additional lag when the ray is reflected near a corner
-            #  and can't immediately move, because it would go outside the building)
-            while self.lag[i] > 0:
-                if self.rays[i].dist <= self.min_distance:
-                    logger.info(
-                        f"Ray {i} needs to be reflected: {self.rays[i]}"
-                    )
-
-                    target_surface_name = self.rays[i].target_surface
-                    assert target_surface_name not in self.transparent_surfs
-
-                    # Reflect
-                    poly = self.building.get_object(target_surface_name)
-                    assert isinstance(poly, Polygon)
-                    self.rays[i].reflect(poly.normal)
-                    self.rays[i].update_location()
-                    self.rays[i].update_target_surface()
-                    self.rays[i].update_distance()
-
-                    # Check if can move forward
-                    # (don't if there is a risk of landing on the other side of the surface)
-                    if self.rays[i].dist <= self.min_distance:
-                        logger.info(f"Ray {i} too close the surface to move forward: {self.rays[i]}")
-
-                        # Remember that this ray is 1 step behind due to corner reflection.
-                        # This lag will have to be reduced by moving forward multiple times.
-                        self.lag[i] += 1
-                        continue
-
-                    if self.lag[i] >= max_allowed_lags:
-                        raise RuntimeError("Too many reflections caused too high ray lag")
-
-                # Move rays forward
-                logger.debug(f"Moving ray {i} forward")
-                self.rays[i].forward()
-                self.rays[i].update_distance()
-                self.lag[i] -= 1
+            logger.debug(f"Processing ray {i}: {self.rays[i]}")
+            self.rays[i].forward()
 
         self.num_step += 1
 

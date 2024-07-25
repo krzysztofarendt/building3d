@@ -49,3 +49,6 @@ def test_ray_moves_closer(single_solid_building):
     ray.update_distance()
     d_new = ray.dist
     assert d_new < d_prev
+
+    # Move until it reaches the wall
+    while ray.dist > Ray.
