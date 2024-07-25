@@ -1,16 +1,12 @@
 import logging
 from pathlib import Path
 
-import numpy as np
 from tqdm import tqdm
 
 from building3d.geom.building import Building
-from building3d.geom.polygon import Polygon
 from building3d.geom.point import Point
-from building3d.geom.paths.object_path import object_path
 from building3d.simulators.basesimulator import BaseSimulator
 from building3d.simulators.rays.manyrays import ManyRays
-from .find_transparent import find_transparent
 from .raymovie import RayMovie
 from .get_location import get_location
 
@@ -36,23 +32,14 @@ class RaySimulator(BaseSimulator):
         receiver: Point,
         receiver_radius: float,
         num_rays: int = 1000,
-        speed: float = 343.0,
-        time_step: float = 1e-4,
         movie_file: None | str = None,
     ):
         logger.info("RaySimulator initialization...")
 
         self.building = building
-        self.building_adj_polygons = building.get_graph()
-        self.building_adj_solids = building.find_adjacent_solids()
-        self.transparent_surfs = find_transparent(building)
-
         self.source = source
         self.receiver = receiver
         self.receiver_radius = receiver_radius
-        self.speed = speed
-        self.time_step = time_step
-        self.min_distance = speed * time_step * 1.1
 
         self.num_step = 0
 
@@ -61,7 +48,6 @@ class RaySimulator(BaseSimulator):
             building=building,
             source=source,
         )
-        self.lag = np.zeros(len(self.rays), dtype=np.uint8)
 
         # TODO:
         # - Decide if properties (transparency, absorption, scattering)
@@ -78,11 +64,13 @@ class RaySimulator(BaseSimulator):
             self.movie = None
 
     def set_initial_location(self):
+        """Overwrite the initial location for all rays to speed up the first step."""
         init_loc = get_location(self.source, self.building)
         for i in range(len(self.rays)):
             self.rays[i].location = init_loc
 
-    def forward(self):
+    def forward(self) -> None:
+        """Process next simulation step."""
         logger.info(f"Processing time step {self.num_step}")
 
         if self.num_step == 0:
@@ -97,7 +85,12 @@ class RaySimulator(BaseSimulator):
         if self.movie is not None:
             self.movie.update()
 
-    def simulate(self, steps: int):
+    def simulate(self, steps: int) -> None:
+        """Simulate chosen number of steps and save a movie.
+
+        Args:
+            steps: number of steps to simulate
+        """
         logger.info("Starting the simulation")
         print("Simulation started")
         for _ in tqdm(range(steps)):
