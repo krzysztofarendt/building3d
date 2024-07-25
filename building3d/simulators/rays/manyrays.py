@@ -1,10 +1,8 @@
 import logging
 
-from building3d import random_between
 from building3d.geom.point import Point
 from building3d.geom.building import Building
 from .ray import Ray
-from .get_location import get_location
 
 
 logger = logging.getLogger(__name__)
@@ -12,8 +10,6 @@ logger = logging.getLogger(__name__)
 
 class ManyRays:
     """Collection of `Ray` instances located in a `Building`.
-
-    Initializes rays and sets their initial location.
     """
     def __init__(
         self,
@@ -27,20 +23,8 @@ class ManyRays:
         self.source = source
         self.rays: list[Ray] = []
 
-        init_loc = get_location(p=source, building=building)
-
-        # Set omnidirectional source
         for _ in range(num_rays):
-            r = Ray(
-                position=source,
-                building=building,
-            )
-            r.location = init_loc
-            r.set_direction(
-                dx = random_between(-1, 1),  # TODO: direction within xlim possible
-                dy = random_between(-1, 1),  # TODO: direction within ylim possible
-                dz = random_between(-1, 1),  # TODO: direction within zlim possible
-            )
+            r = Ray(position=source, building=building)
             self.rays.append(r)
 
     def get_lines(self) -> tuple[list[Point], list[list[int]]]:

@@ -9,10 +9,10 @@ from .manyrays import ManyRays
 
 
 class RayMovie:
-    ray_opacity = 0.7
-    ray_trail_opacity = 0.7
+    ray_opacity = 0.5
+    ray_trail_opacity = 0.25
     ray_color = [1.0, 0.0, 0.0]  # red
-    ray_point_size = 4  # default 3, looks good if many rays
+    ray_point_size = 3  # default 3, looks good if many rays
     building_opacity = 0.5
     building_color = [0.8, 0.8, 0.8]  # gray
     fps = 30

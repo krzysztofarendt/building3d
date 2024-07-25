@@ -8,9 +8,9 @@ from building3d.simulators.rays.simulator import RaySimulator
 
 
 if __name__ == "__main__":
-    L = 2
-    W = 2
-    H = 2
+    L = 3
+    W = 3
+    H = 3
 
     xlim = L
     ylim = W
@@ -42,7 +42,7 @@ if __name__ == "__main__":
         source = Point(1, 1, 1),
         receiver = Point(3, 3, 2),
         receiver_radius = 1,
-        num_rays = 3000,
+        num_rays = 100,
         movie_file = "tmp/ray_simulation.mp4",  # .gif or .mp4
     )
     raysim.simulate(300)

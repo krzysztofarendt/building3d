@@ -29,26 +29,26 @@ def double_solid_building():
     return bdg
 
 
-def test_manyrays_init_location_single_solid(single_solid_building):
+def test_manyrays_init_position_single_solid(single_solid_building):
     num_rays = 10
     source = Point(0.5, 0.5, 0.5)
     rays = ManyRays(num_rays, source, single_solid_building)
     assert len(rays) == num_rays
     for i in range(num_rays):
-        assert rays[i].location == "zone/solid"
+        assert rays[i].position == source
 
 
-def test_manyrays_init_location_double_solid(double_solid_building):
+def test_manyrays_init_position_double_solid(double_solid_building):
     num_rays = 10
     source = Point(0.5, 0.5, 0.5)
     rays = ManyRays(num_rays, source, double_solid_building)
     assert len(rays) == num_rays
     for i in range(num_rays):
-        assert rays[i].location == "zone/solid-1"
+        assert rays[i].position == source
 
     num_rays = 10
     source = Point(1.5, 0.5, 0.5)
     rays = ManyRays(num_rays, source, double_solid_building)
     assert len(rays) == num_rays
     for i in range(num_rays):
-        assert rays[i].location == "zone/solid-2"
+        assert rays[i].position == source

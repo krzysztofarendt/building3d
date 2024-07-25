@@ -129,6 +129,7 @@ class Ray:
         max_allowed_lags = 10
 
         if self.num_step == 0:
+            assert len(self.location) > 0, "Ray initial location not set"
             self.update_target_surface()
             self.update_distance(fast_calc=False)
 
@@ -170,7 +171,6 @@ class Ray:
 
             # Move forward
             self.position += self.velocity * Ray.time_step
-            self.num_steps_after_contact += 1
             fast_calc = True if self.num_steps_after_contact > 1 else False
             self.update_distance(fast_calc)
             lag -= 1
@@ -181,6 +181,8 @@ class Ray:
                 _ = self.past_positions.pop()
 
             self.num_step += 1
+
+        self.num_steps_after_contact += 1
 
     def set_direction(self, dx: float, dy: float, dz: float) -> None:
         d = np.array([float(dx), float(dy), float(dz)])

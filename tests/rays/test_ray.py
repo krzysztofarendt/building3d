@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 
 from building3d.simulators.rays.ray import Ray
@@ -30,25 +31,76 @@ def double_solid_building():
     return bdg
 
 
-def test_ray_moves_closer(single_solid_building):
-    position = Point(0.5, 0.5, 0.5)
-
-    # Initialize ray
-    ray = Ray(
-        position=position,
-        building=single_solid_building,
-    )
-    ray.set_direction(dx=1.0, dy=0.0, dz=0.0)
-    ray.update_location()
-    ray.update_target_surface()
-    ray.update_distance()
-
+def move_and_reflect(ray, max_room_dim):
     # Move 1 step forward and make sure the ray is closer to the target surface
     d_prev = ray.dist
     ray.forward()
-    ray.update_distance()
     d_new = ray.dist
     assert d_new < d_prev
 
-    # Move until it reaches the wall
-    while ray.dist > Ray.
+    # Move until it reaches the wall, make sure it is reflected
+    prev_velocity = ray.velocity.copy()
+    prev_position = ray.position.copy()
+    max_num_steps = max_room_dim / (Ray.speed * Ray.time_step)
+
+    step = 0
+    while True:
+        print(f"{step=}, {ray}")
+        ray.forward()
+        assert prev_position != ray.position, f"Ray not moving? ({step=})"
+
+        if not np.isclose(ray.velocity, prev_velocity).all():
+            assert ray.num_steps_after_contact == 1, \
+                f"Something's wrong with the reflection logic: {ray.num_steps_after_contact=}"
+            break
+
+        prev_position = ray.position.copy()
+        prev_velocity = ray.velocity.copy()
+
+        step += 1
+        if step > max_num_steps:
+            raise RuntimeError(f"Ray is moving for too long ({step} steps) without a reflection.")
+
+
+def test_ray_single_solid_building(single_solid_building):
+    position = Point(0.5, 0.5, 0.5)
+
+    test_directions = [
+        (1.0, 0.0, 0.0),
+        (0.0, 1.0, 0.0),
+        (0.0, 0.0, 1.0),
+        (0.9, 0.5, 0.3),
+        (1.0, 1.0, 1.0),
+        (1.0, 0.0, 1.0),
+        (1.0, 1.0, 0.0),
+        (0.0, 1.0, 1.0),
+        (-1.0, -1.0, -1.0),
+    ]
+
+    for d in test_directions:
+        ray = Ray(position=position, building=single_solid_building)
+        ray.set_direction(dx=d[0], dy=d[1], dz=d[2])
+        ray.update_location()
+        move_and_reflect(ray, max_room_dim=1)
+
+
+def test_ray_double_solid_building(double_solid_building):
+    position = Point(0.5, 0.5, 0.5)
+
+    test_directions = [
+        (1.0, 0.0, 0.0),
+        (0.0, 1.0, 0.0),
+        (0.0, 0.0, 1.0),
+        (0.9, 0.5, 0.3),
+        (1.0, 1.0, 1.0),
+        (1.0, 0.0, 1.0),
+        (1.0, 1.0, 0.0),
+        (0.0, 1.0, 1.0),
+        (-1.0, -1.0, -1.0),
+    ]
+
+    for d in test_directions:
+        ray = Ray(position=position, building=double_solid_building)
+        ray.set_direction(dx=d[0], dy=d[1], dz=d[2])
+        ray.update_location()
+        move_and_reflect(ray, max_room_dim=2)

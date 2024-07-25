@@ -3,6 +3,7 @@ from pathlib import Path
 
 from tqdm import tqdm
 
+from building3d import random_between
 from building3d.geom.building import Building
 from building3d.geom.point import Point
 from building3d.simulators.basesimulator import BaseSimulator
@@ -69,12 +70,22 @@ class RaySimulator(BaseSimulator):
         for i in range(len(self.rays)):
             self.rays[i].location = init_loc
 
+    def set_initial_direction(self):
+        """Set initial, random direction to all rays."""
+        for i in range(len(self.rays)):
+            self.rays[i].set_direction(
+                dx = random_between(-1, 1),  # TODO: direction within xlim possible
+                dy = random_between(-1, 1),  # TODO: direction within ylim possible
+                dz = random_between(-1, 1),  # TODO: direction within zlim possible
+            )
+
     def forward(self) -> None:
         """Process next simulation step."""
         logger.info(f"Processing time step {self.num_step}")
 
         if self.num_step == 0:
             self.set_initial_location()
+            self.set_initial_direction()  # currently, omnidirectional source
 
         for i in range(len(self.rays)):
             logger.debug(f"Processing ray {i}: {self.rays[i]}")
