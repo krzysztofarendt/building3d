@@ -1,10 +1,11 @@
 ![Unit tests](https://github.com/krzysztofarendt/building3d/actions/workflows/unit_tests.yml/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/krzysztofarendt/building3d/badge.svg?branch=main)](https://coveralls.io/github/krzysztofarendt/building3d?branch=main)
 
+
 # building3d
 
 I'm not sure where this project is heading, so there is no documentation yet, but it looks as follows:
-<video src='https://github.com/user-attachments/assets/cb29fb3d-299e-4e1e-a090-a842505a699d'>
+<video src='https://github.com/user-attachments/assets/65da6f8a-71f9-40d9-b9b7-f0323c1df171'>
 
 # Assumptions
 
