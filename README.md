@@ -62,10 +62,7 @@ make coverage
 
 # Examples
 ```
-make example_1
-make example_2
-make example_3
-make example_4
+make examples
 ```
 
 # Notes

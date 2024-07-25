@@ -1,4 +1,4 @@
-.PHONY: format lint lint-full test coverage count count-tests example_1 example_2 example_3 example_4 example_5 examples test_publish publish
+.PHONY: format lint lint-full test coverage count count-tests examples test_publish publish
 
 format:
 	black $(shell ls **/*.py)
@@ -21,21 +21,6 @@ count:
 
 count-tests:
 	cloc --by-file building3d/ tests/
-
-example_1:
-	python examples/example_1.py
-
-example_2:
-	python examples/example_2.py
-
-example_3:
-	python examples/example_3.py
-
-example_4:
-	python examples/example_4.py
-
-example_5:
-	python examples/example_5.py
 
 examples:
 	python examples/example_1.py
