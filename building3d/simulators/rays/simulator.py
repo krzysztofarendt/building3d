@@ -9,7 +9,7 @@ from building3d.geom.point import Point
 from building3d.simulators.basesimulator import BaseSimulator
 from building3d.simulators.rays.manyrays import ManyRays
 from .raymovie import RayMovie
-from .get_location import get_location
+from .find_location import find_location
 
 
 logger = logging.getLogger(__name__)
@@ -66,7 +66,7 @@ class RaySimulator(BaseSimulator):
 
     def set_initial_location(self):
         """Overwrite the initial location for all rays to speed up the first step."""
-        init_loc = get_location(self.source, self.building)
+        init_loc = find_location(self.source, self.building)
         for i in range(len(self.rays)):
             self.rays[i].location = init_loc
 

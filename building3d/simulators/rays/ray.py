@@ -8,7 +8,7 @@ from building3d.geom.polygon import Polygon
 from building3d.geom.building import Building
 from building3d.geom.vector import length
 from building3d.geom.paths import PATH_SEP
-from .get_location import get_location
+from .find_location import find_location
 from .find_target import find_target
 from .find_transparent import find_transparent
 
@@ -62,11 +62,11 @@ class Ray:
             if len(self.target_surface) > 0 and len(self.location) > 0:
                 z, s, _, _ = self.target_surface.split(PATH_SEP)
                 target_solid = z + PATH_SEP + s
-                self.location = get_location(self.position, self.building, target_solid, self.location)
+                self.location = find_location(self.position, self.building, target_solid, self.location)
             elif len(self.location) > 0:
-                self.location = get_location(self.position, self.building, self.location)
+                self.location = find_location(self.position, self.building, self.location)
             else:
-                self.location = get_location(self.position, self.building)
+                self.location = find_location(self.position, self.building)
 
         except RuntimeError as e:
             logging.error(str(e))

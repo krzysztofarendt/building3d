@@ -4,7 +4,7 @@ from building3d.geom.point import Point
 from building3d.geom.paths.object_path import object_path
 
 
-def get_location(p: Point, building: Building, *first_look_at: str) -> str:  # TODO: Rename to find_location
+def find_location(p: Point, building: Building, *first_look_at: str) -> str:
     """Return path to solid having the point `p`.
 
     Args:
