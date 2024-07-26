@@ -3,7 +3,7 @@
 # building3d
 
 I'm not sure where this project is heading, so there is no documentation yet, but it looks as follows:
-<video src='https://github.com/user-attachments/assets/08d31c5e-f0d0-46d7-96b4-1efdc21964f8'>
+<video src='https://github.com/user-attachments/assets/414a01c3-0274-4e7a-bf47-b1b1967a9b73'>
 
 # Assumptions
 
