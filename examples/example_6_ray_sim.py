@@ -8,9 +8,9 @@ from building3d.simulators.rays.simulator import RaySimulator
 
 
 if __name__ == "__main__":
-    L = 3
-    W = 3
-    H = 3
+    L = 4
+    W = 4
+    H = 4
 
     xlim = L
     ylim = W
@@ -58,9 +58,10 @@ if __name__ == "__main__":
         building = building,
         source = Point(1, 1, 1),
         receiver = Point(3, 3, 2),
-        receiver_radius = 1,
-        num_rays = 1000,
+        receiver_radius = 0.3,
+        num_rays = 50000,
         properties = acoustic_properties,
+        csv_file="tmp/results.csv",
         movie_file = "tmp/ray_simulation.mp4",  # .gif or .mp4
     )
     raysim.simulate(500)

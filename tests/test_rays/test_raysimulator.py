@@ -34,6 +34,10 @@ def test_ray_simulator(plot=False):
     building = Building(name="building")
     building.add_zone(zone)
 
+    csv_file = "tmp/test_result.csv"
+    if os.path.exists(csv_file):
+        os.remove(csv_file)
+
     if plot:
         movie_path = "tmp/test_ray_simulator.mp4"
     else:
@@ -45,6 +49,7 @@ def test_ray_simulator(plot=False):
         receiver = Point(0.6, 0.6, 0.6),
         receiver_radius = 0.1,
         num_rays = 50,
+        csv_file = csv_file,
         movie_file = movie_path,
     )
     locations = [r.location for r in raysim.rays]
@@ -57,6 +62,8 @@ def test_ray_simulator(plot=False):
     unique_locations = np.unique(locations)
     assert len(unique_locations) == 3, \
         "Rays not in all three solids at the end of simulation?"
+
+    assert os.path.exists(csv_file)
 
     if plot:
         assert isinstance(movie_path, str)

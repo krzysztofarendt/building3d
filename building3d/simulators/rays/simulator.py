@@ -1,15 +1,21 @@
 import logging
 from pathlib import Path
 
+import numpy as np
+import pandas as pd
 from tqdm import tqdm
 
 from building3d import random_between
 from building3d.geom.building import Building
 from building3d.geom.point import Point
+from building3d.geom.vector import length
+from building3d.geom.vector import vector
 from building3d.simulators.basesimulator import BaseSimulator
 from building3d.simulators.rays.manyrays import ManyRays
+from building3d.simulators.rays.ray import Ray
 from .raymovie import RayMovie
 from .find_location import find_location
+from .ray import Ray
 
 
 logger = logging.getLogger(__name__)
@@ -34,6 +40,7 @@ class RaySimulator(BaseSimulator):
         receiver_radius: float,
         num_rays: int,
         properties: None | dict = None,
+        csv_file: None | str = None,
         movie_file: None | str = None,
     ):
         logger.info("RaySimulator initialization...")
@@ -42,6 +49,7 @@ class RaySimulator(BaseSimulator):
         self.source = source
         self.receiver = receiver
         self.receiver_radius = receiver_radius
+        self.received_energy = np.zeros(1)  # placeholder, reinitialized in self.simulate()
 
         self.num_step = 0
 
@@ -54,6 +62,16 @@ class RaySimulator(BaseSimulator):
         self.total_energy = sum([self.rays[i].energy for i in range(len(self.rays))])
         self.num_active_rays = len(self.rays)
 
+        # Make parent dir for CSV file
+        if csv_file is not None:
+            parent_dir = Path(csv_file).parent
+            if not parent_dir.exists():
+                parent_dir.mkdir(parents=True)
+            self.csv_file = csv_file
+        else:
+            self.csv_file = None
+
+        # Make parent dir for output movie (or gif)
         if movie_file is not None:
             parent_dir = Path(movie_file).parent
             if not parent_dir.exists():
@@ -94,8 +112,15 @@ class RaySimulator(BaseSimulator):
 
         for i in range(len(self.rays)):
             logger.debug(f"Processing ray {i}: {self.rays[i]}")
+
             if self.rays[i].energy > 0:
                 self.rays[i].forward()
+
+                if RaySimulator.is_hit(self.rays[i], self.receiver, self.receiver_radius):
+                    self.received_energy[self.num_step] += self.rays[i].energy
+                    self.rays[i].energy = 0
+                    logger.debug(f"Ray hits receiver: {self.rays[i]}")
+
                 self.total_energy += self.rays[i].energy
                 self.num_active_rays += 1
 
@@ -110,6 +135,8 @@ class RaySimulator(BaseSimulator):
         Args:
             steps: number of steps to simulate
         """
+        self.received_energy = np.zeros(steps)
+
         logger.info("Starting the simulation")
         print("Simulation started")
         for _ in tqdm(range(steps)):
@@ -118,8 +145,25 @@ class RaySimulator(BaseSimulator):
         logger.info("Simulation finished")
         print("Simulation finished")
 
+        if self.csv_file is not None:
+            self.save_results()
+
         if self.movie is not None:
             self.movie.save()
+
+    def save_results(self):
+        df = pd.DataFrame(
+            index=pd.Index(np.arange(0, self.num_step) * Ray.time_step, name="time"),
+        )
+        df["received_energy"] = self.received_energy
+        df.to_csv(self.csv_file)
+
+    @staticmethod
+    def is_hit(ray: Ray, receiver: Point, radius: float) -> bool:
+        if length(vector(ray.position, receiver)) < radius:
+            return True
+        else:
+            return False
 
     def is_finished(self):  # TODO: Needed?
         return False
