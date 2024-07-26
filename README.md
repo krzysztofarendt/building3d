@@ -97,3 +97,8 @@ Other cool projects:
 - https://reuk.github.io/wayverb/
 - https://github.com/pvlib/pvlib-python/tree/main
 - https://github.com/mmatl/pyrender
+
+Commercial software:
+- https://www.treble.tech/
+- https://odeon.dk/
+- https://www.dirac.com/live/
