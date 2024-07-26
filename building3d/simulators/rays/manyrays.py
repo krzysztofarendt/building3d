@@ -16,16 +16,19 @@ class ManyRays:
         num_rays: int,
         source: Point,
         building: Building,
+        properties: None | dict = None,
     ):
         logger.debug("ManyRays initialization")
 
-        self.num_rays = num_rays
         self.source = source
         self.rays: list[Ray] = []
 
         for _ in range(num_rays):
-            r = Ray(position=source, building=building)
+            r = Ray(position=source, building=building, properties=properties)
             self.rays.append(r)
+
+    def get_energy(self) -> list[float]:
+        return [self.rays[i].energy for i in range(len(self.rays))]
 
     def get_lines(self) -> tuple[list[Point], list[list[int]]]:
         """Interface to building3d.display.plot_objects.plot_objects()"""
@@ -61,5 +64,5 @@ class ManyRays:
         self.rays[key] = value
 
     def __str__(self):
-        s = f"ManyRays(num_rays={self.num_rays}, source={self.source}, id={hex(id(self))})"
+        s = f"ManyRays(num_rays={len(self.rays)}, source={self.source}, id={hex(id(self))})"
         return s

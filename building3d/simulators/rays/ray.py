@@ -11,6 +11,7 @@ from building3d.geom.paths import PATH_SEP
 from .find_location import find_location
 from .find_target import find_target
 from .find_transparent import find_transparent
+from .get_property import get_property
 
 
 logger = logging.getLogger(__name__)
@@ -29,11 +30,18 @@ class Ray:
         self,
         position: Point,
         building: Building,
+        properties: None | dict = None,
     ):
         self.position = position
         self.building = building
 
+        if isinstance(properties, dict):
+            self.properties = properties
+        else:
+            self.properties = Ray.default_properties(building)
+
         self.velocity = np.array([0.0, 0.0, 0.0])
+        self.energy = 1.0
 
         if not Ray.transparent_checked:
             Ray.transparent = find_transparent(building)
@@ -44,6 +52,7 @@ class Ray:
 
         self.location: str = ""
         self.target_surface: str = ""
+        self.target_absorption: float = 0.0
 
         self.dist = np.inf
         self.dist_prev = np.inf
@@ -54,7 +63,24 @@ class Ray:
 
         logger.debug(f"Ray created: {self}")
 
+    @staticmethod
+    def default_properties(building: Building):
+        """Return default acoustic properties."""
+        # Default values
+        default_absorption = 0.1
+
+        # Fill in the property dict
+        default = {"absorption": {}}
+
+        for z in building.get_zone_names():
+            default["absorption"][z] = default_absorption
+
+        return default
+
     def update_location(self):
+        if self.energy <= 0:
+            return
+
         logger.debug(f"Update location of: {self}")
         try:
             # If target surface and/or last known solid are known, start searching with them
@@ -78,6 +104,9 @@ class Ray:
         logger.debug(f"Update ray location to: {self.location}")
 
     def update_target_surface(self):
+        if self.energy <= 0:
+            return
+
         logger.debug(f"Update target surface for {self}")
         try:
             self.target_surface = find_target(
@@ -87,6 +116,11 @@ class Ray:
                 building = self.building,
                 transparent = Ray.transparent,
                 checked_locations = set(),
+            )
+            self.target_absorption = get_property(
+                self.target_surface,
+                "absorption",
+                self.properties,
             )
         except RuntimeError as e:
             logging.error(str(e))
@@ -109,6 +143,9 @@ class Ray:
         Return:
             None
         """
+        if self.energy <= 0:
+            return
+
         if fast_calc:
             # This method should be called only when far enough from the target surface
             self.dist_prev = self.dist
@@ -125,6 +162,9 @@ class Ray:
 
     def forward(self) -> None:
         """Run one step forward and update the position."""
+        if self.energy <= 0:
+            return
+
         # If distance below threshold, reflect (change direction)
         max_allowed_lags = 10
 
@@ -141,7 +181,7 @@ class Ray:
         #  and can't immediately move, because it would go outside the building)
         while lag > 0:
             if self.dist <= Ray.min_distance:
-                logger.info(f"{self} needs to be reflected.")
+                logger.debug(f"Ray needs to be reflected: {self}")
 
                 assert self.target_surface not in Ray.transparent
 
@@ -149,6 +189,8 @@ class Ray:
                 poly = self.building.get_object(self.target_surface)
                 assert isinstance(poly, Polygon)
                 self.reflect(poly.normal)
+                if self.energy <= 0:
+                    break
                 self.update_location()
                 self.update_target_surface()
                 self.num_steps_after_contact = 0
@@ -157,7 +199,7 @@ class Ray:
                 # Check if can move forward in the next step
                 # (if the next target surface is not too close)
                 if self.dist <= Ray.min_distance:
-                    logger.info(
+                    logger.debug(
                         f"{self} is too close to the surface {self.target_surface} to move forward."
                     )
                     # Remember that this ray is 1 step behind due to corner reflection
@@ -205,10 +247,19 @@ class Ray:
         speed_after = length(self.velocity)
         assert np.isclose(speed_before, speed_after)
 
+        # Absorp part of the ray energy
+        self.energy -= self.target_absorption
+
+        if self.energy <= 0:
+            logger.debug(f"Ray stopped, energy=0: {self}")
+            self.velocity = np.array([0.0, 0.0, 0.0])
+            self.energy = 0.0
+
     def __str__(self):
         s = "Ray("
         s += f"id={hex(id(self))}, "
         s += f"pos={self.position}, "
+        s += f"enr={self.energy:.2f}, "
         s += f"loc={self.location}, "
         s += f"trg={self.target_surface}, "
         s += f"dst={self.dist:.3f}, "

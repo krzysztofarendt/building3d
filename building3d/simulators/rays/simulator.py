@@ -32,7 +32,8 @@ class RaySimulator(BaseSimulator):
         source: Point,
         receiver: Point,
         receiver_radius: float,
-        num_rays: int = 1000,
+        num_rays: int,
+        properties: None | dict = None,
         movie_file: None | str = None,
     ):
         logger.info("RaySimulator initialization...")
@@ -48,13 +49,10 @@ class RaySimulator(BaseSimulator):
             num_rays=num_rays,
             building=building,
             source=source,
+            properties=properties,
         )
-
-        # TODO:
-        # - Decide if properties (transparency, absorption, scattering)
-        #   should be stored here or in Wall
-        # - Decide if subpolygons are of any use here
-        ...
+        self.total_energy = sum([self.rays[i].energy for i in range(len(self.rays))])
+        self.num_active_rays = len(self.rays)
 
         if movie_file is not None:
             parent_dir = Path(movie_file).parent
@@ -81,7 +79,14 @@ class RaySimulator(BaseSimulator):
 
     def forward(self) -> None:
         """Process next simulation step."""
-        logger.info(f"Processing time step {self.num_step}")
+        logger.info(
+            f"Simulation step {self.num_step}, "
+            f"total energy = {self.total_energy:.2f}, "
+            f"active rays = {self.num_active_rays}"
+        )
+
+        self.total_energy = 0
+        self.num_active_rays = 0
 
         if self.num_step == 0:
             self.set_initial_location()
@@ -89,7 +94,10 @@ class RaySimulator(BaseSimulator):
 
         for i in range(len(self.rays)):
             logger.debug(f"Processing ray {i}: {self.rays[i]}")
-            self.rays[i].forward()
+            if self.rays[i].energy > 0:
+                self.rays[i].forward()
+                self.total_energy += self.rays[i].energy
+                self.num_active_rays += 1
 
         self.num_step += 1
 

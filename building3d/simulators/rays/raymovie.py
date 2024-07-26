@@ -11,11 +11,11 @@ from .manyrays import ManyRays
 class RayMovie:
     ray_opacity = 0.5
     ray_trail_opacity = 0.25
-    ray_color = [1.0, 0.0, 0.0]  # red
     ray_point_size = 3  # default 3, looks good if many rays
     building_opacity = 0.5
     building_color = [0.8, 0.8, 0.8]  # gray
     fps = 30
+    cmap = "RdPu"
 
     def __init__(self, filename: str, building: Building, rays: ManyRays):
         self.rays = rays
@@ -46,11 +46,16 @@ class RayMovie:
         verts = self.rays.get_points()
         varr = points_to_array(verts)
         self.point_mesh = pv.PolyData(varr)
+        self.point_mesh["energy"] = self.rays.get_energy()
+        self.point_mesh.set_active_scalars("energy")
         self.plotter.add_mesh(
             self.point_mesh,
             opacity=RayMovie.ray_opacity,
             point_size=RayMovie.ray_point_size,
-            color=RayMovie.ray_color,
+            color=None,
+            cmap=RayMovie.cmap,
+            show_scalar_bar=True,
+            clim=(0, 1),
         )
 
         # Trailing lines
@@ -61,10 +66,15 @@ class RayMovie:
             larr.extend([len(l)])
             larr.extend(l)
         self.line_mesh = pv.PolyData(line_varr, lines=larr)
+        self.line_mesh["energy"] = self.rays.get_energy()
+        self.line_mesh.set_active_scalars("energy")
         self.plotter.add_mesh(
             self.line_mesh,
             opacity=RayMovie.ray_trail_opacity,
-            color=RayMovie.ray_color,
+            color=None,
+            cmap=RayMovie.cmap,
+            show_scalar_bar=False,
+            clim=(0, 1),
         )
 
         # Start movie
@@ -81,10 +91,12 @@ class RayMovie:
         verts = self.rays.get_points()
         varr = points_to_array(verts)
         self.point_mesh.points = varr
+        self.point_mesh["energy"] = self.rays.get_energy()
         # Update trailing lines
         line_verts, _ = self.rays.get_lines()
         line_varr = points_to_array(line_verts)
         self.line_mesh.points = line_varr
+        self.line_mesh["energy"] = self.rays.get_energy()
         # Write next frame
         self.plotter.write_frame()
 
