@@ -83,6 +83,7 @@ make examples
 
 Validation:
 - https://www.comsol.com/blogs/validating-an-acoustic-ray-tracing-simulation-of-a-chamber-music-hall
+- Absorption coefficients: https://www.acoustic.ua/st/web_absorption_data_eng.pdf
 
 Other cool projects:
 - https://github.com/LCAV/pyroomacoustics
