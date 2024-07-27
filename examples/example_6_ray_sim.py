@@ -59,11 +59,11 @@ if __name__ == "__main__":
         source = Point(1, 1, 1),
         receiver = Point(6, 6, 2),
         receiver_radius = 0.3,
-        num_rays = 50000,
+        num_rays = 1000,
         properties = acoustic_properties,
         csv_file="tmp/results.csv",
         movie_file = "tmp/ray_simulation.mp4",  # .gif or .mp4
     )
-    raysim.simulate(500)
+    raysim.simulate(1000)
 
     plot_objects((building, raysim.rays), output_file="tmp/ray_simulation_last_state.png")

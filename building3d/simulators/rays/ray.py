@@ -23,7 +23,7 @@ class Ray:
     transparent_checked = False
 
     speed: float = 343.0
-    time_step: float = 1e-4
+    time_step: float = 0.0000625  # 62.5 ms, sampling rate = 16 kHz
     min_distance: float = speed * time_step * 1.1  # Cannot move closer the wall
 
     def __init__(
