@@ -57,7 +57,7 @@ if __name__ == "__main__":
     raysim = RaySimulator(
         building = building,
         source = Point(1, 1, 1),
-        receiver = Point(3, 3, 2),
+        receiver = Point(6, 6, 2),
         receiver_radius = 0.3,
         num_rays = 50000,
         properties = acoustic_properties,
