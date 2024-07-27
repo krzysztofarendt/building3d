@@ -83,6 +83,7 @@ make examples
 
 Validation:
 - https://www.comsol.com/blogs/validating-an-acoustic-ray-tracing-simulation-of-a-chamber-music-hall
+- Absorption coefficients: https://www.acoustic.ua/st/web_absorption_data_eng.pdf
 
 Other cool projects:
 - https://github.com/LCAV/pyroomacoustics
@@ -96,3 +97,8 @@ Other cool projects:
 - https://reuk.github.io/wayverb/
 - https://github.com/pvlib/pvlib-python/tree/main
 - https://github.com/mmatl/pyrender
+
+Commercial software:
+- https://www.treble.tech/
+- https://odeon.dk/
+- https://www.dirac.com/live/

@@ -1,7 +1,7 @@
 import logging
 
 # Log file
-LOG_FILE: str = "building3d.log"
+LOG_FILE: str = "b3d.log"  # None to print to screen
 LOG_LEVEL = logging.INFO
 
 # GEOMETRY ====================================================================
