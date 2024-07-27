@@ -63,7 +63,8 @@ if __name__ == "__main__":
         properties = acoustic_properties,
         csv_file="tmp/results.csv",
         movie_file = "tmp/ray_simulation.mp4",  # .gif or .mp4
+        state_dump_dir = "tmp/state_dump/",
     )
-    raysim.simulate(1000)
+    raysim.simulate(100)
 
     plot_objects((building, raysim.rays), output_file="tmp/ray_simulation_last_state.png")

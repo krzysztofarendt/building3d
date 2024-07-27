@@ -42,6 +42,7 @@ class RaySimulator(BaseSimulator):
         properties: None | dict = None,
         csv_file: None | str = None,
         movie_file: None | str = None,
+        state_dump_dir: None | str = None,
     ):
         logger.info("RaySimulator initialization...")
 
@@ -69,6 +70,7 @@ class RaySimulator(BaseSimulator):
                 parent_dir.mkdir(parents=True)
             self.csv_file = csv_file
         else:
+            logger.warning("No output CSV file specified. Receiver results will not be saved!")
             self.csv_file = None
 
         # Make parent dir for output movie (or gif)
@@ -79,6 +81,8 @@ class RaySimulator(BaseSimulator):
             self.movie = RayMovie(filename=movie_file, building=building, rays=self.rays)
         else:
             self.movie = None
+
+        self.state_dump_dir = state_dump_dir
 
     def set_initial_location(self):
         """Overwrite the initial location for all rays to speed up the first step."""
@@ -139,8 +143,13 @@ class RaySimulator(BaseSimulator):
 
         logger.info("Starting the simulation")
         print("Simulation started")
-        for _ in tqdm(range(steps)):
+        for i in tqdm(range(steps)):
+            if self.state_dump_dir is not None:
+                self.rays.dump_state(self.state_dump_dir, i)
             self.forward()
+
+        if self.state_dump_dir is not None:
+            self.rays.dump_state(self.state_dump_dir, steps - 1)
 
         logger.info("Simulation finished")
         print("Simulation finished")

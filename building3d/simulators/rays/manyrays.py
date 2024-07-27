@@ -1,4 +1,7 @@
 import logging
+from pathlib import Path
+
+import numpy as np
 
 from building3d.geom.point import Point
 from building3d.geom.building import Building
@@ -29,6 +32,22 @@ class ManyRays:
 
     def get_energy(self) -> list[float]:
         return [self.rays[i].energy for i in range(len(self.rays))]
+
+    def dump_state(self, dump_dir: str, step: int):
+        logger.debug(f"Saving state of {self} to {dump_dir}")
+
+        d_dir = Path(dump_dir)
+        if not d_dir.exists():
+            d_dir.mkdir(parents=True)
+
+        position = np.array([self.rays[i].position.vector() for i in range(len(self.rays))])
+        energy = np.array(self.get_energy())
+
+        position_file = Path(d_dir) / f"position_{step}.npy"
+        energy_file = Path(d_dir) / f"energy_{step}.npy"
+
+        np.save(position_file, position)
+        np.save(energy_file, energy)
 
     def get_lines(self) -> tuple[list[Point], list[list[int]]]:
         """Interface to building3d.display.plot_objects.plot_objects()"""
