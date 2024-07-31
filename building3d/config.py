@@ -2,7 +2,7 @@ import logging
 
 # Log file
 LOG_FILE: str = "b3d.log"  # None to print to screen
-LOG_LEVEL = logging.INFO
+LOG_LEVEL = logging.DEBUG
 
 # GEOMETRY ====================================================================
 # General epsilon - used to avoid zero division etc.

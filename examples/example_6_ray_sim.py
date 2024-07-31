@@ -5,6 +5,8 @@ from building3d.geom.predefined.solids.box import box
 from building3d.geom.zone import Zone
 from building3d.geom.point import Point
 from building3d.simulators.rays.simulator import RaySimulator
+from building3d.simulators.rays.movie import make_movie
+from building3d.io.b3d import write_b3d
 
 
 if __name__ == "__main__":
@@ -37,6 +39,9 @@ if __name__ == "__main__":
     building = Building(name="building")
     building.add_zone(zone)
 
+    b3d_file = "tmp/building.b3d"
+    write_b3d(b3d_file, building)
+
     # Acoustic properties can be defined for each polygon/subpolygon separately
     # or in groups for parent objects (walls, solids, zones).
     # Group properties are propagated to all children objects.
@@ -54,17 +59,22 @@ if __name__ == "__main__":
         },
     }
 
+    state_dump_dir = "tmp/state_dump/"
+
     raysim = RaySimulator(
         building = building,
         source = Point(1, 1, 1),
         receiver = Point(6, 6, 2),
         receiver_radius = 0.3,
-        num_rays = 1000,
+        num_rays = 500,
         properties = acoustic_properties,
         csv_file="tmp/results.csv",
-        movie_file = "tmp/ray_simulation.mp4",  # .gif or .mp4
-        state_dump_dir = "tmp/state_dump/",
+        state_dump_dir = state_dump_dir,
     )
-    raysim.simulate(100)
+    raysim.simulate(1000)
+
+    print("Making movie")
+    movie_file = "tmp/ray_simulation.mp4"  # .gif or .mp4
+    make_movie(movie_file, state_dump_dir, b3d_file)
 
     plot_objects((building, raysim.rays), output_file="tmp/ray_simulation_last_state.png")

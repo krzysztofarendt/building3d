@@ -6,6 +6,7 @@ import numpy as np
 from building3d.geom.point import Point
 from building3d.geom.building import Building
 from .ray import Ray
+from .config import ENERGY_FILE, POSITION_FILE, DUMP_EXT
 
 
 logger = logging.getLogger(__name__)
@@ -34,6 +35,7 @@ class ManyRays:
         return [self.rays[i].energy for i in range(len(self.rays))]
 
     def dump_state(self, dump_dir: str, step: int):
+        """Save ray positions and energy to files. Used e.g. for movie generation."""
         logger.debug(f"Saving state of {self} to {dump_dir}")
 
         d_dir = Path(dump_dir)
@@ -43,8 +45,8 @@ class ManyRays:
         position = np.array([self.rays[i].position.vector() for i in range(len(self.rays))])
         energy = np.array(self.get_energy())
 
-        position_file = Path(d_dir) / f"position_{step}.npy"
-        energy_file = Path(d_dir) / f"energy_{step}.npy"
+        position_file = Path(d_dir) / f"{POSITION_FILE}{step}{DUMP_EXT}"
+        energy_file = Path(d_dir) / f"{ENERGY_FILE}{step}{DUMP_EXT}"
 
         np.save(position_file, position)
         np.save(energy_file, energy)

@@ -13,7 +13,6 @@ from building3d.geom.vector import vector
 from building3d.simulators.basesimulator import BaseSimulator
 from building3d.simulators.rays.manyrays import ManyRays
 from building3d.simulators.rays.ray import Ray
-from .raymovie import RayMovie
 from .find_location import find_location
 from .ray import Ray
 
@@ -30,7 +29,6 @@ class RaySimulator(BaseSimulator):
     - reflections
     - absorption
     - when to finish
-    - exporting simulation movie or gif
     """
     def __init__(
         self,
@@ -41,7 +39,6 @@ class RaySimulator(BaseSimulator):
         num_rays: int,
         properties: None | dict = None,
         csv_file: None | str = None,
-        movie_file: None | str = None,
         state_dump_dir: None | str = None,
     ):
         logger.info("RaySimulator initialization...")
@@ -72,15 +69,6 @@ class RaySimulator(BaseSimulator):
         else:
             logger.warning("No output CSV file specified. Receiver results will not be saved!")
             self.csv_file = None
-
-        # Make parent dir for output movie (or gif)
-        if movie_file is not None:
-            parent_dir = Path(movie_file).parent
-            if not parent_dir.exists():
-                parent_dir.mkdir(parents=True)
-            self.movie = RayMovie(filename=movie_file, building=building, rays=self.rays)
-        else:
-            self.movie = None
 
         self.state_dump_dir = state_dump_dir
 
@@ -130,11 +118,8 @@ class RaySimulator(BaseSimulator):
 
         self.num_step += 1
 
-        if self.movie is not None:
-            self.movie.update()
-
     def simulate(self, steps: int) -> None:
-        """Simulate chosen number of steps and save a movie.
+        """Simulate chosen number of steps.
 
         Args:
             steps: number of steps to simulate
@@ -156,9 +141,6 @@ class RaySimulator(BaseSimulator):
 
         if self.csv_file is not None:
             self.save_results()
-
-        if self.movie is not None:
-            self.movie.save()
 
     def save_results(self):
         df = pd.DataFrame(
