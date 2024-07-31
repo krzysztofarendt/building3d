@@ -55,8 +55,8 @@ def make_movie(output_file: str, state_dump_dir: str, building_file: str, num_st
 
     for i, state in enumerate(DumpReader(state_dump_dir)):
         logger.debug(f"Processing frame {i}")
-        position_buffer = state["position"]  # shape: (num_rays, 3, Ray.buffer_size)
-        energy_buffer = state["energy"]  # shape: (num_rays, Ray.buffer_size)
+        position_buffer = state["position"]  # shape: (num_rays, 3, DumpReader.buffer_size)
+        energy_buffer = state["energy"]  # shape: (num_rays, DumpReader.buffer_size)
 
         if num_steps > 0 and i == num_steps:
             break
@@ -123,7 +123,7 @@ def make_movie(output_file: str, state_dump_dir: str, building_file: str, num_st
     plotter.close()
 
 
-def position_buffer_to_lines(pb: np.ndarray):
+def position_buffer_to_lines(pb: np.ndarray) -> tuple[np.ndarray, list[int]]:
     """Convert position buffer array to the format required by PyVista Plotter.
 
     The required format is as follows:
@@ -131,15 +131,23 @@ def position_buffer_to_lines(pb: np.ndarray):
     - line connectivity represented as a list indicating the number of points in a line segment
       followed by the point indices. For example, the two line segments [0, 1] and [1, 2, 3, 4]
       will be represented as [2, 0, 1, 4, 1, 2, 3, 4].
+
+    Args:
+        pb: position buffer returned by DumpReader
+
+    Return:
+        line points, line connectivity
     """
     num_rays = pb.shape[0]
-    buf_len = pb.shape[2]  # == Ray.buffer_size
+    buf_len = pb.shape[2]  # == DumpReader.buffer_size
     line_varr = []
     line_index = []
+    curr_index = 0
     for ray_i in range(num_rays):
+        line_index.append(buf_len)
         for buf_i in range(buf_len):
             line_varr.append(pb[ray_i, :, buf_i])
-            line_index.append(buf_len)
-            line_index.extend([ray_i * buf_len + k for k in range(buf_len)])
+            line_index.append(curr_index)
+            curr_index += 1
     line_varr = np.array(line_varr)
     return line_varr, line_index

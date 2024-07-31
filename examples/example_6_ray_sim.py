@@ -71,7 +71,7 @@ if __name__ == "__main__":
         csv_file="tmp/results.csv",
         state_dump_dir = state_dump_dir,
     )
-    raysim.simulate(1000)
+    raysim.simulate(500)
 
     print("Making movie")
     movie_file = "tmp/ray_simulation.mp4"  # .gif or .mp4
