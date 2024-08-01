@@ -58,8 +58,8 @@ class DumpReader:
             self.position = np.zeros((self.num_rays, 3, DumpReader.buffer_size))
             self.energy = np.ones((self.num_rays, DumpReader.buffer_size))
 
-        self.position = np.roll(self.position, shift=1, axis=2)
-        self.energy = np.roll(self.energy, shift=1, axis=1)
+        self.position = np.roll(self.position, shift=1, axis=2)  # TODO: seems to be slow
+        self.energy = np.roll(self.energy, shift=1, axis=1)  # TODO: seems to be slow
         self.position[:, :, 0] = position
         self.energy[:, 0] = energy
 

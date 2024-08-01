@@ -54,7 +54,7 @@ def make_movie(output_file: str, state_dump_dir: str, building_file: str, num_st
     building = read_b3d(building_file)
 
     for i, state in enumerate(DumpReader(state_dump_dir)):
-        logger.debug(f"Processing frame {i}")
+        logger.info(f"Processing frame {i}")
         position_buffer = state["position"]  # shape: (num_rays, 3, DumpReader.buffer_size)
         energy_buffer = state["energy"]  # shape: (num_rays, DumpReader.buffer_size)
 
@@ -119,8 +119,8 @@ def make_movie(output_file: str, state_dump_dir: str, building_file: str, num_st
 
             plotter.write_frame()
 
-    logger.info(f"Movie saved: {output_file}")
     plotter.close()
+    logger.info(f"Movie saved: {output_file}")
 
 
 def position_buffer_to_lines(pb: np.ndarray) -> tuple[np.ndarray, list[int]]:

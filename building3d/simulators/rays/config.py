@@ -4,4 +4,4 @@ POSITION_FILE = "position_"
 DUMP_EXT = ".npy"
 
 # Movie settings
-RAY_LINE_LEN = 30
+RAY_LINE_LEN = 10

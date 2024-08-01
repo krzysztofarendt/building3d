@@ -66,15 +66,15 @@ if __name__ == "__main__":
         source = Point(1, 1, 1),
         receiver = Point(6, 6, 2),
         receiver_radius = 0.3,
-        num_rays = 500,
+        num_rays = 25000,
         properties = acoustic_properties,
         csv_file="tmp/results.csv",
         state_dump_dir = state_dump_dir,
     )
-    raysim.simulate(500)
+    raysim.simulate(1000)
+    plot_objects((building, raysim.rays), output_file="tmp/ray_simulation_last_state.png")
 
     print("Making movie")
     movie_file = "tmp/ray_simulation.mp4"  # .gif or .mp4
-    make_movie(movie_file, state_dump_dir, b3d_file)
+    make_movie(movie_file, state_dump_dir, b3d_file, 300)
 
-    plot_objects((building, raysim.rays), output_file="tmp/ray_simulation_last_state.png")
