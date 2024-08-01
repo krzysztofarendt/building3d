@@ -1,11 +1,13 @@
+from multiprocessing import Queue
 import logging
+import os
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from tqdm import tqdm
 
 from building3d import random_between
+from building3d.logger import init_logger
 from building3d.geom.building import Building
 from building3d.geom.point import Point
 from building3d.geom.vector import length
@@ -18,6 +20,34 @@ from .ray import Ray
 
 
 logger = logging.getLogger(__name__)
+
+
+def simulation_job(
+    building: Building,
+    source: Point,
+    receiver: Point,
+    receiver_radius: float,
+    num_rays: int,
+    properties: None | dict,
+    csv_file: None | str,
+    state_dump_dir: None | str,
+    steps: int,
+    logfile: None | str,
+) -> None:
+
+    init_logger(logfile)  # TODO: Each process has a separate log file. Should it stay like this?
+
+    raysim = RaySimulator(
+        building=building,
+        source=source,
+        receiver=receiver,
+        receiver_radius=receiver_radius,
+        num_rays=num_rays,
+        properties=properties,
+        csv_file=csv_file,
+        state_dump_dir=state_dump_dir,
+    )
+    raysim.simulate(steps)
 
 
 class RaySimulator(BaseSimulator):
@@ -126,9 +156,9 @@ class RaySimulator(BaseSimulator):
         """
         self.received_energy = np.zeros(steps)
 
-        logger.info("Starting the simulation")
-        print("Simulation started")
-        for i in tqdm(range(steps)):
+        logger.info(f"Simulation started (pid = {os.getpid()})")
+        print(f"Simulation started (pid = {os.getpid()})")
+        for i in range(steps):
             if self.state_dump_dir is not None:
                 self.rays.dump_state(self.state_dump_dir, i)
             self.forward()
@@ -136,8 +166,8 @@ class RaySimulator(BaseSimulator):
         if self.state_dump_dir is not None:
             self.rays.dump_state(self.state_dump_dir, steps - 1)
 
-        logger.info("Simulation finished")
-        print("Simulation finished")
+        logger.info(f"Simulation finished (pid = {os.getpid()})")
+        print(f"Simulation finished (pid = {os.getpid()})")
 
         if self.csv_file is not None:
             self.save_results()
