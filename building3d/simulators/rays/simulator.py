@@ -1,4 +1,3 @@
-from multiprocessing import Queue
 import logging
 import os
 from pathlib import Path
@@ -186,7 +185,7 @@ class RaySimulator(BaseSimulator):
         if sink not in self.hits:
             self.hits[sink] = np.zeros(self.num_steps)
         if length(vector(ray.position, sink)) < radius:
-            self.hits[sink][step] += 1
+            self.hits[sink][step] += ray.energy
             return True
         else:
             return False

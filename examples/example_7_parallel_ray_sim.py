@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 from building3d.logger import init_logger
@@ -72,6 +73,10 @@ if __name__ == "__main__":
         num_rays = 800,
         properties = acoustic_properties,
         sim_dir = project_dir,
-        steps = 1500,
+        steps = 1000,
         num_jobs = 8,
     )
+    movie_file = os.path.join(project_dir, "simulation.mp4")
+    state_dump_dir = os.path.join(project_dir, "all", "state")
+    building_file = os.path.join(project_dir, "building.b3d")
+    make_movie(movie_file, state_dump_dir, building_file)

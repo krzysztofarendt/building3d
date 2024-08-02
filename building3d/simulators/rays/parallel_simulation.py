@@ -3,8 +3,11 @@ from multiprocessing import Process
 
 from building3d.geom.building import Building
 from building3d.geom.point import Point
+from building3d.simulators.rays.movie import make_movie
+from building3d.io.b3d import write_b3d
 from .simulator import simulation_job
 from .merge_results import merge_results
+from .config import MERGED_JOBS_DIR, STATE_DIR, B3D_FILE
 
 
 def parallel_simulation(
@@ -21,6 +24,9 @@ def parallel_simulation(
     sim_dpath = Path(sim_dir)
     if not sim_dpath.exists():
         sim_dpath.mkdir(parents=True)
+
+    b3d_file = str(sim_dpath / B3D_FILE)
+    write_b3d(str(b3d_file), building)
 
     jobs = []
     for i in range(num_jobs):
@@ -48,9 +54,12 @@ def parallel_simulation(
     for i in range(num_jobs):
         jobs[i].join()
 
-    # TODO: Merge results
+    # Merge results
     merge_dir = str(Path(sim_dir) / "all")
     merge_results(sim_dir=sim_dir, merge_dir=merge_dir)
 
     # TODO: Make movie
-    ...
+    movie_file = str(sim_dpath / "simulation.mp4")
+    state_dump_dir = str(sim_dpath / MERGED_JOBS_DIR / STATE_DIR)
+    building_file = str(sim_dpath / "building.b3d")
+    make_movie(movie_file, state_dump_dir, building_file)
