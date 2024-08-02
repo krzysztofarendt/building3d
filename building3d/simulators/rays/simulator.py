@@ -25,8 +25,8 @@ logger = logging.getLogger(__name__)
 def simulation_job(
     building: Building,
     source: Point,
-    receiver: Point,
-    receiver_radius: float,
+    sinks: list[Point],
+    sink_radius: float,
     num_rays: int,
     properties: None | dict,
     csv_file: None | str,
@@ -40,8 +40,8 @@ def simulation_job(
     raysim = RaySimulator(
         building=building,
         source=source,
-        receiver=receiver,
-        receiver_radius=receiver_radius,
+        sinks=sinks,
+        sink_radius=sink_radius,
         num_rays=num_rays,
         properties=properties,
         csv_file=csv_file,
@@ -55,7 +55,7 @@ class RaySimulator(BaseSimulator):
 
     Controls:
     - time steps
-    - source and receiver
+    - one source and one or more sinks
     - reflections
     - absorption
     - when to finish
@@ -64,8 +64,8 @@ class RaySimulator(BaseSimulator):
         self,
         building: Building,
         source: Point,
-        receiver: Point,
-        receiver_radius: float,
+        sinks: list[Point],
+        sink_radius: float,
         num_rays: int,
         properties: None | dict = None,
         csv_file: None | str = None,
@@ -75,11 +75,11 @@ class RaySimulator(BaseSimulator):
 
         self.building = building
         self.source = source
-        self.receiver = receiver
-        self.receiver_radius = receiver_radius
-        self.received_energy = np.zeros(1)  # placeholder, reinitialized in self.simulate()
+        self.sinks = sinks
+        self.sink_radius = sink_radius
 
-        self.num_step = 0
+        self.num_steps = 0
+        self.step = 0
 
         self.rays = ManyRays(
             num_rays=num_rays,
@@ -89,6 +89,7 @@ class RaySimulator(BaseSimulator):
         )
         self.total_energy = sum([self.rays[i].energy for i in range(len(self.rays))])
         self.num_active_rays = len(self.rays)
+        self.hits = {}
 
         # Make parent dir for CSV file
         if csv_file is not None:
@@ -120,7 +121,7 @@ class RaySimulator(BaseSimulator):
     def forward(self) -> None:
         """Process next simulation step."""
         logger.info(
-            f"Simulation step {self.num_step}, "
+            f"Simulation step {self.step}, "
             f"total energy = {self.total_energy:.2f}, "
             f"active rays = {self.num_active_rays}"
         )
@@ -128,7 +129,7 @@ class RaySimulator(BaseSimulator):
         self.total_energy = 0
         self.num_active_rays = 0
 
-        if self.num_step == 0:
+        if self.step == 0:
             self.set_initial_location()
             self.set_initial_direction()  # currently, omnidirectional source
 
@@ -138,15 +139,16 @@ class RaySimulator(BaseSimulator):
             if self.rays[i].energy > 0:
                 self.rays[i].forward()
 
-                if RaySimulator.is_hit(self.rays[i], self.receiver, self.receiver_radius):
-                    self.received_energy[self.num_step] += self.rays[i].energy
-                    self.rays[i].energy = 0
-                    logger.debug(f"Ray hits receiver: {self.rays[i]}")
+                for sink in self.sinks:
+                    hit = self.check_hit(self.rays[i], sink, self.sink_radius, self.step)
+                    if hit:
+                        self.rays[i].energy = 0
+                        break
 
                 self.total_energy += self.rays[i].energy
                 self.num_active_rays += 1
 
-        self.num_step += 1
+        self.step += 1
 
     def simulate(self, steps: int) -> None:
         """Simulate chosen number of steps.
@@ -154,7 +156,7 @@ class RaySimulator(BaseSimulator):
         Args:
             steps: number of steps to simulate
         """
-        self.received_energy = np.zeros(steps)
+        self.num_steps = steps
 
         logger.info(f"Simulation started (pid = {os.getpid()})")
         print(f"Simulation started (pid = {os.getpid()})")
@@ -174,14 +176,17 @@ class RaySimulator(BaseSimulator):
 
     def save_results(self):
         df = pd.DataFrame(
-            index=pd.Index(np.arange(0, self.num_step) * Ray.time_step, name="time"),
+            index=pd.Index(np.arange(0, self.step) * Ray.time_step, name="time"),
         )
-        df["received_energy"] = self.received_energy
+        for i, sink in enumerate(self.sinks):
+            df[i] = self.hits[sink]
         df.to_csv(self.csv_file)
 
-    @staticmethod
-    def is_hit(ray: Ray, receiver: Point, radius: float) -> bool:
-        if length(vector(ray.position, receiver)) < radius:
+    def check_hit(self, ray: Ray, sink: Point, radius: float, step: int) -> bool:
+        if sink not in self.hits:
+            self.hits[sink] = np.zeros(self.num_steps)
+        if length(vector(ray.position, sink)) < radius:
+            self.hits[sink][step] += 1
             return True
         else:
             return False

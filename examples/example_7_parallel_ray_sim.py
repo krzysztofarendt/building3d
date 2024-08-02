@@ -52,26 +52,26 @@ if __name__ == "__main__":
     # Group properties are propagated to all children objects.
     acoustic_properties = {
         "absorption": {
-            "zone/solid_1/floor": 0.1,
-            "zone/solid_1/wall-0/wall-0": 0.2,
-            "zone/solid_1/wall-1": 0.2,
-            "zone/solid_1/wall-2": 0.2,
-            "zone/solid_1/wall-3": 0.2,
-            "zone/solid_1/roof": 0.2,
-            "zone/solid_2": 0.3,
-            "zone/solid_3": 0.4,
-            "zone/solid_4": 0.5,
+            "zone/solid_1/floor": 0.3,
+            "zone/solid_1/wall-0/wall-0": 0.1,
+            "zone/solid_1/wall-1": 0.1,
+            "zone/solid_1/wall-2": 0.1,
+            "zone/solid_1/wall-3": 0.1,
+            "zone/solid_1/roof": 0.1,
+            "zone/solid_2": 0.12,
+            "zone/solid_3": 0.13,
+            "zone/solid_4": 0.14,
         },
     }
 
     parallel_simulation(
         building = building,
         source = Point(1, 1, 1),
-        receiver = Point(6, 6, 2),
-        receiver_radius = 0.3,
-        num_rays = 1000,
+        sinks = [Point(3, 3, 2), Point(6, 6, 2)],
+        sink_radius = 0.6,
+        num_rays = 800,
         properties = acoustic_properties,
-        out_dir = project_dir,
-        steps = 1000,
+        sim_dir = project_dir,
+        steps = 1500,
         num_jobs = 8,
     )
