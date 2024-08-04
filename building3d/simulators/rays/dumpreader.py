@@ -3,17 +3,20 @@ from pathlib import Path
 
 import numpy as np
 
-from .config import ENERGY_FILE, POSITION_FILE, DUMP_EXT, RAY_LINE_LEN
-
+from building3d.paths.wildcardpath import WildcardPath
+from .config import (
+    JOB_ENR_STATE_FILE,
+    JOB_POS_STATE_FILE,
+    RAY_LINE_LEN,
+)
 
 logger = logging.getLogger(__name__)
 
 
 class DumpReader:
 
-    energy_file_template = ENERGY_FILE
-    position_file_template = POSITION_FILE
-    ext = DUMP_EXT
+    energy_file_template = JOB_ENR_STATE_FILE
+    position_file_template = JOB_POS_STATE_FILE
     buffer_size = RAY_LINE_LEN
 
     def __init__(self, dump_dir: str):
@@ -40,6 +43,7 @@ class DumpReader:
         The buffers are initialized with zeros. The newest value is at `[...,0]`.
         The oldest value is at `[..., -1]`.
         """
+
         position_filename = (DumpReader.position_file_template + str(step) + DumpReader.ext)
         position_fpath = Path(self.dump_dir) / position_filename
 

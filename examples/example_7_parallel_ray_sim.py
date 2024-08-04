@@ -8,13 +8,14 @@ from building3d.geom.zone import Zone
 from building3d.geom.point import Point
 from building3d.simulators.rays.movie import make_movie
 from building3d.simulators.rays.parallel_simulation import parallel_simulation
+from building3d.simulators.rays.config import MAIN_LOG_FILE
 from building3d.io.b3d import write_b3d
 
 
 if __name__ == "__main__":
     project_dir = "tmp/parallel/"
-    main_logfile = Path(project_dir) / "main.log"
-    init_logger(str(main_logfile))
+    main_logfile = os.path.join(project_dir, MAIN_LOG_FILE)
+    init_logger(main_logfile)
 
     L = 4
     W = 4
@@ -70,7 +71,7 @@ if __name__ == "__main__":
         source = Point(1, 1, 1),
         sinks = [Point(3, 3, 2), Point(6, 6, 2)],
         sink_radius = 0.6,
-        num_rays = 800,
+        num_rays = 80,
         properties = acoustic_properties,
         sim_dir = project_dir,
         steps = 1000,
@@ -79,4 +80,4 @@ if __name__ == "__main__":
     movie_file = os.path.join(project_dir, "simulation.mp4")
     state_dump_dir = os.path.join(project_dir, "all", "state")
     building_file = os.path.join(project_dir, "building.b3d")
-    make_movie(movie_file, state_dump_dir, building_file)
+    # make_movie(movie_file, state_dump_dir, building_file)

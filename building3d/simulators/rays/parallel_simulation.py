@@ -1,13 +1,29 @@
-from pathlib import Path
+import os
 from multiprocessing import Process
 
 from building3d.geom.building import Building
 from building3d.geom.point import Point
 from building3d.simulators.rays.movie import make_movie
 from building3d.io.b3d import write_b3d
+from building3d.paths.wildcardpath import WildcardPath
 from .simulator import simulation_job
-from .merge_results import merge_results
-from .config import MERGED_JOBS_DIR, STATE_DIR, B3D_FILE
+from .merge_jobs import merge_state, merge_hits
+from .config import (
+    MERGE_DIR,
+    MERGE_HIT_CSV,
+    MERGE_STATE_DIR,
+    MOVIE_FILE,
+    MAIN_LOG_FILE,
+    B3D_FILE,
+    JOB_DIR,
+    JOB_STATE_DIR,
+    JOB_HIT_CSV,
+    JOB_LOG_FILE,
+    MERGE_ENR_STATE_FILE,
+    MERGE_POS_STATE_FILE,
+    JOB_ENR_STATE_FILE,
+    JOB_POS_STATE_FILE,
+)
 
 
 def parallel_simulation(
@@ -21,31 +37,32 @@ def parallel_simulation(
     steps: int,
     num_jobs: int,
 ):
-    sim_dpath = Path(sim_dir)
-    if not sim_dpath.exists():
-        sim_dpath.mkdir(parents=True)
+    if not os.path.exists(sim_dir):
+        os.makedirs(sim_dir)
 
-    b3d_file = str(sim_dpath / B3D_FILE)
-    write_b3d(str(b3d_file), building)
+    write_b3d(B3D_FILE, building)
 
     jobs = []
     for i in range(num_jobs):
-        job_dir = sim_dpath / f"job_{i}"
-        job_dir.mkdir(exist_ok=True, parents=False)
+        _ = WildcardPath(JOB_DIR).mkdir(parent=sim_dir, job=i)
+
+        job_hit_csv = WildcardPath(JOB_HIT_CSV).fill(parent=sim_dir, job=i)
+        job_state_dir = WildcardPath(JOB_STATE_DIR).fill(parent=sim_dir, job=i)
+        job_log_file = WildcardPath(JOB_LOG_FILE).fill(parent=sim_dir, job=i)
 
         p = Process(
             target=simulation_job,
             args=(
-                building,  # building
-                source,  # source
-                sinks,  # sinks
-                sink_radius,  # sink_radius
-                num_rays // num_jobs,  # num_rays
-                properties,  # properties
-                str(job_dir / f"hits_{i}.csv"),  # csv_file
-                str(job_dir / "states"),  # state_dump_dir
-                steps,  # steps
-                str(Path(sim_dir) / f"job_{i}.log"),  # logfile
+                building,               # building
+                source,                 # source
+                sinks,                  # sinks
+                sink_radius,            # sink_radius
+                num_rays // num_jobs,   # num_rays
+                properties,             # properties
+                job_hit_csv,            # csv_file
+                job_state_dir,          # state_dump_dir
+                steps,                  # steps
+                job_log_file,           # logfile
             )
         )
         p.start()
@@ -55,11 +72,27 @@ def parallel_simulation(
         jobs[i].join()
 
     # Merge results
-    merge_dir = str(Path(sim_dir) / "all")
-    merge_results(sim_dir=sim_dir, merge_dir=merge_dir)
+    merge_dir = WildcardPath(MERGE_DIR).mkdir(parent=sim_dir)
+    merge_state_dir = WildcardPath(MERGE_STATE_DIR).mkdir(parent=sim_dir)
+    merge_state(
+        sim_dir = sim_dir,
+        mrg_enr_template = MERGE_ENR_STATE_FILE,
+        mrg_pos_template = MERGE_POS_STATE_FILE,
+        job_enr_template = JOB_ENR_STATE_FILE,
+        job_pos_template = JOB_POS_STATE_FILE,
+    )
+    merge_hits(
+        sim_dir = sim_dir,
+        mrg_hit_path = MERGE_HIT_CSV,
+        job_hit_template = JOB_HIT_CSV,
+    )
 
-    # TODO: Make movie
-    movie_file = str(sim_dpath / "simulation.mp4")
-    state_dump_dir = str(sim_dpath / MERGED_JOBS_DIR / STATE_DIR)
-    building_file = str(sim_dpath / "building.b3d")
-    make_movie(movie_file, state_dump_dir, building_file)
+    # Make movie
+    # movie_file = WildcardPath(MOVIE_FILE).fill(parent=sim_dir)
+    # merge_state_dir = WildcardPath(MERGE_STATE_DIR).fill(parent=sim_dir)
+    # b3d_file = WildcardPath(B3D_FILE).fill(parent=sim_dir)
+    # make_movie(
+    #     output_file = movie_file,
+    #     state_dump_dir = merge_state_dir,
+    #     building_file = b3d_file,
+    # )

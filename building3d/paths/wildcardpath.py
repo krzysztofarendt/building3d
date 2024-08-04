@@ -1,3 +1,4 @@
+from typing import NamedTuple
 import os
 from collections import defaultdict
 from collections import namedtuple
@@ -101,7 +102,7 @@ class WildcardPath:
                             f"Multiple values for one wildcard in a path are not allowed: {f}"
         return paths
 
-    def get_matching_paths_namedtuple_keys(self, parent: str) -> dict[tuple, str]:
+    def get_matching_paths_namedtuple_keys(self, parent: str) -> dict[NamedTuple, str]:
         """Return a dict with named tuples as keys and paths as values.
 
         For example, for the following directory structure:
@@ -127,7 +128,7 @@ class WildcardPath:
 
         return paths
 
-    def to_dict_with_namedtuple_keys(self, d: dict[str, dict[str, int]]) -> dict[tuple, str]:
+    def to_dict_with_namedtuple_keys(self, d: dict[str, dict[str, int]]) -> dict[NamedTuple, str]:
         dnew = {}
         for p, wd in d.items():
             s = self.Case(**wd)

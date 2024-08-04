@@ -1,12 +1,13 @@
+import os
 import logging
-from pathlib import Path
 
 import numpy as np
 
 from building3d.geom.point import Point
 from building3d.geom.building import Building
+from building3d.paths.wildcardpath import WildcardPath
 from .ray import Ray
-from .config import ENERGY_FILE, POSITION_FILE, DUMP_EXT
+from .config import ENERGY_FILE, POSITION_FILE
 
 
 logger = logging.getLogger(__name__)
@@ -38,15 +39,14 @@ class ManyRays:
         """Save ray positions and energy to files. Used e.g. for movie generation."""
         logger.debug(f"Saving state of {self} to {dump_dir}")
 
-        d_dir = Path(dump_dir)
-        if not d_dir.exists():
-            d_dir.mkdir(parents=True)
+        if not os.path.exists(dump_dir):
+            os.makedirs(dump_dir)
 
         position = np.array([self.rays[i].position.vector() for i in range(len(self.rays))])
         energy = np.array(self.get_energy())
 
-        position_file = Path(d_dir) / f"{POSITION_FILE}{step}{DUMP_EXT}"
-        energy_file = Path(d_dir) / f"{ENERGY_FILE}{step}{DUMP_EXT}"
+        position_file = WildcardPath(POSITION_FILE).fill(parent=dump_dir, step=step)
+        energy_file = WildcardPath(ENERGY_FILE).fill(parent=dump_dir, step=step)
 
         np.save(position_file, position)
         np.save(energy_file, energy)
