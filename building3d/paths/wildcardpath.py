@@ -1,35 +1,12 @@
+import os
 from collections import defaultdict
+from collections import namedtuple
 from pathlib import Path
 import re
 
 
 class WildcardPath:
     """Custom path class which allows to use wildcards which can be read or replaced with numbers.
-
-    For example, for the following directory structure:
-    - parent_dir
-        - sub_dir_0
-        - sub_dir_1
-            - file_1_0.csv
-            - file_1_1.csv
-
-    The output for this method would be:
-    ```python
-    >>> wp = WildcardPath("sub_dir_<job>/file_<job>_<step>.csv")
-    >>> wp.get_matching_paths_and_values("parent_dir")
-    {
-        "parent_dir/sub_dir_1/file_1_0.csv": {"job": 1, "step": 0},
-        "parent_dir/sub_dir_1/file_1_1.csv": {"job": 1, "step": 1},
-    }
-    ```
-
-    Directories can be also created by replacing wildcards with chosem integers, e.g.:
-    ```python
-    >>> wp = WildcardPath("sub_dir_<job>/case_dir_<case>")
-    >>> wp.mkdir("parent_dir", job=10, case=42)
-    ```
-
-    The above code would create a directory `parent_dir/sub_dir_10/case_dir_42`.
     """
     wcard_sep: tuple[str, str] = ("<", ">")
 
@@ -39,6 +16,7 @@ class WildcardPath:
         self._wildcards: list[str] = self.find_wildcards()
         self._regex: str = self.wildcards_to_regex()
         self._groups: dict = {}
+        self.Case = namedtuple("Case", self._wildcards)
 
     @classmethod
     def wrap(cls, wildcard: str):
@@ -59,7 +37,7 @@ class WildcardPath:
         for w in wildcards:
             self._count[w] += 1
 
-        wildcards = list(set(wildcards))
+        wildcards = sorted(list(set(wildcards)))
 
         self._groups = {}
         for w in wildcards:
@@ -85,8 +63,8 @@ class WildcardPath:
         re_path = ".*" + re_path + "/*$"
         return re_path
 
-    def get_matching_paths_and_values(self, parent: str) -> dict[str, dict[str, int]]:
-        """Return matching paths w.r.t. to parent and found wildcard values.
+    def get_matching_paths_dict_values(self, parent: str) -> dict[str, dict[str, int]]:
+        """Return a dict with paths as keys and dicts with wildcard names and values as keys.
 
         For example, for the following directory structure:
         - parent_dir
@@ -103,6 +81,7 @@ class WildcardPath:
             "parent_dir/sub_dir_1/file_1_0.csv": {"job": 1, "step": 0},
             "parent_dir/sub_dir_1/file_1_1.csv": {"job": 1, "step": 1},
         }
+
         ```
         """
         paths = {}
@@ -120,64 +99,106 @@ class WildcardPath:
                     else:
                         assert int(val) == paths[f][wname], \
                             f"Multiple values for one wildcard in a path are not allowed: {f}"
+        return paths
+
+    def get_matching_paths_namedtuple_keys(self, parent: str) -> dict[tuple, str]:
+        """Return a dict with named tuples as keys and paths as values.
+
+        For example, for the following directory structure:
+        - parent_dir
+            - sub_dir_0
+            - sub_dir_1
+                - file_1_0.csv
+                - file_1_1.csv
+
+        The output for this method would be:
+        ```python
+        >>> wp = WildcardPath("sub_dir_<job>/file_<job>_<step>.csv")
+        >>> wp.get_matching_paths_and_values("parent_dir")
+        {
+            Case(job=1, step=0): "parent_dir/sub_dir_1/file_1_0.csv",
+            Case(job=1, step=1): "parent_dir/sub_dir_1/file_1_1.csv",
+        }
+
+        ```
+        """
+        paths_dict_vals = self.get_matching_paths_dict_values(parent)
+        paths = self.to_dict_with_namedtuple_keys(paths_dict_vals)
 
         return paths
 
-    def get_matching_paths(self, parent) -> list[str]:
-        """Same as `get_matching_paths_and_values()` but returns only the paths."""
-        path_dict = self.get_matching_paths_and_values(parent)
-        return list(path_dict.keys())
+    def to_dict_with_namedtuple_keys(self, d: dict[str, dict[str, int]]) -> dict[tuple, str]:
+        dnew = {}
+        for p, wd in d.items():
+            s = self.Case(**wd)
+            dnew[s] = p
+        return dnew
 
-    def mkdir(self, parent: str, **kwargs) -> None:
+    def get_matching_paths(self, parent, **kwargs) -> list[str]:
+        """Return matching paths as a list of strings.
+
+        Additional filtering is possible by providing specific wildcard values in `kwargs`.
+        """
+        path_dict = self.get_matching_paths_dict_values(parent)
+
+        if len(kwargs.items()) == 0:
+            paths = list(path_dict.keys())
+        else:
+            paths = []
+
+            for p, wd in path_dict.items():
+                num_matching = 0
+                for wcard, val in wd.items():
+                    for k, v in kwargs.items():
+                        if k == wcard and v == val:
+                            num_matching += 1
+
+                if num_matching == len(kwargs.items()):
+                    paths.append(p)
+
+        return paths
+
+    def fill(self, parent="", **kwargs) -> str:
+        path = self.path
+
+        if len(kwargs.keys()) != len(self._wildcards):
+            raise ValueError(f"Number of wildcards and provided arguments does not match")
+
+        for k, v in kwargs.items():
+            if k not in self._wildcards:
+                raise KeyError(f"{k} not in wildcards: {self._wildcards}")
+
+            path = path.replace(self.wrap(k), str(v))
+
+        if len(parent) > 0:
+            path = os.path.join(parent, path)
+        return path
+
+    def mkdir(self, parent: str, **kwargs) -> str:
         """Make directory replacing all wildcards with `kwargs`.
 
         The directory is created using `Path.mkdir(parents=True, exist_ok=True)`.
         If no wildcards are in the path, `kwargs` should be empty.
         Otherwise, the number of items in `kwargs` should match the number of wildcards
         in `self.path`.
+
+        ```python
+        >>> wp = WildcardPath("sub_dir_<job>/case_dir_<case>")
+        >>> wp.mkdir("parent_dir", job=10, case=42)
+
+        ```
+
+        The above code would create a directory `parent_dir/sub_dir_10/case_dir_42`.
+
+        Args:
+            parent: parent directory for self.path
+            kwargs: keyword arguments mapped to wildcards
+
+        Return:
+            absolute path to the created directory
         """
-        path = None
+        path = self.fill(parent=parent, **kwargs)
+        abs_path = Path(path)
+        abs_path.mkdir(parents=True, exist_ok=True)
 
-        if len(self._wildcards) > 0:
-            if len(kwargs.keys()) != len(self._wildcards):
-                raise ValueError(f"Number of wildcards and provided arguments does not match")
-
-            path = self.path
-            for k, v in kwargs.items():
-                if k not in self._wildcards:
-                    raise KeyError(f"{k} not in wildcards: {self._wildcards}")
-
-                path = path.replace(self.wrap(k), str(v))
-
-            assert path is not None
-            (Path(parent) / path).mkdir(parents=True, exist_ok=True)
-
-        else:
-            path = self.path
-            assert path is not None
-            (Path(parent) / path).mkdir(parents=True, exist_ok=True)
-
-
-if __name__ == "__main__":
-    # Example
-    import building3d.simulators.rays.config as config
-    project_dir = "tmp/parallel/"
-
-    wp = WildcardPath(config.JOB_DIR)
-    print(wp.get_matching_paths_and_values(project_dir))
-
-    wp.path = config.JOB_HIT_CSV
-    print(wp.get_matching_paths_and_values(project_dir))
-
-    wp.path = config.JOB_STATE_DIR
-    print(wp.get_matching_paths_and_values(project_dir))
-
-    wp.path = config.JOB_LOG_FILE
-    print(wp.get_matching_paths_and_values(project_dir))
-
-    wp.path = "parallel"
-    print(wp.get_matching_paths_and_values("tmp"))
-
-    wp.path = "test_<number>/dir_<other>"
-    print(wp.get_matching_paths_and_values("tmp"))
-    wp.mkdir("tmp", number=99, other=666)
+        return str(abs_path)
