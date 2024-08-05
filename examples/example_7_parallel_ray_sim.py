@@ -71,13 +71,9 @@ if __name__ == "__main__":
         source = Point(1, 1, 1),
         sinks = [Point(3, 3, 2), Point(6, 6, 2)],
         sink_radius = 0.6,
-        num_rays = 80,
+        num_rays = 160000,
         properties = acoustic_properties,
         sim_dir = project_dir,
         steps = 1000,
         num_jobs = 8,
     )
-    movie_file = os.path.join(project_dir, "simulation.mp4")
-    state_dump_dir = os.path.join(project_dir, "all", "state")
-    building_file = os.path.join(project_dir, "building.b3d")
-    # make_movie(movie_file, state_dump_dir, building_file)

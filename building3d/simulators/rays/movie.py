@@ -7,6 +7,15 @@ import pyvista as pv
 from building3d.geom.cloud import points_to_array
 from building3d.io.b3d import read_b3d
 from .dumpreader import DumpReader
+from .config import (
+    RAY_OPACITY,
+    RAY_TRAIL_OPACITY,
+    RAY_POINT_SIZE,
+    BUILDING_OPACITY,
+    BUILDING_COLOR,
+    FPS,
+    CMAP,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -24,13 +33,13 @@ def make_movie(output_file: str, state_dump_dir: str, building_file: str, num_st
     logger.info(f"Start making movie: {output_file}")
 
     # Graphics settings
-    ray_opacity = 0.5
-    ray_trail_opacity = 0.25
-    ray_point_size = 3  # default 3, looks good if many rays
-    building_opacity = 0.5
-    building_color = [0.8, 0.8, 0.8]  # gray
-    fps = 30
-    cmap = "RdPu"
+    ray_opacity = RAY_OPACITY
+    ray_trail_opacity = RAY_TRAIL_OPACITY
+    ray_point_size = RAY_POINT_SIZE  # default 3, looks good if many rays
+    building_opacity = BUILDING_OPACITY
+    building_color = BUILDING_COLOR
+    fps = FPS
+    cmap = CMAP
 
     # Initialize plotter
     plotter = pv.Plotter(

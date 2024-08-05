@@ -88,11 +88,11 @@ def parallel_simulation(
     )
 
     # Make movie
-    # movie_file = WildcardPath(MOVIE_FILE).fill(parent=sim_dir)
-    # merge_state_dir = WildcardPath(MERGE_STATE_DIR).fill(parent=sim_dir)
-    # b3d_file = WildcardPath(B3D_FILE).fill(parent=sim_dir)
-    # make_movie(
-    #     output_file = movie_file,
-    #     state_dump_dir = merge_state_dir,
-    #     building_file = b3d_file,
-    # )
+    movie_file = WildcardPath(MOVIE_FILE).fill(parent=sim_dir)
+    merge_state_dir = WildcardPath(MERGE_STATE_DIR).fill(parent=sim_dir)
+    b3d_file = WildcardPath(B3D_FILE).fill(parent=sim_dir)
+    make_movie(
+        output_file = movie_file,
+        state_dump_dir = merge_state_dir,
+        building_file = b3d_file,
+    )

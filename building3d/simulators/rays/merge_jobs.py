@@ -33,9 +33,6 @@ def merge_state(
     max_job_num += 1  # must increase, becasue if jobs==N, max. job number in job_<job> is N-1
     max_step_num += 1  # like above
 
-    print(f"{max_step_num=}")
-    print(f"{max_job_num=}")
-
     mrg_enr_wp = WildcardPath(mrg_enr_template)
     mrg_pos_wp = WildcardPath(mrg_pos_template)
 
@@ -65,6 +62,7 @@ def merge_state(
 
         assert position is not None
         np.save(mrg_pos_wp.fill(sim_dir, step=step), position)
+    print()
 
 
 def merge_hits(

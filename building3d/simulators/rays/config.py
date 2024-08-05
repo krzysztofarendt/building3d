@@ -26,4 +26,11 @@ JOB_POS_STATE_FILE = join(JOB_STATE_DIR, POSITION_FILE)
 
 # Movie settings
 # ==============
-RAY_LINE_LEN = 10
+RAY_LINE_LEN = 20
+RAY_OPACITY = 0.05
+RAY_TRAIL_OPACITY = 0.1
+RAY_POINT_SIZE = 3  # default 3, looks good if many rays
+BUILDING_OPACITY = 0.1
+BUILDING_COLOR = [0.8, 0.8, 0.8]  # gray
+FPS = 30
+CMAP = "RdPu"  # energy color scale

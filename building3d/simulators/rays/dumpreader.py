@@ -1,3 +1,4 @@
+import os
 import logging
 from pathlib import Path
 
@@ -5,8 +6,8 @@ import numpy as np
 
 from building3d.paths.wildcardpath import WildcardPath
 from .config import (
-    JOB_ENR_STATE_FILE,
-    JOB_POS_STATE_FILE,
+    ENERGY_FILE,
+    POSITION_FILE,
     RAY_LINE_LEN,
 )
 
@@ -15,15 +16,15 @@ logger = logging.getLogger(__name__)
 
 class DumpReader:
 
-    energy_file_template = JOB_ENR_STATE_FILE
-    position_file_template = JOB_POS_STATE_FILE
+    energy_file_template = ENERGY_FILE
+    position_file_template = POSITION_FILE
     buffer_size = RAY_LINE_LEN
 
-    def __init__(self, dump_dir: str):
-        if not Path(dump_dir).exists():
-            raise FileNotFoundError(f"Dir does not exist: {dump_dir}")
+    def __init__(self, state_dir: str):
+        if not Path(state_dir).exists():
+            raise FileNotFoundError(f"Dir does not exist: {state_dir}")
 
-        self.dump_dir = dump_dir
+        self.state_dir = state_dir
 
         self.num_rays = 0
         self.step = 0
@@ -43,19 +44,15 @@ class DumpReader:
         The buffers are initialized with zeros. The newest value is at `[...,0]`.
         The oldest value is at `[..., -1]`.
         """
+        pos_fpath = WildcardPath(DumpReader.position_file_template).fill(self.state_dir, step=step)
+        enr_fpath = WildcardPath(DumpReader.energy_file_template).fill(self.state_dir, step=step)
 
-        position_filename = (DumpReader.position_file_template + str(step) + DumpReader.ext)
-        position_fpath = Path(self.dump_dir) / position_filename
-
-        energy_filename = (DumpReader.energy_file_template + str(step) + DumpReader.ext)
-        energy_fpath = Path(self.dump_dir) / energy_filename
-
-        if not position_fpath.exists() or not energy_fpath.exists():
+        if not os.path.exists(pos_fpath) or not os.path.exists(enr_fpath):
             logger.warning(f"No state file for step {step}. Return None.")
             return None
 
-        position = np.load(position_fpath)
-        energy = np.load(energy_fpath)
+        position = np.load(pos_fpath)
+        energy = np.load(enr_fpath)
 
         if self.num_rays == 0:
             self.num_rays = energy.size
