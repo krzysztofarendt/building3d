@@ -1,11 +1,12 @@
 import logging
+import os
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from tqdm import tqdm
 
 from building3d import random_between
+from building3d.logger import init_logger
 from building3d.geom.building import Building
 from building3d.geom.point import Point
 from building3d.geom.vector import length
@@ -13,7 +14,6 @@ from building3d.geom.vector import vector
 from building3d.simulators.basesimulator import BaseSimulator
 from building3d.simulators.rays.manyrays import ManyRays
 from building3d.simulators.rays.ray import Ray
-from .raymovie import RayMovie
 from .find_location import find_location
 from .ray import Ray
 
@@ -21,37 +21,64 @@ from .ray import Ray
 logger = logging.getLogger(__name__)
 
 
+def simulation_job(
+    building: Building,
+    source: Point,
+    sinks: list[Point],
+    sink_radius: float,
+    num_rays: int,
+    properties: None | dict,
+    csv_file: None | str,
+    state_dump_dir: None | str,
+    steps: int,
+    logfile: None | str,
+) -> None:
+
+    init_logger(logfile)  # TODO: Each process has a separate log file. Should it stay like this?
+
+    raysim = RaySimulator(
+        building=building,
+        source=source,
+        sinks=sinks,
+        sink_radius=sink_radius,
+        num_rays=num_rays,
+        properties=properties,
+        csv_file=csv_file,
+        state_dump_dir=state_dump_dir,
+    )
+    raysim.simulate(steps)
+
+
 class RaySimulator(BaseSimulator):
     """Simulator class for ray tracing.
 
     Controls:
     - time steps
-    - source and receiver
+    - one source and one or more sinks
     - reflections
     - absorption
     - when to finish
-    - exporting simulation movie or gif
     """
     def __init__(
         self,
         building: Building,
         source: Point,
-        receiver: Point,
-        receiver_radius: float,
+        sinks: list[Point],
+        sink_radius: float,
         num_rays: int,
         properties: None | dict = None,
         csv_file: None | str = None,
-        movie_file: None | str = None,
+        state_dump_dir: None | str = None,
     ):
         logger.info("RaySimulator initialization...")
 
         self.building = building
         self.source = source
-        self.receiver = receiver
-        self.receiver_radius = receiver_radius
-        self.received_energy = np.zeros(1)  # placeholder, reinitialized in self.simulate()
+        self.sinks = sinks
+        self.sink_radius = sink_radius
 
-        self.num_step = 0
+        self.num_steps = 0
+        self.step = 0
 
         self.rays = ManyRays(
             num_rays=num_rays,
@@ -61,6 +88,7 @@ class RaySimulator(BaseSimulator):
         )
         self.total_energy = sum([self.rays[i].energy for i in range(len(self.rays))])
         self.num_active_rays = len(self.rays)
+        self.hits = {}
 
         # Make parent dir for CSV file
         if csv_file is not None:
@@ -69,16 +97,10 @@ class RaySimulator(BaseSimulator):
                 parent_dir.mkdir(parents=True)
             self.csv_file = csv_file
         else:
+            logger.warning("No output CSV file specified. Receiver results will not be saved!")
             self.csv_file = None
 
-        # Make parent dir for output movie (or gif)
-        if movie_file is not None:
-            parent_dir = Path(movie_file).parent
-            if not parent_dir.exists():
-                parent_dir.mkdir(parents=True)
-            self.movie = RayMovie(filename=movie_file, building=building, rays=self.rays)
-        else:
-            self.movie = None
+        self.state_dump_dir = state_dump_dir
 
     def set_initial_location(self):
         """Overwrite the initial location for all rays to speed up the first step."""
@@ -98,7 +120,7 @@ class RaySimulator(BaseSimulator):
     def forward(self) -> None:
         """Process next simulation step."""
         logger.info(
-            f"Simulation step {self.num_step}, "
+            f"Simulation step {self.step}, "
             f"total energy = {self.total_energy:.2f}, "
             f"active rays = {self.num_active_rays}"
         )
@@ -106,7 +128,7 @@ class RaySimulator(BaseSimulator):
         self.total_energy = 0
         self.num_active_rays = 0
 
-        if self.num_step == 0:
+        if self.step == 0:
             self.set_initial_location()
             self.set_initial_direction()  # currently, omnidirectional source
 
@@ -116,51 +138,54 @@ class RaySimulator(BaseSimulator):
             if self.rays[i].energy > 0:
                 self.rays[i].forward()
 
-                if RaySimulator.is_hit(self.rays[i], self.receiver, self.receiver_radius):
-                    self.received_energy[self.num_step] += self.rays[i].energy
-                    self.rays[i].energy = 0
-                    logger.debug(f"Ray hits receiver: {self.rays[i]}")
+                for sink in self.sinks:
+                    hit = self.check_hit(self.rays[i], sink, self.sink_radius, self.step)
+                    if hit:
+                        self.rays[i].energy = 0
+                        break
 
                 self.total_energy += self.rays[i].energy
                 self.num_active_rays += 1
 
-        self.num_step += 1
-
-        if self.movie is not None:
-            self.movie.update()
+        self.step += 1
 
     def simulate(self, steps: int) -> None:
-        """Simulate chosen number of steps and save a movie.
+        """Simulate chosen number of steps.
 
         Args:
             steps: number of steps to simulate
         """
-        self.received_energy = np.zeros(steps)
+        self.num_steps = steps
 
-        logger.info("Starting the simulation")
-        print("Simulation started")
-        for _ in tqdm(range(steps)):
+        logger.info(f"Simulation started (pid = {os.getpid()})")
+        print(f"Simulation started (pid = {os.getpid()})")
+        for i in range(steps):
+            if self.state_dump_dir is not None:
+                self.rays.dump_state(self.state_dump_dir, i)
             self.forward()
 
-        logger.info("Simulation finished")
-        print("Simulation finished")
+        if self.state_dump_dir is not None:
+            self.rays.dump_state(self.state_dump_dir, steps - 1)
+
+        logger.info(f"Simulation finished (pid = {os.getpid()})")
+        print(f"Simulation finished (pid = {os.getpid()})")
 
         if self.csv_file is not None:
             self.save_results()
 
-        if self.movie is not None:
-            self.movie.save()
-
     def save_results(self):
         df = pd.DataFrame(
-            index=pd.Index(np.arange(0, self.num_step) * Ray.time_step, name="time"),
+            index=pd.Index(np.arange(0, self.step) * Ray.time_step, name="time"),
         )
-        df["received_energy"] = self.received_energy
+        for i, sink in enumerate(self.sinks):
+            df[i] = self.hits[sink]
         df.to_csv(self.csv_file)
 
-    @staticmethod
-    def is_hit(ray: Ray, receiver: Point, radius: float) -> bool:
-        if length(vector(ray.position, receiver)) < radius:
+    def check_hit(self, ray: Ray, sink: Point, radius: float, step: int) -> bool:
+        if sink not in self.hits:
+            self.hits[sink] = np.zeros(self.num_steps)
+        if length(vector(ray.position, sink)) < radius:
+            self.hits[sink][step] += ray.energy
             return True
         else:
             return False

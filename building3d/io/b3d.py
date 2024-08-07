@@ -57,6 +57,7 @@ Format:
     }
 }
 """
+from pathlib import Path
 import json
 
 from building3d.geom.cloud import points_to_nested_list
@@ -68,12 +69,21 @@ from building3d.geom.polygon import Polygon
 from building3d.geom.zone import Zone
 from building3d.mesh.polymesh import PolyMesh
 from building3d.mesh.solidmesh import SolidMesh
-from building3d.mesh.mesh import Mesh
 from building3d.types.recursive_default_dict import recursive_default_dict
 
 
-def write_b3d(path: str, bdg: Building) -> None:
-    """Write the model and its mesh to B3D file."""
+def write_b3d(path: str, bdg: Building, parents: bool = True) -> None:
+    """Write the model and its mesh to B3D file.
+
+    Args:
+        path: path to the output file
+        bdg: Building instance
+        parents: if True, parent directories will be created
+    """
+    if parents is True:
+        p = Path(path)
+        if not p.parent.exists():
+            p.parent.mkdir(parents=True)
 
     # Construct the model dictionary
     # I am keeping only the object names and point coordinates

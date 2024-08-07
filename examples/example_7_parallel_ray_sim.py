@@ -1,15 +1,22 @@
-import building3d.logger
-from building3d.display.plot_objects import plot_objects
+import os
+from pathlib import Path
+
+from building3d.logger import init_logger
 from building3d.geom.building import Building
 from building3d.geom.predefined.solids.box import box
 from building3d.geom.zone import Zone
 from building3d.geom.point import Point
-from building3d.simulators.rays.simulator import RaySimulator
 from building3d.simulators.rays.movie import make_movie
+from building3d.simulators.rays.parallel_simulation import parallel_simulation
+from building3d.simulators.rays.config import MAIN_LOG_FILE
 from building3d.io.b3d import write_b3d
 
 
 if __name__ == "__main__":
+    project_dir = "tmp/parallel/"
+    main_logfile = os.path.join(project_dir, MAIN_LOG_FILE)
+    init_logger(main_logfile)
+
     L = 4
     W = 4
     H = 4
@@ -39,42 +46,34 @@ if __name__ == "__main__":
     building = Building(name="building")
     building.add_zone(zone)
 
-    b3d_file = "tmp/building.b3d"
-    write_b3d(b3d_file, building)
+    b3d_file = Path(project_dir) / "building.b3d"
+    write_b3d(str(b3d_file), building)
 
     # Acoustic properties can be defined for each polygon/subpolygon separately
     # or in groups for parent objects (walls, solids, zones).
     # Group properties are propagated to all children objects.
     acoustic_properties = {
         "absorption": {
-            "zone/solid_1/floor": 0.1,
-            "zone/solid_1/wall-0/wall-0": 0.2,
-            "zone/solid_1/wall-1": 0.2,
-            "zone/solid_1/wall-2": 0.2,
-            "zone/solid_1/wall-3": 0.2,
-            "zone/solid_1/roof": 0.2,
-            "zone/solid_2": 0.3,
-            "zone/solid_3": 0.4,
-            "zone/solid_4": 0.5,
+            "zone/solid_1/floor": 0.3,
+            "zone/solid_1/wall-0/wall-0": 0.1,
+            "zone/solid_1/wall-1": 0.1,
+            "zone/solid_1/wall-2": 0.1,
+            "zone/solid_1/wall-3": 0.1,
+            "zone/solid_1/roof": 0.1,
+            "zone/solid_2": 0.12,
+            "zone/solid_3": 0.13,
+            "zone/solid_4": 0.14,
         },
     }
 
-    state_dump_dir = "tmp/state_dump/"
-
-    raysim = RaySimulator(
+    parallel_simulation(
         building = building,
         source = Point(1, 1, 1),
-        receiver = Point(6, 6, 2),
-        receiver_radius = 0.3,
-        num_rays = 25000,
+        sinks = [Point(3, 3, 2), Point(6, 6, 2)],
+        sink_radius = 0.6,
+        num_rays = 160000,
         properties = acoustic_properties,
-        csv_file="tmp/results.csv",
-        state_dump_dir = state_dump_dir,
+        sim_dir = project_dir,
+        steps = 1000,
+        num_jobs = 8,
     )
-    raysim.simulate(1000)
-    plot_objects((building, raysim.rays), output_file="tmp/ray_simulation_last_state.png")
-
-    print("Making movie")
-    movie_file = "tmp/ray_simulation.mp4"  # .gif or .mp4
-    make_movie(movie_file, state_dump_dir, b3d_file, 300)
-

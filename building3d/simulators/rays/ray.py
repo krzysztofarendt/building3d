@@ -12,13 +12,14 @@ from .find_location import find_location
 from .find_target import find_target
 from .find_transparent import find_transparent
 from .get_property import get_property
+from .config import RAY_LINE_LEN
 
 
 logger = logging.getLogger(__name__)
 
 
 class Ray:
-    buffer_size: int = 10  # how many past positions to remember, used only for plotting
+    buffer_size: int = RAY_LINE_LEN  # Used only for plotting
     transparent = []
     transparent_checked = False
 

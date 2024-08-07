@@ -46,11 +46,10 @@ def test_ray_simulator(plot=False):
     raysim = RaySimulator(
         building = building,
         source = Point(0.3, 0.3, 0.3),
-        receiver = Point(0.6, 0.6, 0.6),
-        receiver_radius = 0.1,
-        num_rays = 50,
+        sinks = [Point(0.6, 0.6, 0.6)],
+        sink_radius = 0.1,
+        num_rays = 100,
         csv_file = csv_file,
-        movie_file = movie_path,
     )
     locations = [r.location for r in raysim.rays]
     unique_locations = np.unique(locations)
