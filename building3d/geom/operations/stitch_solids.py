@@ -103,7 +103,10 @@ def find_n_closest_points_between_2_polygons(
             dist_p1_p2[p1].append((d, p2))
 
     for p1 in dist_p1_p2.keys():
-        dist_p1_p2[p1] = sorted(dist_p1_p2[p1])
+        dist_p1_p2[p1] = sorted(
+            dist_p1_p2[p1],
+            key=lambda x: x[0],  # sort by distance (first element of the tuple)
+        )
 
     pairs = []
     points_used = set()
