@@ -4,9 +4,10 @@ from numba import njit
 from building3d.config import GEOM_ATOL
 from building3d.config import POINT_NUM_DEC
 from building3d.geom.numba.config import PointType, FLOAT
-from building3d.geom.numba.vectors import normal
+from building3d.geom.numba.vectors import normal, new_vector
 
 
+@njit
 def new_point(x: float, y: float, z: float) -> PointType:
     return np.array([x, y, z], dtype=FLOAT)
 
@@ -14,7 +15,7 @@ def new_point(x: float, y: float, z: float) -> PointType:
 # njit doesn't support f-strings
 def point_to_str(pt: np.ndarray) -> str:
     """Returns a string representation of the point."""
-    assert pt.shape == (3, )
+    assert pt.shape == (3, ), "point_to_str() works only with single points."
     return f"pt(x={pt[0]:.2f},y={pt[1]:.2f},z={pt[2]:.2f},id={hex(id(pt))})"
 
 
@@ -53,7 +54,8 @@ def are_points_coplanar(
         return True  # collinear points are also coplanar
 
     # Calculate normal vector based on the first 3 points
-    vec_n = np.full(3, np.nan)
+    # vec_n = np.full(3, np.nan, dtype=FLOAT)
+    vec_n = new_vector(np.nan, np.nan, np.nan)
     i = 0
     while np.isnan(vec_n).any():
         if i+2 >= num_pts:

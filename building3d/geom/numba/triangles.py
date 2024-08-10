@@ -1,12 +1,12 @@
 from numba import njit
 import numpy as np
 
-from building3d.geom.exceptions import GeometryError
+from building3d.geom.exceptions import GeometryError, TriangulationError
 from building3d.config import EPSILON
 from building3d.config import GEOM_ATOL
 from building3d.config import POINT_NUM_DEC
-from .config import PointType, VectorType, IndexType
-from .points import are_points_collinear
+from building3d.geom.numba.config import PointType, VectorType, IndexType, INT
+from building3d.geom.numba.points import are_points_collinear
 
 
 @njit
@@ -170,5 +170,82 @@ def is_corner_convex(
         return False
 
 
+@njit
 def triangulate(pts: PointType, vn: VectorType) -> IndexType:
-    ...  # TODO
+    """Return a list of triangles (i, j, k) using the ear-clipping algorithm.
+
+    (i, j, k) are the indices of the points.
+    The polygon must not have any holes.
+    The polygon can be non-convex.
+
+    Args:
+        points: list of points defining the polygon
+        normal: vector normal to the polygon
+
+    Returns:
+        Array of point indices, shape (num_triangles, 3)
+    """
+    if np.isclose(np.linalg.norm(vn), 0):
+        raise TriangulationError("Normal vector cannot have zero length")
+
+    vertices = [(i, p) for i, p in enumerate(pts)]
+    triangles = []
+    pos = 0
+    num_fail = 0
+
+    while len(vertices) > 2:
+
+        if num_fail > len(vertices):
+            raise TriangulationError("Could not triangulate with ear-clipping")
+
+        # If last vertix, start from the beginning
+        if pos > len(vertices) - 1:
+            pos = 0
+
+        prev_pos = pos - 1 if pos > 0 else len(vertices) - 1
+        next_pos = pos + 1 if pos < len(vertices) - 1 else 0
+
+        prev_id, prev_pt = vertices[prev_pos]
+        curr_id, curr_pt = vertices[pos]
+        next_id, next_pt = vertices[next_pos]
+
+        convex_corner = is_corner_convex(prev_pt, curr_pt, next_pt, vn)
+
+        if convex_corner:
+            # Check if no other point is within this triangle
+            # Needed for non-convex polygons
+            any_point_inside = False
+
+            for i in range(0, len(vertices)):
+                test_id = vertices[i][0]
+                if test_id not in (prev_id, curr_id, next_id):
+                    point_inside = is_point_inside(
+                        pts[test_id],
+                        pts[prev_id],
+                        pts[curr_id],
+                        pts[next_id],
+                    )
+                    if point_inside:
+                        any_point_inside = True
+                        # break
+
+            if not any_point_inside:
+                # Add triangle
+                triangles.append((prev_id, curr_id, next_id))
+
+                # Remove pos from index
+                vertices.pop(pos)
+                continue
+
+            else:
+                # There is some point inside this triangle
+                # So it is not not an ear
+                num_fail += 1
+
+        else:
+            # Non-convex corner
+            num_fail += 1
+
+        pos += 1
+
+    return np.array(triangles, dtype=INT)

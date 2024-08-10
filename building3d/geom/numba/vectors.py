@@ -1,7 +1,12 @@
 import numpy as np
 from numba import njit
 
-from building3d.geom.numba.config import PointType, VectorType
+from building3d.geom.numba.config import PointType, VectorType, FLOAT
+
+
+@njit
+def new_vector(x: float, y: float, z: float) -> VectorType:
+    return np.array([x, y, z], dtype=FLOAT)
 
 
 @njit
@@ -11,12 +16,12 @@ def normal(pt0: PointType, pt1: PointType, pt2: PointType) -> VectorType:
     If the normal does not exist, returns `np.full(3, np.nan)`.
     The normal might not exist e.g. if the points are collinear.
     """
-    n = np.cross(pt1 - pt0, pt2 - pt0)
-    len_n = np.linalg.norm(n)
-    if np.isclose(len_n, 0):
-        return np.full(3, np.nan)
-    n /= len_n
-    return n
+    vn = np.cross(pt1 - pt0, pt2 - pt0)
+    len_vn = np.linalg.norm(vn)
+    if np.isclose(len_vn, 0):
+        return np.full(3, np.nan, dtype=FLOAT)
+    vn /= len_vn
+    return vn
 
 
 @njit
