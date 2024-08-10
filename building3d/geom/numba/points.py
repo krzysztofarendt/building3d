@@ -3,7 +3,7 @@ from numba import njit
 
 from building3d.config import GEOM_ATOL
 from building3d.config import POINT_NUM_DEC
-from .config import POINT_TYPE, INDEX_TYPE
+from .config import PointType
 from .vectors import normal
 
 
@@ -14,11 +14,11 @@ def point_to_str(pt: np.ndarray) -> str:
 
 
 @njit
-def points_equal(pt1: POINT_TYPE, pt2: POINT_TYPE, atol: float = GEOM_ATOL) -> bool:
+def points_equal(pt1: PointType, pt2: PointType, atol: float = GEOM_ATOL) -> bool:
     return np.allclose(pt1, pt2, atol=atol)
 
 
-def point_to_hash(pt: POINT_TYPE, decimals: int = POINT_NUM_DEC) -> int:
+def point_to_hash(pt: PointType, decimals: int = POINT_NUM_DEC) -> int:
     # njit doesn't support hash() and tuple()
     pt = np.round(pt, decimals=decimals)
     return hash(tuple(pt))
@@ -26,7 +26,7 @@ def point_to_hash(pt: POINT_TYPE, decimals: int = POINT_NUM_DEC) -> int:
 
 @njit
 def are_points_coplanar(
-    pts: POINT_TYPE,
+    pts: PointType,
     atol: float = GEOM_ATOL,
 ) -> bool:
 
@@ -68,7 +68,7 @@ def are_points_coplanar(
 
 @njit
 def are_points_collinear(
-    pts: POINT_TYPE,
+    pts: PointType,
     atol: float = GEOM_ATOL,
 ) -> bool:
     num_pts = pts.shape[0]
