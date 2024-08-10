@@ -3,8 +3,12 @@ from numba import njit
 
 from building3d.config import GEOM_ATOL
 from building3d.config import POINT_NUM_DEC
-from .config import PointType
-from .vectors import normal
+from building3d.geom.numba.config import PointType, FLOAT
+from building3d.geom.numba.vectors import normal
+
+
+def new_point(x: float, y: float, z: float) -> PointType:
+    return np.array([x, y, z], dtype=FLOAT)
 
 
 # njit doesn't support f-strings

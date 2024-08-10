@@ -5,7 +5,8 @@ from building3d.geom.exceptions import GeometryError
 from building3d.config import EPSILON
 from building3d.config import GEOM_ATOL
 from building3d.config import POINT_NUM_DEC
-from .config import PointType, VectorType
+from .config import PointType, VectorType, IndexType
+from .points import are_points_collinear
 
 
 @njit
@@ -72,3 +73,102 @@ def is_point_on_same_side(
         vtest /= len_vtest
         vref /= len_vref
         return bool(np.isclose(vtest, vref).all())
+
+
+@njit
+def is_point_inside(
+    ptest: PointType,
+    pt1: PointType,
+    pt2: PointType,
+    pt3: PointType,
+) -> bool:
+    """Tests if point `ptest` is inside the triangle `(pt1, pt2, pt3)`.
+
+    Using the "same side technique" described at:
+    https://blackpawn.com/texts/pointinpoly/
+
+    This function does not test if the point is coplanar with the triangle.
+    """
+    # Test if the point is at any of the three vertices
+    if np.allclose(ptest, pt1) or np.allclose(ptest, pt2) or np.allclose(ptest, pt3):
+        return True
+
+    # Test if it's at any of the edges
+    for pair in [(pt1, pt2), (pt2, pt3), (pt3, pt1)]:
+        pts = np.vstack((pair[0], pair[1], ptest))
+        if are_points_collinear(pts):
+            # ptest is collinear, but is it on the edge or outside the triangle?
+            xt, yt, zt = np.round(ptest, POINT_NUM_DEC)     # TODO: is np.round needed?
+            x0, y0, z0 = np.round(pair[0], POINT_NUM_DEC)   # TODO: is np.round needed?
+            x1, y1, z1 = np.round(pair[1], POINT_NUM_DEC)   # TODO: is np.round needed?
+            if (
+                xt > max(x0, x1) or
+                yt > max(y0, y1) or
+                zt > max(z0, z1) or
+                xt < min(x0, x1) or
+                yt < min(y0, y1) or
+                zt < min(z0, z1)
+            ):
+                return False
+            else:
+                return True
+
+    # Test if ptest is inside
+    side1 = is_point_on_same_side(pt1, pt2, ptest, pt3)
+    side2 = is_point_on_same_side(pt2, pt3, ptest, pt1)
+    side3 = is_point_on_same_side(pt3, pt1, ptest, pt2)
+    is_inside = side1 and side2 and side3
+
+    if is_inside:
+        return True
+    else:
+        return False
+
+
+@njit
+def is_corner_convex(
+    pt1: PointType,
+    pt2: PointType,
+    pt3: PointType,
+    vn: VectorType,
+    atol: float = GEOM_ATOL,
+) -> bool:
+    """Checks if the angle between pt2->pt1 and pt2->pt3 is less than 180 degress.
+
+    It is done by comparing the polygon normal vector with the cross product pt2->pt3 x pt2->pt1.
+    The points pt1, pt2, pt3 should be ordered counter-clockwise with respect to the
+    surface front side.
+
+    Args:
+        pt1: first corner point
+        pt2: second corner point
+        pt3: third corner point
+        vn: unit vector normal to the surface defined by (pt1, pt2, pt3)
+        atol: absolute tolerance
+
+    Returns:
+        True if the corner is convex, else False
+    """
+    assert np.abs(np.linalg.norm(vn) - 1.0) < atol, "Normal vector doesn't have a unit length"
+    v1 = pt2 - pt1
+    v2 = pt3 - pt2
+    v1v2_n = np.cross(v1, v2)  # NOTE: different order in building3d.geom.triangle.is_corner_convex
+    v1v2_n_len = np.linalg.norm(v1v2_n)
+
+    if v1v2_n_len < atol:
+        # Collinear points pt1, pt2, pt3
+        return False
+    else:
+        # Normalize before comparing to vn
+        v1v2_n /= v1v2_n_len
+
+    if np.allclose(v1v2_n, vn):
+        # Convex vertex
+        return True
+    else:
+        # Concave vertex
+        return False
+
+
+def triangulate(pts: PointType, vn: VectorType) -> IndexType:
+    ...  # TODO

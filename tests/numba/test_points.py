@@ -1,8 +1,16 @@
 import numpy as np
 
+from building3d.geom.numba.points import new_point
 from building3d.geom.numba.points import are_points_collinear
 from building3d.geom.numba.points import are_points_coplanar
 from building3d.geom.numba.points import point_to_str
+from building3d.geom.numba.config import FLOAT
+
+
+def test_new_point():
+    pt = new_point(0.0, 0.0, 0.0)
+    assert isinstance(pt, np.ndarray)
+    assert type(pt[0]) is FLOAT
 
 
 def test_are_points_collinear():
