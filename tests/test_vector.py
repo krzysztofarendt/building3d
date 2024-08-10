@@ -1,7 +1,6 @@
 import numpy as np
 
 from building3d.geom.vector import angle
-from building3d.geom.vector import angle_ccw
 
 
 def test_angle():
@@ -39,5 +38,3 @@ def test_angle():
     v1 = np.array([1.0, 0.0, 0.0])
     v2 = np.array([-1.0, -0.5, 0.0])
     assert angle(v1, v2) < np.pi
-    assert angle_ccw(v1, v2, np.cross(v2, v1)) > np.pi
-    assert angle_ccw(v2, v1, np.cross(v1, v2)) > np.pi

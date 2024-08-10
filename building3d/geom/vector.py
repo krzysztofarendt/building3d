@@ -42,26 +42,6 @@ def angle(v1: np.ndarray, v2: np.ndarray) -> float:
     return rad
 
 
-def angle_ccw(v1: np.ndarray, v2: np.ndarray, n: np.ndarray) -> float:  # TODO: is it used anywhere?
-    """Calculate counter-clockwise angle in radians between two vectors.
-    """
-    # In 3D space, determining whether an angle is
-    # counterclockwise or clockwise depends on the context and
-    # the coordinate system being used.
-    # That's why we need a fixed normal
-    n /= length(n)
-    assert (~np.isnan(n)).any(), "Normal has 0 length"
-
-    dot = v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2]
-    det = np.dot(n, np.cross(v1, v2))
-    rad = np.arctan2(det, dot)
-
-    if rad < 0:
-        rad = 2. * np.pi  + rad
-
-    return rad
-
-
 def is_point_colinear(p1: Point, p2: Point, ptest: Point) -> bool:
     v1 = vector(p1, p2)
     v2 = vector(p1, ptest)
