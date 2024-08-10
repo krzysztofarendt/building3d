@@ -121,3 +121,26 @@ def are_points_collinear(
             break
 
     return are_collinear
+
+
+@njit
+def roll_forward(pts: PointType) -> PointType:
+    """Rolls points array 1 element forward. Moves the last point to the beggining.
+
+    Returns a new object. This function does not modify `pts` in place.
+
+    Args:
+        pts: points array, shape (num_points, 3)
+
+    Returns:
+        points array shifted by 1
+    """
+    assert len(pts.shape) == 2
+    new_pts = np.zeros(pts.shape, dtype=FLOAT)
+    num_pts = pts.shape[0]
+    for i in range(num_pts):
+        if i == 0:
+            new_pts[i] = pts[-1]
+        else:
+            new_pts[i] = pts[i-1]
+    return new_pts

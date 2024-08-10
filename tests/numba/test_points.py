@@ -4,6 +4,7 @@ from building3d.geom.numba.points import new_point
 from building3d.geom.numba.points import are_points_collinear
 from building3d.geom.numba.points import are_points_coplanar
 from building3d.geom.numba.points import point_to_str
+from building3d.geom.numba.points import roll_forward
 from building3d.geom.numba.config import FLOAT
 
 
@@ -44,3 +45,16 @@ def test_point_to_str():
     assert isinstance(s, str)
     assert "x=0.00" in s and "y=0.00" in s and "z=0.00" in s and "id=" in s
 
+
+def test_roll_forward():
+    p0 = new_point(0.0, 0.0, 0.0)
+    p1 = new_point(1.0, 0.0, 0.0)
+    p2 = new_point(2.0, 0.0, 0.0)
+    pts = np.vstack((p0, p1, p2))
+    assert np.allclose(pts[0], p0)
+    assert np.allclose(pts[1], p1)
+    assert np.allclose(pts[2], p2)
+    pts = roll_forward(pts)
+    assert np.allclose(pts[0], p2)
+    assert np.allclose(pts[1], p0)
+    assert np.allclose(pts[2], p1)

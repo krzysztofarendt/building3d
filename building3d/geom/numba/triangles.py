@@ -7,6 +7,7 @@ from building3d.config import GEOM_ATOL
 from building3d.config import POINT_NUM_DEC
 from building3d.geom.numba.config import PointType, VectorType, IndexType, INT
 from building3d.geom.numba.points import are_points_collinear
+from building3d.geom.numba.points import roll_forward
 
 
 @njit
@@ -194,10 +195,8 @@ def triangulate(pts: PointType, vn: VectorType) -> IndexType:
     num_fail = 0
 
     while len(vertices) > 2:
-
         if num_fail > len(vertices):
-            raise TriangulationError("Could not triangulate with ear-clipping")
-
+            raise TriangulationError("Ear-clipping algorithm failed.")
         # If last vertix, start from the beginning
         if pos > len(vertices) - 1:
             pos = 0
@@ -215,7 +214,6 @@ def triangulate(pts: PointType, vn: VectorType) -> IndexType:
             # Check if no other point is within this triangle
             # Needed for non-convex polygons
             any_point_inside = False
-
             for i in range(0, len(vertices)):
                 test_id = vertices[i][0]
                 if test_id not in (prev_id, curr_id, next_id):
@@ -228,24 +226,19 @@ def triangulate(pts: PointType, vn: VectorType) -> IndexType:
                     if point_inside:
                         any_point_inside = True
                         # break
-
             if not any_point_inside:
                 # Add triangle
                 triangles.append((prev_id, curr_id, next_id))
-
                 # Remove pos from index
                 vertices.pop(pos)
                 continue
-
             else:
                 # There is some point inside this triangle
                 # So it is not not an ear
                 num_fail += 1
-
         else:
             # Non-convex corner
             num_fail += 1
-
         pos += 1
 
     return np.array(triangles, dtype=INT)

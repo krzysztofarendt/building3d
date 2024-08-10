@@ -1004,7 +1004,7 @@ class Polygon:
 
         weighted_centroids = tri_ctr_arr * weights_arr
 
-        vec = weighted_centroids.sum(axis=0) / weights_arr.sum()
+        vec = weighted_centroids.sum(axis=0) / weights_arr.sum()  # TODO: wieghts_arr.sum()?
         ctr = Point(vec[0], vec[1], vec[2])
 
         return ctr

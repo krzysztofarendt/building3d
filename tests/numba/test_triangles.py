@@ -7,7 +7,9 @@ from building3d.geom.numba.triangles import is_point_inside
 from building3d.geom.numba.triangles import is_corner_convex
 from building3d.geom.numba.triangles import triangulate
 from building3d.geom.numba.points import new_point
+from building3d.geom.numba.points import roll_forward
 from building3d.geom.numba.vectors import new_vector
+from building3d.geom.numba.vectors import normal
 
 
 def test_triangle_area():
@@ -107,6 +109,41 @@ def test_triangulate_l_shape():
     pt4 = new_point(2, 2, 0)
     pt5 = new_point(0, 2, 0)
     pts = np.vstack((pt0, pt1, pt2, pt3, pt4, pt5))
+    num_pts = pts.shape[0]
     vn = new_vector(0, 0, 1)
-    tri = triangulate(pts, vn)
-    assert len(tri) == 4
+
+    # Test at starting points
+    for i in range(num_pts):
+        if i > 0:
+            pts = roll_forward(pts)
+        tri = triangulate(pts, vn)
+        assert len(tri) == 4
+        for nt in range(tri.shape[0]):
+            assert np.allclose(normal(pts[tri[nt, 0]], pts[tri[nt, 1]], pts[tri[nt, 2]]), vn)
+
+
+def test_triangulate_u_shape():
+    pt0 = new_point(0, 0, 0)
+    pt1 = new_point(1, 0, 0)
+    pt2 = new_point(1, 1, 0)
+    pt3 = new_point(2, 1, 0)
+    pt4 = new_point(2, 0, 0)
+    pt5 = new_point(3, 0, 0)
+    pt6 = new_point(3, 2, 0)
+    pt7 = new_point(0, 2, 0)
+    pts = np.vstack((pt0, pt1, pt2, pt3, pt4, pt5, pt6, pt7))
+    num_pts = pts.shape[0]
+    vn = new_vector(0, 0, 1)
+
+    # Test at starting points
+    for i in range(num_pts):
+        if i > 0:
+            pts = roll_forward(pts)
+        tri = triangulate(pts, vn)
+        assert len(tri) == 6
+        for nt in range(tri.shape[0]):
+            assert np.allclose(normal(pts[tri[nt, 0]], pts[tri[nt, 1]], pts[tri[nt, 2]]), vn)
+
+
+if __name__ == "__main__":
+    test_triangulate_u_shape()
