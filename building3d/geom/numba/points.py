@@ -7,19 +7,22 @@ from .config import PointType
 from .vectors import normal
 
 
+# njit doesn't support f-strings
 def point_to_str(pt: np.ndarray) -> str:
-    # njit doesn't support f-strings
+    """Returns a string representation of the point."""
     assert pt.shape == (3, )
     return f"pt(x={pt[0]:.2f},y={pt[1]:.2f},z={pt[2]:.2f},id={hex(id(pt))})"
 
 
 @njit
 def points_equal(pt1: PointType, pt2: PointType, atol: float = GEOM_ATOL) -> bool:
+    """Checks if two points are equal."""
     return np.allclose(pt1, pt2, atol=atol)
 
 
+# njit doesn't support hash() and tuple()
 def point_to_hash(pt: PointType, decimals: int = POINT_NUM_DEC) -> int:
-    # njit doesn't support hash() and tuple()
+    """Calculates a hash value for the point, assuming a chosen number of decimals."""
     pt = np.round(pt, decimals=decimals)
     return hash(tuple(pt))
 
@@ -29,6 +32,15 @@ def are_points_coplanar(
     pts: PointType,
     atol: float = GEOM_ATOL,
 ) -> bool:
+    """Checks if (multiple) points are coplanar.
+
+    Args:
+        pts: point array, shape (num_points, 3)
+        atol: absolute tolerance
+
+    Return:
+        True if points are coplanar, else False
+    """
 
     num_pts = pts.shape[0]
     if num_pts <= 3:
@@ -71,6 +83,15 @@ def are_points_collinear(
     pts: PointType,
     atol: float = GEOM_ATOL,
 ) -> bool:
+    """Checks if (multiple) points are collinear.
+
+    Args:
+        pts: point array, shape (num_points, 3)
+        atol: absolute tolerance
+
+    Return:
+        True if points are collinear, else False
+    """
     num_pts = pts.shape[0]
     assert num_pts >= 3, "At least 3 points must be given"
 
