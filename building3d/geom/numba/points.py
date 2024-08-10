@@ -38,10 +38,9 @@ def are_points_coplanar(
         pts: point array, shape (num_points, 3)
         atol: absolute tolerance
 
-    Return:
+    Returns:
         True if points are coplanar, else False
     """
-
     num_pts = pts.shape[0]
     if num_pts <= 3:
         return True
@@ -89,7 +88,7 @@ def are_points_collinear(
         pts: point array, shape (num_points, 3)
         atol: absolute tolerance
 
-    Return:
+    Returns:
         True if points are collinear, else False
     """
     num_pts = pts.shape[0]
