@@ -5,7 +5,7 @@ from building3d.geom.numba.points import are_points_collinear
 from building3d.geom.numba.points import are_points_coplanar
 from building3d.geom.numba.points import point_to_str
 from building3d.geom.numba.points import roll_forward
-from building3d.geom.numba.config import FLOAT
+from building3d.geom.numba.types import FLOAT
 
 
 def test_new_point():

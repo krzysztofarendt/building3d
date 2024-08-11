@@ -1,7 +1,7 @@
 import numpy as np
 from numba import njit
 
-from building3d.geom.numba.config import PointType, VectorType, FLOAT
+from building3d.geom.numba.types import PointType, VectorType, FLOAT
 
 
 @njit

@@ -3,7 +3,7 @@ from numba import njit
 
 from building3d.config import GEOM_ATOL
 from building3d.config import POINT_NUM_DEC
-from building3d.geom.numba.config import PointType, FLOAT
+from building3d.geom.numba.types import PointType, FLOAT
 from building3d.geom.numba.vectors import normal, new_vector
 
 

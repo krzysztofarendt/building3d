@@ -1,8 +1,11 @@
 import numpy as np
 
 from building3d.geom.numba.points import new_point
+from building3d.geom.numba.vectors import new_vector
 from building3d.geom.numba.polygon import Polygon
-from building3d.geom.numba.polygon import polygon_centroid
+from building3d.geom.numba.polygon.centroid import polygon_centroid
+from building3d.geom.numba.polygon.edges import polygon_edges
+from building3d.geom.numba.polygon.area import polygon_area
 
 
 def test_polygon_centroid_square():
@@ -17,3 +20,53 @@ def test_polygon_centroid_square():
     ])
     ctr = polygon_centroid(pts, tri)
     assert np.allclose(ctr, [0.5, 0.5, 0.0])
+
+
+def test_polygon_edges():
+    pt0 = new_point(0, 0, 0)
+    pt1 = new_point(1, 0, 0)
+    pt2 = new_point(1, 1, 0)
+    pt3 = new_point(0, 1, 0)
+    pts = np.vstack((pt0, pt1, pt2, pt3))
+    edges = polygon_edges(pts)
+    assert edges.shape == (4, 2, 3)
+    assert np.allclose(edges[0, 0, :], pt0)
+    assert np.allclose(edges[0, 1, :], pt1)
+    assert np.allclose(edges[1, 0, :], pt1)
+    assert np.allclose(edges[1, 1, :], pt2)
+    assert np.allclose(edges[2, 0, :], pt2)
+    assert np.allclose(edges[2, 1, :], pt3)
+    assert np.allclose(edges[3, 0, :], pt3)
+    assert np.allclose(edges[3, 1, :], pt0)
+
+
+def test_polygon_area():
+    pt0 = new_point(0, 0, 0)
+    pt1 = new_point(1, 0, 0)
+    pt2 = new_point(1, 1, 0)
+    pt3 = new_point(0, 1, 0)
+    pts = np.vstack((pt0, pt1, pt2, pt3))
+    vn = new_vector(0, 0, 1)
+    area = polygon_area(pts, vn)
+    assert np.isclose(area, 1)
+    breakpoint()
+
+
+def test_polygon():
+    pt0 = new_point(0, 0, 0)
+    pt1 = new_point(1, 0, 0)
+    pt2 = new_point(1, 1, 0)
+    pt3 = new_point(0, 1, 0)
+    pts = np.vstack((pt0, pt1, pt2, pt3))
+    poly = Polygon(pts, name="test_poly")
+    # Check attributes
+    assert np.allclose(poly.ctr, [0.5, 0.5, 0.0])
+    assert len(poly.tri) == 2
+    assert len(poly.pts) == 4
+    assert np.allclose(poly.vn, [0, 0, 1])
+    # Check if uid is random
+    for _ in range(10):
+        poly1 = Polygon(pts)
+        poly2 = Polygon(pts)
+        assert poly1.name != poly2.name
+        assert poly1.uid != poly2.uid

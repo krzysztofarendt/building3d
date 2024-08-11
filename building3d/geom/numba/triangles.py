@@ -5,9 +5,8 @@ from building3d.geom.exceptions import GeometryError, TriangulationError
 from building3d.config import EPSILON
 from building3d.config import GEOM_ATOL
 from building3d.config import POINT_NUM_DEC
-from building3d.geom.numba.config import PointType, VectorType, IndexType, INT
+from building3d.geom.numba.types import PointType, VectorType, IndexType, INT
 from building3d.geom.numba.points import are_points_collinear
-from building3d.geom.numba.points import roll_forward
 
 
 @njit
