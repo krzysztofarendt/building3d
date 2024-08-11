@@ -7,6 +7,7 @@ from building3d.geom.numba.points import point_to_str
 from building3d.geom.numba.points import roll_forward
 from building3d.geom.numba.points import new_point_between_2_points
 from building3d.geom.numba.points import many_new_points_between_2_points
+from building3d.geom.numba.points import is_point_on_segment
 from building3d.geom.numba.types import FLOAT
 
 
@@ -90,3 +91,18 @@ def test_many_new_points_between_2_points():
         [1.0, 0, 0],
     ], dtype=FLOAT)
     assert np.allclose(pts, expected)
+
+
+def test_is_point_on_segment():
+    pt2 = new_point(2, 0, 0)
+    pt1 = new_point(0, 0, 0)
+    ptest = new_point(1, 0, 0)
+    assert is_point_on_segment(ptest, pt1, pt2) is True
+    ptest = new_point(1, 1, 0)
+    assert is_point_on_segment(ptest, pt1, pt2) is False
+    ptest = new_point(2, 0, 0)
+    assert is_point_on_segment(ptest, pt1, pt2) is True
+    ptest = new_point(0, 0, 0)
+    assert is_point_on_segment(ptest, pt1, pt2) is True
+    ptest = new_point(-0.001, 0, 0)
+    assert is_point_on_segment(ptest, pt1, pt2) is False

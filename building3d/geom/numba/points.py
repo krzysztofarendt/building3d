@@ -199,3 +199,29 @@ def many_new_points_between_2_points(
     pts[-1] = pt2
 
     return pts
+
+
+@njit
+def is_point_on_segment(ptest: PointType, pt1: PointType, pt2: PointType) -> bool:
+    """Checks if point p lies on the line segment defined by points pt1 and pt2.
+
+    Args:
+        ptest: The point to check
+        pt1: The first endpoint of the segment
+        pt2: The second endpoint of the segment
+
+    Returns:
+        bool: True if the point lies on the segment, False otherwise.
+    """
+    # Check collinearity using the cross product
+    if not np.allclose(np.cross(ptest - pt1, pt2 - pt1), np.zeros(3, dtype=FLOAT)):
+        return False
+
+    # Check if the point lies within the segment bounds
+    dot_product = np.dot(ptest - pt1, pt2 - pt1)
+    squared_length_p1_p2 = np.dot(pt2 - pt1, pt2 - pt1)
+
+    if dot_product < 0 or dot_product > squared_length_p1_p2:
+        return False
+
+    return True
