@@ -5,6 +5,7 @@ from building3d.geom.numba.points import are_points_collinear
 from building3d.geom.numba.points import are_points_coplanar
 from building3d.geom.numba.points import point_to_str
 from building3d.geom.numba.points import roll_forward
+from building3d.geom.numba.points import new_point_between_2_points
 from building3d.geom.numba.types import FLOAT
 
 
@@ -58,3 +59,17 @@ def test_roll_forward():
     assert np.allclose(pts[0], p2)
     assert np.allclose(pts[1], p0)
     assert np.allclose(pts[2], p1)
+
+
+def test_new_point_between_2_points():
+    p1 = new_point(0.0, 0.0, 0.0)
+    p2 = new_point(1.0, 0.0, 0.0)
+    rel_dist = 0.5
+    pnew = new_point_between_2_points(p1, p2, rel_dist)
+    assert np.allclose(pnew, new_point(0.5, 0.0, 0.0))
+    rel_dist = 0.1
+    pnew = new_point_between_2_points(p1, p2, rel_dist)
+    assert np.allclose(pnew, new_point(0.1, 0.0, 0.0))
+    rel_dist = 0.9
+    pnew = new_point_between_2_points(p1, p2, rel_dist)
+    assert np.allclose(pnew, new_point(0.9, 0.0, 0.0))

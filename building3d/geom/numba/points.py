@@ -144,3 +144,25 @@ def roll_forward(pts: PointType) -> PointType:
         else:
             new_pts[i] = pts[i-1]
     return new_pts
+
+
+@njit
+def new_point_between_2_points(
+    pt1: PointType,
+    pt2: PointType,
+    rel_d: float
+) -> PointType:
+    """Create new point along the edge pt1->pt2.
+
+    Args:
+        pt1: first point of the edge, shape (3, )
+        pt2: second point of the edge, shape (3, )
+        rel_d: relative distance along the edge, 0 = p1, 1 = p2
+
+    Return:
+        new point, shape (3, )
+    """
+    alpha = rel_d
+    alpha_v = new_vector(alpha, alpha, alpha)
+    new_vec = pt1 * (1 - alpha_v) + pt2 * alpha_v
+    return new_point(new_vec[0], new_vec[1], new_vec[2])
