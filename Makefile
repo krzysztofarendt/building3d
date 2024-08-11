@@ -13,6 +13,10 @@ lint-full:
 test:
 	pytest tests/
 
+test-numba:
+	NUMBA_DISABLE_JIT=1 pytest tests/numba/
+	NUMBA_DISABLE_JIT=0 pytest tests/numba/
+
 coverage:
 	pytest --cov=building3d --cov-report=xml --cov-report=term-missing tests/
 
