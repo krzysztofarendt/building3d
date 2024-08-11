@@ -49,13 +49,24 @@ class Polygon:
         self.area = polygon_area(self.pts, self.vn)
 
     def copy(self, new_name: str | None = None):
-        """Return a copy of itself (with a new name).
+        """Returns a copy of itself (with a new name and uid).
 
         Args:
             new_name: polygon name (must be unique within a Wall)
 
-        Return:
+        Returns:
             Polygon
         """
         logger.debug(f"Creating a copy of the polygon {self}. New name = {new_name}")
         return Polygon(self.pts, name=new_name)
+
+    def flip(self, new_name: str | None = None):
+        """Copies and flips the polygon. Changes the name.
+
+        Args:
+            new_name: polygon name (must be unique within a Wall)
+
+        Returns:
+            Polygon
+        """
+        return Polygon(self.pts[::-1].copy(), name=new_name)
