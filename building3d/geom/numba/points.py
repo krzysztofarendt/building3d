@@ -152,17 +152,50 @@ def new_point_between_2_points(
     pt2: PointType,
     rel_d: float
 ) -> PointType:
-    """Create new point along the edge pt1->pt2.
+    """Creates new point along the edge pt1->pt2.
 
     Args:
         pt1: first point of the edge, shape (3, )
         pt2: second point of the edge, shape (3, )
         rel_d: relative distance along the edge, 0 = p1, 1 = p2
 
-    Return:
+    Returns:
         new point, shape (3, )
     """
     alpha = rel_d
     alpha_v = new_vector(alpha, alpha, alpha)
     new_vec = pt1 * (1 - alpha_v) + pt2 * alpha_v
     return new_point(new_vec[0], new_vec[1], new_vec[2])
+
+
+@njit
+def many_new_points_between_2_points(
+    pt1: PointType,
+    pt2: PointType,
+    num: int,
+) -> PointType:
+    """Creates new points along the edge spanning from p1 to p2.
+
+    Points are evenly distributed based on `num`.
+
+    Args:
+        p1: first point of the edge, shape (3, )
+        p2: second point of the edge, shape (3, )
+        num: number of new points to create
+
+    Returns:
+        array of points including p1 and p2, shape (num + 2, 3)
+    """
+    pts = np.zeros((num + 2, 3), dtype=FLOAT)
+    pts[0] = pt1
+
+    for i in range(1, num + 1):
+        alpha = i / (num + 1)
+        alpha_v = new_vector(alpha, alpha, alpha)
+        new_vec = pt1 * (1 - alpha_v) + pt2 * alpha_v
+        new_pt = new_point(new_vec[0], new_vec[1], new_vec[2])
+        pts[i] = new_pt
+
+    pts[-1] = pt2
+
+    return pts

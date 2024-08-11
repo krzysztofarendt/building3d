@@ -6,6 +6,7 @@ from building3d.geom.numba.points import are_points_coplanar
 from building3d.geom.numba.points import point_to_str
 from building3d.geom.numba.points import roll_forward
 from building3d.geom.numba.points import new_point_between_2_points
+from building3d.geom.numba.points import many_new_points_between_2_points
 from building3d.geom.numba.types import FLOAT
 
 
@@ -73,3 +74,19 @@ def test_new_point_between_2_points():
     rel_dist = 0.9
     pnew = new_point_between_2_points(p1, p2, rel_dist)
     assert np.allclose(pnew, new_point(0.9, 0.0, 0.0))
+
+
+def test_many_new_points_between_2_points():
+    pt1 = new_point(0, 0, 0)
+    pt2 = new_point(1, 0, 0)
+    num = 4
+    pts = many_new_points_between_2_points(pt1, pt2, num)
+    expected = np.array([
+        [0.0, 0, 0],
+        [0.2, 0, 0],
+        [0.4, 0, 0],
+        [0.6, 0, 0],
+        [0.8, 0, 0],
+        [1.0, 0, 0],
+    ], dtype=FLOAT)
+    assert np.allclose(pts, expected)
