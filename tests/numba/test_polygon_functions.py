@@ -2,10 +2,12 @@ import numpy as np
 
 from building3d.geom.numba.points import new_point
 from building3d.geom.numba.vectors import new_vector
-from building3d.geom.numba.polygon import Polygon
 from building3d.geom.numba.polygon.centroid import polygon_centroid
 from building3d.geom.numba.polygon.edges import polygon_edges
 from building3d.geom.numba.polygon.area import polygon_area
+from building3d.geom.numba.polygon.plane import projection_coefficients
+from building3d.geom.numba.polygon.plane import plane_coefficients
+from building3d.geom.numba.polygon.ispointinside import is_point_inside
 
 
 def test_polygon_centroid_square():
@@ -51,45 +53,50 @@ def test_polygon_area():
     assert np.isclose(area, 1)
 
 
-def test_polygon():
+def test_projection_cofficients():
+    pt = new_point(0.5, 0.5, 0.5)
+    vn = new_vector(1, 1, 1)
+    a, b, c, d = projection_coefficients(pt, vn)
+    assert np.isclose(a, 1)
+    assert np.isclose(b, 1)
+    assert np.isclose(c, 1)
+    assert np.isclose(d, -1.5)
+
+
+def test_plane_cofficients():
+    pt0 = new_point(1, 0, 0)
+    pt1 = new_point(0, 1, 0)
+    pt2 = new_point(0, 0, 1)
+    pts = np.vstack((pt0, pt1, pt2))
+    a, b, c, d = plane_coefficients(pts)
+
+    assert np.isclose(a, b)
+    assert np.isclose(a, c)
+    assert np.isclose(a / d, b / d)
+    assert np.isclose(a / d, c / d)
+
+
+def test_is_point_inside():
     pt0 = new_point(0, 0, 0)
     pt1 = new_point(1, 0, 0)
     pt2 = new_point(1, 1, 0)
     pt3 = new_point(0, 1, 0)
     pts = np.vstack((pt0, pt1, pt2, pt3))
-    poly = Polygon(pts, name="test_poly")
-    # Check attributes
-    assert np.allclose(poly.ctr, [0.5, 0.5, 0.0])
-    assert len(poly.tri) == 2
-    assert len(poly.pts) == 4
-    assert np.allclose(poly.vn, [0, 0, 1])
-    assert np.isclose(poly.area, 1)
-    # Check if uid is random
-    for _ in range(10):
-        poly1 = Polygon(pts)
-        poly2 = Polygon(pts)
-        assert poly1.name != poly2.name
-        assert poly1.uid != poly2.uid
-
-def test_polygon_copy():
-    pt0 = new_point(0, 0, 0)
-    pt1 = new_point(1, 0, 0)
-    pt2 = new_point(1, 1, 0)
-    pt3 = new_point(0, 1, 0)
-    pts = np.vstack((pt0, pt1, pt2, pt3))
-    poly1 = Polygon(pts, name="poly1")
-    poly2 = poly1.copy("poly2")
-    assert np.allclose(poly1.pts, poly2.pts)
-    assert poly1 is not poly2.pts
-    assert poly1.uid != poly2.uid
-
-
-def test_polygon_flip():
-    pt0 = new_point(0, 0, 0)
-    pt1 = new_point(1, 0, 0)
-    pt2 = new_point(1, 1, 0)
-    pt3 = new_point(0, 1, 0)
-    pts = np.vstack((pt0, pt1, pt2, pt3))
-    poly1 = Polygon(pts, name="poly1")
-    poly2 = poly1.flip("poly2")
-    assert np.allclose(poly1.pts, poly2.pts[::-1])
+    tri = np.array([
+            [0, 1, 2],
+            [2, 3, 0],
+    ])
+    ptest = new_point(0.5, 0.5, 0)
+    assert is_point_inside(ptest, pts, tri) is True
+    ptest = new_point(0.1, 0.9, 0)
+    assert is_point_inside(ptest, pts, tri) is True
+    ptest = new_point(1, 1, 0)
+    assert is_point_inside(ptest, pts, tri) is True
+    ptest = new_point(1, 0, 0)
+    assert is_point_inside(ptest, pts, tri) is True
+    ptest = new_point(0.5, 0.5, 0.01)
+    assert is_point_inside(ptest, pts, tri) is False
+    ptest = new_point(1.1, 0, 0)
+    assert is_point_inside(ptest, pts, tri) is False
+    ptest = new_point(-0.001, 0, 0)
+    assert is_point_inside(ptest, pts, tri) is False

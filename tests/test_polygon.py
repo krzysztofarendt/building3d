@@ -335,19 +335,6 @@ def test_is_point_inside_ortho_projection_fwd_only():
         assert poly.is_point_inside_projection(ptest, vec, fwd_only) is True
 
 
-def test_is_point_behind():
-    p1 = Point(1.0, 0.0, 0.0)
-    p2 = Point(1.0, 1.0, 0.0)
-    p3 = Point(1.0, 1.0, 1.0)
-    p4 = Point(1.0, 0.0, 1.0)
-    poly = Polygon([p1, p2, p3, p4])
-
-    ptest = Point(0.99, 0.5, 0.5)
-    assert poly.is_point_behind(ptest) is True
-    ptest = Point(1.01, 0.5, 0.5)
-    assert poly.is_point_behind(ptest) is False
-
-
 def test_plane_equation_coefficients():
     p1 = Point(0.0, 4.0, -1.0)
     p2 = Point(1.0, -1.0, 2.0)

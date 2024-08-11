@@ -689,15 +689,6 @@ class Polygon:
                     min_dist = dist
             return min_dist
 
-    def distance_point_to_polygon_points(self, p: Point) -> float:
-        """Return minimum distance between test point and polygon points."""
-        dist = np.inf
-        for v in self.points:
-            p_to_v = length(p.vector() - v.vector())
-            if  p_to_v < dist:
-                dist = p_to_v
-        return dist
-
     def plane_normal_and_d(self) -> tuple[np.ndarray, float]:
         """Return the normal vector and coefficient d describing the plane."""
         _, _, _, d = self.plane_equation_coefficients()
@@ -824,26 +815,6 @@ class Polygon:
             logger.debug(f"Check if projected point is inside the polygon: {p} ({p.x}, {p.y}, {p.z})")
             is_inside = self.is_point_inside(p)
             return is_inside
-
-    def is_point_behind(self, p: Point) -> bool:
-        """Checks if the point p is behind the polygon.
-
-        A point is behind the polygon if the polygon's normal vector
-        is directed in the opposite direction to the point.
-        """
-        # Translate polygon's to the point p
-        _, _, _, d = self.plane_equation_coefficients()
-        _, _, _, dp = self.projection_coefficients(p)
-
-        # Distance
-        # Negative distance -> point behind the polygon
-        # Positive distance -> point in front of the polygon
-        dist = d - dp
-
-        if dist < 0:
-            return True
-        else:
-            return False
 
     def is_facing_polygon(self, poly, exact: bool = True) -> bool:
         """Checks if this polygon is facing another polygon.

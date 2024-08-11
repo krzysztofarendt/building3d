@@ -202,15 +202,6 @@ class Solid:
                     return True
         return False
 
-    def distance_to_solid_points(self, p: Point) -> float:
-        """Return minimum distance from test point `p` to solid points."""
-        dist = np.inf
-        for poly in self.get_polygons():
-            dp = poly.distance_point_to_polygon_points(p)
-            if dp < dist:
-                dist = dp
-        return dist
-
     def _volume(self) -> float:
         """Based on: http://chenlab.ece.cornell.edu/Publication/Cha/icip01_Cha.pdf"""
         total_volume = 0.0
