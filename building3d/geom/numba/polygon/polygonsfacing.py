@@ -37,6 +37,8 @@ def are_polygons_facing(
     if not np.allclose(vn1, -1 * vn2, rtol=GEOM_RTOL):
         return False
 
+    normals_opposite = True
+
     if exact:
         if len(pts1) != len(pts2):
             return False
@@ -56,7 +58,7 @@ def are_polygons_facing(
         points_coplanar = are_points_coplanar(np.vstack((pts1, pts2)))
 
         # Condition 2: normal vectors must be opposite
-        normals_opposite = np.allclose(vn1, -1 * vn2, rtol=GEOM_RTOL)
+        pass  # Already checked at the beginning
 
         # Condition 3: polygons must be overlapping
         overlapping = False
