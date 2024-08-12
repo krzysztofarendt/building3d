@@ -3,7 +3,7 @@ from numba import njit
 
 from building3d.config import GEOM_ATOL
 from building3d.config import POINT_NUM_DEC
-from building3d.geom.numba.types import PointType, FLOAT
+from building3d.geom.numba.types import PointType, VectorType, FLOAT
 from building3d.geom.numba.vectors import normal, new_vector
 
 
@@ -227,6 +227,7 @@ def is_point_on_segment(ptest: PointType, pt1: PointType, pt2: PointType) -> boo
     return True
 
 
+# TODO: njit
 def create_points_between_list_of_points(
     pts: PointType,
     delta: float,
@@ -245,6 +246,7 @@ def create_points_between_list_of_points(
     raise NotImplementedError
 
 
+@njit
 def distance_point_to_edge(ptest: PointType, pt1: PointType, pt2: PointType) -> float:
     """Calculates distance of ptest to the line segment pt1->pt2."""
     v21 = pt2 - pt1
@@ -267,3 +269,40 @@ def distance_point_to_edge(ptest: PointType, pt1: PointType, pt2: PointType) -> 
         # Closest point is somewhere between pt1 and pt2
         closest_point = pt1 + t * v21
         return float(np.linalg.norm(closest_point - ptest))
+
+
+# TODO: njit
+def line_intersection(
+    pt1: PointType,
+    d1: VectorType,
+    pt2: PointType,
+    d2: VectorType,
+) -> PointType | None:
+    """Determines the intersection point of two lines in 3D space.
+
+    Args:
+        p1: A point on the first line.
+        d1: The direction vector of the first line.
+        p2: A point on the second line.
+        d2: The direction vector of the second line.
+
+    Returns:
+        The coordinates of the intersection point, or None if the lines are parallel or coincident.
+    """
+    raise NotImplementedError
+
+
+# TODO: njit
+def line_segment_intersection(
+    pa1: PointType,
+    pb1: PointType,
+    pa2: PointType,
+    pb2: PointType,
+) -> PointType | None:
+    """Determines the intersection point between two line segments: pa1->pb1 and pa2->pb2.
+
+    Returns None if:
+    - line segments are not intersecting
+    - line segments are parallel or coincident (their direction vectors are equal)
+    """
+    raise NotImplementedError
