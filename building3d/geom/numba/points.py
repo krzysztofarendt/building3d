@@ -225,3 +225,45 @@ def is_point_on_segment(ptest: PointType, pt1: PointType, pt2: PointType) -> boo
         return False
 
     return True
+
+
+def create_points_between_list_of_points(
+    pts: PointType,
+    delta: float,
+    fixed_pts: PointType | None = None,
+) -> PointType:
+    """Adds new points on the edges, but respects fixed points.
+
+    Args:
+        pts: array of input points defining the edges, shape (num_pts, 3)
+        delta: approximate distance between new points
+        fixed_pts: optional array of fixed points passed to the output, shape (num_pts, 3)
+
+    Returns:
+        array of new points (input and fixed points included), shape (num_pts, 3)
+    """
+    raise NotImplementedError
+
+
+def distance_point_to_edge(ptest: PointType, pt1: PointType, pt2: PointType) -> float:
+    """Calculates distance of ptest to the line segment pt1->pt2."""
+    v21 = pt2 - pt1
+    vt1 = ptest - pt1
+
+    # Project vt1 vector onto the line segment v21
+    # t represents a value between 0 and 1 where:
+    # t=0 corresponts to the start of point of the segment
+    # t=1 corresponds to the end point of the segment
+    t = np.dot(vt1, v21) / np.dot(v21, v21)
+
+    # Check if the projection is outside the segment range
+    if t < 0:
+        closest_point = pt1
+        return float(np.linalg.norm(pt1 - ptest))
+    elif t > 1:
+        clocset_point = pt2
+        return float(np.linalg.norm(pt2 - ptest))
+    else:
+        # Closest point is somewhere between pt1 and pt2
+        closest_point = pt1 + t * v21
+        return float(np.linalg.norm(closest_point - ptest))

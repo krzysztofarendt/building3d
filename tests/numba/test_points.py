@@ -8,6 +8,7 @@ from building3d.geom.numba.points import roll_forward
 from building3d.geom.numba.points import new_point_between_2_points
 from building3d.geom.numba.points import many_new_points_between_2_points
 from building3d.geom.numba.points import is_point_on_segment
+from building3d.geom.numba.points import distance_point_to_edge
 from building3d.geom.numba.types import FLOAT
 
 
@@ -106,3 +107,24 @@ def test_is_point_on_segment():
     assert is_point_on_segment(ptest, pt1, pt2) is True
     ptest = new_point(-0.001, 0, 0)
     assert is_point_on_segment(ptest, pt1, pt2) is False
+
+
+def test_distance_point_to_edge():
+    pt1 = new_point(0.0, 0.0, 0.0)
+    pt2 = new_point(0.0, 1.0, 0.0)
+    ptest1 = new_point(1.0, 0.0, 0.0)  # distance = 1
+    ptest2 = new_point(1.0, 0.5, 0.0)  # distance = 1
+    ptest3 = new_point(1.0, 1.0, 0.0)  # distance = 1
+    ptest4 = new_point(1.0, 2.0, 0.0)  # distance = np.sqrt(2)
+    ptest5 = new_point(0.0, 0.5, 0.0)  # distance = 0
+
+    d = distance_point_to_edge(ptest1, pt1, pt2)
+    assert np.isclose(d, 1)
+    d = distance_point_to_edge(ptest2, pt1, pt2)
+    assert np.isclose(d, 1)
+    d = distance_point_to_edge(ptest3, pt1, pt2)
+    assert np.isclose(d, 1)
+    d = distance_point_to_edge(ptest4, pt1, pt2)
+    assert np.isclose(d, np.sqrt(2))
+    d = distance_point_to_edge(ptest5, pt1, pt2)
+    assert np.isclose(d, 0)
