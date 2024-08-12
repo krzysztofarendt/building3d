@@ -54,7 +54,6 @@ def are_points_coplanar(
         return True  # collinear points are also coplanar
 
     # Calculate normal vector based on the first 3 points
-    # vec_n = np.full(3, np.nan, dtype=FLOAT)
     vec_n = new_vector(np.nan, np.nan, np.nan)
     i = 0
     while np.isnan(vec_n).any():
@@ -247,7 +246,7 @@ def create_points_between_list_of_points(
 
 
 @njit
-def distance_point_to_edge(ptest: PointType, pt1: PointType, pt2: PointType) -> float:
+def distance_point_to_edge(ptest: PointType, pt1: PointType, pt2: PointType) -> FLOAT:
     """Calculates distance of ptest to the line segment pt1->pt2."""
     v21 = pt2 - pt1
     vt1 = ptest - pt1
@@ -261,14 +260,14 @@ def distance_point_to_edge(ptest: PointType, pt1: PointType, pt2: PointType) -> 
     # Check if the projection is outside the segment range
     if t < 0:
         closest_point = pt1
-        return float(np.linalg.norm(pt1 - ptest))
+        return np.linalg.norm(pt1 - ptest)
     elif t > 1:
         clocset_point = pt2
-        return float(np.linalg.norm(pt2 - ptest))
+        return np.linalg.norm(pt2 - ptest)
     else:
         # Closest point is somewhere between pt1 and pt2
         closest_point = pt1 + t * v21
-        return float(np.linalg.norm(closest_point - ptest))
+        return np.linalg.norm(closest_point - ptest)
 
 
 # TODO: njit

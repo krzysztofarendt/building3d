@@ -20,12 +20,12 @@ def normal(pt0: PointType, pt1: PointType, pt2: PointType) -> VectorType:
     len_vn = np.linalg.norm(vn)
     if np.isclose(len_vn, 0):
         return np.full(3, np.nan, dtype=FLOAT)
-    vn /= len_vn
+    vn = vn / len_vn
     return vn
 
 
 @njit
-def angle(v1: VectorType, v2: VectorType) -> float:
+def angle(v1: VectorType, v2: VectorType) -> FLOAT:
     """Calculates angle in radians between two vectors.
     """
     dot_v1_v2 = np.dot(v1 / np.linalg.norm(v1), v2 / np.linalg.norm(v2))

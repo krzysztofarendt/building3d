@@ -1,10 +1,20 @@
-from building3d.geom.numba.types import PointType, VectorType, IndexType, FLOAT
+from numba import njit
+import numpy as np
+
+from building3d.config import GEOM_RTOL
+from building3d.geom.numba.points import points_equal
+from building3d.geom.numba.types import PointType, VectorType, IndexType
+from building3d.geom.numba.points import are_points_coplanar
+from building3d.geom.numba.polygon.ispointinside import is_point_inside
 
 
-def are_polygons_facing_each_other(
+@njit
+def are_polygons_facing(
     pts1: PointType,
+    tri1: IndexType,
     vn1: VectorType,
     pts2: PointType,
+    tri2: IndexType,
     vn2: VectorType,
     exact: bool = True,
 ) -> bool:
@@ -24,5 +34,43 @@ def are_polygons_facing_each_other(
     Return:
         True if the polygons are facing each other
     """
-    ...
+    if not np.allclose(vn1, -1 * vn2, rtol=GEOM_RTOL):
+        return False
 
+    if exact:
+        if len(pts1) != len(pts2):
+            return False
+
+        num_matching = 0
+        for i in range(pts1.shape[0]):
+            for j in range(pts2.shape[0]):
+                if points_equal(pts1[i], pts2[j]):
+                    num_matching += 1
+        if num_matching == len(pts1):
+            return True
+        else:
+            return False
+
+    else:
+        # Condition 1: points must be  coplanar
+        points_coplanar = are_points_coplanar(np.vstack((pts1, pts2)))
+
+        # Condition 2: normal vectors must be opposite
+        normals_opposite = np.allclose(vn1, -1 * vn2, rtol=GEOM_RTOL)
+
+        # Condition 3: polygons must be overlapping
+        overlapping = False
+        for pt in pts1:
+            if is_point_inside(pt, pts2, tri2):
+                overlapping = True
+                break
+        if not overlapping:
+            for pt in pts2:
+                if is_point_inside(pt, pts1, tri1):
+                    overlapping = True
+                    break
+
+        if points_coplanar and normals_opposite and overlapping:
+            return True
+        else:
+            return False
