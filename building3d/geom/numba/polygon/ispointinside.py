@@ -112,7 +112,7 @@ def is_point_inside_ortho_projection(
     moved_pts = pts + dist * vn
 
     # Check if the point lays inside the polygon
-    is_inside = is_point_inside(ptest, moved_pts, tri)  # TODO: Error in njit mode
+    is_inside = is_point_inside(ptest, moved_pts, tri)
 
     return is_inside
 

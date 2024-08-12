@@ -44,10 +44,14 @@ def are_polygons_facing(
             return False
 
         num_matching = 0
+        matched = set()
         for i in range(pts1.shape[0]):
             for j in range(pts2.shape[0]):
-                if points_equal(pts1[i], pts2[j]):
-                    num_matching += 1
+                if j not in matched:
+                    if points_equal(pts1[i], pts2[j]):
+                        num_matching += 1
+                        matched.add(j)
+                        break
         if num_matching == len(pts1):
             return True
         else:
