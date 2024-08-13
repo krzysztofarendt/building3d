@@ -89,6 +89,7 @@ class Building:
             graph = {}
             adjacent_solids = self.find_adjacent_solids()
 
+            # TODO: DON'T LOVE BELOW CODE
             # For each polygon find the adjacent polygon (there can be only 1)
             for zone in self.get_zones():
                 for solid in zone.get_solids():

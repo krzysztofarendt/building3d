@@ -1,7 +1,7 @@
 import numpy as np
 from numba import njit
 
-from building3d.config import GEOM_ATOL
+from building3d.config import GEOM_ATOL, EPSILON
 from building3d.config import POINT_NUM_DEC
 from building3d.geom.numba.types import PointType, VectorType, FLOAT
 from building3d.geom.numba.vectors import normal, new_vector
@@ -104,7 +104,11 @@ def are_points_collinear(
     for i in range(1, num_pts):
         v_num = i - 1
         vectors[v_num] = pts[i] - pts[0]
-        vectors[v_num] /= np.linalg.norm(vectors[v_num])
+        length = np.linalg.norm(vectors[v_num])
+        if length > EPSILON:
+            vectors[v_num] /= length
+        else:
+            vectors[v_num] = np.zeros(3, dtype=FLOAT)
 
     are_collinear = True
     num_vectors = vectors.shape[0]
