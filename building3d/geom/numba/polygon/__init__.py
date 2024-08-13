@@ -1,7 +1,5 @@
 import logging
 
-import numpy as np
-
 from building3d import random_id
 from building3d.geom.paths.validate_name import validate_name
 from building3d.geom.numba.types import PointType, VectorType, IndexType, FLOAT
@@ -12,6 +10,7 @@ from building3d.geom.numba.triangles import triangle_centroid
 from building3d.geom.numba.polygon.centroid import polygon_centroid
 from building3d.geom.numba.polygon.area import polygon_area
 from building3d.geom.numba.polygon.plane import plane_coefficients
+from building3d.geom.numba.polygon.ispointinside import is_point_inside
 
 
 logger = logging.getLogger(__name__)
@@ -80,6 +79,9 @@ class Polygon:
         pt3 = self.pts[self.tri[0, 2]]
         some_pt = triangle_centroid(pt1, pt2, pt3)
         return some_pt
+
+    def is_point_inside(self, pt: PointType) -> bool:
+        return is_point_inside(pt, self.pts, self.tri)
 
     def __str__(self):
         return f"Polygon(name={self.name}, points={self.pts}, id={hex(id(self))})"
