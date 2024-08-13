@@ -14,8 +14,6 @@ Geometry:
 - a set of solids defines a zone
 - a set of zones defines a building
 - wall polygons do not have to be coplanar
-- wall can have subpolygons (e.g. wall with a window)
-- subpolygons do not have own meshes (yet)
 - solids of a zone need to be adjacent
 - but zones of a building do not need to be adjacent
 - polygon names within a wall must be unique

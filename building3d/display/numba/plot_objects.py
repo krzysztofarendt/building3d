@@ -1,6 +1,7 @@
 import logging
 from pathlib import Path
 
+import numpy as np
 import pyvista as pv
 
 from building3d.geom.numba.types import PointType
@@ -62,7 +63,11 @@ def plot_objects(objects: tuple, output_file = None) -> None:
 
         if has_get_mesh:
             verts, faces = obj.get_mesh(children=True)
-            mesh = pv.PolyData(verts, faces=faces)
+            faces_flat = []
+            for f in faces:
+                faces_flat.extend([3, f[0], f[1], f[2]])
+            faces_flat = np.array(faces_flat)
+            mesh = pv.PolyData(verts, faces=faces_flat)
             pl.add_mesh(mesh, show_edges=True, opacity=0.7, color=col)
 
         # TODO

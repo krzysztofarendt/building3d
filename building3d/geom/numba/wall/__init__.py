@@ -145,16 +145,12 @@ class Wall:
 
         for poly in self.get_polygons(children=children):
             offset = len(verts)
-            verts.append(poly.pts)
+            verts.extend(poly.pts.tolist())
             f = poly.tri + offset
             faces.extend(f.tolist())
 
-        faces_flat = []
-        for f in faces:
-            faces_flat.extend([3, f[0], f[1], f[2]])
-
         verts_arr = np.vstack(verts)
-        faces_arr = np.array(faces_flat)
+        faces_arr = np.array(faces)
 
         return verts_arr, faces_arr
 
