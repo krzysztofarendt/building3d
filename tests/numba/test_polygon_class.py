@@ -34,15 +34,3 @@ def test_polygon_flip():
     poly1 = Polygon(pts, name="poly1")
     poly2 = poly1.flip("poly2")
     assert np.allclose(poly1.pts, poly2.pts[::-1])
-
-
-def test_polygon_move_orthogonal():
-    pt0 = new_point(0, 0, 0)
-    pt1 = new_point(1, 0, 0)
-    pt2 = new_point(1, 1, 0)
-    pt3 = new_point(0, 1, 0)
-    pts = np.vstack((pt0, pt1, pt2, pt3))
-    poly = Polygon(pts)
-    poly = poly.move_orthogonal(1)
-    # Check if Z == 1
-    assert np.allclose(poly.pts[:, 2], np.full((1, 4), 1))

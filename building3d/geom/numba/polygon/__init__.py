@@ -63,12 +63,6 @@ class Polygon:
         """
         return Polygon(self.pts[::-1].copy(), name=new_name)
 
-    def move_orthogonal(self, d: float, new_name: str | None = None):
-        """Copies and moves the polygon along the normal vector by a distance `d` (in-place)."""
-        moved_pts = self.pts.copy()
-        moved_pts += self.vn * d
-        return Polygon(moved_pts, name=new_name, triangles=self.tri)
-
     def get_some_interior_point(self) -> PointType:
         """Return some point laying inside this polygon.
 

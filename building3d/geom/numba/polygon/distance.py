@@ -1,7 +1,7 @@
 from numba import njit
 import numpy as np
 
-from building3d.geom.numba.types import PointType, VectorType, IndexType, FLOAT
+from building3d.geom.numba.types import PointType, VectorType, IndexType
 from building3d.geom.numba.polygon.plane import plane_coefficients
 from building3d.geom.numba.polygon.plane import projection_coefficients
 from building3d.geom.numba.points import distance_point_to_edge
