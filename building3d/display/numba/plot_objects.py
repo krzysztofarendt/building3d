@@ -21,11 +21,9 @@ def plot_objects(objects: tuple, output_file = None) -> None:
     The lines are organized as 2D array shaped `(num_lines, num_points_in_a_line)`.
 
     The object must have at least one of the following methods:
-    - get_mesh(children) - returning points and faces -> tuple[PointType, IndexType]
+    - get_mesh() - returning points and faces -> tuple[PointType, IndexType]
     - get_lines() - returning points and lines -> tuple[PointType, IndexType]
     - get_points() - returning points -> PointType
-
-    If you want to include subpolygons in the mesh, get_mesh() must be called with children=True.
 
     Args:
         objects: objects to plot, described above
@@ -62,7 +60,7 @@ def plot_objects(objects: tuple, output_file = None) -> None:
         assert has_get_mesh or has_get_lines or has_get_points, f"{obj} has nothing to plot"
 
         if has_get_mesh:
-            verts, faces = obj.get_mesh(children=True)
+            verts, faces = obj.get_mesh()
             faces_flat = []
             for f in faces:
                 faces_flat.extend([3, f[0], f[1], f[2]])
