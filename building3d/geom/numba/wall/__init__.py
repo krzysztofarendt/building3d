@@ -1,4 +1,5 @@
 import numpy as np
+from typing import Sequence
 
 from building3d import random_id
 from building3d.geom.paths.validate_name import validate_name
@@ -17,7 +18,7 @@ class Wall:
     """
     def __init__(
         self,
-        polygons: list[Polygon] = [],
+        polygons: Sequence[Polygon] = [],
         name: str | None = None,
         uid: str | None = None,
     ):
