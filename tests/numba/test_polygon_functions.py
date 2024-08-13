@@ -5,6 +5,7 @@ from building3d.geom.numba.vectors import new_vector
 from building3d.geom.numba.polygon.centroid import polygon_centroid
 from building3d.geom.numba.polygon.edges import polygon_edges
 from building3d.geom.numba.polygon.area import polygon_area
+from building3d.geom.numba.polygon.distance import distance_point_to_polygon
 from building3d.geom.numba.polygon.plane import projection_coefficients
 from building3d.geom.numba.polygon.plane import plane_coefficients
 from building3d.geom.numba.polygon.ispointinside import is_point_inside
@@ -261,3 +262,53 @@ def test_are_polygons_not_facing():
     assert are_polygons_facing(pts1, tri1, vn1, pts2, tri2, vn2) is False  # exact=True by default
     assert are_polygons_facing(pts1, tri1, vn1, pts2, tri2, vn2, exact=True) is False
     assert are_polygons_facing(pts1, tri1, vn1, pts2, tri2, vn2, exact=False) is False
+
+
+def test_distance_point_to_polygon():
+    p0 = new_point(0.0, 0.0, 0.0)
+    p1 = new_point(1.0, 0.0, 0.0)
+    p2 = new_point(1.0, 1.0, 0.0)
+    p3 = new_point(0.0, 1.0, 0.0)
+    ptest1 = new_point(0.5, 0.5, 1.0)  # distance = 1
+    ptest2 = new_point(1.0, 0.5, 1.0)  # distance = 1
+    ptest3 = new_point(1.0, 0.5, -1.0)  # distance = 1
+    ptest4 = new_point(1.0, 2.0, 0.0)  # distance = 1
+    ptest5 = new_point(2.0, 1.0, 1.0)  # distance = np.sqrt(2)
+    ptest6 = new_point(-1.0, -1.0, 0.0)  # distance = np.sqrt(2)
+    ptest7 = new_point(0.9, 0.1, 3.0)  # distance = 3
+    ptest8 = new_point(0.5, 2.0, 0.0)  # distance = 1 TODO: must calc. dist. to edge, not to vertex
+
+    pts = np.vstack((p0, p1, p2, p3))
+    vn = normal(pts[-1], pts[0], pts[1])
+    tri = triangulate(pts, vn)
+
+    d = distance_point_to_polygon(ptest1, pts, tri, vn)
+    assert np.isclose(d, 1.0)
+    d = distance_point_to_polygon(ptest2, pts, tri, vn)
+    assert np.isclose(d, 1.0)
+    d = distance_point_to_polygon(ptest3, pts, tri, vn)
+    assert np.isclose(d, 1.0)
+    d = distance_point_to_polygon(ptest4, pts, tri, vn)
+    assert np.isclose(d, 1.0)
+    d = distance_point_to_polygon(ptest5, pts, tri, vn)
+    assert np.isclose(d, np.sqrt(2))
+    d = distance_point_to_polygon(ptest6, pts, tri, vn)
+    assert np.isclose(d, np.sqrt(2))
+    d = distance_point_to_polygon(ptest7, pts, tri, vn)
+    assert np.isclose(d, 3)
+    d = distance_point_to_polygon(ptest8, pts, tri, vn)
+    assert np.isclose(d, 1)
+
+    p0 = new_point(1.0, 1.0, 0.0)
+    p1 = new_point(0.0, 1.0, 0.0)
+    p2 = new_point(0.0, 0.0, 1.0)
+    p3 = new_point(1.0, 0.0, 1.0)
+
+    pts = np.vstack((p0, p1, p2, p3))
+    vn = normal(pts[-1], pts[0], pts[1])
+    tri = triangulate(pts, vn)
+
+    ptest8 = new_point(0.5, 1.0, 1.0)  # distance = np.sqrt(2) / 2
+
+    d = distance_point_to_polygon(ptest8, pts, tri, vn)
+    assert np.isclose(d, np.sqrt(2) / 2)
