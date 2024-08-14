@@ -19,6 +19,7 @@ def get_mesh(
     num_pts_per_obj = {}
     num_tri_per_obj = {}
 
+    # Allocate empty arrays for verts and faces
     for i in range(num_objects):
         num_pts_tot += t_pts[i].shape[0]
         num_tri_tot += t_tri[i].shape[0]
@@ -28,6 +29,7 @@ def get_mesh(
     verts = np.zeros((num_pts_tot, 3), dtype=FLOAT)
     faces = np.zeros((num_tri_tot, 3), dtype=INT)
 
+    # Fill the arrays (vstack)
     num_pts_added = 0
     tri_offset = 0
     pts_offset = 0
@@ -41,5 +43,8 @@ def get_mesh(
                 pts_offset += num_pts_per_obj[i-1]
             verts[j + pts_offset] = t_pts[i][j]
             num_pts_added += 1
+
+    # TODO: Equal points should be merged. Look at building3d/mesh/quality/purge_mesh.py
+    ...
 
     return verts, faces

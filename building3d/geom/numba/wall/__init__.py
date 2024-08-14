@@ -91,8 +91,7 @@ class Wall:
         Return:
             tuple of vertices, shaped (num_pts, 3), and faces, shaped (num_tri, 3)
         """
-        mesh = get_mesh_from_polygons(self.get_polygons())
-        return mesh
+        return get_mesh_from_polygons(self.get_polygons())
 
     def __eq__(self, other):
         """Return True if all polygons of this and other are equal."""
