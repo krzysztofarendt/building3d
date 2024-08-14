@@ -6,7 +6,7 @@ from building3d.geom.numba.wall import Wall
 
 
 if __name__ == "__main__":
-    pts = np.array([
+    pts0 = np.array([
         [0.0, 0.0, 0.0],
         [1.0, 0.0, 0.0],
         [1.0, 1.0, 0.0],
@@ -16,7 +16,16 @@ if __name__ == "__main__":
         [1.0, 3.0, 0.0],
         [0.0, 3.0, 0.0],
     ])
-    poly = Polygon(pts, name="poly0")
-    wall = Wall([poly], name="wall0")
+    poly0 = Polygon(pts0, name="poly0")
+
+    pts1 = np.array([
+        [0.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0],
+        [1.0, 0.0, 1.0],
+        [1.0, 0.0, 0.0],
+    ])
+    poly1 = Polygon(pts1, name="poly1")
+
+    wall = Wall([poly0, poly1], name="wall0")
 
     plot_objects((wall, ))

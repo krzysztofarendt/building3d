@@ -21,12 +21,12 @@ if __name__ == "__main__":
     p7 = new_point(0.0, 1.0, 1.5) * stretch + translate
 
 
-    poly_floor = Polygon(np.vstack((p0, p3, p2, p1)))
-    poly_wall0 = Polygon(np.vstack((p0, p1, p5, p4)))
-    poly_wall1 = Polygon(np.vstack((p1, p2, p6, p5)))
-    poly_wall2 = Polygon(np.vstack((p3, p7, p6, p2)))
-    poly_wall3 = Polygon(np.vstack((p0, p4, p7, p3)))
-    poly_roof = Polygon(np.vstack((p4, p5, p6, p7)))
+    poly_floor = Polygon(np.vstack((p0, p3, p2, p1)), name="floor")
+    poly_wall0 = Polygon(np.vstack((p0, p1, p5, p4)), name="w0")
+    poly_wall1 = Polygon(np.vstack((p1, p2, p6, p5)), name="w1")
+    poly_wall2 = Polygon(np.vstack((p3, p7, p6, p2)), name="w2")
+    poly_wall3 = Polygon(np.vstack((p0, p4, p7, p3)), name="w3")
+    poly_roof = Polygon(np.vstack((p4, p5, p6, p7)), name="roof")
 
     walls = Wall(name="walls")
     walls.add_polygon(poly_wall0)
@@ -43,3 +43,5 @@ if __name__ == "__main__":
     solid = Solid(name="room", walls=[walls, floor, roof])
 
     plot_objects((solid, ))
+    plot_objects((walls, floor, roof))
+    plot_objects((poly_floor, poly_wall0, poly_wall1, poly_wall2, poly_wall3, poly_roof))

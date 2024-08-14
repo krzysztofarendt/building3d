@@ -14,6 +14,7 @@ from building3d.geom.numba.polygon import Polygon
 from building3d.geom.numba.polygon.ispointinside import is_point_inside_projection
 from building3d.geom.numba.polygon.polygonsfacing import are_polygons_facing
 from building3d.geom.numba.tetrahedrons import tetrahedron_volume
+from building3d.geom.numba.solid.get_mesh import get_mesh_from_walls
 
 
 logger = logging.getLogger(__name__)
@@ -93,20 +94,7 @@ class Solid:
         Return:
             tuple of vertices, shaped (num_pts, 3), and faces, shaped (num_tri, 3)
         """
-        verts = []
-        faces = []
-
-        for w in self.walls.values():
-            offset = len(verts)
-            v, f = w.get_mesh()
-            verts.extend(v.tolist())
-            f += offset
-            faces.extend(f.tolist())
-
-        verts_arr = np.vstack(verts)
-        faces_arr = np.array(faces)
-
-        return verts_arr, faces_arr
+        return get_mesh_from_walls(self.get_walls())
 
     def bounding_box(self) -> PointType:
         """Return array [[xmin, ymin, zmin], [xmax, ymax, zmax]]"""

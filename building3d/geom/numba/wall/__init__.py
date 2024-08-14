@@ -6,6 +6,7 @@ from building3d.geom.paths.validate_name import validate_name
 from building3d.geom.numba.polygon import Polygon
 from building3d.geom.numba.types import PointType, IndexType
 from building3d.geom.exceptions import GeometryError
+from building3d.geom.numba.wall.get_mesh import get_mesh_from_polygons
 
 
 class Wall:
@@ -90,19 +91,8 @@ class Wall:
         Return:
             tuple of vertices, shaped (num_pts, 3), and faces, shaped (num_tri, 3)
         """
-        verts = []
-        faces = []
-
-        for poly in self.get_polygons():
-            offset = len(verts)
-            verts.extend(poly.pts.tolist())
-            f = poly.tri + offset
-            faces.extend(f.tolist())
-
-        verts_arr = np.vstack(verts)
-        faces_arr = np.array(faces)
-
-        return verts_arr, faces_arr
+        mesh = get_mesh_from_polygons(self.get_polygons())
+        return mesh
 
     def __eq__(self, other):
         """Return True if all polygons of this and other are equal."""
