@@ -53,3 +53,7 @@ def test_zone():
     assert zone.get_object("solid1/walls/w2").name == "w2"
     assert isinstance(zone.get_object("solid1/walls"), Wall)
     assert zone.get_object("solid1/walls").name == "walls"
+
+    verts, faces = zone.get_mesh()
+    assert verts.shape == (2 * 6 * 4, 3)  # NOTE: points not unique
+    assert faces.shape == (2 * 12, 3)     # NOTE: points not unique
