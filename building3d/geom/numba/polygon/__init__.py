@@ -11,6 +11,7 @@ from building3d.geom.numba.polygon.centroid import polygon_centroid
 from building3d.geom.numba.polygon.area import polygon_area
 from building3d.geom.numba.polygon.plane import plane_coefficients
 from building3d.geom.numba.polygon.ispointinside import is_point_inside
+from building3d.geom.numba.polygon.polygonsfacing import are_polygons_facing
 
 
 logger = logging.getLogger(__name__)
@@ -86,6 +87,11 @@ class Polygon:
 
     def is_point_inside(self, pt: PointType) -> bool:
         return is_point_inside(pt, self.pts, self.tri)
+
+    def is_facing_polygon(self, other, exact: bool = True) -> bool:
+        return are_polygons_facing(
+            self.pts, self.tri, self.vn, other.pts, other.tri, other.vn, exact
+        )
 
     def __str__(self):
         return f"Polygon(name={self.name}, points={self.pts}, id={hex(id(self))})"

@@ -24,7 +24,7 @@ class Solid:
     """Solid is a space enclosed by polygons."""
     def __init__(
         self,
-        walls: Sequence[Wall] = [],
+        walls: Sequence[Wall] = (),
         name: str | None = None,
         uid: str | None = None,
     ):

@@ -19,7 +19,7 @@ class Wall:
     """
     def __init__(
         self,
-        polygons: Sequence[Polygon] = [],
+        polygons: Sequence[Polygon] = (),
         name: str | None = None,
         uid: str | None = None,
     ):
