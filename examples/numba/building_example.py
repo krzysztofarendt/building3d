@@ -7,9 +7,6 @@ from building3d.geom.numba.wall import Wall
 from building3d.geom.numba.solid import Solid
 from building3d.geom.numba.zone import Zone
 from building3d.geom.numba.building import Building
-from building3d.io.numba.b3d import write_b3d, read_b3d
-from building3d.io.numba.dotbim import write_dotbim, read_dotbim
-from building3d.io.numba.stl import write_stl, read_stl
 
 
 if __name__ == "__main__":
@@ -33,24 +30,11 @@ if __name__ == "__main__":
     poly_wall3 = Polygon(np.vstack((p0, p4, p7, p3)), name="p_3")
     poly_roof = Polygon(np.vstack((p4, p5, p6, p7)), name="p_roof")
 
-    walls = Wall(name="walls")
-    walls.add_polygon(poly_wall0)
-    walls.add_polygon(poly_wall1)
-    walls.add_polygon(poly_wall2)
-    walls.add_polygon(poly_wall3)
-
-    floor = Wall(name="floor")
-    floor.add_polygon(poly_floor)
-
-    roof = Wall(name="roof")
-    roof.add_polygon(poly_roof)
-
-    solid = Solid(name="room", walls=[walls, floor, roof])
-
-    zone = Zone("zone")
-    zone.add_solid(solid)
-
-    building = Building("building")
-    building.add_zone(zone)
+    walls = Wall([poly_wall0, poly_wall1, poly_wall2, poly_wall3], name="walls")
+    floor = Wall([poly_floor], name="floor")
+    roof = Wall([poly_roof], name="roof")
+    solid = Solid([walls, floor, roof], name="room")
+    zone = Zone([solid], "zone")
+    building = Building([zone], "building")
 
     plot_objects((building, ))

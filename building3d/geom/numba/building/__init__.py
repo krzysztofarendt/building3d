@@ -1,5 +1,6 @@
 from __future__ import annotations
 import logging
+from typing import Sequence
 
 from building3d import random_id
 from building3d.geom.paths.object_path import object_path
@@ -21,7 +22,12 @@ class Building:
 
     Zones do not have to be adjacent. They can even be separate buildings.
     """
-    def __init__(self, name: str | None = None, uid: str | None = None):
+    def __init__(
+        self,
+        zones: Sequence[Zone] = (),
+        name: str | None = None,
+        uid: str | None = None,
+    ):
         """Initialize the building.
 
         Args:
@@ -38,6 +44,9 @@ class Building:
         self.zones: dict[str, Zone] = {}  # {Zone.name: Zone}
         self.graph = {}
         self.adj_solids = {}
+
+        for zn in zones:
+            self.add_zone(zn)
 
         logger.info(f"Building created: {self}")
 

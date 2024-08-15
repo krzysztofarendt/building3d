@@ -1,6 +1,5 @@
 import logging
-
-import numpy as np
+from typing import Sequence
 
 from building3d import random_id
 from building3d.geom.paths.validate_name import validate_name
@@ -23,10 +22,16 @@ class Zone:
 
     Zone is used to model 3D phenomena (e.g. ray tracing, heat transfer, CFD).
     """
-    def __init__(self, name: str | None = None, uid: str | None = None):
+    def __init__(
+        self,
+        solids: Sequence[Solid] = (),
+        name: str | None = None,
+        uid: str | None = None,
+    ):
         """Initialize the zone.
 
         Args:
+            solids: list of Solid instances
             name: name of the zone
             uid: unique id of the zone, random if None
         """
@@ -38,6 +43,9 @@ class Zone:
         else:
             self.uid = random_id()
         self.solids: dict[str, Solid] = {}  # {Solid.name: Solid}
+
+        for sld in solids:
+            self.add_solid(sld)
 
         logger.info(f"Zone created: {self}")
 
