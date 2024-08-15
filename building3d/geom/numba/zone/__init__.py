@@ -80,23 +80,16 @@ class Zone:
         """Get list of solids."""
         return list(self.solids.values())
 
-    def get_wall_names(self) -> list[str]:
-        """Get list of wall names."""
-        return [name for sld in self.get_solids() for name in sld.get_wall_names()]
+    # TODO: Delete
+    # def get_wall_names(self) -> list[str]:
+    #     """Get list of wall names."""
+    #     return [name for sld in self.get_solids() for name in sld.get_wall_names()]
 
-    def get_walls(self) -> list[Wall]:
-        """Get list of wall instances."""
-        return [w for sld in self.get_solids() for w in sld.get_walls()]
+    # def get_walls(self) -> list[Wall]:
+    #     """Get list of wall instances."""
+    #     return [w for sld in self.get_solids() for w in sld.get_walls()]
 
-    def find_wall(self, wall_name: str) -> str:
-        """Find wall by name. Return path suitable for get_object(). Will search in all solids."""
-        for sld in self.get_solids():
-            for wall in sld.get_walls():
-                if wall.name == wall_name:
-                    return object_path(solid=sld, wall=wall)
-        raise GeometryError(f"Wall {wall_name} not found")
-
-    def get_object(self, path: str) -> Solid | Wall | Polygon | None:
+    def get_object(self, path: str) -> Solid | Wall | Polygon:
         """Get object by the path. The path contains names of nested components."""
         names = path.split("/")
         solid_name = names.pop(0)
@@ -125,25 +118,11 @@ class Zone:
             volume += sld.volume
         return volume
 
-    def __eq__(self, other) -> bool:
-        """Returns True if all solids of this and other are equal."""
-        if len(self.solids.values()) != len(other.solids.values()):
-            return False
-        else:
-            num_matches = 0
-            for this_solid in self.solids.values():
-                for other_solid in other.solids.values():
-                    if this_solid == other_solid:
-                        num_matches += 1
-                        break
-            if num_matches != len(self.solids.values()):
-                return False
-        return True
-
     def __str__(self):
         s = f"Zone(name={self.name}, "
         s += f"solids={self.get_solid_names()}, "
-        s += f"volume={self.volume():.2f}, "
         s += f"id={hex(id(self))})"
         return s
 
+    def __repr__(self):
+        return self.__str__()

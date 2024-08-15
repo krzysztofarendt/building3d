@@ -1,4 +1,3 @@
-import numpy as np
 from typing import Sequence
 
 from building3d import random_id
@@ -63,21 +62,13 @@ class Wall:
         """Return list of all polygons."""
         return list(self.polygons.values())
 
-    def get_object(self, path: str) -> Polygon | None:
+    def get_object(self, path: str) -> Polygon:
         """Get object by the path. The path contains names of nested components."""
         names = path.split("/")
         poly_name = names.pop(0)
 
-        polygon_names_all = self.get_polygon_names()
-
-        if poly_name not in polygon_names_all:
+        if poly_name not in self.get_polygon_names():
             raise ValueError(f"Polygon not found: {poly_name}")
-        elif len(names) == 1:  # searching for subpolygon
-            subpoly_name = names[0]
-            if subpoly_name in polygon_names_all:
-                return self.polygons[subpoly_name]
-            else:
-                raise ValueError(f"Subpolygon not found: {subpoly_name}")
         elif len(names) == 0:
             return self.polygons[poly_name]
         else:
@@ -93,23 +84,8 @@ class Wall:
         """
         return get_mesh_from_polygons(self.get_polygons())
 
-    def __eq__(self, other):
-        """Return True if all polygons of this and other are equal."""
-        if len(self.polygons.values()) != len(other.polygons.values()):
-            return False
-        else:
-            num_matches = 0
-            for this_poly in self.polygons.values():
-                for other_poly in other.polygons.values():
-                    if this_poly == other_poly:
-                        num_matches += 1
-                        break
-            if num_matches != len(self.polygons.values()):
-                return False
-        return True
-
     def __str__(self):
-        return f"Wall(name={self.name}, polygons={self.polygons}, id={hex(id(self))})"
+        return f"Wall(name={self.name}, polygons={self.get_polygon_names()}, id={hex(id(self))})"
 
     def __repr__(self):
         return self.__str__()

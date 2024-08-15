@@ -63,7 +63,7 @@ class Building:
         """Get list of zones."""
         return list(self.zones.values())
 
-    def get_object(self, path: str) -> Zone | Solid | Wall | Polygon | None:
+    def get_object(self, path: str) -> Zone | Solid | Wall | Polygon:
         """Get object by the path. The path contains names of nested components."""
         names = path.split("/")
         zone_name = names.pop(0)
@@ -75,15 +75,15 @@ class Building:
         else:
             return self.zones[zone_name].get_object("/".join(names))
 
-    def get_graph(self, recalc=False) -> dict[str, list[str]]:
+    def get_graph(self, recalc=False) -> dict[str, str | None]:
         """Return graph matching adjacent polygons.
 
-        Each polygon can have only 0 or 1 adjacent polygons.
+        Each polygon can have only 0 or 1 adjacent polygons. (TODO -> NOT TRUE? Why list then?)
         Polygons that are partially overlapping are considered non-adjacent.
 
         Expect return value in the following format:
         ```
-        graph["zone0/solid0/wall0/polygon0"] = ["zone1/solid1/wall1/polygon1", ...]
+        graph["zone0/solid0/wall0/polygon0"] = "zone1/solid1/wall1/polygon1"
         ```
         """
         if len(self.graph) > 0 and recalc is False:
@@ -100,7 +100,7 @@ class Building:
                         for poly in wall.get_polygons():
                             found = False
                             poly_path = PATH_SEP.join([zone.name, solid.name, wall.name, poly.name])
-                            graph[poly_path] = []
+                            graph[poly_path] = None
                             # Find adjacent polygon (look only at the adjacent solids)
                             solid_path = PATH_SEP.join([zone.name, solid.name])
                             for a_solid_path in adjacent_solids[solid_path]:
@@ -175,7 +175,7 @@ class Building:
     def volume(self) -> float:
         """Calculate building volume as the sum of zone volumes."""
         volume = 0.0
-        for z in self.zones.values():
+        for z in self.get_zones():
             volume += z.volume()
         return volume
 
@@ -189,25 +189,11 @@ class Building:
         """
         return get_mesh_from_zones(self.get_zones())
 
-    def __eq__(self, other) -> bool:
-        """Returns True if all zones of this and other are equal."""
-        if len(self.zones.values()) != len(other.zones.values()):
-            return False
-        else:
-            num_matches = 0
-            for this_zone in self.zones.values():
-                for other_zone in other.zones.values():
-                    if this_zone == other_zone:
-                        num_matches += 1
-                        break
-            if num_matches != len(self.zones.values()):
-                return False
-            return True
-
     def __str__(self):
         s = f"Building(name={self.name}, "
         s += f"zones={self.get_zone_names()}, "
-        s += f"volume={self.volume():.2f}, "
         s += f"id={hex(id(self))})"
         return s
 
+    def __repr__(self):
+        return self.__str__()

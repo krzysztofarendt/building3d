@@ -59,22 +59,15 @@ class Solid:
         """Get list of walls."""
         return list(self.walls.values())
 
-    def get_polygons(self) -> list[Polygon]:
-        """Return list with all polygons of this solid."""
-        poly = []
-        for wall in self.get_walls():
-            poly.extend(wall.get_polygons())
-        return poly
+    # TODO: Delete
+    # def get_polygons(self) -> list[Polygon]:
+    #     """Return list with all polygons of this solid."""
+    #     poly = []
+    #     for wall in self.get_walls():
+    #         poly.extend(wall.get_polygons())
+    #     return poly
 
-    def find_polygon(self, poly_name: str) -> str:
-        """Find polygon by name. Return path suitable for get_object(). Will search in all walls."""
-        for wall in self.get_walls():
-            for poly in wall.get_polygons():
-                if poly.name == poly_name:
-                    return object_path(wall=wall, poly=poly)
-        raise GeometryError(f"Polygon {poly_name} not found")
-
-    def get_object(self, path: str) -> Wall | Polygon | None:
+    def get_object(self, path: str) -> Wall | Polygon:
         """Get object by the path. The path contains names of nested components."""
         names = path.split("/")
         wall_name = names.pop(0)
@@ -106,7 +99,7 @@ class Solid:
         pmax = new_point(xaxis.max(), yaxis.max(), zaxis.max())
         return np.vstack((pmin, pmax))
 
-    def is_point_inside(self, pt: PointType) -> bool:
+    def is_point_inside(self, pt: PointType) -> bool:  # TODO: use numba
         """Checks whether the point p is inside the solid.
 
         Being at the boundary is assumed to be inside.
@@ -136,7 +129,8 @@ class Solid:
         vec /= np.linalg.norm(vec)
 
         num_crossings = 0
-        for poly in self.get_polygons():
+        all_polys = [p for w in self.get_walls() for p in w.get_polygons()]
+        for poly in all_polys:
             p_crosses_polygon = is_point_inside_projection(pt, vec, poly.pts, poly.tri)
             if p_crosses_polygon:
                 num_crossings += 1
@@ -145,14 +139,15 @@ class Solid:
             return True
         else:
             # Check if point is at the boundary
-            if self.is_point_at_the_boundary(pt):
+            if self.is_point_at_boundary(pt):
                 return True
             else:
                 return False
 
-    def is_point_at_the_boundary(self, pt: PointType) -> bool:
+    def is_point_at_boundary(self, pt: PointType) -> bool:
         """Checks whether the point p lays on any of the boundary polygons."""
-        for poly in self.get_polygons():
+        all_polys = [p for w in self.get_walls() for p in w.get_polygons()]
+        for poly in all_polys:
             if poly.is_point_inside(pt):
                 return True
         return False
@@ -173,8 +168,11 @@ class Solid:
             True if the solids are adjacent
         """
         # TODO: Polygons can be sorted based on the distance of their centroids
-        for this_poly in self.get_polygons():
-            for other_poly in sld.get_polygons():
+        this_all_polys = [p for w in self.get_walls() for p in w.get_polygons()]
+        other_all_polys = [p for w in sld.get_walls() for p in w.get_polygons()]
+
+        for this_poly in this_all_polys:
+            for other_poly in other_all_polys:
                 pts1 = this_poly.pts
                 tri1 = this_poly.tri
                 vn1 = this_poly.vn
@@ -188,7 +186,8 @@ class Solid:
     def _volume(self) -> float:
         """Based on: http://chenlab.ece.cornell.edu/Publication/Cha/icip01_Cha.pdf"""
         total_volume = 0.0
-        for poly in self.get_polygons():
+        all_polys = [p for w in self.get_walls() for p in w.get_polygons()]
+        for poly in all_polys:
             for tri in poly.tri:
                 p0 = new_point(0.0, 0.0, 0.0)
                 p1 = poly.pts[tri[0]]
@@ -210,19 +209,7 @@ class Solid:
         return abs(float(total_volume))
 
     def __str__(self):
-        return f"Solid({self.name=}, {self.walls=}, id={hex(id(self))})"
+        return f"Solid(name={self.name}, walls={self.get_wall_names()}, id={hex(id(self))})"
 
-    def __eq__(self, other):
-        """Return True if all walls of this and other are equal."""
-        if len(self.walls) != len(other.walls):
-            return False
-        else:
-            num_matches = 0
-            for this_wall in self.walls.values():
-                for other_wall in other.walls.values():
-                    if this_wall == other_wall:
-                        num_matches += 1
-                        break
-            if num_matches != len(self.walls):
-                return False
-        return True
+    def __repr__(self):
+        return self.__str__()

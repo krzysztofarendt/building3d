@@ -94,7 +94,7 @@ class Polygon:
         )
 
     def __str__(self):
-        return f"Polygon(name={self.name}, points={self.pts}, id={hex(id(self))})"
+        return f"Polygon(name={self.name}, pts.shape={self.pts.shape}, id={hex(id(self))})"
 
     def __repr__(self):
         return self.__str__()
