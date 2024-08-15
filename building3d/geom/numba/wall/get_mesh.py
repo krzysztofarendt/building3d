@@ -1,6 +1,6 @@
 from building3d.geom.numba.types import PointType, IndexType
 from building3d.geom.numba.polygon import Polygon
-from building3d.geom.numba.mesh import get_mesh
+from building3d.geom.numba.mesh import vstack_mesh
 
 
 def get_mesh_from_polygons(polys: list[Polygon]) -> tuple[PointType, IndexType]:
@@ -16,4 +16,4 @@ def get_mesh_from_polygons(polys: list[Polygon]) -> tuple[PointType, IndexType]:
     """
     t_pts = tuple(p.pts for p in polys)
     t_tri = tuple(p.tri for p in polys)
-    return get_mesh(t_pts, t_tri)
+    return vstack_mesh(t_pts, t_tri)

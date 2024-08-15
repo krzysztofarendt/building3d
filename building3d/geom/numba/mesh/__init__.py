@@ -5,7 +5,7 @@ from building3d.geom.numba.types import PointType, IndexType, FLOAT, INT
 
 
 @njit
-def get_mesh(
+def vstack_mesh(
     t_pts: tuple[PointType, ...],
     t_tri: tuple[IndexType, ...],
 ) -> tuple[PointType, IndexType]:

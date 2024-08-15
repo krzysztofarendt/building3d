@@ -9,6 +9,7 @@ from building3d.geom.numba.types import PointType, IndexType
 from building3d.geom.numba.solid import Solid
 from building3d.geom.numba.wall import Wall
 from building3d.geom.numba.polygon import Polygon
+from building3d.geom.numba.zone.get_mesh import get_mesh_from_solids
 from building3d.geom.exceptions import GeometryError
 
 
@@ -107,19 +108,7 @@ class Zone:
         Return:
             tuple of vertices, shaped (num_pts, 3), and faces, shaped (num_tri, 3)
         """
-        verts = []
-        faces = []
-        for sld in self.solids.values():
-            offset = len(verts)
-            v, f = sld.get_mesh()
-            verts.extend(v.tolist())
-            f += offset
-            faces.extend(f.tolist())
-
-        verts_arr = np.vstack(verts)
-        faces_arr = np.array(faces)
-
-        return verts_arr, faces_arr
+        return get_mesh_from_solids(self.get_solids())
 
     def volume(self) -> float:
         """Calculate zone volume as the sum of solid volumes."""
