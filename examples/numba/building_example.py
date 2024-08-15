@@ -8,6 +8,8 @@ from building3d.geom.numba.solid import Solid
 from building3d.geom.numba.zone import Zone
 from building3d.geom.numba.building import Building
 from building3d.io.numba.b3d import write_b3d, read_b3d
+from building3d.io.numba.dotbim import write_dotbim, read_dotbim
+from building3d.io.numba.stl import write_stl, read_stl
 
 
 if __name__ == "__main__":
@@ -50,9 +52,5 @@ if __name__ == "__main__":
 
     building = Building("building")
     building.add_zone(zone)
-
-    write_b3d("xxx.b3d", building)
-    del building
-    building = read_b3d("xxx.b3d")
 
     plot_objects((building, ))
