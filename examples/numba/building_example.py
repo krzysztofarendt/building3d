@@ -1,0 +1,58 @@
+import numpy as np
+
+from building3d.display.numba.plot_objects import plot_objects
+from building3d.geom.numba.points import new_point
+from building3d.geom.numba.polygon import Polygon
+from building3d.geom.numba.wall import Wall
+from building3d.geom.numba.solid import Solid
+from building3d.geom.numba.zone import Zone
+from building3d.geom.numba.building import Building
+from building3d.io.numba.b3d import write_b3d, read_b3d
+
+
+if __name__ == "__main__":
+    size = 3
+    stretch = [size, size, size]
+    translate = [3.0, 3.0, 3.0]
+    p0 = new_point(0.0, 0.0, 0.0) * stretch + translate
+    p1 = new_point(1.0, 0.0, 0.0) * stretch + translate
+    p2 = new_point(1.0, 1.0, 0.0) * stretch + translate
+    p3 = new_point(0.0, 1.0, 0.0) * stretch + translate
+    p4 = new_point(0.0, 0.0, 1.0) * stretch + translate
+    p5 = new_point(1.0, 0.0, 0.5) * stretch + translate
+    p6 = new_point(1.0, 1.0, 1.0) * stretch + translate
+    p7 = new_point(0.0, 1.0, 1.5) * stretch + translate
+
+
+    poly_floor = Polygon(np.vstack((p0, p3, p2, p1)), name="p_floor")
+    poly_wall0 = Polygon(np.vstack((p0, p1, p5, p4)), name="p_0")
+    poly_wall1 = Polygon(np.vstack((p1, p2, p6, p5)), name="p_1")
+    poly_wall2 = Polygon(np.vstack((p3, p7, p6, p2)), name="p_2")
+    poly_wall3 = Polygon(np.vstack((p0, p4, p7, p3)), name="p_3")
+    poly_roof = Polygon(np.vstack((p4, p5, p6, p7)), name="p_roof")
+
+    walls = Wall(name="walls")
+    walls.add_polygon(poly_wall0)
+    walls.add_polygon(poly_wall1)
+    walls.add_polygon(poly_wall2)
+    walls.add_polygon(poly_wall3)
+
+    floor = Wall(name="floor")
+    floor.add_polygon(poly_floor)
+
+    roof = Wall(name="roof")
+    roof.add_polygon(poly_roof)
+
+    solid = Solid(name="room", walls=[walls, floor, roof])
+
+    zone = Zone("zone")
+    zone.add_solid(solid)
+
+    building = Building("building")
+    building.add_zone(zone)
+
+    write_b3d("xxx.b3d", building)
+    del building
+    building = read_b3d("xxx.b3d")
+
+    plot_objects((building, ))

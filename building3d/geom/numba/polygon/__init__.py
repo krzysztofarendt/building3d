@@ -20,14 +20,14 @@ logger = logging.getLogger(__name__)
 class Polygon:
     def __init__(
         self,
-        points: PointType,
+        pts: PointType,
         name: str | None = None,
         uid: str | None = None,
-        triangles: IndexType | None = None,
+        tri: IndexType | None = None,
     ):
         # Sanity checks
-        assert are_points_coplanar(points), "Polygon points must be coplanar"
-        assert len(points) >= 3, "Polygon needs at least 3 points"
+        assert are_points_coplanar(pts), "Polygon points must be coplanar"
+        assert len(pts) >= 3, "Polygon needs at least 3 points"
 
         # Attribute assignment
         if name is None:
@@ -40,14 +40,14 @@ class Polygon:
         else:
             self.uid = uid
 
-        self.pts: PointType = points
+        self.pts: PointType = pts
         self.vn: VectorType = normal(self.pts[-1], self.pts[0], self.pts[1])
 
-        if triangles is None:
+        if tri is None:
             self.tri: IndexType = triangulate(self.pts, self.vn)
         else:
-            assert len(triangles) > 0, "Empty triangles provided"
-            self.tri: IndexType = triangles
+            assert len(tri) > 0, "Empty triangles provided"
+            self.tri: IndexType = tri
 
         self.ctr: PointType = polygon_centroid(self.pts, self.tri)
         self.area: float = polygon_area(self.pts, self.vn)
