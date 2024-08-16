@@ -169,7 +169,7 @@ class Polygon:
         for p in points:
             if not self.is_point_inside(p):
                 raise GeometryError(
-                    f"At least on of the points is not inside the polygon {self.name}: {p}"
+                    f"At least one of the points is not inside the polygon {self.name}: {p}"
                 )
 
         if name1 is None:
@@ -497,7 +497,6 @@ class Polygon:
             raise GeometryError("First slicing point must start at an edge or a vertex")
         if sl_pt_loc[len(slicing_pts) - 1][0] == "interior":
             raise GeometryError("Last slicing point must end at an edge or a vertex")
-
 
         return sl_pt_loc
 
