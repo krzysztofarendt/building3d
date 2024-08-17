@@ -1,6 +1,7 @@
 import numpy as np
 
 from building3d.geom.numba.points import new_point
+from building3d.geom.numba.points import is_point_in_array
 from building3d.geom.numba.points import are_points_collinear
 from building3d.geom.numba.points import are_points_coplanar
 from building3d.geom.numba.points import point_to_str
@@ -16,6 +17,19 @@ def test_new_point():
     pt = new_point(0.0, 0.0, 0.0)
     assert isinstance(pt, np.ndarray)
     assert type(pt[0]) is FLOAT
+
+
+def test_is_point_in_array():
+    pt = new_point(0.0, 0.0, 0.0)
+
+    arr = np.vstack((
+        new_point(1.0, 1.0, 1.0),
+        new_point(-1.0, -1.0, -1.0),
+        new_point(0.0, 0.0, 0.0),
+    ))
+
+    assert is_point_in_array(pt, arr) is True
+    assert is_point_in_array(pt, arr[:2]) is False
 
 
 def test_are_points_collinear():

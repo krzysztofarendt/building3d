@@ -4,6 +4,9 @@ from building3d.geom.numba.points import new_point, points_equal
 from building3d.geom.numba.polygon.edges import polygon_edges
 from building3d.geom.numba.polygon.slice import slicing_point_location
 from building3d.geom.numba.polygon.slice import remove_redundant_points
+from building3d.geom.numba.polygon.slice import slice_polygon
+from building3d.geom.numba.vectors import normal
+from building3d.geom.numba.triangles import triangulate
 
 
 def test_slicing_point_location():
@@ -63,13 +66,14 @@ def test_remove_redundant_points():
         new_point(1, 1, 0),
         new_point(0, 1, 0),
     ))
+    poly_edges = polygon_edges(pts)
 
     # Check different slices
     slicing_pts = np.vstack((
         new_point(0.5, 0, 0),
         new_point(0.5, 1, 0),
     ))
-    kept = remove_redundant_points(pts, slicing_pts)
+    kept = remove_redundant_points(pts, slicing_pts, poly_edges)
     assert kept.shape == (2, 3)
 
     assert is_point_in(kept[0], slicing_pts)
@@ -80,7 +84,7 @@ def test_remove_redundant_points():
         new_point(0.5, 0, 0),
         new_point(0.5, 1, 0),
     ))
-    kept = remove_redundant_points(pts, slicing_pts)
+    kept = remove_redundant_points(pts, slicing_pts, poly_edges)
     assert kept.shape == (2, 3)
     assert is_point_in(kept[0], slicing_pts[1:])
     assert is_point_in(kept[1], slicing_pts[1:])
@@ -92,12 +96,71 @@ def test_remove_redundant_points():
         new_point(0.5, 1, 0),
         new_point(1, 0, 0),
     ))
-    kept = remove_redundant_points(pts, slicing_pts)
+    kept = remove_redundant_points(pts, slicing_pts, poly_edges)
     assert kept.shape == (3, 3)
     assert is_point_in(kept[0], slicing_pts[1:4])
     assert is_point_in(kept[1], slicing_pts[1:4])
     assert is_point_in(kept[2], slicing_pts[1:4])
 
 
+def test_slice_polygon():
+    pts = np.vstack((
+        new_point(0, 0, 0),
+        new_point(1, 0, 0),
+        new_point(1, 1, 0),
+        new_point(0, 1, 0),
+    ))
+    vn = normal(pts[-1], pts[0], pts[1])
+    tri = triangulate(pts, vn)
+
+    # Check different slices
+    # Start at edge, end at another edge
+    slicing_pts = np.vstack((
+        new_point(0.5, 0, 0),
+        new_point(0.5, 1, 0),
+    ))
+    name1 = "left"
+    pt1 = new_point(0.25, 0.5, 0)
+    name2 = "right"
+    pt2 = new_point(0.75, 0.5, 0)
+    pts1, pts2 = slice_polygon(pts, tri, slicing_pts)
+
+    # Start and end at the same edge
+    slicing_pts = np.vstack((
+        new_point(0.6, 0, 0),
+        new_point(0.6, 0.5, 0),
+        new_point(0.4, 0.5, 0),
+        new_point(0.4, 0.0, 0),
+    ))
+    name1 = "left"
+    pt1 = new_point(0.25, 0.5, 0)
+    name2 = "right"
+    pt2 = new_point(0.5, 0.25, 0)
+    pts1, pts2 = slice_polygon(pts, tri, slicing_pts)
+
+    # Start at vertex, end at edge
+    slicing_pts = np.vstack((
+        new_point(0, 0, 0),
+        new_point(0.5, 0.5, 0),
+        new_point(0.5, 1, 0),
+    ))
+    name1 = "left"
+    pt1 = new_point(0.25, 0.9, 0)
+    name2 = "right"
+    pt2 = new_point(0.75, 0.1, 0)
+    pts1, pts2 = slice_polygon(pts, tri, slicing_pts)
+
+    # Start at vertex, end at different vertex
+    slicing_pts = np.vstack((
+        new_point(0, 0, 0),
+        new_point(1, 1, 0),
+    ))
+    name1 = "left"
+    pt1 = new_point(0.1, 0.9, 0)
+    name2 = "right"
+    pt2 = new_point(0.9, 0.1, 0)
+    pts1, pts2 = slice_polygon(pts, tri, slicing_pts)
+
+
 if __name__ == "__main__":
-    test_remove_redundant_points()
+    test_slice_polygon()

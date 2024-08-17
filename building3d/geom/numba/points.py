@@ -25,6 +25,17 @@ def points_equal(pt1: PointType, pt2: PointType, atol: float = GEOM_ATOL) -> boo
     return np.allclose(pt1, pt2, atol=atol)
 
 
+@njit
+def is_point_in_array(ptest: PointType, arr: PointType) -> bool:
+    assert ptest.shape == (3, )
+    assert len(arr.shape) == 2 and arr.shape[1] == 3
+    num_pts = arr.shape[0]
+    for i in range(num_pts):
+        if points_equal(ptest, arr[i]):
+            return True
+    return False
+
+
 # njit doesn't support hash() and tuple()
 def point_to_hash(pt: PointType, decimals: int = POINT_NUM_DEC) -> int:
     """Calculates a hash value for the point, assuming a chosen number of decimals."""
