@@ -27,6 +27,7 @@ def points_equal(pt1: PointType, pt2: PointType, atol: float = GEOM_ATOL) -> boo
 
 @njit
 def is_point_in_array(ptest: PointType, arr: PointType) -> bool:
+    """Checks if a point is in the 2D array of points."""
     assert ptest.shape == (3, )
     assert len(arr.shape) == 2 and arr.shape[1] == 3
     num_pts = arr.shape[0]
@@ -34,6 +35,16 @@ def is_point_in_array(ptest: PointType, arr: PointType) -> bool:
         if points_equal(ptest, arr[i]):
             return True
     return False
+
+
+@njit
+def list_pts_to_array(lst_pts: list[PointType]) -> PointType:
+    """Converts a list of points into a 2D array."""
+    num_pts = len(lst_pts)
+    pts = np.zeros((num_pts, 3), dtype=FLOAT)
+    for i in range(num_pts):
+        pts[i] = lst_pts[i]
+    return pts
 
 
 # njit doesn't support hash() and tuple()
