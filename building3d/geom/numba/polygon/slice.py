@@ -2,26 +2,19 @@ from numba import njit
 import numpy as np
 
 from building3d.geom.numba.points import points_equal, is_point_in_array
-from building3d.geom.numba.types import PointType, IndexType, FLOAT, INT
-from building3d.geom.exceptions import GeometryError, TriangulationError
+from building3d.geom.numba.types import PointType, IndexType, FLOAT
+from building3d.geom.exceptions import GeometryError
 from building3d.geom.numba.polygon.ispointinside import is_point_inside
 from building3d.geom.numba.polygon.edges import polygon_edges
 from building3d.geom.numba.polygon.distance import distance_point_to_edge
 from building3d.geom.numba.polygon import Polygon
-from building3d.geom.numba.triangles import triangulate
 from building3d.geom.numba.vectors import normal
 
 
 def polygons_from_slices(pts1, pts2, pt1, name1, pt2, name2) -> tuple[Polygon, Polygon]:
     # Determine which polygon is name1 and which name2, based on pt1 and pt2
-    try:
-        poly1 = Polygon(pts1)
-    except TriangulationError:
-        poly1 = Polygon(pts1[::-1])  # TODO: Do it without exception handling
-    try:
-        poly2 = Polygon(pts2)
-    except TriangulationError:
-        poly2 = Polygon(pts2[::-1])  # TODO: Do it without exception handling
+    poly1 = Polygon(pts1)
+    poly2 = Polygon(pts2)
 
     if poly1.is_point_inside(pt1):
         poly1.name = name1
