@@ -5,6 +5,7 @@ from building3d.geom.numba.polygon.edges import polygon_edges
 from building3d.geom.numba.polygon.slice import slicing_point_location
 from building3d.geom.numba.polygon.slice import remove_redundant_points
 from building3d.geom.numba.polygon.slice import slice_polygon
+from building3d.geom.numba.polygon.slice import polygons_from_slices
 from building3d.geom.numba.vectors import normal
 from building3d.geom.numba.triangles import triangulate
 
@@ -124,6 +125,8 @@ def test_slice_polygon():
     name2 = "right"
     pt2 = new_point(0.75, 0.5, 0)
     pts1, pts2 = slice_polygon(pts, tri, slicing_pts)
+    poly1, poly2 = polygons_from_slices(pts1, pts2, pt1, name1, pt2, name2)
+    print(poly1, poly2)
 
     # Start and end at the same edge
     slicing_pts = np.vstack((
@@ -137,6 +140,8 @@ def test_slice_polygon():
     name2 = "right"
     pt2 = new_point(0.5, 0.25, 0)
     pts1, pts2 = slice_polygon(pts, tri, slicing_pts)
+    poly1, poly2 = polygons_from_slices(pts1, pts2, pt1, name1, pt2, name2)
+    print(poly1, poly2)
 
     # Start at vertex, end at edge
     slicing_pts = np.vstack((
@@ -149,6 +154,8 @@ def test_slice_polygon():
     name2 = "right"
     pt2 = new_point(0.75, 0.1, 0)
     pts1, pts2 = slice_polygon(pts, tri, slicing_pts)
+    poly1, poly2 = polygons_from_slices(pts1, pts2, pt1, name1, pt2, name2)
+    print(poly1, poly2)
 
     # Start at vertex, end at different vertex
     slicing_pts = np.vstack((
@@ -160,6 +167,8 @@ def test_slice_polygon():
     name2 = "right"
     pt2 = new_point(0.9, 0.1, 0)
     pts1, pts2 = slice_polygon(pts, tri, slicing_pts)
+    poly1, poly2 = polygons_from_slices(pts1, pts2, pt1, name1, pt2, name2)
+    print(poly1, poly2)
 
 
 if __name__ == "__main__":

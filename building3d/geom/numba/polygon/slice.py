@@ -3,16 +3,41 @@ import numpy as np
 
 from building3d.geom.numba.points import points_equal, is_point_in_array
 from building3d.geom.numba.types import PointType, IndexType, FLOAT, INT
-from building3d.geom.exceptions import GeometryError
+from building3d.geom.exceptions import GeometryError, TriangulationError
 from building3d.geom.numba.polygon.ispointinside import is_point_inside
 from building3d.geom.numba.polygon.edges import polygon_edges
 from building3d.geom.numba.polygon.distance import distance_point_to_edge
 from building3d.geom.numba.polygon import Polygon
+from building3d.geom.numba.triangles import triangulate
+from building3d.geom.numba.vectors import normal
 
 
 def polygons_from_slices(pts1, pts2, pt1, name1, pt2, name2) -> tuple[Polygon, Polygon]:
     # Determine which polygon is name1 and which name2, based on pt1 and pt2
-    ...
+    try:
+        poly1 = Polygon(pts1)
+    except TriangulationError:
+        poly1 = Polygon(pts1[::-1])  # TODO: Do it without exception handling
+    try:
+        poly2 = Polygon(pts2)
+    except TriangulationError:
+        poly2 = Polygon(pts2[::-1])  # TODO: Do it without exception handling
+
+    if poly1.is_point_inside(pt1):
+        poly1.name = name1
+    elif poly1.is_point_inside(pt2):
+        poly1.name = name2
+    else:
+        raise GeometryError("None of the points is inside polygon made of pts1")
+
+    if poly2.is_point_inside(pt1):
+        poly2.name = name1
+    elif poly2.is_point_inside(pt2):
+        poly2.name = name2
+    else:
+        raise GeometryError("None of the points is inside polygon made of pts2")
+
+    return (poly1, poly2)
 
 
 @njit
@@ -167,6 +192,16 @@ def slice_polygon(
         pts1 = slicing_pts.copy()  # name=name1
 
         # Polygon 2 is composed of both, own points and sliced points
+        # slicing_pts must have opposite order than pts -> compare their normal vectors
+        slicing_vn = normal(slicing_pts[-1], slicing_pts[0], slicing_pts[1])
+        poly_vn = normal(pts[-1], pts[0], pts[1])
+        if np.allclose(-1 * slicing_vn, poly_vn):
+            pass
+        elif np.allclose(slicing_vn, poly_vn):
+            slicing_pts = slicing_pts[::-1]  # Re-ordering needed
+        else:
+            raise ValueError("Unexpected slicing plane orientation")
+
         points_2 = []
         slice_points_included = False
         for p in pts:
