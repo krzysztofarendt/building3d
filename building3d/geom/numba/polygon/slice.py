@@ -59,155 +59,199 @@ from building3d.geom.numba.polygon.distance import distance_point_to_edge
 #     if name2 is None:
 #         name2 = random_id()
 #
-#
-# @njit
-# def remove_trailing_boundary_touching_points(
-#     pts: PointType,
-#     slicing_pts: PointType,
-# ) -> PointType:
-#     """Remove all heading and trailing slicing points touching a vertex or an edge.
-#
-#     The returned list of points starts with a single vertex touching polygon's
-#     vertex or edge and ends with a single vertex touching an edge or a vertex.
-#     """
-#     sl_pt_loc = self._slicing_point_location(slicing_pts)
-#     num_at_vertex = sum([1 for loc, _ in sl_pt_loc.values() if loc == "at_vertex"])
-#     num_at_edge = sum([1 for loc, _ in sl_pt_loc.values() if loc == "at_edge"])
-#     num_interior = sum([1 for loc, _ in sl_pt_loc.values() if loc == "interior"])
-#
-#     new_points = []
-#     for i in range(len(slicing_pts)):
-#         # Collect point, location type, and location index for previous, this, and next point
-#         this_pt = slicing_pts[i]
-#         this_loc_type, this_loc_ix = sl_pt_loc[i]
-#
-#         if i > 0:
-#             prev_loc_type, prev_loc_ix = sl_pt_loc[i - 1]
-#         else:
-#             prev_loc_type = None
-#             prev_loc_ix = None
-#
-#         if i < len(slicing_pts) - 1:
-#             next_pt = slicing_pts[i + 1]
-#             next_loc_type, next_loc_ix = sl_pt_loc[i + 1]
-#         else:
-#             next_pt = None
-#             next_loc_type = None
-#             next_loc_ix = None
-#
-#         neglect_subsequent = False
-#
-#         # Check if this point should be kept or removed
-#         if neglect_subsequent is True:
-#             continue
-#         elif this_loc_type == "interior":
-#             new_points.append(this_pt)
-#         elif next_loc_type == "interior":
-#             new_points.append(this_pt)
-#         elif (
-#             prev_loc_type is not None
-#             and prev_loc_type == "interior"
-#             and this_loc_type in ("at_vertex", "at_edge")
-#         ):
-#             new_points.append(this_pt)
-#             neglect_subsequent = True
-#         elif this_loc_type == "at_vertex" and next_loc_type == "at_vertex":
-#             if num_at_vertex == 2:
-#                 # It means there are no interior points
-#                 assert num_interior == 0
-#                 new_points.append(this_pt)
-#             else:
-#                 continue
-#         elif this_loc_type == "at_vertex" and prev_loc_type == "at_vertex":
-#             if num_at_vertex == 2:
-#                 # It means there are no interior points
-#                 assert num_interior == 0
-#                 new_points.append(this_pt)
-#             else:
-#                 continue
-#         elif this_loc_type == "at_edge" and next_loc_type == "at_edge":
-#             if this_loc_ix != next_loc_ix:
-#                 # It means there are no interior points
-#                 assert num_interior == 0
-#                 new_points.append(this_pt)
-#             else:
-#                 continue
-#         elif (
-#             this_loc_type == "at_edge"
-#             and next_loc_type is None
-#             and prev_loc_type == "at_edge"
-#             and prev_loc_ix is not None
-#             and prev_loc_ix != this_loc_ix
-#         ):
-#             # It means there are no interior points
-#             # and this is the last slicing point
-#             assert num_interior == 0
-#             new_points.append(this_pt)
-#         elif (
-#             this_loc_type == "at_edge"
-#             and next_loc_type is None
-#             and prev_loc_type == "at_edge"
-#             and prev_loc_ix is not None
-#             and prev_loc_ix == this_loc_ix
-#         ):
-#             # It means there must be some interior points
-#             # and this is the last slicing point
-#             # and this and previous points lay on the same edge
-#             # so this one must be removed
-#             assert num_interior > 0
-#             continue
-#         elif (
-#             this_loc_type in ("at_vertex", "at_edge")
-#             and next_loc_type != "interior"
-#         ):
-#             continue
-#         elif (
-#             this_loc_type == "at_vertex"
-#             and next_loc_type == "at_edge"
-#             and next_loc_ix is not None
-#         ):
-#             d = distance_point_to_edge(
-#                 ptest = this_pt,
-#                 p1 = self.edges[next_loc_ix][0],
-#                 p2 = self.edges[next_loc_ix][1],
-#             )
-#             if np.isclose(d, 0):
-#                 continue
-#             else:
-#                 new_points.append(this_pt)
-#         elif (
-#             this_loc_type == "at_edge"
-#             and next_loc_type == "at_vertex"
-#             and next_pt is not None
-#         ):
-#             d = distance_point_to_edge(
-#                 ptest = next_pt,
-#                 p1 = self.edges[this_loc_ix][0],
-#                 p2 = self.edges[this_loc_ix][1],
-#             )
-#             if np.isclose(d, 0):
-#                 continue
-#             else:
-#                 new_points.append(this_pt)
-#         else:
-#             raise RuntimeError("This should never happen. Some case is not considered (bug!).")
-#
-#     return new_points
+#     ...
 
 
 @njit
-def slicing_point_location(pts: PointType, slicing_pts: PointType) -> dict:
-    """Return the location of each slicing point.
+def remove_redundant_points(
+    pts: PointType,
+    slicing_pts: PointType,
+) -> PointType:
+    """Removes all heading and trailing slicing points touching a vertex or an edge.
+
+    The returned list of points starts with a single vertex touching polygon's
+    vertex or edge and ends with a single vertex touching an edge or a vertex.
+
+    This function is useful if the slicing points come from another polygon.
+    The second polygon might be overlapping with this one, so some of its vertices
+    will be outside this polygon. Similarly, some edges might be overlapping.
+    We need to keep only the points that create a polygonal chain slicing this polygon
+    into two parts.
+
+    Args:
+        pts: polygon points
+        slicing_pts: points defining how to slice the polygon
+
+    Return:
+        slicing points with redundant points removed
+    """
+    assert len(pts.shape) == 2 and pts.shape[1] == 3
+    assert len(slicing_pts.shape) == 2 and slicing_pts.shape[1] == 3
+
+    poly_edges = polygon_edges(pts)
+    sl_pt_loc = slicing_point_location(pts, slicing_pts, poly_edges)
+
+    num_at_vertex = sum([1 for loc, _ in sl_pt_loc.values() if loc == "at_vertex"])
+    num_interior = sum([1 for loc, _ in sl_pt_loc.values() if loc == "interior"])
+
+    new_points = []
+    for i in range(len(slicing_pts)):
+        # Collect point, location type, and location index for previous, this, and next point
+        this_pt = slicing_pts[i]
+        this_loc_type, this_loc_ix = sl_pt_loc[i]
+
+        if i > 0:
+            prev_loc_type, prev_loc_ix = sl_pt_loc[i - 1]
+        else:
+            prev_loc_type = None
+            prev_loc_ix = -1  # None not accepted by numba, because it is later used as index
+
+        if i < len(slicing_pts) - 1:
+            next_pt = slicing_pts[i + 1]
+            next_loc_type, next_loc_ix = sl_pt_loc[i + 1]
+        else:
+            next_pt = None
+            next_loc_type = None
+            next_loc_ix = -1  # None not accepted by numba, because it is later used as index
+
+        neglect_subsequent = False
+
+        # Check if this point should be kept or removed
+        if neglect_subsequent is True:
+            continue
+        elif this_loc_type == "interior":
+            new_points.append(this_pt)
+        elif next_loc_type == "interior":
+            new_points.append(this_pt)
+        elif (
+            prev_loc_type is not None
+            and prev_loc_type == "interior"
+            and this_loc_type in ("at_vertex", "at_edge")
+        ):
+            new_points.append(this_pt)
+            neglect_subsequent = True
+        elif this_loc_type == "at_vertex" and next_loc_type == "at_vertex":
+            if num_at_vertex == 2:
+                # It means there are no interior points
+                assert num_interior == 0
+                new_points.append(this_pt)
+            else:
+                continue
+        elif this_loc_type == "at_vertex" and prev_loc_type == "at_vertex":
+            if num_at_vertex == 2:
+                # It means there are no interior points
+                assert num_interior == 0
+                new_points.append(this_pt)
+            else:
+                continue
+        elif this_loc_type == "at_edge" and next_loc_type == "at_edge":
+            if this_loc_ix != next_loc_ix:
+                # It means there are no interior points
+                assert num_interior == 0
+                new_points.append(this_pt)
+            else:
+                continue
+        elif (
+            this_loc_type == "at_edge"
+            and next_loc_type is None
+            and prev_loc_type == "at_edge"
+            and prev_loc_ix >= 0
+            and prev_loc_ix != this_loc_ix
+        ):
+            # It means there are no interior points
+            # and this is the last slicing point
+            assert num_interior == 0
+            new_points.append(this_pt)
+        elif (
+            this_loc_type == "at_edge"
+            and next_loc_type is None
+            and prev_loc_type == "at_edge"
+            and prev_loc_ix >= 0
+            and prev_loc_ix == this_loc_ix
+        ):
+            # It means there must be some interior points
+            # and this is the last slicing point
+            # and this and previous points lay on the same edge
+            # so this one must be removed
+            assert num_interior > 0
+            continue
+        elif (
+            this_loc_type in ("at_vertex", "at_edge")
+            and next_loc_type != "interior"
+        ):
+            continue
+        elif (
+            this_loc_type == "at_vertex"
+            and next_loc_type == "at_edge"
+            and next_loc_ix >= 0
+        ):
+            edge = poly_edges[next_loc_ix]
+            d = distance_point_to_edge(
+                ptest = this_pt,
+                pt1 = edge[0],
+                pt2 = edge[1],
+            )
+            if np.isclose(d, 0):
+                continue
+            else:
+                new_points.append(this_pt)
+        elif (
+            this_loc_type == "at_edge"
+            and next_loc_type == "at_vertex"
+            and next_pt is not None
+        ):
+            edge = poly_edges[this_loc_ix]
+            d = distance_point_to_edge(
+                ptest = next_pt,
+                pt1 = edge[0],
+                pt2 = edge[1],
+            )
+            if np.isclose(d, 0):
+                continue
+            else:
+                new_points.append(this_pt)
+        else:
+            raise RuntimeError("This should never happen. Some case is not considered (bug!).")
+
+    # Convert list of points to an array
+    # (done this way to keep it compatible with numba)
+    new_pts_arr = np.zeros((len(new_points), 3), dtype=FLOAT)
+    for i in range(len(new_points)):
+        new_pts_arr[i] = new_points[i]
+
+    return new_pts_arr
+
+
+@njit
+def slicing_point_location(
+    pts: PointType,
+    slicing_pts: PointType,
+    poly_edges: PointType,  # It is calculated in the parent function so we don't want to recalc.
+) -> dict:
+    """Returns the location of each slicing point.
 
     The returned dict has the following format:
     `{slicing_point_index: (location_string, location_index)}`.
     `location_index` is either vertex index, edge index, or `-1` (for `interior`).
     `location_string` is `at_vertex`, `at_edge`, or `interior`.
+
+    Example return values:
+    - `{0: ("at_vertex", 2)}` - slicing point 0 is at vertex 2
+    - `{1: ("at_edge", 1)}` - slicing point 0 is at edge 1
+    - `{2: ("interior", -1)}` - slicing point 2 is inside the polygon
+
+    The number of itmes in the dict is equal to the number of slicing points.
+
+    Args:
+        pts: polygon points
+        slicing_pts: points defining how to slice the polygon
+        poly_edges: list of tuples of points defining the polygon edges
+
+    Return:
+        dict defining the location of each slicing point (vertex, edge, interior)
     """
     if len(slicing_pts) == 0:
         raise GeometryError("No slicing points passed")
-
-    poly_edges = polygon_edges(pts)
 
     sl_pt_loc = {}
     for slp_i, slp in enumerate(slicing_pts):
