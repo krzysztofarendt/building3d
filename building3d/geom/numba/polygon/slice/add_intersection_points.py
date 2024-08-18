@@ -1,11 +1,12 @@
 from numba import njit, typed, types
 import numpy as np
 
-from building3d.geom.numba.types import PointType, INVALID_PT, INVALID_INDEX
+from building3d.geom.numba.types import PointType
 from building3d.geom.numba.points import points_equal
 from building3d.geom.numba.points import list_pts_to_array
 from building3d.geom.numba.points import line_segment_intersection
 from building3d.geom.numba.polygon.edges import polygon_edges
+from .constants import INVALID_INDEX
 
 
 @njit

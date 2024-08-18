@@ -15,4 +15,3 @@ IndexType = NDArray[INT]       # Same shape as referenced array
 
 # Constants
 INVALID_PT = np.full(3, np.nan, dtype=FLOAT)
-INVALID_INDEX = -99999

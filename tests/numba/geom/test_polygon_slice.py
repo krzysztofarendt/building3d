@@ -8,7 +8,7 @@ from building3d.geom.numba.polygon.edges import polygon_edges
 from building3d.geom.numba.polygon.slice import slice_polygon
 from building3d.geom.numba.polygon.slice.locate_slicing_points import locate_slicing_points
 from building3d.geom.numba.polygon.slice.remove_redundant_points import remove_redundant_points
-from building3d.geom.numba.polygon.slice.constants import INTERIOR, VERTEX, EDGE
+from building3d.geom.numba.polygon.slice.constants import INTERIOR, VERTEX, EDGE, INVALID_INDEX
 
 
 def test_slicing_point_location():
@@ -51,7 +51,7 @@ def test_slicing_point_location():
     loc = locate_slicing_points(slicing_pts, pts, tri, edges)
     assert loc[0] == (VERTEX, 0)
     assert loc[1] == (EDGE, 0)
-    assert loc[2] == (INTERIOR, -1)
+    assert loc[2] == (INTERIOR, INVALID_INDEX)
     assert loc[3] == (EDGE, 2)
     assert loc[4] == (VERTEX, 1)
 
