@@ -182,3 +182,47 @@ def test_line_intersection():
     d2 = np.array([0.0, 1.0, 0.0])
     ptest = line_intersection(pt1, d1, pt2, d2)
     assert ptest is INVALID_PT
+
+
+def test_line_segment_intersection():
+    pa1 = new_point(0.0, 0.0, 0.0)
+    pb1 = new_point(2.0, 0.0, 0.0)
+    pa2 = new_point(1.0, 1.0, 0.0)
+    pb2 = new_point(1.0, -1.0, 0.0)
+    ptest = line_segment_intersection(pa1, pb1, pa2, pb2)
+    assert points_equal(ptest, new_point(1.0, 0.0, 0.0))
+
+    pa1 = new_point(0.0, 0.0, 0.0)
+    pb1 = new_point(2.0, 0.0, 0.0)
+    pa2 = new_point(0.0, 1.0, 0.0)
+    pb2 = new_point(0.0, -1.0, 0.0)
+    ptest = line_segment_intersection(pa1, pb1, pa2, pb2)
+    assert points_equal(ptest, new_point(0.0, 0.0, 0.0))
+
+    pa1 = new_point(0.0, 0.0, 0.0)
+    pb1 = new_point(2.0, 0.0, 0.0)
+    pa2 = new_point(0.0, 0.0, 0.0)
+    pb2 = new_point(0.0, 1.0, 0.0)
+    ptest = line_segment_intersection(pa1, pb1, pa2, pb2)
+    assert points_equal(ptest, new_point(0.0, 0.0, 0.0))
+
+    pa1 = new_point(0.0, 0.0, 0.0)
+    pb1 = new_point(2.0, 0.0, 0.0)
+    pa2 = new_point(0.0, 0.0, 0.0)
+    pb2 = new_point(-2.0, 0.0, 0.0)
+    ptest = line_segment_intersection(pa1, pb1, pa2, pb2)
+    assert ptest is INVALID_PT  # Because same directions
+
+    pa1 = new_point(0.0, 0.0, 0.0)
+    pb1 = new_point(2.0, 0.0, 0.0)
+    pa2 = new_point(1.0, 0.0, 0.0)
+    pb2 = new_point(-2.0, 0.0, 0.0)
+    ptest = line_segment_intersection(pa1, pb1, pa2, pb2)
+    assert ptest is INVALID_PT  # Because same directions
+
+    pa1 = new_point(0.0, 0.0, 0.0)
+    pb1 = new_point(2.0, 0.0, 0.0)
+    pa2 = new_point(1.0, 1.0, 1.0)
+    pb2 = new_point(1.0, -1.0, 1.0)
+    ptest = line_segment_intersection(pa1, pb1, pa2, pb2)
+    assert ptest is INVALID_PT

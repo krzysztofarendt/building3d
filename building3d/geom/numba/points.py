@@ -294,10 +294,10 @@ def distance_point_to_edge(ptest: PointType, pt1: PointType, pt2: PointType) -> 
 
     # Check if the projection is outside the segment range
     if t < 0:
-        closest_point = pt1
+        # closest_point = pt1
         return np.linalg.norm(pt1 - ptest)
     elif t > 1:
-        clocset_point = pt2
+        # closest_point = pt2
         return np.linalg.norm(pt2 - ptest)
     else:
         # Closest point is somewhere between pt1 and pt2
@@ -355,7 +355,7 @@ def line_intersection(
         return INVALID_PT
 
 
-# TODO: njit
+@njit
 def line_segment_intersection(
     pa1: PointType,
     pb1: PointType,
@@ -368,4 +368,16 @@ def line_segment_intersection(
     - line segments are not intersecting
     - line segments are parallel or coincident (their direction vectors are equal)
     """
-    raise NotImplementedError
+    d1 = pb1 - pa1
+    d2 = pb2 - pa2
+
+    candidate = line_intersection(pa1, d1, pa2, d2)
+
+    if candidate is INVALID_PT:
+        return INVALID_PT
+    else:
+        # Check if the candidate point lies within both edges
+        if is_point_on_segment(candidate, pa1, pb1) and is_point_on_segment(candidate, pa2, pb2):
+            return candidate
+        else:
+            return INVALID_PT
