@@ -39,6 +39,17 @@ def locate_slicing_points(
 
 @njit
 def locate_point_on_polygon(ptest, pts, tri, edges) -> tuple[int, int]:
+    """Return a tuple defining the location of `ptest` inside the polygon.
+
+    Possible return values:
+    - `(EXTERIOR, INVALID_INDEX)` - the point is outside the polygon
+    - `(INTERIOR, INVALID_INDEX)` - inside the polygon, not touching any vertex or edge
+    - `(VERTEX, vi)` - touching a vertex with index `vi`
+    - `(EDGE, ei)` - touching an edge with index `ei`
+
+    The constants `EXTERIOR`, `INTERIOR`, `VERTEX`, `EDGE`, `INVALID_INDEX`
+    are defined in `./constants.py`.
+    """
     if not is_point_inside(ptest, pts, tri):
         return (EXTERIOR, INVALID_INDEX)
     else:
