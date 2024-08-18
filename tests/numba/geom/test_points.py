@@ -13,6 +13,7 @@ from building3d.geom.numba.points import is_point_on_segment
 from building3d.geom.numba.points import distance_point_to_edge
 from building3d.geom.numba.points import line_intersection
 from building3d.geom.numba.points import line_segment_intersection
+from building3d.geom.numba.vectors import new_vector
 from building3d.geom.numba.types import FLOAT, INVALID_PT
 
 
@@ -149,39 +150,39 @@ def test_distance_point_to_edge():
 
 def test_line_intersection():
     pt1 = new_point(0.0, 0.0, 0.0)
-    d1 = np.array([0.0, 1.0, 0.0])
+    d1 = new_vector(0.0, 1.0, 0.0)
     pt2 = new_point(1.0, 2.0, 0.0)
-    d2 = np.array([-0.1, 0.0, 0.0])
+    d2 = new_vector(-0.1, 0.0, 0.0)
     ptest = line_intersection(pt1, d1, pt2, d2)
     assert points_equal(ptest, new_point(0.0, 2.0, 0.0))
 
     pt1 = new_point(0.0, 0.0, 0.0)
-    d1 = np.array([0.0, 1.0, 0.0])
+    d1 = new_vector(0.0, 1.0, 0.0)
     pt2 = new_point(2.0, 2.0, 0.0)
-    d2 = np.array([-0.1, 0.0, 0.0])
+    d2 = new_vector(-0.1, 0.0, 0.0)
     ptest = line_intersection(pt1, d1, pt2, d2)
     assert points_equal(ptest, new_point(0.0, 2.0, 0.0))
 
     pt1 = new_point(0.0, 0.0, 0.0)
-    d1 = np.array([0.0, 1.0, 0.0])
+    d1 = new_vector(0.0, 1.0, 0.0)
     pt2 = new_point(2.0, 2.0, 0.0)
-    d2 = np.array([0.0, 1.0, 0.0])
+    d2 = new_vector(0.0, 1.0, 0.0)
     ptest = line_intersection(pt1, d1, pt2, d2)
-    assert ptest is INVALID_PT
+    assert np.isnan(ptest).any()
 
     pt1 = new_point(0.0, 0.0, 0.0)
-    d1 = np.array([0.0, 1.0, 0.0])
+    d1 = new_vector(0.0, 1.0, 0.0)
     pt2 = new_point(2.0, 2.0, 0.0)
-    d2 = np.array([0.0, 0.0, 0.0])
+    d2 = new_vector(0.0, 0.0, 0.0)
     ptest = line_intersection(pt1, d1, pt2, d2)
-    assert ptest is INVALID_PT
+    assert np.isnan(ptest).any()
 
     pt1 = new_point(0.0, 0.0, 0.0)
-    d1 = np.array([0.0, 1.0, 0.0])
+    d1 = new_vector(0.0, 1.0, 0.0)
     pt2 = new_point(0.0, 0.0, 0.0)
-    d2 = np.array([0.0, 1.0, 0.0])
+    d2 = new_vector(0.0, 1.0, 0.0)
     ptest = line_intersection(pt1, d1, pt2, d2)
-    assert ptest is INVALID_PT
+    assert np.isnan(ptest).any()
 
 
 def test_line_segment_intersection():
@@ -211,18 +212,18 @@ def test_line_segment_intersection():
     pa2 = new_point(0.0, 0.0, 0.0)
     pb2 = new_point(-2.0, 0.0, 0.0)
     ptest = line_segment_intersection(pa1, pb1, pa2, pb2)
-    assert ptest is INVALID_PT  # Because same directions
+    assert np.isnan(ptest).any()  # Because same directions
 
     pa1 = new_point(0.0, 0.0, 0.0)
     pb1 = new_point(2.0, 0.0, 0.0)
     pa2 = new_point(1.0, 0.0, 0.0)
     pb2 = new_point(-2.0, 0.0, 0.0)
     ptest = line_segment_intersection(pa1, pb1, pa2, pb2)
-    assert ptest is INVALID_PT  # Because same directions
+    assert np.isnan(ptest).any()  # Because same directions
 
     pa1 = new_point(0.0, 0.0, 0.0)
     pb1 = new_point(2.0, 0.0, 0.0)
     pa2 = new_point(1.0, 1.0, 1.0)
     pb2 = new_point(1.0, -1.0, 1.0)
     ptest = line_segment_intersection(pa1, pb1, pa2, pb2)
-    assert ptest is INVALID_PT
+    assert np.isnan(ptest).any()  # Because same directions

@@ -185,29 +185,29 @@ def test_slice_polygon():
     print(poly1, poly2)
 
 
-# def test_polygon_slice_using_another_polygon():
-#     pt0 = new_point(0, 0, 0)
-#     pt1 = new_point(1, 0, 0)
-#     pt2 = new_point(1, 1, 0)
-#     pt3 = new_point(0, 1, 0)
-#     pts = np.vstack((pt0, pt1, pt2, pt3))
-#     poly1 = Polygon(pts, name="poly1")
-#
-#     dxy = np.array([0.5, 0.5, 0.0])
-#     poly2 = Polygon(pts + dxy, name="poly2")
-#
-#     # TODO: Need to add slicing points at cross-section of lines
-#     poly3, poly4 = slice_polygon(
-#         poly1,
-#         poly2.pts,
-#         pt1=new_point(0.25, 0.25, 0),
-#         name1="poly3",
-#         pt2=new_point(0.75, 0.75, 0),
-#         name2="poly4",
-#     )
-#     assert len(poly4.pts) == 4  # square
-#     assert len(poly3.pts) == 6  # L-shape
+def test_polygon_slice_using_another_polygon():
+    pt0 = new_point(0, 0, 0)
+    pt1 = new_point(1, 0, 0)
+    pt2 = new_point(1, 1, 0)
+    pt3 = new_point(0, 1, 0)
+    pts = np.vstack((pt0, pt1, pt2, pt3))
+    poly1 = Polygon(pts, name="poly1")
+
+    dxy = np.array([0.5, 0.5, 0.0])
+    poly2 = Polygon(pts + dxy, name="poly2")
+
+    # TODO: Need to add slicing points at cross-section of lines
+    poly3, poly4 = slice_polygon(
+        poly1,
+        poly2.pts,
+        pt1=new_point(0.25, 0.25, 0),
+        name1="poly3",
+        pt2=new_point(0.75, 0.75, 0),
+        name2="poly4",
+    )
+    assert len(poly4.pts) == 4  # square
+    assert len(poly3.pts) == 6  # L-shape
 
 
 if __name__ == "__main__":
-    test_slice_polygon()
+    test_polygon_slice_using_another_polygon()

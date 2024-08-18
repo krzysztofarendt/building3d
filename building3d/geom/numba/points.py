@@ -321,9 +321,10 @@ def line_intersection(
         d2: The direction vector of the second line.
 
     Returns:
-        The coordinates of the intersection point, or None if the lines are parallel or coincident.
+        The coordinates of the intersection point, filled with `nan`
+        if the lines are parallel or coincident.
     """
-    if np.allclose(d1, [0, 0, 0]) or np.allclose(d2, [0, 0, 0]):
+    if np.allclose(d1, new_vector(0, 0, 0)) or np.allclose(d2, new_vector(0, 0, 0)):
         # Direction vectors cannot be zero
         return INVALID_PT
     elif np.allclose(d1 / np.linalg.norm(d1), d2 / np.linalg.norm(d2)):
@@ -334,24 +335,25 @@ def line_intersection(
         return INVALID_PT
 
     # Construct the system of linear equations
-    A = np.array([d1, -d2]).T
+    A = list_pts_to_array([d1, -d2]).T
     b = pt2 - pt1
 
     try:
         # Solve for t and s using least squares to handle potential overdetermined system
-        t_s, _, _, s = np.linalg.lstsq(A, b, rcond=None)
-        t, s = t_s
+        t_s, _, _, s = np.linalg.lstsq(A, b)
+    except Exception:  # numba does not support other types of exceptions
+        return INVALID_PT
 
-        # Check if the intersection point is the same for both lines
-        point_on_line1 = pt1 + t * d1
-        point_on_line2 = pt2 + s * d2
+    t, s = t_s
 
-        if np.allclose(point_on_line1, point_on_line2):
-            x, y, z = point_on_line1
-            return new_point(x, y, z)
-        else:
-            return INVALID_PT
-    except np.linalg.LinAlgError:
+    # Check if the intersection point is the same for both lines
+    point_on_line1 = pt1 + t * d1
+    point_on_line2 = pt2 + s * d2
+
+    if np.allclose(point_on_line1, point_on_line2):
+        x, y, z = point_on_line1
+        return new_point(x, y, z)
+    else:
         return INVALID_PT
 
 

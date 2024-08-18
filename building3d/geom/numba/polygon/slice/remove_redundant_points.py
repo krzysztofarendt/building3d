@@ -1,7 +1,9 @@
 from numba import njit
 import numpy as np
 
+from building3d.geom.exceptions import GeometryError
 from building3d.geom.numba.types import PointType, IndexType, FLOAT
+from building3d.geom.numba.points import roll_forward
 from building3d.geom.numba.polygon.slice.locate_slicing_points import locate_slicing_points
 from .constants import EXTERIOR, INTERIOR, VERTEX, EDGE, INVALID_INDEX, INVALID_LOC
 
@@ -12,6 +14,7 @@ def remove_redundant_points(
     pts: PointType,
     tri: IndexType,
     edges: PointType,
+    num_try: int = 0,
 ) -> PointType:
     """Keeps only these slicing points that are needed to perform the slice.
 
@@ -38,6 +41,12 @@ def remove_redundant_points(
     assert len(slicing_pts.shape) == 2 and slicing_pts.shape[1] == 3
 
     sploc = locate_slicing_points(slicing_pts, pts, tri, edges)
+
+    if sploc[0][0] == INTERIOR:
+        if num_try > len(slicing_pts):
+            raise GeometryError("Removing redundant slicing points failed!")
+        else:
+            return remove_redundant_points(roll_forward(slicing_pts), pts, tri, edges, num_try + 1)
 
     num_interior = sum([1 for loc, _ in sploc if loc == INTERIOR])
 

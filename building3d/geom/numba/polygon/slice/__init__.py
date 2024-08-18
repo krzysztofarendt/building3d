@@ -1,7 +1,11 @@
+import numpy as np
+
 from building3d.geom.exceptions import GeometryError
 from building3d.geom.numba.types import PointType
+from building3d.geom.numba.points import are_points_coplanar
 from building3d.geom.numba.polygon import Polygon
 from building3d.geom.numba.polygon.slice.get_point_arrays import get_point_arrays
+from building3d.geom.numba.polygon.slice.add_intersection_points import add_intersection_points
 
 
 def slice_polygon(
@@ -27,6 +31,10 @@ def slice_polygon(
     Return:
         tuple of new polygons
     """
+    assert are_points_coplanar(np.vstack((poly.pts, slicing_pts))), \
+        "Polygon points are not coplanar with slicing points"
+
+    _,  slicing_pts = add_intersection_points(poly.pts, slicing_pts)
     pts1, pts2 = get_point_arrays(poly.pts, poly.tri, slicing_pts)
     poly1, poly2 = make_polygons(pts1, pts2, pt1, name1, pt2, name2)
 
