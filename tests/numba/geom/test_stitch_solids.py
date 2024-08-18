@@ -65,7 +65,7 @@ def test_stitch_solids():
     stitch_solids(s1, s2)
     stitch_solids(s1, s3)
     stitch_solids(s4, s0)  # TODO: Does not work, s6 fully enclosed in s0, needs to be sliced twice
-    # stitch_solids(s0, s5)  # TODO: Does not work, fully enclosed but touching boundary
+    stitch_solids(s0, s5)
     stitch_solids(s0, s6)
 
     return s0, s1, s2, s3, s6, s4, s5, s6

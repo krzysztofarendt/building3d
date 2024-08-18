@@ -74,18 +74,14 @@ def slice_and_replace(s1: Solid, p1: Polygon, s2: Solid, p2: Polygon) -> tuple[S
     if p1a and p1b:
         replace_polygon(s1, p1, p1a, p1b)
     else:
-        print(f"Polygons {p1}, {p2} of {s1}, {s2} either fully enclosed or touching at one edge")
         if p1.contains_polygon(p2) or p2.contains_polygon(p1):
-            print("TODO: deal with fully enclosed polygons")
-            # breakpoint()  # TODO: deal with fully enclosed polygons
+            print(f"TODO(a): deal with fully enclosed polygons {s1.name}/{p1.name}, {s2.name}/{p2.name}")
 
     p2a, p2b = slice_polygon(p2, p1.pts)
     if p2a and p2b:
         replace_polygon(s2, p2, p2a, p2b)
     else:
-        print(f"Polygons {p1}, {p2} of {s1}, {s2} either fully enclosed or touching at one edge")
         if p1.contains_polygon(p2) or p2.contains_polygon(p1):
-            print("TODO: deal with fully enclosed polygons")
-            # breakpoint()  # TODO: deal with fully enclosed polygons
+            print(f"TODO(b): deal with fully enclosed polygons {s1.name}/{p1.name}, {s2.name}/{p2.name}")
 
     return (s1, s2)

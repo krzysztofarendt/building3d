@@ -205,8 +205,38 @@ def test_polygon_slice_using_another_polygon():
         pt2=new_point(0.75, 0.75, 0),
         name2="poly4",
     )
+    assert poly3 is not None and poly4 is not None
     assert len(poly4.pts) == 4  # square
     assert len(poly3.pts) == 6  # L-shape
+
+
+def test_polygon_slice_using_smaller_polygon():
+    pt0 = new_point(0, 0, 0)
+    pt1 = new_point(1, 0, 0)
+    pt2 = new_point(1, 1, 0)
+    pt3 = new_point(0, 1, 0)
+    pts = np.vstack((pt0, pt1, pt2, pt3))
+    poly1 = Polygon(pts, name="poly1")
+
+    poly2 = Polygon(pts * 0.5, name="poly2")
+
+    # poly2 crosses poly1 at two edges
+    poly_a, poly_b = slice_polygon(
+        poly1,
+        poly2.pts,
+        pt1=new_point(0.25, 0.25, 0),
+        name1="poly3",
+        pt2=new_point(0.75, 0.75, 0),
+        name2="poly4",
+    )
+    assert poly_a is not None and poly_b is not None
+    for p in [poly_a, poly_b]:
+        if p.name == "poly3":
+            assert len(p.pts) == 4  # square
+        elif p.name == "poly4":
+            assert len(p.pts) == 6  # L-shape
+        else:
+            raise RuntimeError
 
 
 def test_polygon_slice_using_another_complex_polygon():
@@ -229,7 +259,7 @@ def test_polygon_slice_using_another_complex_polygon():
     poly2 = Polygon(pts, name="poly2")
 
     # poly2 crosses poly1 twice at a single edge
-    poly3, poly4 = slice_polygon(
+    poly_a, poly_b = slice_polygon(
         poly1,
         poly2.pts,
         pt1=new_point(0.4, 0.9, 0),
@@ -237,9 +267,15 @@ def test_polygon_slice_using_another_complex_polygon():
         pt2=new_point(0.1, 0.1, 0),
         name2="poly4",
     )
-    assert len(poly3.pts) == 4  # square
-    assert len(poly4.pts) == 8  # U-shape
+    assert poly_a is not None and poly_b is not None
+    for p in [poly_a, poly_b]:
+        if p.name == "poly3":
+            assert len(p.pts) == 4  # square
+        elif p.name == "poly4":
+            assert len(p.pts) == 8  # U-shape
+        else:
+            raise RuntimeError
 
 
 if __name__ == "__main__":
-    test_polygon_slice_using_another_polygon()
+    test_polygon_slice_using_smaller_polygon()

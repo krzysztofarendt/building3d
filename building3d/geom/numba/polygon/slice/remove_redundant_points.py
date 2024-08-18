@@ -1,7 +1,6 @@
 from numba import njit
 import numpy as np
 
-from building3d.geom.exceptions import GeometryError
 from building3d.geom.numba.types import PointType, IndexType, FLOAT
 from building3d.geom.numba.points import roll_forward
 from building3d.geom.numba.polygon.slice.locate_slicing_points import locate_slicing_points
@@ -42,7 +41,7 @@ def remove_redundant_points(
     edges = polygon_edges(pts)
     sploc = locate_slicing_points(slicing_pts, pts, tri, edges)
 
-    if sploc[0][0] == INTERIOR:
+    if sploc[0][0] == INTERIOR or sploc[-1][0] == INTERIOR:
         if num_try > len(slicing_pts):
             return slicing_pts[0:1]  # Return empty list
         else:
@@ -92,11 +91,7 @@ def remove_redundant_points(
             # Points thouching a vertex or edge are included if the next one is inside the polygon
              new_points.append(this_pt)
 
-        elif (
-            prev_loc_type != INVALID_LOC
-            and prev_loc_type == INTERIOR
-            and this_loc_type in (VERTEX, EDGE)
-        ):
+        elif prev_loc_type == INTERIOR and this_loc_type in (VERTEX, EDGE):
             # This is the last needed point
             new_points.append(this_pt)
             break
@@ -141,6 +136,30 @@ def remove_redundant_points(
             else:
                 # Don't include it, because it is not crossing the polygon
                 # (the segment from this to next point is along the edge)
+                continue
+
+        elif this_loc_type == VERTEX and next_loc_type == EDGE:
+            if num_interior == 0 and this_pt not in edges[next_loc_ix]:
+                new_points.append(this_pt)
+            else:
+                continue
+
+        elif this_loc_type == VERTEX and prev_loc_type == EDGE:
+            if num_interior == 0 and this_pt not in edges[prev_loc_ix]:
+                new_points.append(this_pt)
+            else:
+                continue
+
+        elif this_loc_type == EDGE and next_loc_type == VERTEX:
+            if num_interior == 0 and pts[next_loc_ix] not in edges[this_loc_ix]:
+                new_points.append(this_pt)
+            else:
+                continue
+
+        elif this_loc_type == EDGE and prev_loc_type == VERTEX:
+            if num_interior == 0 and pts[prev_loc_ix] not in edges[this_loc_ix]:
+                new_points.append(this_pt)
+            else:
                 continue
 
     # Convert list of points to an array
