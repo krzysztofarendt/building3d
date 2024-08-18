@@ -1,7 +1,7 @@
 from building3d.geom.exceptions import GeometryError
 from building3d.geom.numba.types import PointType
 from building3d.geom.numba.polygon import Polygon
-from building3d.geom.numba.polygon.slice.get_two_parts_pts import get_two_parts_pts
+from building3d.geom.numba.polygon.slice.get_point_arrays import get_point_arrays
 
 
 def slice_polygon(
@@ -27,7 +27,7 @@ def slice_polygon(
     Return:
         tuple of new polygons
     """
-    pts1, pts2 = get_two_parts_pts(poly.pts, poly.tri, slicing_pts)
+    pts1, pts2 = get_point_arrays(poly.pts, poly.tri, slicing_pts)
     poly1, poly2 = make_polygons(pts1, pts2, pt1, name1, pt2, name2)
 
     return poly1, poly2

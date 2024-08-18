@@ -9,22 +9,26 @@ from building3d.geom.numba.polygon.edges import polygon_edges
 from building3d.geom.numba.polygon.ispointinside import is_point_inside
 from building3d.geom.numba.polygon.slice.remove_redundant_points import remove_redundant_points
 from building3d.geom.numba.polygon.slice.locate_slicing_points import locate_slicing_points
-from .constants import EXTERIOR, INTERIOR, VERTEX, EDGE, INVALID_INDEX
+from .constants import INTERIOR, VERTEX, EDGE
 
 
 @njit
-def get_two_parts_pts(
+def get_point_arrays(
     pts: PointType,
     tri: IndexType,
     slicing_pts: PointType,
 ):
     """Slices a polygon into two parts.
 
-    Slicing rules:
-    - the first and the last slicing point must be touching a vertex or an edge
-    - if more is touching vertex/edge at the beginning of the list, they are removed
-      so that the list starts with a single vertex/edge touching point
-    - the same applies to the end of the slicing points list
+    Slicing procedure:
+    - find and keep relevant slicing points:
+        - remove points outside the polygon
+        - remove points along the polygon boundary
+        - keep only the points crossing the polygon (slicing it into 2 parts)
+    - create two new polygons for each slice
+    - return a tuple with the polygons (random order)
+
+    The order the output tuple should be considered random.
 
     Possible cases:
     1) slicing points start and end at two different edges

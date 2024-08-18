@@ -107,6 +107,21 @@ def test_remove_redundant_points():
     assert is_point_in(kept[1], slicing_pts[1:4])
     assert is_point_in(kept[2], slicing_pts[1:4])
 
+    slicing_pts = np.vstack((
+        new_point(-1, -1, -1),  # Point outside polygon
+        new_point(0, 0, 0),
+        new_point(0.5, 0, 0),
+        new_point(0.5, 0.5, 0),
+        new_point(0.5, 1, 0),
+        new_point(1, 0, 0),
+        new_point(3, 3, 3),  # Point outside polygon
+    ))
+    kept = remove_redundant_points(slicing_pts, pts, tri, edges)
+    assert kept.shape == (3, 3)
+    assert is_point_in(kept[0], slicing_pts[2:5])
+    assert is_point_in(kept[1], slicing_pts[2:5])
+    assert is_point_in(kept[2], slicing_pts[2:5])
+
 
 def test_slice_polygon():
     pts = np.vstack((
