@@ -3,7 +3,7 @@ from numba import njit
 
 from building3d.config import GEOM_ATOL, EPSILON
 from building3d.config import POINT_NUM_DEC
-from building3d.geom.numba.types import PointType, VectorType, FLOAT
+from building3d.geom.numba.types import PointType, VectorType, FLOAT, INVALID_PT
 from building3d.geom.numba.vectors import normal, new_vector
 
 
@@ -305,25 +305,54 @@ def distance_point_to_edge(ptest: PointType, pt1: PointType, pt2: PointType) -> 
         return np.linalg.norm(closest_point - ptest)
 
 
-# TODO: njit
+@njit
 def line_intersection(
     pt1: PointType,
     d1: VectorType,
     pt2: PointType,
     d2: VectorType,
-) -> PointType | None:
+) -> PointType:
     """Determines the intersection point of two lines in 3D space.
 
     Args:
-        p1: A point on the first line.
+        pt1: A point on the first line.
         d1: The direction vector of the first line.
-        p2: A point on the second line.
+        pt2: A point on the second line.
         d2: The direction vector of the second line.
 
     Returns:
         The coordinates of the intersection point, or None if the lines are parallel or coincident.
     """
-    raise NotImplementedError
+    if np.allclose(d1, [0, 0, 0]) or np.allclose(d2, [0, 0, 0]):
+        # Direction vectors cannot be zero
+        return INVALID_PT
+    elif np.allclose(d1 / np.linalg.norm(d1), d2 / np.linalg.norm(d2)):
+        # Parallel or coincident
+        return INVALID_PT
+    elif np.allclose(d1 / np.linalg.norm(d1), -1 * d2 / np.linalg.norm(d2)):
+        # Parallel or coincident
+        return INVALID_PT
+
+    # Construct the system of linear equations
+    A = np.array([d1, -d2]).T
+    b = pt2 - pt1
+
+    try:
+        # Solve for t and s using least squares to handle potential overdetermined system
+        t_s, _, _, s = np.linalg.lstsq(A, b, rcond=None)
+        t, s = t_s
+
+        # Check if the intersection point is the same for both lines
+        point_on_line1 = pt1 + t * d1
+        point_on_line2 = pt2 + s * d2
+
+        if np.allclose(point_on_line1, point_on_line2):
+            x, y, z = point_on_line1
+            return new_point(x, y, z)
+        else:
+            return INVALID_PT
+    except np.linalg.LinAlgError:
+        return INVALID_PT
 
 
 # TODO: njit
@@ -332,10 +361,10 @@ def line_segment_intersection(
     pb1: PointType,
     pa2: PointType,
     pb2: PointType,
-) -> PointType | None:
+) -> PointType:
     """Determines the intersection point between two line segments: pa1->pb1 and pa2->pb2.
 
-    Returns None if:
+    Returns `INVALID_PT` if:
     - line segments are not intersecting
     - line segments are parallel or coincident (their direction vectors are equal)
     """

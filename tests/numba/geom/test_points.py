@@ -1,6 +1,7 @@
 import numpy as np
 
 from building3d.geom.numba.points import new_point
+from building3d.geom.numba.points import points_equal
 from building3d.geom.numba.points import is_point_in_array
 from building3d.geom.numba.points import are_points_collinear
 from building3d.geom.numba.points import are_points_coplanar
@@ -10,7 +11,9 @@ from building3d.geom.numba.points import new_point_between_2_points
 from building3d.geom.numba.points import many_new_points_between_2_points
 from building3d.geom.numba.points import is_point_on_segment
 from building3d.geom.numba.points import distance_point_to_edge
-from building3d.geom.numba.types import FLOAT
+from building3d.geom.numba.points import line_intersection
+from building3d.geom.numba.points import line_segment_intersection
+from building3d.geom.numba.types import FLOAT, INVALID_PT
 
 
 def test_new_point():
@@ -142,3 +145,40 @@ def test_distance_point_to_edge():
     assert np.isclose(d, np.sqrt(2))
     d = distance_point_to_edge(ptest5, pt1, pt2)
     assert np.isclose(d, 0)
+
+
+def test_line_intersection():
+    pt1 = new_point(0.0, 0.0, 0.0)
+    d1 = np.array([0.0, 1.0, 0.0])
+    pt2 = new_point(1.0, 2.0, 0.0)
+    d2 = np.array([-0.1, 0.0, 0.0])
+    ptest = line_intersection(pt1, d1, pt2, d2)
+    assert points_equal(ptest, new_point(0.0, 2.0, 0.0))
+
+    pt1 = new_point(0.0, 0.0, 0.0)
+    d1 = np.array([0.0, 1.0, 0.0])
+    pt2 = new_point(2.0, 2.0, 0.0)
+    d2 = np.array([-0.1, 0.0, 0.0])
+    ptest = line_intersection(pt1, d1, pt2, d2)
+    assert points_equal(ptest, new_point(0.0, 2.0, 0.0))
+
+    pt1 = new_point(0.0, 0.0, 0.0)
+    d1 = np.array([0.0, 1.0, 0.0])
+    pt2 = new_point(2.0, 2.0, 0.0)
+    d2 = np.array([0.0, 1.0, 0.0])
+    ptest = line_intersection(pt1, d1, pt2, d2)
+    assert ptest is INVALID_PT
+
+    pt1 = new_point(0.0, 0.0, 0.0)
+    d1 = np.array([0.0, 1.0, 0.0])
+    pt2 = new_point(2.0, 2.0, 0.0)
+    d2 = np.array([0.0, 0.0, 0.0])
+    ptest = line_intersection(pt1, d1, pt2, d2)
+    assert ptest is INVALID_PT
+
+    pt1 = new_point(0.0, 0.0, 0.0)
+    d1 = np.array([0.0, 1.0, 0.0])
+    pt2 = new_point(0.0, 0.0, 0.0)
+    d2 = np.array([0.0, 1.0, 0.0])
+    ptest = line_intersection(pt1, d1, pt2, d2)
+    assert ptest is INVALID_PT
