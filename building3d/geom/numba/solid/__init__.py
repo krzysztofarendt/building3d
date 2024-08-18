@@ -44,11 +44,14 @@ class Solid:
         self.walls: dict[str, Wall] = {}  # {Wall.name: Wall}
         for w in walls:
             self.add_wall(w)
-        self.volume = self._volume()
 
     def add_wall(self, wall: Wall) -> None:
         """Add a Wall instance to the solid."""
         self.walls[wall.name] = wall
+
+    def replace_wall(self, old_name: str, new_wall: Wall):
+        del self.walls[old_name]
+        self.add_wall(new_wall)
 
     def get_wall_names(self) -> list[str]:
         """Get list of wall names."""
@@ -168,7 +171,8 @@ class Solid:
                     return True
         return False
 
-    def _volume(self) -> float:
+    @property
+    def volume(self) -> float:
         """Based on: http://chenlab.ece.cornell.edu/Publication/Cha/icip01_Cha.pdf"""
         total_volume = 0.0
         all_polys = [p for w in self.get_walls() for p in w.get_polygons()]

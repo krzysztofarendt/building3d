@@ -55,6 +55,11 @@ class Wall:
 
         self.polygons[poly.name] = poly
 
+    def replace_polygon(self, old_name: str, *new_poly: Polygon):
+        del self.polygons[old_name]
+        for np in new_poly:
+            self.add_polygon(np)
+
     def get_polygon_names(self) -> list[str]:
         """Return list of parent polygon names."""
         return list(self.polygons.keys())

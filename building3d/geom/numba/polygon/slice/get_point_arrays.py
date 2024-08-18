@@ -6,7 +6,6 @@ from building3d.geom.numba.types import PointType, IndexType
 from building3d.geom.exceptions import GeometryError
 from building3d.geom.numba.vectors import normal
 from building3d.geom.numba.polygon.edges import polygon_edges
-from building3d.geom.numba.polygon.slice.remove_redundant_points import remove_redundant_points
 from building3d.geom.numba.polygon.slice.locate_slicing_points import locate_slicing_points
 from .constants import VERTEX, EDGE
 
@@ -49,11 +48,6 @@ def get_point_arrays(
 
     # Get the edges of the polygon
     edges = polygon_edges(pts)
-
-    # Keep only relevant slicing points
-    slicing_pts = remove_redundant_points(slicing_pts, pts, tri, edges)
-    if slicing_pts.shape[0] < 2:
-        raise GeometryError("Cannot slice the polygon using less than 2 points")
 
     # Find out which case is it
     edges = polygon_edges(pts)

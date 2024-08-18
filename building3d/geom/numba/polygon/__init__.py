@@ -1,6 +1,9 @@
 import logging
 
+import numpy as np
+
 from building3d import random_id
+from building3d.config import GEOM_ATOL
 from building3d.geom.paths.validate_name import validate_name
 from building3d.geom.numba.types import PointType, VectorType, IndexType, FLOAT
 from building3d.geom.numba.points import are_points_coplanar
@@ -11,7 +14,7 @@ from building3d.geom.numba.triangles import triangle_centroid
 from building3d.geom.numba.polygon.centroid import polygon_centroid
 from building3d.geom.numba.polygon.area import polygon_area
 from building3d.geom.numba.polygon.plane import plane_coefficients
-from building3d.geom.numba.polygon.ispointinside import is_point_inside
+from building3d.geom.numba.polygon.ispointinside import is_point_inside, is_point_inside_margin
 from building3d.geom.numba.polygon.polygonsfacing import are_polygons_facing
 
 
@@ -96,6 +99,18 @@ class Polygon:
         return are_polygons_facing(
             self.pts, self.tri, self.vn, other.pts, other.tri, other.vn, exact
         )
+
+    def contains_polygon(self, other) -> bool:
+        for pt in other.pts:
+            if not is_point_inside_margin(pt, GEOM_ATOL, self.pts, self.tri):
+                return False
+        return True
+
+    def __eq__(self, other):
+        if np.allclose(self.pts, other.pts):
+            return True
+        else:
+            return False
 
     def __str__(self):
         return f"Polygon(name={self.name}, pts.shape={self.pts.shape}, id={hex(id(self))})"
