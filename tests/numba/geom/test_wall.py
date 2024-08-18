@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 
 from building3d import random_id
+from building3d.geom.numba.points import new_point
 from building3d.geom.numba.polygon import Polygon
 from building3d.geom.numba.wall import Wall
 
@@ -77,3 +78,17 @@ def test_wall_double():
         wall.get_object("poly0/xxx")
     with pytest.raises(ValueError):
         wall.get_object("/")
+
+
+def test_wall_bbox():
+    pt0 = new_point(0, 0, 0)
+    pt1 = new_point(1, 0, 0)
+    pt2 = new_point(1, 1, 0)
+    pt3 = new_point(0, 1, 0)
+    pts = np.vstack((pt0, pt1, pt2, pt3))
+    poly = Polygon(pts, name="poly")
+    wall = Wall([poly])
+    bbox = wall.bbox()
+    assert np.allclose(bbox[0], [0, 0, 0])
+    assert np.allclose(bbox[1], [1, 1, 0])
+

@@ -44,7 +44,7 @@ def test_single_solid():
     assert np.isclose(solid.volume, 1, atol=GEOM_RTOL)
     for i in range(3):
         assert solid.get_walls()[i] is walls[i]
-    assert np.allclose(solid.bounding_box(), [[0, 0, 0], [1, 1, 1]])
+    assert np.allclose(solid.bbox(), [[0, 0, 0], [1, 1, 1]])
     assert solid.get_object("walls/w0").name == "w0"
     assert solid.get_object("floor/floor").name == "floor"
     assert isinstance(solid.get_object("floor/floor"), Polygon)

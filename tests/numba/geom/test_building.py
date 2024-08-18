@@ -1,6 +1,5 @@
 import numpy as np
 
-from building3d.config import GEOM_RTOL
 from building3d.geom.numba.points import new_point
 from building3d.geom.numba.polygon import Polygon
 from building3d.geom.numba.wall import Wall
@@ -50,6 +49,7 @@ def test_zone():
     b = Building([z], "building")
 
     assert b.get_zones()[0] is z
+    assert np.allclose(b.bbox(), [[0, 0, 0], [2, 1, 1]])
     assert b.get_object("zone") is z
     assert isinstance(b.get_object("zone/solid0"), Solid)
     assert isinstance(b.get_object("zone/solid0/walls"), Wall)

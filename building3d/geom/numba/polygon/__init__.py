@@ -4,6 +4,7 @@ from building3d import random_id
 from building3d.geom.paths.validate_name import validate_name
 from building3d.geom.numba.types import PointType, VectorType, IndexType, FLOAT
 from building3d.geom.numba.points import are_points_coplanar
+from building3d.geom.numba.points import bounding_box
 from building3d.geom.numba.vectors import normal
 from building3d.geom.numba.triangles import triangulate
 from building3d.geom.numba.triangles import triangle_centroid
@@ -52,6 +53,9 @@ class Polygon:
         self.ctr: PointType = polygon_centroid(self.pts, self.tri)
         self.area: float = polygon_area(self.pts, self.vn)
         self.plane_coefficients: tuple[FLOAT, FLOAT, FLOAT, FLOAT] = plane_coefficients(self.pts)
+
+    def bbox(self) -> tuple[PointType, PointType]:
+        return bounding_box(self.pts)
 
     def get_mesh(self) -> tuple[PointType, IndexType]:
         """Get vertices and faces of this polygon.

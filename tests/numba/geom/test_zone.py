@@ -45,6 +45,7 @@ def test_zone():
     sld1 = get_solid(1)
     zone = Zone([sld0, sld1], name="zone")
     assert np.isclose(zone.volume(), 2, rtol=GEOM_RTOL)
+    assert np.allclose(zone.bbox(), [[0, 0, 0], [2, 1, 1]])
     assert zone.get_solid_names()[0] == "solid0"
     assert zone.get_solid_names()[1] == "solid1"
     assert zone.get_solids()[0] is sld0

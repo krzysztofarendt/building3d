@@ -6,6 +6,7 @@ from building3d import random_id
 from building3d.geom.paths.object_path import object_path
 from building3d.geom.paths.validate_name import validate_name
 from building3d.geom.paths import PATH_SEP
+from building3d.geom.numba.points import bounding_box
 from building3d.geom.numba.zone import Zone
 from building3d.geom.numba.solid import Solid
 from building3d.geom.numba.wall import Wall
@@ -178,6 +179,10 @@ class Building:
         for z in self.get_zones():
             volume += z.volume()
         return volume
+
+    def bbox(self) -> tuple[PointType, PointType]:
+        pts, _ = self.get_mesh()
+        return bounding_box(pts)
 
     def get_mesh(self) -> tuple[PointType, IndexType]:
         """Get vertices and faces of this building's polygons.

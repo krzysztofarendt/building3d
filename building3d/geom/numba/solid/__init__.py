@@ -4,11 +4,10 @@ from typing import Sequence
 import numpy as np
 
 from building3d import random_id
-from building3d.geom.paths.object_path import object_path
 from building3d.geom.paths.validate_name import validate_name
-from building3d.geom.exceptions import GeometryError
 from building3d.geom.numba.wall import Wall
 from building3d.geom.numba.types import PointType, IndexType
+from building3d.geom.numba.points import bounding_box
 from building3d.geom.numba.points import new_point
 from building3d.geom.numba.polygon import Polygon
 from building3d.geom.numba.polygon.ispointinside import is_point_inside_projection
@@ -59,14 +58,6 @@ class Solid:
         """Get list of walls."""
         return list(self.walls.values())
 
-    # TODO: Delete
-    # def get_polygons(self) -> list[Polygon]:
-    #     """Return list with all polygons of this solid."""
-    #     poly = []
-    #     for wall in self.get_walls():
-    #         poly.extend(wall.get_polygons())
-    #     return poly
-
     def get_object(self, path: str) -> Wall | Polygon:
         """Get object by the path. The path contains names of nested components."""
         names = path.split("/")
@@ -89,15 +80,9 @@ class Solid:
         """
         return get_mesh_from_walls(self.get_walls())
 
-    def bounding_box(self) -> PointType:
-        """Return array [[xmin, ymin, zmin], [xmax, ymax, zmax]]"""
-        vertices, _ = self.get_mesh()
-        xaxis = vertices[:, 0]
-        yaxis = vertices[:, 1]
-        zaxis = vertices[:, 2]
-        pmin = new_point(xaxis.min(), yaxis.min(), zaxis.min())
-        pmax = new_point(xaxis.max(), yaxis.max(), zaxis.max())
-        return np.vstack((pmin, pmax))
+    def bbox(self) -> tuple[PointType, PointType]:
+        pts, _ = self.get_mesh()
+        return bounding_box(pts)
 
     def is_point_inside(self, pt: PointType) -> bool:  # TODO: use numba
         """Checks whether the point p is inside the solid.

@@ -2,6 +2,7 @@ from typing import Sequence
 
 from building3d import random_id
 from building3d.geom.paths.validate_name import validate_name
+from building3d.geom.numba.points import bounding_box
 from building3d.geom.numba.polygon import Polygon
 from building3d.geom.numba.types import PointType, IndexType
 from building3d.geom.exceptions import GeometryError
@@ -73,6 +74,10 @@ class Wall:
             return self.polygons[poly_name]
         else:
             raise ValueError("Path to object too deep (too many slashes)")
+
+    def bbox(self) -> tuple[PointType, PointType]:
+        pts, _ = self.get_mesh()
+        return bounding_box(pts)
 
     def get_mesh(self) -> tuple[PointType, IndexType]:
         """Get vertices and faces of this wall's polygons.

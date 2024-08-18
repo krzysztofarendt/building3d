@@ -3,7 +3,7 @@ from typing import Sequence
 
 from building3d import random_id
 from building3d.geom.paths.validate_name import validate_name
-from building3d.geom.paths.object_path import object_path
+from building3d.geom.numba.points import bounding_box
 from building3d.geom.numba.types import PointType, IndexType
 from building3d.geom.numba.solid import Solid
 from building3d.geom.numba.wall import Wall
@@ -80,15 +80,6 @@ class Zone:
         """Get list of solids."""
         return list(self.solids.values())
 
-    # TODO: Delete
-    # def get_wall_names(self) -> list[str]:
-    #     """Get list of wall names."""
-    #     return [name for sld in self.get_solids() for name in sld.get_wall_names()]
-
-    # def get_walls(self) -> list[Wall]:
-    #     """Get list of wall instances."""
-    #     return [w for sld in self.get_solids() for w in sld.get_walls()]
-
     def get_object(self, path: str) -> Solid | Wall | Polygon:
         """Get object by the path. The path contains names of nested components."""
         names = path.split("/")
@@ -100,6 +91,10 @@ class Zone:
             return self.solids[solid_name]
         else:
             return self.solids[solid_name].get_object("/".join(names))
+
+    def bbox(self) -> tuple[PointType, PointType]:
+        pts, _ = self.get_mesh()
+        return bounding_box(pts)
 
     def get_mesh(self) -> tuple[PointType, IndexType]:
         """Get vertices and faces of all solids. Used mostly for plotting.

@@ -55,6 +55,15 @@ def point_to_hash(pt: PointType, decimals: int = POINT_NUM_DEC) -> int:
 
 
 @njit
+def bounding_box(pts: PointType) -> tuple[PointType, PointType]:
+    """Returns bounding box `((xmin, ymin, zmin), (xmax, ymax, zmax))` for points `pts`."""
+    xmin, xmax = np.min(pts[:, 0]), np.max(pts[:, 0])
+    ymin, ymax = np.min(pts[:, 1]), np.max(pts[:, 1])
+    zmin, zmax = np.min(pts[:, 2]), np.max(pts[:, 2])
+    return (np.array([xmin, ymin, zmin], dtype=FLOAT), np.array([xmax, ymax, zmax], dtype=FLOAT))
+
+
+@njit
 def are_points_coplanar(
     pts: PointType,
     atol: float = GEOM_ATOL,
