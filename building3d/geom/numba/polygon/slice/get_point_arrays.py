@@ -6,10 +6,9 @@ from building3d.geom.numba.types import PointType, IndexType
 from building3d.geom.exceptions import GeometryError
 from building3d.geom.numba.vectors import normal
 from building3d.geom.numba.polygon.edges import polygon_edges
-from building3d.geom.numba.polygon.ispointinside import is_point_inside
 from building3d.geom.numba.polygon.slice.remove_redundant_points import remove_redundant_points
 from building3d.geom.numba.polygon.slice.locate_slicing_points import locate_slicing_points
-from .constants import INTERIOR, VERTEX, EDGE
+from .constants import VERTEX, EDGE
 
 
 @njit
@@ -40,10 +39,6 @@ def get_point_arrays(
         pts: polygon points
         tri: polygon triangles
         slicing_pts: slicing points
-        name1: name of the first part of the sliced polygon
-        pt1: some reference point used to identify the first part of the slice
-        name2: name of the second part of the sliced polygon
-        pt2: some reference point used to identify the second part of the slice
 
     Return:
         (pts1, pts2)
@@ -52,30 +47,23 @@ def get_point_arrays(
     if slicing_pts.shape[0] < 2:
         raise GeometryError("Cannot slice the polygon using less than 2 points")
 
-    # Make sure all slicing points are within this polygon
-    for pt in slicing_pts:
-        if not is_point_inside(pt, pts, tri):
-            raise GeometryError("At least one of the points is not inside the polygon")
-
     # Get the edges of the polygon
-    poly_edges = polygon_edges(pts)
+    edges = polygon_edges(pts)
 
-    # Clean slicing points: remove heading or trailing vertex/edge points
-    slicing_pts = remove_redundant_points(slicing_pts, pts, tri, poly_edges)
+    # Keep only relevant slicing points
+    slicing_pts = remove_redundant_points(slicing_pts, pts, tri, edges)
     if slicing_pts.shape[0] < 2:
         raise GeometryError("Cannot slice the polygon using less than 2 points")
 
     # Find out which case is it
-    poly_edges = polygon_edges(pts)
-    sploc = locate_slicing_points(slicing_pts, pts, tri, poly_edges)
+    edges = polygon_edges(pts)
+    sploc = locate_slicing_points(slicing_pts, pts, tri, edges)
+
     num_at_vertex = sum([1 for loc, _ in sploc if loc == VERTEX])
     num_at_edge = sum([1 for loc, _ in sploc if loc == EDGE])
-    num_interior = sum([1 for loc, _ in sploc if loc == INTERIOR])
+
     sl_edges = set([index for loc, index in sploc if loc == EDGE])
     sl_vertices = set([index for loc, index in sploc if loc == VERTEX])
-
-    assert num_at_vertex + num_at_edge + num_interior == len(slicing_pts), \
-        "Slicing point location counting must have a bug"
 
     case = None
     if num_at_edge == 2 and len(sl_edges) == 2 and num_at_vertex == 0:
@@ -113,13 +101,13 @@ def get_point_arrays(
         last_2 = 0
 
         for i in range(len(pts)):
-            if points_equal(pts[i], poly_edges[edge_num_2, 0]):
+            if points_equal(pts[i], edges[edge_num_2, 0]):
                 next_1 = i
-            if points_equal(pts[i], poly_edges[edge_num_2, 1]):
+            if points_equal(pts[i], edges[edge_num_2, 1]):
                 next_2 = i
-            if points_equal(pts[i], poly_edges[edge_num_1][1]):
+            if points_equal(pts[i], edges[edge_num_1][1]):
                 last_1 = i
-            if points_equal(pts[i], poly_edges[edge_num_1][0]):
+            if points_equal(pts[i], edges[edge_num_1][0]):
                 last_2 = i
 
         if next_1 < next_2 or next_2 == 0:
@@ -173,9 +161,9 @@ def get_point_arrays(
         slice_points_included = False
         for p in pts:
             points_2.append(p)
-            if is_point_in_array(p, poly_edges[edge_num]):
+            if not slice_points_included:
+                if is_point_in_array(p, edges[edge_num]):
                 # Slicing ocurred at this edge - need to add slice_points
-                if not slice_points_included:
                     for sp in slicing_pts:
                         points_2.append(sp)
                     slice_points_included = True
@@ -193,6 +181,7 @@ def get_point_arrays(
             assert sploc[len(slicing_pts) - 1][0] == EDGE
         else:
             start_at_vertex = False
+            assert sploc[0][0] == EDGE
             assert sploc[len(slicing_pts) - 1][0] == VERTEX
 
         points_1 = []
@@ -210,9 +199,9 @@ def get_point_arrays(
         last_2 = 0
 
         for i in range(len(pts)):
-            if points_equal(pts[i], poly_edges[edge_num, 0]):
+            if points_equal(pts[i], edges[edge_num, 0]):
                 next_1 = i
-            if points_equal(pts[i], poly_edges[edge_num, 1]):
+            if points_equal(pts[i], edges[edge_num, 1]):
                 next_2 = i
             if points_equal(pts[i], points_1[0]):
                 last_1 = i
