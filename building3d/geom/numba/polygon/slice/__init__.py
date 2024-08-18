@@ -20,6 +20,9 @@ def slice_polygon(
 
     To assign names, all optional arguments needs to be provided.
 
+    NOTE:
+        Slicing points must divide the polygon into exactly 2 parts.
+
     Args:
         poly: polygon instrance
         slicing_pts: slicing points

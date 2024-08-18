@@ -196,7 +196,7 @@ def test_polygon_slice_using_another_polygon():
     dxy = np.array([0.5, 0.5, 0.0])
     poly2 = Polygon(pts + dxy, name="poly2")
 
-    # TODO: Need to add slicing points at cross-section of lines
+    # poly2 crosses poly1 at two edges
     poly3, poly4 = slice_polygon(
         poly1,
         poly2.pts,
@@ -207,6 +207,38 @@ def test_polygon_slice_using_another_polygon():
     )
     assert len(poly4.pts) == 4  # square
     assert len(poly3.pts) == 6  # L-shape
+
+
+def test_polygon_slice_using_another_complex_polygon():
+    pt0 = new_point(0, 0, 0)
+    pt1 = new_point(1, 0, 0)
+    pt2 = new_point(1, 1, 0)
+    pt3 = new_point(0, 1, 0)
+    pts = np.vstack((pt0, pt1, pt2, pt3))
+    poly1 = Polygon(pts, name="poly1")
+
+    pt0 = new_point(0.2, 0.5, 0)
+    pt1 = new_point(0.5, 0.5, 0)
+    pt2 = new_point(0.5, 1.5, 0)
+    pt3 = new_point(0.7, 1.5, 0)
+    pt4 = new_point(0.7, 1.1, 0)
+    pt5 = new_point(2.0, 1.1, 0)
+    pt6 = new_point(2.0, 2.0, 0)
+    pt7 = new_point(0.2, 2.0, 0)
+    pts = np.vstack((pt0, pt1, pt2, pt3, pt4, pt5, pt6, pt7))
+    poly2 = Polygon(pts, name="poly2")
+
+    # poly2 crosses poly1 twice at a single edge
+    poly3, poly4 = slice_polygon(
+        poly1,
+        poly2.pts,
+        pt1=new_point(0.4, 0.9, 0),
+        name1="poly3",
+        pt2=new_point(0.1, 0.1, 0),
+        name2="poly4",
+    )
+    assert len(poly3.pts) == 4  # square
+    assert len(poly4.pts) == 8  # U-shape
 
 
 if __name__ == "__main__":
