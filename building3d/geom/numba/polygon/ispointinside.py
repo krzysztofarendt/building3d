@@ -20,6 +20,8 @@ def is_point_inside(
 ) -> bool:
     """Checks whether a point lies on the surface of the polygon.
 
+    If the point lays on an edge or vertex, it is assumed it is inside.
+
     Args:
         ptest: test point, array shape (3, )
         pts: polygon points, array shape (num_points, 3)
