@@ -1,7 +1,7 @@
 from numba import njit
 import numpy as np
 
-from building3d.config import GEOM_RTOL
+from building3d.config import GEOM_RTOL, GEOM_ATOL
 from building3d.geom.numba.points import points_equal
 from building3d.geom.numba.types import PointType, VectorType, IndexType
 from building3d.geom.numba.points import are_points_coplanar

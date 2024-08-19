@@ -46,3 +46,22 @@ def test_polygon_bbox():
     bbox = poly.bbox()
     assert np.allclose(bbox[0], [0, 0, 0])
     assert np.allclose(bbox[1], [1, 1, 0])
+
+
+def test_polygon_contains():
+    pt0 = new_point(0, 0, 0)
+    pt1 = new_point(1, 0, 0)
+    pt2 = new_point(1, 1, 0)
+    pt3 = new_point(0, 1, 0)
+    pts0 = np.vstack((pt0, pt1, pt2, pt3))
+    poly0 = Polygon(pts0)
+
+    pt0 = new_point(0.1, 0.1, 0)
+    pt1 = new_point(0.9, 0.1, 0)
+    pt2 = new_point(0.9, 0.9, 0)
+    pt3 = new_point(0.1, 0.9, 0)
+    pts1 = np.vstack((pt0, pt1, pt2, pt3))
+    poly1 = Polygon(pts1)
+
+    assert poly0.contains_polygon(poly1) is True
+    assert poly1.contains_polygon(poly0) is False

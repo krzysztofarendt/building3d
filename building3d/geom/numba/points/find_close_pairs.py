@@ -2,10 +2,17 @@ import numpy as np
 from numba import njit
 
 from building3d.geom.numba.types import PointType, FLOAT
+from building3d.geom.numba.points.visibility import are_points_visible
+from building3d.geom.numba.polygon.edges import polygon_edges
 
 
 @njit
-def find_close_pairs(pts0: PointType, pts1: PointType, n: int) -> PointType:
+def find_close_pairs(
+    pts0: PointType,
+    pts1: PointType,
+    n: int,
+    vis_only: bool = True,
+) -> PointType:
     """Return an array of pairs of closest points between 2 polygons.
 
     The pairs are sorted based on distance in the ascending order.
@@ -16,6 +23,7 @@ def find_close_pairs(pts0: PointType, pts1: PointType, n: int) -> PointType:
         pts0: Points of polygon 0
         pts1: Points of polygon 1
         n: Number of closest pairs to find
+        vis_only: if True, will find only point pairs which are mutually visible
 
     Return:
         array shaped `(n, num_poly, xyz)`, where `num_poly=2` and `xyz=3`,
@@ -26,10 +34,16 @@ def find_close_pairs(pts0: PointType, pts1: PointType, n: int) -> PointType:
     """
     pairs = []
 
+    edges0 = polygon_edges(pts0)
+    edges1 = polygon_edges(pts1)
+
     for i, p0 in enumerate(pts0):
         for j, p1 in enumerate(pts1):
-            d = np.linalg.norm(p1 - p0)
-            pairs.append((d, i, j))
+            if vis_only and not are_points_visible(p0, p1, edges0, edges1):
+                continue
+            else:
+                d = np.linalg.norm(p1 - p0)
+                pairs.append((d, i, j))
 
     pairs = sorted(pairs)
     used_0 = set()

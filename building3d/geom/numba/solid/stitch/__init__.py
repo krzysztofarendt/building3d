@@ -1,6 +1,6 @@
 import numpy as np
 
-from building3d.geom.numba.points import find_close_pairs
+from building3d.geom.numba.points.find_close_pairs import find_close_pairs
 from building3d.geom.numba.polygon import Polygon
 from building3d.geom.numba.polygon.slice import slice_polygon
 from building3d.geom.numba.wall import Wall
@@ -30,20 +30,35 @@ def stitch_solids(s1: Solid, s2: Solid, adj: list | None = None) -> None:
 def slice_and_replace(s1: Solid, p1: Polygon, s2: Solid, p2: Polygon) -> None:
     """Slices polygons `p1` and `p2` and replaces them in solids `s1` and `s2`.
     """
-    if p1.contains_polygon(p2) or p2.contains_polygon(p1):
-        pass  # TODO: Additional slice needed
+    p2_in_p1 = p1.contains_polygon(p2)
+    p1_in_p2 = p2.contains_polygon(p1)
+    if p2_in_p1 or p1_in_p2:
         # Proposed algorithm:
-        # 1. Find two pairs of mutually visible points between p1 and p2
-        # 2. Make a aux. polygon with them (though slice_polygon()?)
-        # 3. Then proceed to slicing the main polygon as below
+        # - [x] find_close_pairs()
+        # - [ ] Make a aux. polygon with them (though slice_polygon()?)
+        # - [ ] Then proceed to slicing the main polygon as below
+        pairs = find_close_pairs(p1.pts, p2.pts, n=2, vis_only=True)
+        subpoly_pts = pairs.reshape((-1, 3))
+        subpoly = Polygon(subpoly_pts)
+        # TODO: make the second polygon and replace
+
+        if p2_in_p1:
+            ...  # TODO: replace in p1
+            p1 = None  # assign the second polygon here
+        elif p1_in_p2:
+            ...  # TODO: replace in p2
+            p2 = None  # assign the second polygon here
+        else:
+            raise RuntimeError("Should not happen")
+        breakpoint()
 
     p1a, p1b = slice_polygon(p1, p2.pts)
-    assert (p1a is not None) and (p1b is not None)
-    replace_polygon(s1, p1, p1a, p1b)
+    if (p1a is not None) and (p1b is not None):
+        replace_polygon(s1, p1, p1a, p1b)
 
     p2a, p2b = slice_polygon(p2, p1.pts)
-    assert (p2a is not None) and (p2b is not None)
-    replace_polygon(s2, p2, p2a, p2b)
+    if (p2a is not None) and (p2b is not None):
+        replace_polygon(s2, p2, p2a, p2b)
 
     return None
 
