@@ -10,11 +10,11 @@ from building3d.geom.numba.points import roll_forward
 from building3d.geom.numba.points import new_point_between_2_points
 from building3d.geom.numba.points import many_new_points_between_2_points
 from building3d.geom.numba.points import is_point_on_segment
-from building3d.geom.numba.points import distance_point_to_edge
-from building3d.geom.numba.points import line_intersection
-from building3d.geom.numba.points import line_segment_intersection
+from building3d.geom.numba.points.distance import distance_point_to_edge
+from building3d.geom.numba.points.intersections import line_intersection
+from building3d.geom.numba.points.intersections import line_segment_intersection
 from building3d.geom.numba.vectors import new_vector
-from building3d.geom.numba.types import FLOAT, INVALID_PT
+from building3d.geom.numba.types import FLOAT
 
 
 def test_new_point():

@@ -4,7 +4,6 @@ from building3d.geom.exceptions import GeometryError
 from building3d.geom.numba.types import PointType
 from building3d.geom.numba.points import are_points_coplanar
 from building3d.geom.numba.polygon import Polygon
-from building3d.geom.numba.polygon.edges import polygon_edges
 from building3d.geom.numba.polygon.slice.get_point_arrays import get_point_arrays
 from building3d.geom.numba.polygon.slice.add_intersection_points import add_intersection_points
 from building3d.geom.numba.polygon.slice.remove_redundant_points import remove_redundant_points
@@ -17,7 +16,7 @@ def slice_polygon(
     name1: str | None = None,
     pt2: PointType | None = None,
     name2: str | None = None,
-) -> tuple[Polygon | None, Polygon | None]:
+) -> tuple[Polygon, Polygon] | tuple[None, None]:
     """Slice polygon into two parts.
 
     To assign names, all optional arguments needs to be provided.
@@ -45,7 +44,7 @@ def slice_polygon(
 
     if slicing_pts.shape[0] < 2:
         # Slicing not possible
-        return None, None
+        return None, None  # TODO: I don't like it
 
     pts1, pts2 = get_point_arrays(poly.pts, poly.tri, slicing_pts)
     poly1, poly2 = make_polygons(pts1, pts2, pt1, name1, pt2, name2)

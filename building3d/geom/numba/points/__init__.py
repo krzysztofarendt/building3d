@@ -3,13 +3,21 @@ from numba import njit
 
 from building3d.config import GEOM_ATOL, EPSILON
 from building3d.config import POINT_NUM_DEC
-from building3d.geom.numba.types import PointType, VectorType, FLOAT, INVALID_PT
+from building3d.geom.numba.types import PointType, FLOAT
 from building3d.geom.numba.vectors import normal, new_vector
 
 
 @njit
 def new_point(x: float, y: float, z: float) -> PointType:
     return np.array([x, y, z], dtype=FLOAT)
+
+
+@njit
+def is_valid_pt(pt: PointType) -> bool:
+    if np.isnan(pt).any():
+        return False
+    else:
+        return True
 
 
 # njit doesn't support f-strings
@@ -278,159 +286,3 @@ def create_points_between_list_of_points(
         array of new points (input and fixed points included), shape (num_pts, 3)
     """
     raise NotImplementedError
-
-
-@njit
-def distance_point_to_edge(ptest: PointType, pt1: PointType, pt2: PointType) -> FLOAT:
-    """Calculates distance of ptest to the line segment pt1->pt2."""
-    v21 = pt2 - pt1
-    vt1 = ptest - pt1
-
-    # Project vt1 vector onto the line segment v21
-    # t represents a value between 0 and 1 where:
-    # t=0 corresponts to the start of point of the segment
-    # t=1 corresponds to the end point of the segment
-    t = np.dot(vt1, v21) / np.dot(v21, v21)
-
-    # Check if the projection is outside the segment range
-    if t < 0:
-        # closest_point = pt1
-        return np.linalg.norm(pt1 - ptest)
-    elif t > 1:
-        # closest_point = pt2
-        return np.linalg.norm(pt2 - ptest)
-    else:
-        # Closest point is somewhere between pt1 and pt2
-        closest_point = pt1 + t * v21
-        return np.linalg.norm(closest_point - ptest)
-
-
-@njit
-def line_intersection(
-    pt1: PointType,
-    d1: VectorType,
-    pt2: PointType,
-    d2: VectorType,
-) -> PointType:
-    """Determines the intersection point of two lines in 3D space.
-
-    Args:
-        pt1: A point on the first line.
-        d1: The direction vector of the first line.
-        pt2: A point on the second line.
-        d2: The direction vector of the second line.
-
-    Returns:
-        The coordinates of the intersection point, filled with `nan`
-        if the lines are parallel or coincident.
-    """
-    if np.allclose(d1, new_vector(0, 0, 0)) or np.allclose(d2, new_vector(0, 0, 0)):
-        # Direction vectors cannot be zero
-        return INVALID_PT
-    elif np.allclose(d1 / np.linalg.norm(d1), d2 / np.linalg.norm(d2)):
-        # Parallel or coincident
-        return INVALID_PT
-    elif np.allclose(d1 / np.linalg.norm(d1), -1 * d2 / np.linalg.norm(d2)):
-        # Parallel or coincident
-        return INVALID_PT
-
-    # Construct the system of linear equations
-    A = list_pts_to_array([d1, -d2]).T
-    b = pt2 - pt1
-
-    try:
-        # Solve for t and s using least squares to handle potential overdetermined system
-        t_s, _, _, s = np.linalg.lstsq(A, b)
-    except Exception:  # numba does not support other types of exceptions
-        return INVALID_PT
-
-    t, s = t_s
-
-    # Check if the intersection point is the same for both lines
-    point_on_line1 = pt1 + t * d1
-    point_on_line2 = pt2 + s * d2
-
-    if np.allclose(point_on_line1, point_on_line2):
-        x, y, z = point_on_line1
-        return new_point(x, y, z)
-    else:
-        return INVALID_PT
-
-
-@njit
-def line_segment_intersection(
-    pa1: PointType,
-    pb1: PointType,
-    pa2: PointType,
-    pb2: PointType,
-) -> PointType:
-    """Determines the intersection point between two line segments: pa1->pb1 and pa2->pb2.
-
-    Returns `INVALID_PT` if:
-    - line segments are not intersecting
-    - line segments are parallel or coincident (their direction vectors are equal)
-    """
-    d1 = pb1 - pa1
-    d2 = pb2 - pa2
-
-    candidate = line_intersection(pa1, d1, pa2, d2)
-
-    if candidate is INVALID_PT:
-        return INVALID_PT
-    else:
-        # Check if the candidate point lies within both edges
-        if is_point_on_segment(candidate, pa1, pb1) and is_point_on_segment(candidate, pa2, pb2):
-            return candidate
-        else:
-            return INVALID_PT
-
-
-@njit
-def find_close_pairs(pts0: PointType, pts1: PointType, n: int) -> PointType:
-    """Return an array of pairs of closest points between 2 polygons.
-
-    The pairs are sorted based on distance in the ascending order.
-    The number of pairs to return is n.
-    Each point can be used once, i.e. each pair is unique.
-
-    Args:
-        pts0: Points of polygon 0
-        pts1: Points of polygon 1
-        n: Number of closest pairs to find
-
-    Return:
-        array shaped `(n, num_poly, xyz)`, where `num_poly=2` and `xyz=3`,
-        the first item `[0, :, :]` is the closest pair of points
-
-    Raises:
-        ValueError: when `n` is too large and cannot find enough pairs
-    """
-    pairs = []
-
-    for i, p0 in enumerate(pts0):
-        for j, p1 in enumerate(pts1):
-            d = np.linalg.norm(p1 - p0)
-            pairs.append((d, i, j))
-
-    pairs = sorted(pairs)
-    used_0 = set()
-    used_1 = set()
-
-    indices = []
-
-    for pp in pairs:
-        _, i, j = pp
-        if (i not in used_0) and (j not in used_1):
-            indices.append((i, j))
-            used_0.add(i)
-            used_1.add(j)
-
-    if len(indices) < n:
-        raise ValueError("n is too large, not enough point pairs found")
-
-    points = np.zeros((n, 2, 3), dtype=FLOAT)
-    for k in range(n):
-        points[k, 0] = pts0[indices[k][0]]
-        points[k, 1] = pts1[indices[k][1]]
-
-    return points

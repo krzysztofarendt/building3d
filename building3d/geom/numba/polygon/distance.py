@@ -4,7 +4,7 @@ import numpy as np
 from building3d.geom.numba.types import PointType, VectorType, IndexType
 from building3d.geom.numba.polygon.plane import plane_coefficients
 from building3d.geom.numba.polygon.plane import projection_coefficients
-from building3d.geom.numba.points import distance_point_to_edge
+from building3d.geom.numba.points.distance import distance_point_to_edge
 from building3d.geom.numba.polygon.ispointinside import is_point_inside_ortho_projection
 from building3d.geom.numba.polygon.edges import polygon_edges
 
