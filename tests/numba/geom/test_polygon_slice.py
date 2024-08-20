@@ -1,6 +1,6 @@
 import numpy as np
 
-from building3d.geom.numba.points import new_point, points_equal
+from building3d.geom.numba.points import new_point, points_equal, roll_forward
 from building3d.geom.numba.vectors import normal
 from building3d.geom.numba.triangles import triangulate
 from building3d.geom.numba.polygon import Polygon
@@ -107,6 +107,7 @@ def test_remove_redundant_points():
     assert is_point_in(kept[2], slicing_pts[1:4])
 
     slicing_pts = np.vstack((
+        new_point(-2, -2, -2),  # Point outside polygon
         new_point(-1, -1, -1),  # Point outside polygon
         new_point(0, 0, 0),
         new_point(0.5, 0, 0),
@@ -117,9 +118,14 @@ def test_remove_redundant_points():
     ))
     kept = remove_redundant_points(slicing_pts, pts, tri)
     assert kept.shape == (3, 3)
-    assert is_point_in(kept[0], slicing_pts[2:5])
-    assert is_point_in(kept[1], slicing_pts[2:5])
-    assert is_point_in(kept[2], slicing_pts[2:5])
+    assert is_point_in(kept[0], slicing_pts[3:6])
+    assert is_point_in(kept[1], slicing_pts[3:6])
+    assert is_point_in(kept[2], slicing_pts[3:6])
+
+    for _ in range(len(slicing_pts)):
+        slicing_pts = roll_forward(slicing_pts)
+        kept = remove_redundant_points(slicing_pts, pts, tri)
+        assert kept.shape == (3, 3)
 
 
 def test_slice_polygon():
@@ -142,7 +148,14 @@ def test_slice_polygon():
     name2 = "right"
     pt2 = new_point(0.75, 0.5, 0)
     poly1, poly2 = slice_polygon(poly, slicing_pts, pt1, name1, pt2, name2)
-    print(poly1, poly2)
+    assert poly1.name == name1
+    assert poly2.name == name2
+    poly1, poly2 = slice_polygon(poly, slicing_pts, pt1=pt1, name1=name1, name2=name2)
+    assert poly1.name == name1
+    assert poly2.name == name2
+    poly1, poly2 = slice_polygon(poly, slicing_pts, pt2=pt2, name1=name1, name2=name2)
+    assert poly1.name == name1
+    assert poly2.name == name2
 
     # Start and end at the same edge
     slicing_pts = np.vstack((
@@ -156,7 +169,8 @@ def test_slice_polygon():
     name2 = "right"
     pt2 = new_point(0.5, 0.25, 0)
     poly1, poly2 = slice_polygon(poly, slicing_pts, pt1, name1, pt2, name2)
-    print(poly1, poly2)
+    assert poly1.name == name1
+    assert poly2.name == name2
 
     # Start at vertex, end at edge
     slicing_pts = np.vstack((
@@ -169,7 +183,8 @@ def test_slice_polygon():
     name2 = "right"
     pt2 = new_point(0.75, 0.1, 0)
     poly1, poly2 = slice_polygon(poly, slicing_pts, pt1, name1, pt2, name2)
-    print(poly1, poly2)
+    assert poly1.name == name1
+    assert poly2.name == name2
 
     # Start at vertex, end at different vertex
     slicing_pts = np.vstack((
@@ -181,7 +196,8 @@ def test_slice_polygon():
     name2 = "right"
     pt2 = new_point(0.9, 0.1, 0)
     poly1, poly2 = slice_polygon(poly, slicing_pts, pt1, name1, pt2, name2)
-    print(poly1, poly2)
+    assert poly1.name == name1
+    assert poly2.name == name2
 
 
 def test_polygon_slice_using_another_polygon():
@@ -277,4 +293,4 @@ def test_polygon_slice_using_another_complex_polygon():
 
 
 if __name__ == "__main__":
-    test_polygon_slice_using_smaller_polygon()
+    test_slice_polygon()

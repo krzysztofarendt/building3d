@@ -1,5 +1,6 @@
 import numpy as np
 
+from building3d import random_id
 from building3d.geom.exceptions import GeometryError
 from building3d.geom.numba.types import PointType
 from building3d.geom.numba.points import are_points_coplanar
@@ -16,7 +17,7 @@ def slice_polygon(
     name1: str | None = None,
     pt2: PointType | None = None,
     name2: str | None = None,
-) -> tuple[Polygon, Polygon] | tuple[None, None]:
+) -> tuple[Polygon, Polygon]:
     """Slice polygon into two parts.
 
     To assign names, all optional arguments needs to be provided.
@@ -32,8 +33,11 @@ def slice_polygon(
         pt2: optional point inside the other one of the resulting slices
         name2: optional name of part associated with pt2
 
-    Return:
+    Returns:
         tuple of new polygons or Nones if slicing not possible
+
+    Raises:
+        GeometryError: if slicing not possible
     """
     assert are_points_coplanar(np.vstack((poly.pts, slicing_pts))), \
         "Polygon points are not coplanar with slicing points"
@@ -44,7 +48,7 @@ def slice_polygon(
 
     if slicing_pts.shape[0] < 2:
         # Slicing not possible
-        return None, None  # TODO: I don't like it
+        raise GeometryError("Slicing not possible, less than 2 valid slicing points")
 
     pts1, pts2 = get_point_arrays(poly.pts, poly.tri, slicing_pts)
     poly1, poly2 = make_polygons(pts1, pts2, pt1, name1, pt2, name2)
@@ -78,12 +82,12 @@ def make_polygons(
     poly1 = Polygon(pts1)
     poly2 = Polygon(pts2)
 
-    if (
-        pt1 is not None and
-        name1 is not None and
-        pt2 is not None and
-        name2 is not None
-    ):
+    if name1 is None:
+        name1 = random_id()
+    if name2 is None:
+        name2 = random_id()
+
+    if (pt1 is not None) and (pt2 is not None):
         if poly1.is_point_inside(pt1):
             poly1.name = name1
         elif poly1.is_point_inside(pt2):
@@ -98,4 +102,33 @@ def make_polygons(
         else:
             raise GeometryError("None of the points is inside polygon made of pts2")
 
-    return (poly1, poly2)
+    elif (pt1 is not None) and (pt2 is None):
+        if poly1.is_point_inside(pt1):
+            poly1.name = name1
+            poly2.name = name2
+        elif poly2.is_point_inside(pt1):
+            poly1.name = name2
+            poly2.name = name1
+        else:
+            raise GeometryError("pt1 given but outside both polygons")
+
+    elif (pt1 is None) and (pt2 is not None):
+        if poly1.is_point_inside(pt2):
+            poly1.name = name2
+            poly2.name = name1
+        elif poly2.is_point_inside(pt2):
+            poly1.name = name1
+            poly2.name = name2
+        else:
+            raise GeometryError("pt2 given but outside both polygons")
+
+    else:
+        poly1.name = name1
+        poly2.name = name2
+
+    if poly1.name == name1 and poly2.name == name2:
+        return (poly1, poly2)
+    elif poly1.name == name2 and poly2.name == name1:
+        return (poly2, poly1)
+    else:
+        raise RuntimeError("Such a case should not happen")

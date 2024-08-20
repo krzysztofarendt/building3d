@@ -1,33 +1,31 @@
 from numba import njit
 import numpy as np
 
+from building3d.geom.exceptions import GeometryError
 from building3d.geom.numba.types import PointType
 from building3d.geom.numba.points.find_close_pairs import find_close_pairs
 from building3d.geom.numba.polygon import Polygon
 from building3d.geom.numba.polygon.slice import slice_polygon
 from building3d.geom.numba.wall import Wall
 from building3d.geom.numba.solid import Solid
-from building3d.geom.exceptions import GeometryError
-from building3d.geom.paths.object_path import object_path
-from building3d.geom.paths import PATH_SEP
+from building3d.geom.numba.types import FLOAT
 
 
-def stitch_solids(s1: Solid, s2: Solid, adj: list | None = None) -> None:
+def stitch_solids(s1: Solid, s2: Solid) -> None:
     """Slice adjacent polygons of two solids so that they share vertices and edges.
     """
-    # Find adjacent polygons
-    if adj is None:
-        adj = find_adjacent_polygons(s1, s2)
+    # print("Stitch solid", s1, s2)
+    adj = next_adjacent_polygons(s1, s2)
+    print(adj)
 
-    # Process next pair of adjacent polygons
-    if len(adj) > 0:
-        p1, p2 = adj.pop()
-        slice_and_replace(s1, p1, s2, p2)
-        return stitch_solids(s1, s2, adj)
+    if adj is not None:
+        # Process next pair of adjacent polygons
+        p1, p2 = adj
+        slice_both_and_replace(s1, p1, s2, p2)
+        return stitch_solids(s1, s2)
 
     else:
         return None
-
 
 @njit
 def get_sup_cut(pairs: PointType) -> PointType:
@@ -39,13 +37,10 @@ def get_sup_cut(pairs: PointType) -> PointType:
     return pts
 
 
-def get_main_poly(pts, pairs):
-    ...
-
-
-def slice_and_replace(s1: Solid, p1: Polygon, s2: Solid, p2: Polygon) -> None:
-    """Slices polygons `p1` and `p2` and replaces them in solids `s1` and `s2`.
+def slice_both_and_replace(s1: Solid, p1: Polygon, s2: Solid, p2: Polygon) -> None:
+    """Slices polygons `p1` and `p2` and replaces them in solids `s1` and `s2` (in-place).
     """
+    # print("slice_both_and_replace", s1, p1, s2, p2)
     # TODO: REFACTORING NEEDED
     p2_in_p1 = p1.contains_polygon(p2)
     p1_in_p2 = p2.contains_polygon(p1)
@@ -65,48 +60,70 @@ def slice_and_replace(s1: Solid, p1: Polygon, s2: Solid, p2: Polygon) -> None:
 
         if p2_in_p1:
             # Slice p1 twice
-            main, sup = slice_polygon(p1, sup_cut)
-            assert (main is not None) and (sup is not None)
-            if not np.allclose(main.vn, p1.vn):
-                main = main.flip()
-            if not np.allclose(sup.vn, p1.vn):
-                sup = sup.flip()
-            replace_polygon(s1, p1, main, sup)
-            a, b = slice_polygon(main, p2.pts)
-            if (a is not None) and (b is not None):
-                replace_polygon(s1, main, a, b)
+            main, sup = slice_one_and_replace(s1, p1, sup_cut)
+            assert main is not None
+            _, _ = slice_one_and_replace(s1, main, p2.pts)
 
         elif p1_in_p2:
             # Slice p2 twice
-            main, sup = slice_polygon(p2, sup_cut)
-            assert (main is not None) and (sup is not None)
-            if not np.allclose(main.vn, p2.vn):
-                main = main.flip()
-            if not np.allclose(sup.vn, p2.vn):
-                sup = sup.flip()
-            replace_polygon(s2, p2, main, sup)
-            a, b = slice_polygon(main, p1.pts)
-            if (a is not None) and (b is not None):
-                replace_polygon(s2, main, a, b)
+            main, sup = slice_one_and_replace(s2, p2, sup_cut)
+            assert main is not None
+            _, _ = slice_one_and_replace(s2, main, p1.pts)
+
         else:
             raise RuntimeError("Should not happen")
 
     else:
         # The polygons are overlapping
-        p1a, p1b = slice_polygon(p1, p2.pts)
-        if (p1a is not None) and (p1b is not None):
-            replace_polygon(s1, p1, p1a, p1b)
-
-        p2a, p2b = slice_polygon(p2, p1.pts)
-        if (p2a is not None) and (p2b is not None):
-            replace_polygon(s2, p2, p2a, p2b)
+        _, _ = slice_one_and_replace(s1, p1, p2.pts)
+        _, _ = slice_one_and_replace(s2, p2, p1.pts)
 
     return None
 
 
-def replace_polygon(s: Solid, old_poly: Polygon, *new_poly: Polygon) -> None:
-    """Replaces `old_poly` with an arbitraty number of `new_poly`. Works in-place.
+def slice_one_and_replace(
+    s: Solid,
+    p: Polygon,
+    slicing_pts: PointType
+) -> tuple[Polygon | None, Polygon | None]:
+    """Slices polygon `p` with `slicing_pts` and replaces it in solid `s` (in-place).
+
+    Args:
+        s: Solid containing the polygon `p`
+        p: Polygon from solid `s`
+        slicing_pts: Slicing points
+
+    Return:
+        tuple of polygons `(a, b)`, where `b` is the polygon surrounded by `slicing_pts`
     """
+    # print("slice_one_and_replace", s, p, slicing_pts)
+    slicing_pts = remove_outside_points(p, slicing_pts)
+
+    if len(slicing_pts) < 2:
+        return None, None
+
+    pt_in_b = None  # TODO
+    try:
+        a, b = slice_polygon(
+            p, slicing_pts, pt2=pt_in_b, name1=f"{p.name}-main", name2=f"{p.name}-sup"
+        )
+    except GeometryError:
+        return None, None
+
+    if not np.allclose(a.vn, p.vn):
+        a = a.flip()
+    if not np.allclose(b.vn, p.vn):
+        b = b.flip()
+
+    replace_polygon(s, p, a, b)
+
+    return a, b
+
+
+def replace_polygon(s: Solid, old_poly: Polygon, *new_poly: Polygon) -> None:
+    """Replaces `old_poly` with an arbitraty number of `new_poly` (in-place).
+    """
+    print("REPLACE")
     wpl = get_walls_and_polygons(s)
     for wall, poly in wpl:
         if poly.name == old_poly.name:
@@ -125,18 +142,32 @@ def get_walls_and_polygons(s: Solid) -> list[tuple[Wall, Polygon]]:
     return wpl
 
 
-def find_adjacent_polygons(s1: Solid, s2: Solid) -> list[tuple[Polygon, Polygon]]:
-    """Returns a list of pairs of adjacent polygons. Those matching exactly are omitted.
+def next_adjacent_polygons(s1: Solid, s2: Solid) -> tuple[Polygon, Polygon] | None:
+    """Returns a pair of adjacent polygons. Those matching exactly are omitted.
     """
-    adj = []
     for _, p1 in get_walls_and_polygons(s1):
         for _, p2 in get_walls_and_polygons(s2):
             facing_exactly = p1.is_facing_polygon(p2, exact=True)
             if facing_exactly:
+                # Nothing to slice
+                continue
+            touching = p1.is_touching_polygon(p2)
+            if touching:
                 continue
             adjacent = p1.is_facing_polygon(p2, exact=False)
             if adjacent:
                 assert np.allclose(p1.vn, -1 * p2.vn)
-                adj.append((p1, p2))
+                return p1, p2
+    return None
 
-    return adj
+
+@njit
+def remove_outside_points(poly: Polygon, slicing_pts: PointType) -> PointType:
+    pts = np.zeros(slicing_pts.shape, dtype=FLOAT)
+    j = 0
+    for i in range(slicing_pts.shape[0]):
+        pt = slicing_pts[i]
+        if poly.is_point_inside(pt):
+            pts[j] = pt
+            j += 1
+    return pts[:j]

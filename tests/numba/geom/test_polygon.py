@@ -63,8 +63,8 @@ def test_polygon_contains():
     pts1 = np.vstack((pt0, pt1, pt2, pt3))
     poly1 = Polygon(pts1)
 
-    assert poly0.is_polygon_inside(poly1) is True
-    assert poly1.is_polygon_inside(poly0) is False
+    assert poly0.contains_polygon(poly1) is True
+    assert poly1.contains_polygon(poly0) is False
 
 
 def test_polygon_is_touching_other():
