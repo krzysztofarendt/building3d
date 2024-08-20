@@ -7,9 +7,21 @@ from building3d.geom.numba.points import are_points_coplanar
 from building3d.geom.numba.triangles import is_point_inside as is_point_inside_triangle
 from building3d.geom.numba.polygon.edges import polygon_edges
 from building3d.geom.numba.points.distance import distance_point_to_edge
+from building3d.geom.numba.points import is_point_on_segment
 from building3d.geom.numba.polygon.plane import plane_coefficients
 from building3d.geom.numba.polygon.plane import projection_coefficients
 from building3d.geom.numba.vectors import normal
+
+
+@njit
+def is_point_at_boundary(ptest: PointType, pts: PointType) -> bool:
+    """Checks if the point lays on any of the edges of `pts`.
+    """
+    edges = polygon_edges(pts)
+    for pt1, pt2 in edges:
+        if is_point_on_segment(ptest, pt1, pt2):
+            return True
+    return False
 
 
 @njit
@@ -17,6 +29,7 @@ def is_point_inside(
     ptest: PointType,
     pts: PointType,
     tri: IndexType,
+    boundary_in: bool = True,
 ) -> bool:
     """Checks whether a point lies on the surface of the polygon.
 
@@ -47,7 +60,13 @@ def is_point_inside(
             tri_pts[j] = pts[tri[i, j]]
 
         if is_point_inside_triangle(ptest, tri_pts[0], tri_pts[1], tri_pts[2]):
-            return True
+            if boundary_in:
+                return True
+            else:
+                if is_point_at_boundary(ptest, pts):
+                    return False
+                else:
+                    return True
 
     return False
 

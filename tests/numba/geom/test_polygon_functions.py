@@ -102,12 +102,16 @@ def test_is_point_inside():
     assert is_point_inside(ptest, pts, tri) is True
     ptest = new_point(1, 0, 0)
     assert is_point_inside(ptest, pts, tri) is True
+    assert is_point_inside(ptest, pts, tri, boundary_in=False) is False
     ptest = new_point(0.5, 0.5, 0.01)
     assert is_point_inside(ptest, pts, tri) is False
     ptest = new_point(1.1, 0, 0)
     assert is_point_inside(ptest, pts, tri) is False
     ptest = new_point(-0.001, 0, 0)
     assert is_point_inside(ptest, pts, tri) is False
+    ptest = new_point(0.5, 0, 0)
+    assert is_point_inside(ptest, pts, tri) is True
+    assert is_point_inside(ptest, pts, tri, boundary_in=False) is False
 
 
 def test_is_point_inside_margin():

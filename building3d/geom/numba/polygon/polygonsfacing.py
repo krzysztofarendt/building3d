@@ -6,6 +6,7 @@ from building3d.geom.numba.points import points_equal
 from building3d.geom.numba.types import PointType, VectorType, IndexType
 from building3d.geom.numba.points import are_points_coplanar
 from building3d.geom.numba.polygon.ispointinside import is_point_inside
+from building3d.geom.numba.polygon.area import polygon_area
 
 
 @njit
@@ -43,8 +44,12 @@ def are_polygons_facing(
         if len(pts1) != len(pts2):
             return False
 
+        if not np.isclose(polygon_area(pts1, vn1), polygon_area(pts2, vn2)):
+            return False
+
         num_matching = 0
         matched = set()
+        # TODO: This does not test if the connections between points are same
         for i in range(pts1.shape[0]):
             for j in range(pts2.shape[0]):
                 if j not in matched:
