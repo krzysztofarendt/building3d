@@ -1,5 +1,7 @@
+from numba import njit
 import numpy as np
 
+from building3d.geom.numba.types import PointType
 from building3d.geom.numba.points.find_close_pairs import find_close_pairs
 from building3d.geom.numba.polygon import Polygon
 from building3d.geom.numba.polygon.slice import slice_polygon
@@ -27,38 +29,77 @@ def stitch_solids(s1: Solid, s2: Solid, adj: list | None = None) -> None:
         return None
 
 
+@njit
+def get_sup_cut(pairs: PointType) -> PointType:
+    """Returns points to be used to slice supporting polygon."""
+    pts = pairs.reshape((-1, 3))
+    tmp = pts[0].copy()
+    pts[0] = pts[1].copy()
+    pts[1] = tmp
+    return pts
+
+
+def get_main_poly(pts, pairs):
+    ...
+
+
 def slice_and_replace(s1: Solid, p1: Polygon, s2: Solid, p2: Polygon) -> None:
     """Slices polygons `p1` and `p2` and replaces them in solids `s1` and `s2`.
     """
     p2_in_p1 = p1.contains_polygon(p2)
     p1_in_p2 = p2.contains_polygon(p1)
+
     if p2_in_p1 or p1_in_p2:
-        # Proposed algorithm:
-        # - [x] find_close_pairs()
-        # - [ ] Make a aux. polygon with them (though slice_polygon()?)
-        # - [ ] Then proceed to slicing the main polygon as below
+        # One polygon is completely inside the other
+        # Algorithm:
+        # - find close pairs which are mutually visible
+        # - slice the large polygon into 2: main + supporting
+        # - the supporting polygon needs to touch the edges of the large and small polygons
+        # - then slice the main polygon using the points of the small polygon
+        # Result:
+        # - large polygon is sliced twice
+        # - small polygon is not sliced
+        # TODO: REFACTORING NEEDED
         pairs = find_close_pairs(p1.pts, p2.pts, n=2, vis_only=True)
-        subpoly_pts = pairs.reshape((-1, 3))
-        subpoly = Polygon(subpoly_pts)
-        # TODO: make the second polygon and replace
+        sup_cut = get_sup_cut(pairs)
 
         if p2_in_p1:
-            ...  # TODO: replace in p1
-            p1 = None  # assign the second polygon here
+            # Slice p1 twice
+            main, sup = slice_polygon(p1, sup_cut)
+            assert (main is not None) and (sup is not None)
+            if not np.allclose(main.vn, p1.vn):
+                main = main.flip()
+            if not np.allclose(sup.vn, p1.vn):
+                sup = sup.flip()
+            replace_polygon(s1, p1, main, sup)
+            a, b = slice_polygon(main, p2.pts)
+            if (a is not None) and (b is not None):
+                replace_polygon(s1, main, a, b)
+
         elif p1_in_p2:
-            ...  # TODO: replace in p2
-            p2 = None  # assign the second polygon here
+            # Slice p2 twice
+            main, sup = slice_polygon(p2, sup_cut)
+            assert (main is not None) and (sup is not None)
+            if not np.allclose(main.vn, p2.vn):
+                main = main.flip()
+            if not np.allclose(sup.vn, p2.vn):
+                sup = sup.flip()
+            replace_polygon(s2, p2, main, sup)
+            a, b = slice_polygon(main, p1.pts)
+            if (a is not None) and (b is not None):
+                replace_polygon(s2, main, a, b)
         else:
             raise RuntimeError("Should not happen")
-        breakpoint()
 
-    p1a, p1b = slice_polygon(p1, p2.pts)
-    if (p1a is not None) and (p1b is not None):
-        replace_polygon(s1, p1, p1a, p1b)
+    else:
+        # The polygons are overlapping
+        p1a, p1b = slice_polygon(p1, p2.pts)
+        if (p1a is not None) and (p1b is not None):
+            replace_polygon(s1, p1, p1a, p1b)
 
-    p2a, p2b = slice_polygon(p2, p1.pts)
-    if (p2a is not None) and (p2b is not None):
-        replace_polygon(s2, p2, p2a, p2b)
+        p2a, p2b = slice_polygon(p2, p1.pts)
+        if (p2a is not None) and (p2b is not None):
+            replace_polygon(s2, p2, p2a, p2b)
 
     return None
 
@@ -95,6 +136,7 @@ def find_adjacent_polygons(s1: Solid, s2: Solid) -> list[tuple[Polygon, Polygon]
                 continue
             adjacent = p1.is_facing_polygon(p2, exact=False)
             if adjacent:
+                assert np.allclose(p1.vn, -1 * p2.vn)
                 adj.append((p1, p2))
 
     return adj

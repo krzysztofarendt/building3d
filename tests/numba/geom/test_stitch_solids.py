@@ -38,7 +38,7 @@ def get_walls(size=1.0, dx=0.0, dy=0.0, dz=0.0) -> tuple[Wall, ...]:
     return walls, floor, roof
 
 
-def test_stitch_solids():
+def test_stitch_solids(show=False):
     w0 = get_walls()
     s0 = Solid(w0, "s0")
 
@@ -64,16 +64,16 @@ def test_stitch_solids():
     stitch_solids(s0, s3)
     stitch_solids(s1, s2)
     stitch_solids(s1, s3)
-    stitch_solids(s4, s0)  # TODO: Does not work, s6 fully enclosed in s0, needs to be sliced twice
+    stitch_solids(s4, s0)
     stitch_solids(s0, s5)
     stitch_solids(s0, s6)
 
-    return s0, s1, s2, s3, s6, s4, s5, s6
+    if show:
+        return s0, s1, s2, s3, s6, s4, s5, s6
 
 
 if __name__ == "__main__":
     from building3d.display.numba.plot_objects import plot_objects
-
-    s = test_stitch_solids()
-
+    s = test_stitch_solids(show=True)
+    assert s is not None
     plot_objects(s)
