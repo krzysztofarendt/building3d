@@ -3,6 +3,7 @@ import numpy as np
 
 from building3d.geom.numba.types import PointType, IndexType, FLOAT
 from building3d.geom.numba.points import roll_forward
+from building3d.geom.numba.points import is_point_in_array
 from building3d.geom.numba.polygon.slice.locate_slicing_points import locate_slicing_points
 from building3d.geom.numba.polygon.edges import polygon_edges
 from .constants import EXTERIOR, INTERIOR, VERTEX, EDGE, INVALID_INDEX, INVALID_LOC
@@ -139,25 +140,25 @@ def remove_redundant_points(
                 continue
 
         elif this_loc_type == VERTEX and next_loc_type == EDGE:
-            if num_interior == 0 and this_pt not in edges[next_loc_ix]:
+            if num_interior == 0 and not is_point_in_array(this_pt, edges[next_loc_ix]):
                 new_points.append(this_pt)
             else:
                 continue
 
         elif this_loc_type == VERTEX and prev_loc_type == EDGE:
-            if num_interior == 0 and this_pt not in edges[prev_loc_ix]:
+            if num_interior == 0 and not is_point_in_array(this_pt, edges[prev_loc_ix]):
                 new_points.append(this_pt)
             else:
                 continue
 
         elif this_loc_type == EDGE and next_loc_type == VERTEX:
-            if num_interior == 0 and pts[next_loc_ix] not in edges[this_loc_ix]:
+            if num_interior == 0 and not is_point_in_array(pts[next_loc_ix], edges[this_loc_ix]):
                 new_points.append(this_pt)
             else:
                 continue
 
         elif this_loc_type == EDGE and prev_loc_type == VERTEX:
-            if num_interior == 0 and pts[prev_loc_ix] not in edges[this_loc_ix]:
+            if num_interior == 0 and not is_point_in_array(pts[prev_loc_ix], edges[this_loc_ix]):
                 new_points.append(this_pt)
             else:
                 continue

@@ -89,7 +89,6 @@ def test_remove_redundant_points():
         new_point(0.5, 1, 0),
     ))
     kept = remove_redundant_points(slicing_pts, pts, tri)
-    breakpoint()
     assert kept.shape == (2, 3)
     assert is_point_in(kept[0], slicing_pts[1:])
     assert is_point_in(kept[1], slicing_pts[1:])

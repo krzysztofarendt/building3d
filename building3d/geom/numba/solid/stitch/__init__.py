@@ -46,6 +46,7 @@ def get_main_poly(pts, pairs):
 def slice_and_replace(s1: Solid, p1: Polygon, s2: Solid, p2: Polygon) -> None:
     """Slices polygons `p1` and `p2` and replaces them in solids `s1` and `s2`.
     """
+    # TODO: REFACTORING NEEDED
     p2_in_p1 = p1.contains_polygon(p2)
     p1_in_p2 = p2.contains_polygon(p1)
 
@@ -59,7 +60,6 @@ def slice_and_replace(s1: Solid, p1: Polygon, s2: Solid, p2: Polygon) -> None:
         # Result:
         # - large polygon is sliced twice
         # - small polygon is not sliced
-        # TODO: REFACTORING NEEDED
         pairs = find_close_pairs(p1.pts, p2.pts, n=2, vis_only=True)
         sup_cut = get_sup_cut(pairs)
 
