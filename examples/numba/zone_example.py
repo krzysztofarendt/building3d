@@ -35,15 +35,12 @@ if __name__ == "__main__":
     walls.add_polygon(poly_wall2)
     walls.add_polygon(poly_wall3)
 
-    floor = Wall(name="floor")
-    floor.add_polygon(poly_floor)
+    floor = Wall([poly_floor], "floor")
 
-    roof = Wall(name="roof")
-    roof.add_polygon(poly_roof)
+    roof = Wall([poly_roof], "roof")
 
-    solid = Solid(name="room", walls=[walls, floor, roof])
+    solid = Solid([walls, floor, roof], "room")
 
-    zone = Zone("zone")
-    zone.add_solid(solid)
+    zone = Zone([solid], "zone")
 
     plot_objects((zone, ))
