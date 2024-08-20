@@ -194,7 +194,7 @@ def triangulate(pts: PointType, vn: VectorType) -> IndexType:
     num_fail = 0
 
     while len(vertices) > 2:
-        if num_fail > len(vertices):
+        if num_fail > len(pts):
             raise TriangulationError("Ear-clipping algorithm failed.")
         # If last vertix, start from the beginning
         if pos > len(vertices) - 1:
