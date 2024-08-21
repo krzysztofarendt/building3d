@@ -13,7 +13,7 @@ def polygon_centroid(pts: PointType, tri: IndexType) -> PointType:
     The centroid is calculated using a weighted average of
     the triangle centroids. The weights are the triangle areas.
 
-    Uses self.triangles (the output of self.triangulate()).
+    Uses triangles from `triangles.triangulate()`.
     """
     num_tri = tri.shape[0]
     assert num_tri > 0, "No triangles passed"

@@ -4,6 +4,7 @@ import numpy as np
 from building3d.geom.exceptions import GeometryError, TriangulationError
 from building3d.config import EPSILON
 from building3d.config import GEOM_ATOL
+from building3d.config import GEOM_RTOL
 from building3d.config import POINT_NUM_DEC
 from building3d.geom.numba.types import PointType, VectorType, IndexType, INT
 from building3d.geom.numba.points import are_points_collinear
@@ -72,7 +73,7 @@ def is_point_on_same_side(
     else:
         vtest /= len_vtest
         vref /= len_vref
-        return bool(np.isclose(vtest, vref).all())
+        return bool(np.isclose(vtest, vref, rtol=GEOM_RTOL).all())
 
 
 @njit
@@ -162,7 +163,7 @@ def is_corner_convex(
         # Normalize before comparing to vn
         v1v2_n /= v1v2_n_len
 
-    if np.allclose(v1v2_n, vn):
+    if np.allclose(v1v2_n, vn, rtol=GEOM_RTOL):
         # Convex vertex
         return True
     else:
@@ -171,20 +172,30 @@ def is_corner_convex(
 
 
 @njit
-def triangulate(pts: PointType, vn: VectorType) -> IndexType:
-    """Return a list of triangles (i, j, k) using the ear-clipping algorithm.
+def triangulate(
+    pts: PointType,
+    vn: VectorType,
+    num_try: int = 0,
+) -> tuple[PointType, IndexType]:
+    """Return a list of points and triangles (i, j, k) using the ear-clipping algorithm.
 
     (i, j, k) are the indices of the points.
     The polygon must not have any holes.
     The polygon can be non-convex.
+
+    The points `pts` are returned because they may be flipped during triangulation.
+    This is a recursive function. If it fails on `pts`, it calls itself with `pts[::-1]`.
 
     Args:
         points: list of points defining the polygon
         normal: vector normal to the polygon
 
     Returns:
-        Array of point indices, shape (num_triangles, 3)
+        tuple of points and indices
     """
+    if num_try >= 2:
+        raise TriangulationError("Ear-clipping algorithm failed.")
+
     if np.isclose(np.linalg.norm(vn), 0):
         raise TriangulationError("Normal vector cannot have zero length")
 
@@ -195,7 +206,9 @@ def triangulate(pts: PointType, vn: VectorType) -> IndexType:
 
     while len(vertices) > 2:
         if num_fail > len(pts):
-            raise TriangulationError("Ear-clipping algorithm failed.")
+            # Try with flipped points
+            return triangulate(pts[::-1], vn, num_try + 1)
+
         # If last vertix, start from the beginning
         if pos > len(vertices) - 1:
             pos = 0
@@ -240,4 +253,4 @@ def triangulate(pts: PointType, vn: VectorType) -> IndexType:
             num_fail += 1
         pos += 1
 
-    return np.array(triangles, dtype=INT)
+    return pts, np.array(triangles, dtype=INT)

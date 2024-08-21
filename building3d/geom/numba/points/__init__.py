@@ -20,19 +20,6 @@ def is_valid_pt(pt: PointType) -> bool:
         return True
 
 
-# njit doesn't support f-strings
-def point_to_str(pt: np.ndarray) -> str:
-    """Returns a string representation of the point."""
-    assert pt.shape == (3, ), "point_to_str() works only with single points."
-    return f"pt(x={pt[0]:.2f},y={pt[1]:.2f},z={pt[2]:.2f},id={hex(id(pt))})"
-
-
-@njit
-def points_equal(pt1: PointType, pt2: PointType, atol: float = GEOM_ATOL) -> bool:
-    """Checks if two points are equal."""
-    return np.allclose(pt1, pt2, atol=atol)
-
-
 @njit
 def is_point_in_array(ptest: PointType, arr: PointType) -> bool:
     """Checks if a point is in the 2D array of points."""
@@ -53,6 +40,42 @@ def list_pts_to_array(lst_pts: list[PointType]) -> PointType:
     for i in range(num_pts):
         pts[i] = lst_pts[i]
     return pts
+
+
+@njit
+def roll_forward(pts: PointType) -> PointType:
+    """Rolls points array 1 element forward. Moves the last point to the beggining.
+
+    Returns a new object. This function does not modify `pts` in place.
+
+    Args:
+        pts: points array, shape (num_points, 3)
+
+    Returns:
+        points array shifted by 1
+    """
+    assert len(pts.shape) == 2
+    new_pts = np.zeros(pts.shape, dtype=FLOAT)
+    num_pts = pts.shape[0]
+    for i in range(num_pts):
+        if i == 0:
+            new_pts[i] = pts[-1]
+        else:
+            new_pts[i] = pts[i-1]
+    return new_pts
+
+
+# njit doesn't support f-strings
+def point_to_str(pt: np.ndarray) -> str:
+    """Returns a string representation of the point."""
+    assert pt.shape == (3, ), "point_to_str() works only with single points."
+    return f"pt(x={pt[0]:.2f},y={pt[1]:.2f},z={pt[2]:.2f},id={hex(id(pt))})"
+
+
+@njit
+def points_equal(pt1: PointType, pt2: PointType, atol: float = GEOM_ATOL) -> bool:
+    """Checks if two points are equal."""
+    return np.allclose(pt1, pt2, atol=atol)
 
 
 # njit doesn't support hash() and tuple()
@@ -163,29 +186,6 @@ def are_points_collinear(
             break
 
     return are_collinear
-
-
-@njit
-def roll_forward(pts: PointType) -> PointType:
-    """Rolls points array 1 element forward. Moves the last point to the beggining.
-
-    Returns a new object. This function does not modify `pts` in place.
-
-    Args:
-        pts: points array, shape (num_points, 3)
-
-    Returns:
-        points array shifted by 1
-    """
-    assert len(pts.shape) == 2
-    new_pts = np.zeros(pts.shape, dtype=FLOAT)
-    num_pts = pts.shape[0]
-    for i in range(num_pts):
-        if i == 0:
-            new_pts[i] = pts[-1]
-        else:
-            new_pts[i] = pts[i-1]
-    return new_pts
 
 
 @njit

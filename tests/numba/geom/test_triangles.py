@@ -97,7 +97,7 @@ def test_triangulate_square():
     pt3 = new_point(0, 1, 0)
     pts = np.vstack((pt0, pt1, pt2, pt3))
     vn = new_vector(0, 0, 1)
-    tri = triangulate(pts, vn)
+    pts, tri = triangulate(pts, vn)
     assert len(tri) == 2
 
 
@@ -116,7 +116,7 @@ def test_triangulate_l_shape():
     for i in range(num_pts):
         if i > 0:
             pts = roll_forward(pts)
-        tri = triangulate(pts, vn)
+        pts, tri = triangulate(pts, vn)
         assert len(tri) == 4
         for nt in range(tri.shape[0]):
             assert np.allclose(normal(pts[tri[nt, 0]], pts[tri[nt, 1]], pts[tri[nt, 2]]), vn)
@@ -139,11 +139,43 @@ def test_triangulate_u_shape():
     for i in range(num_pts):
         if i > 0:
             pts = roll_forward(pts)
-        tri = triangulate(pts, vn)
+        pts, tri = triangulate(pts, vn)
         assert len(tri) == 6
         for nt in range(tri.shape[0]):
             assert np.allclose(normal(pts[tri[nt, 0]], pts[tri[nt, 1]], pts[tri[nt, 2]]), vn)
 
 
+def test_triangulate_c_shape():
+    pts = np.array([
+        [0.75, 0.75, 1.  ],
+        [0.75, 0.25, 1.  ],
+        [0.25, 0.25, 1.  ],
+        [0.  , 0.  , 1.  ],
+        [1.  , 0.  , 1.  ],
+        [1.  , 1.  , 1.  ],
+        [0.  , 1.  , 1.  ],
+        [0.25, 0.75, 1.  ],
+    ])
+    # vn must be given explicitly, because the first corner is non-convex
+    vn = new_vector(0, 0, 1)
+    pts, tri = triangulate(pts, vn)
+    assert len(tri) == 6
+
+
+def test_triangulate_from_failed_example():
+    pts = np.array([
+        [0.5, 0.5, 0. ],
+        [0.5, 1. , 0. ],
+        [1. , 1. , 0. ],
+        [1. , 0. , 0. ],
+        [0. , 0. , 0. ],
+    ])
+    for i in range(6):
+        pts = roll_forward(pts)
+        vn = np.array([0.0, 0.0, 1.0])
+        pts, tri = triangulate(pts, vn)
+        assert len(tri) == 3
+
+
 if __name__ == "__main__":
-    test_triangulate_u_shape()
+    test_triangulate_from_failed_example()

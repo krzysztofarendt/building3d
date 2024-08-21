@@ -4,11 +4,14 @@ import numpy as np
 
 from building3d import random_id
 from building3d.config import GEOM_ATOL
+from building3d.config import GEOM_RTOL
+from building3d.geom.exceptions import GeometryError
 from building3d.geom.paths.validate_name import validate_name
 from building3d.geom.numba.types import PointType, VectorType, IndexType, FLOAT
 from building3d.geom.numba.points import are_points_coplanar
 from building3d.geom.numba.points import bounding_box
 from building3d.geom.numba.points import new_point_between_2_points
+from building3d.geom.numba.points import roll_forward
 from building3d.geom.numba.polygon.ispointinside import is_point_at_boundary
 from building3d.geom.numba.vectors import normal
 from building3d.geom.numba.triangles import triangulate
@@ -30,6 +33,7 @@ class Polygon:
         name: str | None = None,
         uid: str | None = None,
         tri: IndexType | None = None,
+        vn: VectorType | None = None,
     ):
         # Sanity checks
         assert are_points_coplanar(pts), "Polygon points must be coplanar"
@@ -47,10 +51,18 @@ class Polygon:
             self.uid = uid
 
         self.pts: PointType = pts
-        self.vn: VectorType = normal(self.pts[-1], self.pts[0], self.pts[1])
+
+        # Normal vector is calculated using the first corner from `pts`
+        # If the first corner is non-convex, the normal will be wrong and triangulation will fail.
+        # The first corner can be non-convex only if the normal vector is provided (argument `vn`).
+        # In such a case the points are rolled forward until the first corner is convex.
+        if vn is None:
+            self.vn: VectorType = normal(self.pts[-1], self.pts[0], self.pts[1])
+        else:
+            self.vn = vn
 
         if tri is None:
-            self.tri: IndexType = triangulate(self.pts, self.vn)
+            self.pts, self.tri = triangulate(self.pts, self.vn)
         else:
             assert len(tri) > 0, "Empty triangles provided"
             self.tri: IndexType = tri

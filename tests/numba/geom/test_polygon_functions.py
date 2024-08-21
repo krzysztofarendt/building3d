@@ -215,8 +215,8 @@ def test_are_polygons_facing():
     pts2 = np.array([pt3, pt2, pt1])
     vn1 = normal(pts1[-1], pts1[0], pts1[1])
     vn2 = normal(pts2[-1], pts2[0], pts2[1])
-    tri1 = triangulate(pts1, vn1)
-    tri2 = triangulate(pts2, vn2)
+    pts1, tri1 = triangulate(pts1, vn1)
+    pts2, tri2 = triangulate(pts2, vn2)
 
     assert are_polygons_facing(pts1, tri1, vn1, pts2, tri2, vn2) is True  # exact=True by default
     assert are_polygons_facing(pts1, tri1, vn1, pts2, tri2, vn2, exact=True) is True
@@ -238,8 +238,8 @@ def test_are_polygons_facing_different_sizes():
 
     vn1 = normal(pts1[-1], pts1[0], pts1[1])
     vn2 = normal(pts2[-1], pts2[0], pts2[1])
-    tri1 = triangulate(pts1, vn1)
-    tri2 = triangulate(pts2, vn2)
+    pts1, tri1 = triangulate(pts1, vn1)
+    pts2, tri2 = triangulate(pts2, vn2)
 
     assert are_polygons_facing(pts1, tri1, vn1, pts2, tri2, vn2) is False  # exact=True by default
     assert are_polygons_facing(pts1, tri1, vn1, pts2, tri2, vn2, exact=True) is False
@@ -260,8 +260,8 @@ def test_are_polygons_not_facing():
 
     vn1 = normal(pts1[-1], pts1[0], pts1[1])
     vn2 = normal(pts2[-1], pts2[0], pts2[1])
-    tri1 = triangulate(pts1, vn1)
-    tri2 = triangulate(pts2, vn2)
+    pts1, tri1 = triangulate(pts1, vn1)
+    pts2, tri2 = triangulate(pts2, vn2)
 
     assert are_polygons_facing(pts1, tri1, vn1, pts2, tri2, vn2) is False  # exact=True by default
     assert are_polygons_facing(pts1, tri1, vn1, pts2, tri2, vn2, exact=True) is False
@@ -284,7 +284,7 @@ def test_distance_point_to_polygon():
 
     pts = np.vstack((p0, p1, p2, p3))
     vn = normal(pts[-1], pts[0], pts[1])
-    tri = triangulate(pts, vn)
+    pts, tri = triangulate(pts, vn)
 
     d = distance_point_to_polygon(ptest1, pts, tri, vn)
     assert np.isclose(d, 1.0)
@@ -310,7 +310,7 @@ def test_distance_point_to_polygon():
 
     pts = np.vstack((p0, p1, p2, p3))
     vn = normal(pts[-1], pts[0], pts[1])
-    tri = triangulate(pts, vn)
+    pts, tri = triangulate(pts, vn)
 
     ptest8 = new_point(0.5, 1.0, 1.0)  # distance = np.sqrt(2) / 2
 

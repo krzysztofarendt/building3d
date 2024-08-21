@@ -25,5 +25,5 @@ def plane_coefficients(pts: PointType) -> tuple[FLOAT, FLOAT, FLOAT, FLOAT]:
     This equation describes the plane that this polygon is on.
     """
     vn = normal(pts[-1], pts[0], pts[1])
-    a, b, c, d = projection_coefficients(pts[0], vn)
+    a, b, c, d = projection_coefficients(pts[0].copy(), vn)
     return a, b, c, d

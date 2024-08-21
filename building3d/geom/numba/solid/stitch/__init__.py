@@ -52,7 +52,6 @@ def next_adjacent_polygons(s1: Solid, s2: Solid) -> tuple[Polygon, Polygon] | No
 def slice_both_and_replace(s1: Solid, p1: Polygon, s2: Solid, p2: Polygon) -> None:
     """Slices polygons `p1` and `p2` and replaces them in solids `s1` and `s2` (in-place).
     """
-    # TODO: REFACTORING NEEDED
     p2_in_p1 = p1.contains_polygon(p2)
     p1_in_p2 = p2.contains_polygon(p1)
 

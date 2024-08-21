@@ -19,7 +19,7 @@ def test_slicing_point_location():
         new_point(0, 1, 0),
     ))
     vn = normal(pts[-1], pts[0], pts[1])
-    tri = triangulate(pts, vn)
+    pts, tri = triangulate(pts, vn)
     edges = polygon_edges(pts)
 
     # Check different slices
@@ -70,7 +70,7 @@ def test_remove_redundant_points():
         new_point(0, 1, 0),
     ))
     vn = normal(pts[-1], pts[0], pts[1])
-    tri = triangulate(pts, vn)
+    pts, tri = triangulate(pts, vn)
 
     # Check different slices
     slicing_pts = np.vstack((
@@ -210,6 +210,8 @@ def test_polygon_slice_using_another_polygon():
 
     dxy = np.array([0.5, 0.5, 0.0])
     poly2 = Polygon(pts + dxy, name="poly2")
+    poly2_rev = Polygon(pts[::-1] + dxy, name="poly2")
+    assert poly2.area == poly2_rev.area
 
     # poly2 crosses poly1 at two edges
     poly3, poly4 = slice_polygon(
@@ -234,6 +236,8 @@ def test_polygon_slice_using_smaller_polygon():
     poly1 = Polygon(pts, name="poly1")
 
     poly2 = Polygon(pts * 0.5, name="poly2")
+    poly2_rev = Polygon(pts[::-1] * 0.5, name="poly2")
+    assert poly2.area == poly2_rev.area
 
     # poly2 crosses poly1 at two edges
     poly_a, poly_b = slice_polygon(
@@ -244,6 +248,8 @@ def test_polygon_slice_using_smaller_polygon():
         pt2=new_point(0.75, 0.75, 0),
         name2="poly4",
     )
+    assert np.allclose(poly_a.vn, poly1.vn)
+    assert np.allclose(poly_b.vn, poly1.vn)
     assert poly_a is not None and poly_b is not None
     for p in [poly_a, poly_b]:
         if p.name == "poly3":
@@ -293,4 +299,4 @@ def test_polygon_slice_using_another_complex_polygon():
 
 
 if __name__ == "__main__":
-    test_slice_polygon()
+    test_polygon_slice_using_smaller_polygon()

@@ -1,8 +1,9 @@
 import numpy as np
 
 from building3d import random_id
+from building3d.config import GEOM_RTOL
 from building3d.geom.exceptions import GeometryError
-from building3d.geom.numba.types import PointType
+from building3d.geom.numba.types import PointType, VectorType
 from building3d.geom.numba.points import are_points_coplanar
 from building3d.geom.numba.polygon import Polygon
 from building3d.geom.numba.polygon.slice.get_point_arrays import get_point_arrays
@@ -51,12 +52,23 @@ def slice_polygon(
         raise GeometryError("Slicing not possible, less than 2 valid slicing points")
 
     pts1, pts2 = get_point_arrays(poly.pts, poly.tri, slicing_pts)
-    poly1, poly2 = make_polygons(pts1, pts2, pt1, name1, pt2, name2)
+    poly1, poly2 = make_polygons(poly.vn, pts1, pts2, pt1, name1, pt2, name2)
+
+    # Below code is generally not needed, because the normal vector is passed to
+    # `make_polygon()` so poly1 and poly2 should be oriented properly,
+    # but it does no harm to double check because it's cheap
+    if not np.allclose(poly1.vn, poly.vn, rtol=GEOM_RTOL):
+        poly1 = poly1.flip(poly1.name)
+        assert np.allclose(poly1.vn, poly.vn, rtol=GEOM_RTOL)
+    if not np.allclose(poly2.vn, poly.vn, rtol=GEOM_RTOL):
+        poly2 = poly2.flip(poly2.name)
+        assert np.allclose(poly2.vn, poly.vn, rtol=GEOM_RTOL)
 
     return poly1, poly2
 
 
 def make_polygons(
+    vn: VectorType,
     pts1: PointType,
     pts2: PointType,
     pt1: PointType | None = None,
@@ -66,11 +78,12 @@ def make_polygons(
 ) -> tuple[Polygon, Polygon]:
     """Get polygons from `pts1` and `pts2` and assign names.
 
-    To assign names, all optional arguments needs to be provided.
+    To assign names `name1`, `name2` at least one point (`pt1`, `pt2`) must be provided.
 
     Args:
-        poly: polygon instrance
-        slicing_pts: slicing points
+        vn: normal vector of the new polygons
+        pts1: points of polygon 1
+        pts2: points of polygon 2
         pt1: optional point inside one of the resulting slices
         name1: optional name of part associated with pt1
         pt2: optional point inside the other one of the resulting slices
@@ -79,8 +92,11 @@ def make_polygons(
     Return:
         tuple of new polygons
     """
-    poly1 = Polygon(pts1)
-    poly2 = Polygon(pts2)
+    # Normal vector vn is passed because we can't be sure if pts1 and pts2 start in a convex corner.
+    # If the first corner is non-convex and vn is not given polygon triangulation fails.
+    # Fortunately, vn is known, because it is the same as in the original polygon.
+    poly1 = Polygon(pts1, vn=vn)
+    poly2 = Polygon(pts2, vn=vn)
 
     if name1 is None:
         name1 = random_id()

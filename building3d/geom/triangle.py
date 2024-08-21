@@ -9,6 +9,7 @@ from building3d.geom.exceptions import GeometryError
 from building3d.geom.exceptions import TriangulationError
 from building3d.config import EPSILON
 from building3d.config import GEOM_ATOL
+from building3d.config import GEOM_RTOL
 from building3d.config import POINT_NUM_DEC
 
 
@@ -59,7 +60,7 @@ def is_point_on_correct_side(ptest: Point, p1: Point, p2: Point, pref: Point) ->
     else:
         vtest /= len_vtest
         vref /= len_vref
-        return bool(np.isclose(vtest, vref).all())
+        return bool(np.isclose(vtest, vref, rtol=GEOM_RTOL).all())
 
 
 def is_point_inside(ptest: Point, p1: Point, p2: Point, p3: Point) -> bool:
@@ -123,7 +124,7 @@ def is_corner_convex(p0: Point, p1: Point, p2: Point, n: np.ndarray) -> bool:
     else:
         # Normalize before comparing to n
         v1_v2_normal /= length(v1_v2_normal)
-    if np.isclose(v1_v2_normal, n).all():
+    if np.isclose(v1_v2_normal, n, rtol=GEOM_RTOL).all():
         # Convex vertex
         return True
     else:
