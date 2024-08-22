@@ -78,16 +78,20 @@ def test_polygon_is_touching_other():
     pts1 = pts0 + np.array([1.0, 0.0, 0.0])
     poly1 = Polygon(pts1)
     assert poly0.is_touching_polygon(poly1) is True
+    assert poly1.is_touching_polygon(poly0) is True
 
     pts2 = pts0 + np.array([2.0, 0.0, 0.0])
     poly2 = Polygon(pts2)
     assert poly0.is_touching_polygon(poly2) is False
+    assert poly2.is_touching_polygon(poly0) is False
 
     pts3 = pts0 + np.array([0.5, 0.0, 0.0])
     poly3 = Polygon(pts3)
     assert poly0.is_touching_polygon(poly3) is False
+    assert poly3.is_touching_polygon(poly0) is False
 
     pts4 = pts0 + np.array([1.0, 0.5, 0.0])
     poly4 = Polygon(pts4)
     assert poly0.is_touching_polygon(poly4) is True
+    assert poly4.is_touching_polygon(poly0) is True
 

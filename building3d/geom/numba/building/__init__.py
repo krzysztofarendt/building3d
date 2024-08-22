@@ -13,6 +13,7 @@ from building3d.geom.numba.wall import Wall
 from building3d.geom.numba.polygon import Polygon
 from building3d.geom.numba.types import PointType, IndexType
 from building3d.geom.numba.building.get_mesh import get_mesh_from_zones
+from building3d.geom.numba.solid.stitch import stitch_solids
 
 
 logger = logging.getLogger(__name__)
@@ -128,6 +129,7 @@ class Building:
         The keys of the returned dict are solid paths, i.e. "zone_name/solid_name".
         The values are lists of adjacent solid paths.
         """
+        # TODO: Add unit test
         if len(self.adj_solids) > 0 and recalc is False:
             return self.adj_solids
         else:
@@ -148,30 +150,29 @@ class Building:
             self.adj_solids = adjacent
             return adjacent
 
-    # TODO
-    # def stitch_solids(self):
-    #     """Find adjacent solids and stitch them."""
-
-    #     logger.info(f"Stitching solids in building {self}")
-
-    #     adj_solids = self.find_adjacent_solids()
-    #     done = []
-
-    #     for sld_path in adj_solids.keys():
-    #         for adj_sld_path in adj_solids[sld_path]:
-    #             z1_name, sld_name = sld_path.split(PATH_SEP)
-    #             z2_name, adj_sld_name = adj_sld_path.split(PATH_SEP)
-
-    #             if set([sld_name, adj_sld_name]) not in done:
-    #                 new_sld, new_adj_sld = stitch_solids(
-    #                     sld1=self.zones[z1_name].solids[sld_name],
-    #                     sld2=self.zones[z2_name].solids[adj_sld_name],
-    #                 )
-
-    #                 self.zones[z1_name].solids[sld_name] = new_sld
-    #                 self.zones[z2_name].solids[adj_sld_name] = new_adj_sld
-
-    #                 done.append(set([sld_name, adj_sld_name]))
+#     def stitch_solids(self):
+#         """Find adjacent solids and stitch them."""
+#
+#         logger.info(f"Stitching solids in building {self}")
+#
+#         adj_solids = self.find_adjacent_solids()
+#         done = []
+#
+#         for sld_path in adj_solids.keys():
+#             for adj_sld_path in adj_solids[sld_path]:
+#                 z1_name, sld_name = sld_path.split(PATH_SEP)
+#                 z2_name, adj_sld_name = adj_sld_path.split(PATH_SEP)
+#
+#                 if set([sld_name, adj_sld_name]) not in done:
+#                     new_sld, new_adj_sld = stitch_solids(
+#                         sld1=self.zones[z1_name].solids[sld_name],
+#                         sld2=self.zones[z2_name].solids[adj_sld_name],
+#                     )
+#
+#                     self.zones[z1_name].solids[sld_name] = new_sld
+#                     self.zones[z2_name].solids[adj_sld_name] = new_adj_sld
+#
+#                     done.append(set([sld_name, adj_sld_name]))
 
     def volume(self) -> float:
         """Calculate building volume as the sum of zone volumes."""

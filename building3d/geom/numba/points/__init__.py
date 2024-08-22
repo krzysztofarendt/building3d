@@ -255,6 +255,9 @@ def is_point_on_segment(ptest: PointType, pt1: PointType, pt2: PointType) -> boo
     Returns:
         bool: True if the point lies on the segment, False otherwise.
     """
+    if np.allclose(ptest, pt1) or np.allclose(ptest, pt2):
+        return True
+
     # Check collinearity using the cross product
     if not np.allclose(np.cross(ptest - pt1, pt2 - pt1), np.zeros(3, dtype=FLOAT)):
         return False

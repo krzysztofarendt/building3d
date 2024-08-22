@@ -4,15 +4,10 @@ import numpy as np
 
 from building3d import random_id
 from building3d.config import GEOM_ATOL
-from building3d.config import GEOM_RTOL
-from building3d.geom.exceptions import GeometryError
 from building3d.geom.paths.validate_name import validate_name
 from building3d.geom.numba.types import PointType, VectorType, IndexType, FLOAT
 from building3d.geom.numba.points import are_points_coplanar
 from building3d.geom.numba.points import bounding_box
-from building3d.geom.numba.points import new_point_between_2_points
-from building3d.geom.numba.points import roll_forward
-from building3d.geom.numba.polygon.ispointinside import is_point_at_boundary
 from building3d.geom.numba.vectors import normal
 from building3d.geom.numba.triangles import triangulate
 from building3d.geom.numba.triangles import triangle_centroid
@@ -20,7 +15,8 @@ from building3d.geom.numba.polygon.centroid import polygon_centroid
 from building3d.geom.numba.polygon.area import polygon_area
 from building3d.geom.numba.polygon.plane import plane_coefficients
 from building3d.geom.numba.polygon.ispointinside import is_point_inside, is_point_inside_margin
-from building3d.geom.numba.polygon.polygonsfacing import are_polygons_facing
+from building3d.geom.numba.polygon.facing import are_polygons_facing
+from building3d.geom.numba.polygon.touching import are_polygons_touching
 
 
 logger = logging.getLogger(__name__)
@@ -125,29 +121,7 @@ class Polygon:
     def is_touching_polygon(self, other) -> bool:
         """Checks if the polygon touches (but doesn't cross) another one.
         """
-        at_least_one_boundary = False
-        edge = [other.pts[-1]]
-        middle_pt = None
-
-        for ptest in other.pts:
-            edge.append(ptest)
-            middle_pt = new_point_between_2_points(edge[0], edge[1], rel_d=0.5)
-            edge.pop(0)
-
-            at_boundary = is_point_at_boundary(ptest, self.pts)
-            is_inside = self.is_point_inside(ptest, boundary_in=False)
-            is_middle_inside = self.is_point_inside(middle_pt, boundary_in=False)
-
-            if is_middle_inside:
-                return False
-            if is_inside:
-                return False
-            if at_boundary:
-                at_least_one_boundary = True
-
-        is_touching = True if at_least_one_boundary else False
-
-        return is_touching
+        return are_polygons_touching(self.pts, self.tri, other.pts, other.tri)
 
     def __eq__(self, other):
         if np.allclose(self.pts, other.pts):

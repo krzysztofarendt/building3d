@@ -11,7 +11,7 @@ from building3d.geom.numba.points import bounding_box
 from building3d.geom.numba.points import new_point
 from building3d.geom.numba.polygon import Polygon
 from building3d.geom.numba.polygon.ispointinside import is_point_inside_projection
-from building3d.geom.numba.polygon.polygonsfacing import are_polygons_facing
+from building3d.geom.numba.polygon.facing import are_polygons_facing
 from building3d.geom.numba.tetrahedrons import tetrahedron_volume
 from building3d.geom.numba.solid.get_mesh import get_mesh_from_walls
 

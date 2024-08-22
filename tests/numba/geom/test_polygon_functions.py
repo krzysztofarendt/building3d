@@ -12,7 +12,8 @@ from building3d.geom.numba.polygon.ispointinside import is_point_inside
 from building3d.geom.numba.polygon.ispointinside import is_point_inside_margin
 from building3d.geom.numba.polygon.ispointinside import is_point_inside_ortho_projection
 from building3d.geom.numba.polygon.ispointinside import is_point_inside_projection
-from building3d.geom.numba.polygon.polygonsfacing import are_polygons_facing
+from building3d.geom.numba.polygon.facing import are_polygons_facing
+from building3d.geom.numba.polygon.touching import are_polygons_touching
 from building3d.geom.numba.triangles import triangulate
 from building3d.geom.numba.vectors import normal
 from building3d.geom.numba.types import INT
@@ -241,6 +242,7 @@ def test_are_polygons_facing_different_sizes():
     pts1, tri1 = triangulate(pts1, vn1)
     pts2, tri2 = triangulate(pts2, vn2)
 
+    assert are_polygons_touching(pts1, tri1, pts2, tri2) is False
     assert are_polygons_facing(pts1, tri1, vn1, pts2, tri2, vn2) is False  # exact=True by default
     assert are_polygons_facing(pts1, tri1, vn1, pts2, tri2, vn2, exact=True) is False
     assert are_polygons_facing(pts1, tri1, vn1, pts2, tri2, vn2, exact=False) is True
@@ -316,3 +318,8 @@ def test_distance_point_to_polygon():
 
     d = distance_point_to_polygon(ptest8, pts, tri, vn)
     assert np.isclose(d, np.sqrt(2) / 2)
+
+
+if __name__ == "__main__":
+    test_are_polygons_facing_different_sizes()
+
