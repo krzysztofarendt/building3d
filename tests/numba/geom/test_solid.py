@@ -5,6 +5,7 @@ from building3d.geom.numba.points import new_point
 from building3d.geom.numba.polygon import Polygon
 from building3d.geom.numba.wall import Wall
 from building3d.geom.numba.solid import Solid
+from building3d.geom.numba.solid.box import box
 from building3d.geom.numba.types import FLOAT
 
 
@@ -75,3 +76,15 @@ def test_adjacent_solids():
     assert sld0.is_adjacent_to_solid(sld1) is True
     assert sld1.is_adjacent_to_solid(sld2) is True
     assert sld0.is_adjacent_to_solid(sld2) is False
+
+
+def test_adjacent_solid_boxes():
+    s1 = box(1, 1, 1, (0, 0, 0), "s1")
+    s2 = box(1, 2, 1, (1, 0, 0), "s2")
+    s3 = box(2, 1, 1, (1, 0, 1), "s3")
+    assert s1.is_adjacent_to_solid(s2) is True
+    assert s2.is_adjacent_to_solid(s1) is True
+    assert s2.is_adjacent_to_solid(s3) is True
+    assert s3.is_adjacent_to_solid(s2) is True
+    assert s1.is_adjacent_to_solid(s3) is False
+    assert s3.is_adjacent_to_solid(s1) is False

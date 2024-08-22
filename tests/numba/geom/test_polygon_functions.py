@@ -248,6 +248,32 @@ def test_are_polygons_facing_different_sizes():
     assert are_polygons_facing(pts1, tri1, vn1, pts2, tri2, vn2, exact=False) is True
 
 
+def test_are_polygons_facing_orthogonal_overlapping():
+    pt1 = new_point(0.0, 0.0, 0.0)
+    pt2 = new_point(1.0, 0.0, 0.0)
+    pt3 = new_point(1.0, 2.0, 0.0)
+    pt4 = new_point(0.0, 2.0, 0.0)
+    pts1 = np.array([pt1, pt2, pt3, pt4])
+
+    pt1 = new_point(0.0, 1.0, 0.0)
+    pt2 = new_point(2.0, 1.0, 0.0)
+    pt3 = new_point(2.0, 2.0, 0.0)
+    pt4 = new_point(0.0, 2.0, 0.0)
+    pts2 = np.array([pt4, pt3, pt2, pt1])
+
+    vn1 = normal(pts1[-1], pts1[0], pts1[1])
+    vn2 = normal(pts2[-1], pts2[0], pts2[1])
+    pts1, tri1 = triangulate(pts1, vn1)
+    pts2, tri2 = triangulate(pts2, vn2)
+
+    assert np.allclose(vn1, -1 * vn2)
+
+    assert are_polygons_touching(pts1, tri1, pts2, tri2) is False
+    assert are_polygons_facing(pts1, tri1, vn1, pts2, tri2, vn2) is False  # exact=True by default
+    assert are_polygons_facing(pts1, tri1, vn1, pts2, tri2, vn2, exact=True) is False
+    assert are_polygons_facing(pts1, tri1, vn1, pts2, tri2, vn2, exact=False) is True
+
+
 def test_are_polygons_not_facing():
     pt1 = new_point(0.0, 0.0, 1.0)
     pt2 = new_point(1.0, 0.0, 1.0)

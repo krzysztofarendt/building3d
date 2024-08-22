@@ -140,7 +140,7 @@ class Solid:
                 return True
         return False
 
-    def is_adjacent_to_solid(self, sld, exact: bool = True) -> bool:
+    def is_adjacent_to_solid(self, sld, exact: bool = False) -> bool:
         """Checks if this solid is adjacent to another solid.
 
         The argument `exact` has the same meaning as in Polygon.is_facing_polygon().

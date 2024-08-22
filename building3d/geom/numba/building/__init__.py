@@ -150,29 +150,25 @@ class Building:
             self.adj_solids = adjacent
             return adjacent
 
-#     def stitch_solids(self):
-#         """Find adjacent solids and stitch them."""
-#
-#         logger.info(f"Stitching solids in building {self}")
-#
-#         adj_solids = self.find_adjacent_solids()
-#         done = []
-#
-#         for sld_path in adj_solids.keys():
-#             for adj_sld_path in adj_solids[sld_path]:
-#                 z1_name, sld_name = sld_path.split(PATH_SEP)
-#                 z2_name, adj_sld_name = adj_sld_path.split(PATH_SEP)
-#
-#                 if set([sld_name, adj_sld_name]) not in done:
-#                     new_sld, new_adj_sld = stitch_solids(
-#                         sld1=self.zones[z1_name].solids[sld_name],
-#                         sld2=self.zones[z2_name].solids[adj_sld_name],
-#                     )
-#
-#                     self.zones[z1_name].solids[sld_name] = new_sld
-#                     self.zones[z2_name].solids[adj_sld_name] = new_adj_sld
-#
-#                     done.append(set([sld_name, adj_sld_name]))
+    def stitch_solids(self):
+        """Find adjacent solids and stitch them.
+        """
+        logger.info(f"Stitching solids in building {self}")
+
+        adj_solids = self.find_adjacent_solids()
+        done = []
+
+        for s_path in adj_solids.keys():
+            for adj_s_path in adj_solids[s_path]:
+                z1_name, s_name = s_path.split(PATH_SEP)
+                z2_name, adj_s_name = adj_s_path.split(PATH_SEP)
+
+                if set([s_name, adj_s_name]) not in done:
+                    stitch_solids(
+                        s1=self.zones[z1_name].solids[s_name],
+                        s2=self.zones[z2_name].solids[adj_s_name],
+                    )
+                    done.append(set([s_name, adj_s_name]))
 
     def volume(self) -> float:
         """Calculate building volume as the sum of zone volumes."""

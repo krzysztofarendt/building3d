@@ -8,6 +8,7 @@ from building3d.geom.numba.points import are_points_coplanar
 from building3d.geom.numba.polygon.ispointinside import is_point_inside
 from building3d.geom.numba.polygon.area import polygon_area
 from building3d.geom.numba.polygon.touching import are_polygons_touching
+from building3d.geom.numba.polygon.crossing import are_polygons_crossing
 
 
 @njit
@@ -39,9 +40,6 @@ def are_polygons_facing(
     if not np.allclose(vn1, -1 * vn2, rtol=GEOM_RTOL):
         return False
 
-    normals_opposite = True
-
-
     num_matching = 0
     matched = set()
     # This does not test if the connections between points are same
@@ -63,30 +61,16 @@ def are_polygons_facing(
         else:
             pass
 
-    # Condition 1: points must be  coplanar
-    points_coplanar = are_points_coplanar(np.vstack((pts1, pts2)))
+    # Condition 1: points must be coplanar
+    if not are_points_coplanar(np.vstack((pts1, pts2))):
+        return False
 
     # Condition 2: normal vectors must be opposite
     pass  # Already checked at the beginning
 
-    # Condition 3: polygons must not be touching (touching = shared boundary but not overlapping)
-    touching = are_polygons_touching(pts1, tri1, pts2, tri2)
-    if touching:
+    # Condition 3: some edges must cross
+    if not are_polygons_crossing(pts1, tri1, pts2, tri2):
         return False
 
-    # Condition 4: polygons must be overlapping
-    overlapping = False
-    for pt in pts1:
-        if is_point_inside(pt, pts2, tri2, boundary_in=True):
-            overlapping = True
-            break
-    if not overlapping:
-        for pt in pts2:
-            if is_point_inside(pt, pts1, tri1, boundary_in=True):
-                overlapping = True
-                break
-
-    if points_coplanar and normals_opposite and overlapping and not touching:
-        return True
-    else:
-        return False
+    # All conditions met
+    return True

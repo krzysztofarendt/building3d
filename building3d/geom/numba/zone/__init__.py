@@ -69,7 +69,6 @@ class Zone:
 
         # Add solid
         self.solids[sld.name] = sld
-
         logger.info(f"Solid {sld.name} added: {self}")
 
     def get_solid_names(self) -> list[str]:
