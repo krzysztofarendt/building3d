@@ -134,3 +134,6 @@ class Polygon:
 
     def __repr__(self):
         return self.__str__()
+
+    def __getitem__(self, key) -> PointType:
+        return self.pts[key]

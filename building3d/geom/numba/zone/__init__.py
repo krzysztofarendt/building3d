@@ -120,3 +120,6 @@ class Zone:
 
     def __repr__(self):
         return self.__str__()
+
+    def __getitem__(self, key) -> Solid:
+        return self.solids[key]

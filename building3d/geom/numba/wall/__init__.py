@@ -99,3 +99,6 @@ class Wall:
 
     def __repr__(self):
         return self.__str__()
+
+    def __getitem__(self, key) -> Polygon:
+        return self.polygons[key]
