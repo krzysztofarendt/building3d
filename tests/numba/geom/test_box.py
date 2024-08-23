@@ -24,3 +24,8 @@ def test_two_boxes():
     assert b1.name != b2.name
     assert list(b1.walls.values())[0].name == list(b2.walls.values())[0].name
     assert list(b1.walls.values())[0].uid != list(b2.walls.values())[0].uid
+
+    assert np.allclose(b1.bbox()[0], [0, 0, 0])
+    assert np.allclose(b1.bbox()[1], [1, 1, 1])
+    assert np.allclose(b2.bbox()[0], [1, 0, 0])
+    assert np.allclose(b2.bbox()[1], [2, 1, 1])
