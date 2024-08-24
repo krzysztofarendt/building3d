@@ -26,6 +26,7 @@ class Solid:
         walls: Sequence[Wall] = (),
         name: str | None = None,
         uid: str | None = None,
+        parent = None,
     ):
         """Initialize the solid
 
@@ -34,6 +35,8 @@ class Solid:
             name: name of the solid
             uid: unique id of the solid, random if None
         """
+        self._parent = parent
+
         if name is None:
             name = random_id()
         self.name = validate_name(name)
@@ -44,6 +47,18 @@ class Solid:
         self.walls: dict[str, Wall] = {}  # {Wall.name: Wall}
         for w in walls:
             self.add_wall(w)
+
+    @property
+    def children(self) -> dict[str, Wall]:
+        return self.walls
+
+    @property
+    def parent(self):
+        return self._parent
+
+    @parent.setter
+    def parent(self, zone):
+        self._parent = zone
 
     def add_wall(self, wall: Wall) -> None:
         """Add a Wall instance to the solid."""

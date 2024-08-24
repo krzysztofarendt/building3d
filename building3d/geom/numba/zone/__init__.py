@@ -27,6 +27,7 @@ class Zone:
         solids: Sequence[Solid] = (),
         name: str | None = None,
         uid: str | None = None,
+        parent = None,
     ):
         """Initialize the zone.
 
@@ -35,6 +36,8 @@ class Zone:
             name: name of the zone
             uid: unique id of the zone, random if None
         """
+        self._parent = parent
+
         if name is None:
             name = random_id()
         self.name = validate_name(name)
@@ -47,7 +50,20 @@ class Zone:
         for sld in solids:
             self.add_solid(sld)
 
+
         logger.info(f"Zone created: {self}")
+
+    @property
+    def children(self) -> dict[str, Solid]:
+        return self.solids
+
+    @property
+    def parent(self):
+        return self._parent
+
+    @parent.setter
+    def parent(self, bdg):
+        self._parent = bdg
 
     def add_solid(self, sld: Solid) -> None:
         """Add a Solid instance to the zone.

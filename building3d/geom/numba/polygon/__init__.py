@@ -30,10 +30,13 @@ class Polygon:
         uid: str | None = None,
         tri: IndexType | None = None,
         vn: VectorType | None = None,
+        parent = None,
     ):
         # Sanity checks
         assert are_points_coplanar(pts), "Polygon points must be coplanar"
         assert len(pts) >= 3, "Polygon needs at least 3 points"
+
+        self._parent = parent
 
         # Attribute assignment
         if name is None:
@@ -66,6 +69,18 @@ class Polygon:
         self.ctr: PointType = polygon_centroid(self.pts, self.tri)
         self.area: float = polygon_area(self.pts, self.vn)
         self.plane_coefficients: tuple[FLOAT, FLOAT, FLOAT, FLOAT] = plane_coefficients(self.pts)
+
+    @property
+    def children(self) -> PointType:
+        return self.pts
+
+    @property
+    def parent(self):
+        return self._parent
+
+    @parent.setter
+    def parent(self, wall):
+        self._parent = wall
 
     def bbox(self) -> tuple[PointType, PointType]:
         return bounding_box(self.pts)

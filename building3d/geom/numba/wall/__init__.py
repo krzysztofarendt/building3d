@@ -22,6 +22,7 @@ class Wall:
         polygons: Sequence[Polygon] = (),
         name: str | None = None,
         uid: str | None = None,
+        parent = None,
     ):
         """Initialize the wall.
 
@@ -30,6 +31,8 @@ class Wall:
             name: name of the wall, random if None
             uid: unique id of the wall, random if None
         """
+        self._parent = parent
+
         if name is None:
             name = random_id()
 
@@ -43,6 +46,18 @@ class Wall:
 
         for poly in polygons:
             self.add_polygon(poly)
+
+    @property
+    def children(self) -> dict[str, Polygon]:
+        return self.polygons
+
+    @property
+    def parent(self):
+        return self._parent
+
+    @parent.setter
+    def parent(self, sld):
+        self._parent = sld
 
     def add_polygon(self, poly: Polygon):
         """Add polygon to the wall.

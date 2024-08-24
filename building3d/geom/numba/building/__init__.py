@@ -52,6 +52,14 @@ class Building:
 
         logger.info(f"Building created: {self}")
 
+    @property
+    def children(self) -> dict[str, Zone]:
+        return self.zones
+
+    @property
+    def parent(self) -> None:
+        return None
+
     def add_zone(self, zone: Zone) -> None:
         """Add a Zone instance."""
         self.zones[zone.name] = zone
