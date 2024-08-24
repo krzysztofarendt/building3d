@@ -155,7 +155,7 @@ def get_walls_and_polygons(s: Solid) -> list[tuple[Wall, Polygon]]:
     walls = s.children.values()
     wpl = []
     for w in walls:
-        for p in w.get_polygons():
+        for p in w.children.values():
             wpl.append((w, p))
 
     return wpl

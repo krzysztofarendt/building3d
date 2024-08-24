@@ -94,6 +94,14 @@ class Polygon:
     def bbox(self) -> tuple[PointType, PointType]:
         return bounding_box(self.pts)
 
+    def get(self, abspath: str):
+        """Get object by the absolute path."""
+        obj = self
+        while obj.parent is not None:
+            obj = obj.parent
+        building = obj
+        return building.get(abspath)
+
     def get_mesh(self) -> tuple[PointType, IndexType]:
         """Get vertices and faces of this polygon.
 

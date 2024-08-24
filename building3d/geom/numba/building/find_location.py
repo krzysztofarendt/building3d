@@ -1,7 +1,6 @@
 from building3d.geom.numba.building import Building
 from building3d.geom.numba.solid import Solid
 from building3d.geom.numba.types import PointType
-from building3d.geom.paths.object_path import object_path
 
 
 def find_location(p: PointType, building: Building, *first_look_at: str) -> str:
@@ -17,12 +16,9 @@ def find_location(p: PointType, building: Building, *first_look_at: str) -> str:
     """
     solids_to_search = list(first_look_at)
 
-    solids_to_search = []
     for z in building.children.values():
         for s in z.children.values():
-            s_path = object_path(zone=z, solid=s)
-            if s_path not in solids_to_search:
-                solids_to_search.append(s_path)
+            solids_to_search.append(s.path)
 
     location = ""
 

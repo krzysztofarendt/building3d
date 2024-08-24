@@ -4,7 +4,6 @@ from typing import Sequence
 
 from building3d import random_id
 from building3d.geom.exceptions import GeometryError
-from building3d.geom.paths.object_path import object_path
 from building3d.geom.paths.validate_name import validate_name
 from building3d.geom.paths import PATH_SEP
 from building3d.geom.numba.points import bounding_box
@@ -15,6 +14,7 @@ from building3d.geom.numba.polygon import Polygon
 from building3d.geom.numba.types import PointType, IndexType
 from building3d.geom.numba.building.get_mesh import get_mesh_from_zones
 from building3d.geom.numba.solid.stitch import stitch_solids
+from building3d.geom.numba.building.graph import graph
 
 
 logger = logging.getLogger(__name__)
@@ -74,17 +74,42 @@ class Building:
         self.zones[zone.name] = zone
         logger.info(f"Zone {zone.name} added: {self}")
 
-    def get(self, path: str) -> Zone | Solid | Wall | Polygon:
-        """Get object by the path. The path contains names of nested components."""
-        names = path.split("/")
-        zone_name = names.pop(0)
+    def get(self, abspath: str):
+        """Get object by the absolute path."""
+        obj = abspath.split(PATH_SEP)
+        assert len(obj) >= 1
+        building = obj[0]
+        assert building == self.name
 
-        if zone_name not in self.children.keys():
-            raise ValueError(f"Zone {zone_name} not found")
-        elif len(names) == 0:
-            return self.zones[zone_name]
+        if len(obj) == 1:
+            return self
+        elif len(obj) == 2:
+            zone = obj[1]
+            return self[zone]
+        elif len(obj) == 3:
+            zone = obj[1]
+            solid = obj[2]
+            return self[zone][solid]
+        elif len(obj) == 4:
+            zone = obj[1]
+            solid = obj[2]
+            wall = obj[3]
+            return self[zone][solid][wall]
+        elif len(obj) == 5:
+            zone = obj[1]
+            solid = obj[2]
+            wall = obj[3]
+            polygon = obj[4]
+            return self[zone][solid][wall][polygon]
+        elif len(obj) == 6:
+            zone = obj[1]
+            solid = obj[2]
+            wall = obj[3]
+            polygon = obj[4]
+            index = int(obj[5])
+            return self[zone][solid][wall][polygon][index]
         else:
-            return self.zones[zone_name].get("/".join(names))
+            raise ValueError(f"Incorrect absolute path: {abspath}")
 
     def get_graph(self, recalc=False) -> dict[str, str | None]:
         """Return graph matching adjacent polygons.
@@ -100,37 +125,36 @@ class Building:
         if len(self.graph) > 0 and recalc is False:
             return self.graph
         else:
-            graph = {}
-            adjacent_solids = self.find_adjacent_solids()
-
-            # TODO: DON'T LOVE BELOW CODE
-            # For each polygon find the adjacent polygon (there can be only 1)
-            for zone in self.children.values():
-                for solid in zone.children.values():
-                    for wall in solid.children.values():
-                        for poly in wall.children.values():
-                            found = False
-                            poly_path = PATH_SEP.join([zone.name, solid.name, wall.name, poly.name])
-                            graph[poly_path] = None
-                            # Find adjacent polygon (look only at the adjacent solids)
-                            solid_path = PATH_SEP.join([zone.name, solid.name])
-                            for a_solid_path in adjacent_solids[solid_path]:
-                                z, s = a_solid_path.split(PATH_SEP)  # Adjacent zone and solid names
-                                for w in self.zones[z].solids[s].walls.keys():
-                                    for p in self.zones[z].solids[s].walls[w].polygons.keys():
-                                        adj_poly_path = PATH_SEP.join([z, s, w, p])
-                                        adj_poly = self.get(adj_poly_path)
-                                        if poly.is_facing_polygon(adj_poly):
-                                            graph[poly_path] = adj_poly_path
-                                            found = True
-                                        if found:
-                                            break
-                                    if found:
-                                        break
-                                if found:
-                                    break
-            self.graph = graph
-            return graph
+            self.graph = graph(self)
+            return self.graph
+            # TODO: DELETE BELOW CODE ONCE REIMPLEMENTED
+            # adjacent_solids = self.find_adjacent_solids()
+            # # For each polygon find the adjacent polygon (there can be only 1)
+            # for zone in self.children.values():
+            #     for solid in zone.children.values():
+            #         for wall in solid.children.values():
+            #             for poly in wall.children.values():
+            #                 found = False
+            #                 poly_path = PATH_SEP.join([zone.name, solid.name, wall.name, poly.name])
+            #                 graph[poly_path] = None
+            #                 # Find adjacent polygon (look only at the adjacent solids)
+            #                 solid_path = PATH_SEP.join([zone.name, solid.name])
+            #                 for a_solid_path in adjacent_solids[solid_path]:
+            #                     z, s = a_solid_path.split(PATH_SEP)  # Adjacent zone and solid names
+            #                     for w in self.zones[z].solids[s].walls.keys():
+            #                         for p in self.zones[z].solids[s].walls[w].polygons.keys():
+            #                             adj_poly_path = PATH_SEP.join([z, s, w, p])
+            #                             adj_poly = self.get(adj_poly_path)
+            #                             if poly.is_facing_polygon(adj_poly):
+            #                                 graph[poly_path] = adj_poly_path
+            #                                 found = True
+            #                             if found:
+            #                                 break
+            #                         if found:
+            #                             break
+            #                     if found:
+            #                         break
+            # self.graph = graph
 
     def find_adjacent_solids(self, recalc=False) -> dict[str, list[str]]:
         """Return a dict mapping adjacent solids.
@@ -142,20 +166,18 @@ class Building:
         if len(self.adj_solids) > 0 and recalc is False:
             return self.adj_solids
         else:
-            zones = list(self.children.values())
+            zones = self.children.values()
             adjacent = {}
-            for i in range(len(zones)):
-                for j in range(i, len(zones)):
-                    solids_i = zones[i].children.values()
-                    solids_j = zones[j].children.values()
+            for zi in zones:
+                for zj in zones:
+                    solids_i = zi.children.values()
+                    solids_j = zj.children.values()
                     for si in solids_i:
                         for sj in solids_j:
-                            path_to_si = object_path(zones[i], si)
-                            path_to_sj = object_path(zones[j], sj)
-                            if path_to_si not in adjacent:
-                                adjacent[path_to_si] = []
+                            if si.path not in adjacent:
+                                adjacent[si.path] = []
                             if si.is_adjacent_to_solid(sj, exact=False):
-                                adjacent[path_to_si].append(path_to_sj)
+                                adjacent[si.path].append(sj.path)
             self.adj_solids = adjacent
             return adjacent
 

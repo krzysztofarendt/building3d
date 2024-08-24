@@ -50,10 +50,10 @@ def test_zone():
     assert list(zone.children.keys())[1] == "solid1"
     assert list(zone.children.values())[0] is sld0
     assert list(zone.children.values())[1] is sld1
-    assert isinstance(zone.get("solid1/walls/w2"), Polygon)
-    assert zone.get("solid1/walls/w2").name == "w2"
-    assert isinstance(zone.get("solid1/walls"), Wall)
-    assert zone.get("solid1/walls").name == "walls"
+    assert isinstance(zone["solid1"]["walls"]["w2"], Polygon)
+    assert zone["solid1"]["walls"]["w2"].name == "w2"
+    assert isinstance(zone["solid1"]["walls"], Wall)
+    assert zone["solid1"]["walls"].name == "walls"
 
     verts, faces = zone.get_mesh()
     assert verts.shape == (2 * 6 * 4, 3)  # NOTE: points not unique

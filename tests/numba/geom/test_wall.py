@@ -20,23 +20,23 @@ def test_wall_single():
     ])
     poly0 = Polygon(pts0, name="poly0")
     wall = Wall([poly0])
-    assert wall.get_polygons()[0] is poly0
-    assert wall.get("poly0") is poly0
+    assert list(wall.children.values())[0] is poly0
+    assert wall["poly0"] is poly0
 
     name = "wall"
     wall = Wall([poly0], name="wall")
     assert wall.name == name
-    assert wall.get_polygons()[0] is poly0
+    assert list(wall.children.values())[0] is poly0
 
     uid = random_id()
     wall = Wall([poly0], name="wall", uid=uid)
     assert wall.name == name
     assert wall.uid == uid
-    assert wall.get_polygons()[0] is poly0
+    assert list(wall.children.values())[0] is poly0
 
     wall = Wall()
     wall.add_polygon(poly0)
-    assert wall.get_polygons()[0] is poly0
+    assert list(wall.children.values())[0] is poly0
 
     verts, faces = wall.get_mesh()
     assert np.allclose(verts, pts0)
@@ -66,18 +66,12 @@ def test_wall_double():
 
     wall = Wall([poly0, poly1], name="wall")
     assert wall.name == "wall"
-    assert wall.get_polygons()[0] is poly0
-    assert wall.get_polygons()[1] is poly1
-    assert wall.get_polygon_names() == ["poly0", "poly1"]
-    assert isinstance(wall.get("poly0"), Polygon)
-    assert wall.get("poly0") is poly0
-    assert wall.get("poly1") is poly1
-    with pytest.raises(ValueError):
-        wall.get("xxx")
-    with pytest.raises(ValueError):
-        wall.get("poly0/xxx")
-    with pytest.raises(ValueError):
-        wall.get("/")
+    assert list(wall.children.values())[0] is poly0
+    assert list(wall.children.values())[1] is poly1
+    assert list(wall.children.keys()) == ["poly0", "poly1"]
+    assert isinstance(wall["poly0"], Polygon)
+    assert wall["poly0"] is poly0
+    assert wall["poly1"] is poly1
 
 
 def test_wall_bbox():

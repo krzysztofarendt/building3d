@@ -117,9 +117,9 @@ def floor_plan(
     # Compare the order of wall vertices to the order
     # of floor vertices - they should be opposite.
     for k in range(len(walls)):
-        w_poly = walls[k].get_polygons()[0]  # There is only one
+        w_poly = list(walls[k].children.values())[0]  # There is only one
         w_pts = w_poly.pts
-        f_poly = floor.get_polygons()[0]  # There is only one
+        f_poly = list(floor.children.values())[0]  # There is only one
         f_pts = f_poly.pts
 
         wall_z0_pts = []

@@ -85,25 +85,13 @@ class Wall:
         for np in new_poly:
             self.add_polygon(np)
 
-    def get_polygon_names(self) -> list[str]:
-        """Return list of parent polygon names."""
-        return list(self.polygons.keys())
-
-    def get_polygons(self) -> list[Polygon]:
-        """Return list of all polygons."""
-        return list(self.polygons.values())
-
-    def get(self, path: str) -> Polygon:
-        """Get object by the path. The path contains names of nested components."""
-        names = path.split("/")
-        poly_name = names.pop(0)
-
-        if poly_name not in self.get_polygon_names():
-            raise ValueError(f"Polygon not found: {poly_name}")
-        elif len(names) == 0:
-            return self.polygons[poly_name]
-        else:
-            raise ValueError("Path to object too deep (too many slashes)")
+    def get(self, abspath: str):
+        """Get object by the absolute path."""
+        obj = self
+        while obj.parent is not None:
+            obj = obj.parent
+        building = obj
+        return building.get(abspath)
 
     def bbox(self) -> tuple[PointType, PointType]:
         pts, _ = self.get_mesh()
@@ -117,10 +105,10 @@ class Wall:
         Return:
             tuple of vertices, shaped (num_pts, 3), and faces, shaped (num_tri, 3)
         """
-        return get_mesh_from_polygons(self.get_polygons())
+        return get_mesh_from_polygons(list(self.children.values()))
 
     def __str__(self):
-        return f"Wall(name={self.name}, polygons={self.get_polygon_names()}, id={hex(id(self))})"
+        return f"Wall(name={self.name}, polygons={list(self.children.keys())}, id={hex(id(self))})"
 
     def __repr__(self):
         return self.__str__()

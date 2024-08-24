@@ -100,17 +100,13 @@ class Zone:
         self.solids[sld.name] = sld
         logger.info(f"Solid {sld.name} added: {self}")
 
-    def get(self, path: str) -> Solid | Wall | Polygon:
+    def get(self, abspath: str):
         """Get object by the path. The path contains names of nested components."""
-        names = path.split("/")
-        solid_name = names.pop(0)
-
-        if solid_name not in self.children.keys():
-            raise ValueError(f"Solid not found: {solid_name}")
-        elif len(names) == 0:
-            return self.solids[solid_name]
-        else:
-            return self.solids[solid_name].get("/".join(names))
+        obj = self
+        while obj.parent is not None:
+            obj = obj.parent
+        building = obj
+        return building.get(abspath)
 
     def bbox(self) -> tuple[PointType, PointType]:
         pts, _ = self.get_mesh()

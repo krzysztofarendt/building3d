@@ -82,17 +82,13 @@ class Solid:
         del self.walls[old_name]
         self.add_wall(new_wall)
 
-    def get(self, path: str) -> Wall | Polygon:
-        """Get object by the path. The path contains names of nested components."""
-        names = path.split("/")
-        wall_name = names.pop(0)
-
-        if wall_name not in self.children.keys():
-            raise ValueError(f"Wall not found: {wall_name}")
-        elif len(names) == 0:
-            return self.walls[wall_name]
-        else:
-            return self.walls[wall_name].get("/".join(names))
+    def get(self, abspath: str):
+        """Get object by the absolute path."""
+        obj = self
+        while obj.parent is not None:
+            obj = obj.parent
+        building = obj
+        return building.get(abspath)
 
     def get_mesh(self) -> tuple[PointType, IndexType]:
         """Get vertices and faces of this solid's walls.
@@ -155,7 +151,7 @@ class Solid:
 
     def is_point_at_boundary(self, pt: PointType) -> bool:
         """Checks whether the point p lays on any of the boundary polygons."""
-        all_polys = [p for w in self.children.values() for p in w.get_polygons()]
+        all_polys = [p for w in self.children.values() for p in w.children.values()]
         for poly in all_polys:
             if poly.is_point_inside(pt):
                 return True

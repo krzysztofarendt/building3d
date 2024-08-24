@@ -46,9 +46,9 @@ def test_single_solid():
     for i in range(3):
         assert list(solid.children.values())[i] is walls[i]
     assert np.allclose(solid.bbox(), [[0, 0, 0], [1, 1, 1]])
-    assert solid.get("walls/w0").name == "w0"
-    assert solid.get("floor/floor").name == "floor"
-    assert isinstance(solid.get("floor/floor"), Polygon)
+    assert solid["walls"]["w0"].name == "w0"
+    assert solid["floor"]["floor"].name == "floor"
+    assert isinstance(solid["floor"]["floor"], Polygon)
     assert solid.is_point_inside(new_point(0.5, 0.5, 0.5)) is True
     assert solid.is_point_inside(new_point(0.5, 0.5, 0.0)) is True
     assert solid.is_point_inside(new_point(0.0, 0.0, 0.0)) is True
