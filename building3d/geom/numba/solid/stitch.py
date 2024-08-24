@@ -152,7 +152,7 @@ def replace_polygon(s: Solid, old_poly: Polygon, *new_poly: Polygon) -> None:
 def get_walls_and_polygons(s: Solid) -> list[tuple[Wall, Polygon]]:
     """Returns a list of tuples with walls and polygons for this solid.
     """
-    walls = s.get_walls()
+    walls = s.children.values()
     wpl = []
     for w in walls:
         for p in w.get_polygons():

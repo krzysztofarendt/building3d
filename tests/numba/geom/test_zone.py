@@ -46,14 +46,14 @@ def test_zone():
     zone = Zone([sld0, sld1], name="zone")
     assert np.isclose(zone.volume(), 2, rtol=GEOM_RTOL)
     assert np.allclose(zone.bbox(), [[0, 0, 0], [2, 1, 1]])
-    assert zone.get_solid_names()[0] == "solid0"
-    assert zone.get_solid_names()[1] == "solid1"
-    assert zone.get_solids()[0] is sld0
-    assert zone.get_solids()[1] is sld1
-    assert isinstance(zone.get_object("solid1/walls/w2"), Polygon)
-    assert zone.get_object("solid1/walls/w2").name == "w2"
-    assert isinstance(zone.get_object("solid1/walls"), Wall)
-    assert zone.get_object("solid1/walls").name == "walls"
+    assert list(zone.children.keys())[0] == "solid0"
+    assert list(zone.children.keys())[1] == "solid1"
+    assert list(zone.children.values())[0] is sld0
+    assert list(zone.children.values())[1] is sld1
+    assert isinstance(zone.get("solid1/walls/w2"), Polygon)
+    assert zone.get("solid1/walls/w2").name == "w2"
+    assert isinstance(zone.get("solid1/walls"), Wall)
+    assert zone.get("solid1/walls").name == "walls"
 
     verts, faces = zone.get_mesh()
     assert verts.shape == (2 * 6 * 4, 3)  # NOTE: points not unique

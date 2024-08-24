@@ -48,12 +48,12 @@ def test_zone():
     z = get_zone()
     b = Building([z], "building")
 
-    assert b.get_zones()[0] is z
+    assert list(b.children.values())[0] is z
     assert np.allclose(b.bbox(), [[0, 0, 0], [2, 1, 1]])
-    assert b.get_object("zone") is z
-    assert isinstance(b.get_object("zone/solid0"), Solid)
-    assert isinstance(b.get_object("zone/solid0/walls"), Wall)
-    assert isinstance(b.get_object("zone/solid0/walls/w2"), Polygon)
+    assert b.get("zone") is z
+    assert isinstance(b.get("zone/solid0"), Solid)
+    assert isinstance(b.get("zone/solid0/walls"), Wall)
+    assert isinstance(b.get("zone/solid0/walls/w2"), Polygon)
 
     graph = b.get_graph()
     for key in graph.keys():

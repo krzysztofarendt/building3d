@@ -21,7 +21,7 @@ def test_wall_single():
     poly0 = Polygon(pts0, name="poly0")
     wall = Wall([poly0])
     assert wall.get_polygons()[0] is poly0
-    assert wall.get_object("poly0") is poly0
+    assert wall.get("poly0") is poly0
 
     name = "wall"
     wall = Wall([poly0], name="wall")
@@ -69,15 +69,15 @@ def test_wall_double():
     assert wall.get_polygons()[0] is poly0
     assert wall.get_polygons()[1] is poly1
     assert wall.get_polygon_names() == ["poly0", "poly1"]
-    assert isinstance(wall.get_object("poly0"), Polygon)
-    assert wall.get_object("poly0") is poly0
-    assert wall.get_object("poly1") is poly1
+    assert isinstance(wall.get("poly0"), Polygon)
+    assert wall.get("poly0") is poly0
+    assert wall.get("poly1") is poly1
     with pytest.raises(ValueError):
-        wall.get_object("xxx")
+        wall.get("xxx")
     with pytest.raises(ValueError):
-        wall.get_object("poly0/xxx")
+        wall.get("poly0/xxx")
     with pytest.raises(ValueError):
-        wall.get_object("/")
+        wall.get("/")
 
 
 def test_wall_bbox():

@@ -18,8 +18,8 @@ def find_location(p: PointType, building: Building, *first_look_at: str) -> str:
     solids_to_search = list(first_look_at)
 
     solids_to_search = []
-    for z in building.get_zones():
-        for s in z.get_solids():
+    for z in building.children.values():
+        for s in z.children.values():
             s_path = object_path(zone=z, solid=s)
             if s_path not in solids_to_search:
                 solids_to_search.append(s_path)
@@ -29,7 +29,7 @@ def find_location(p: PointType, building: Building, *first_look_at: str) -> str:
     found = False
 
     for path_to_solid in solids_to_search:
-        s = building.get_object(path_to_solid)
+        s = building.get(path_to_solid)
 
         if isinstance(s, Solid):
             if s.is_point_inside(p):

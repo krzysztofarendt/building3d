@@ -18,7 +18,7 @@ def test_floor_plan():
     s = floor_plan(plan, height, move, rotate)
     assert np.isclose(s.volume, 1, rtol=GEOM_RTOL)
 
-    for w in s.get_walls():
+    for w in s.children.values():
         for poly in w.get_polygons():
             assert (poly.pts >= 0).all()
             assert (poly.pts <= 1).all()
@@ -39,7 +39,7 @@ def test_floor_plan_reversed_and_moved():
     s = floor_plan(plan, height, move, rotate)
     assert np.isclose(s.volume, 1, rtol=GEOM_RTOL)
 
-    for w in s.get_walls():
+    for w in s.children.values():
         for poly in w.get_polygons():
             assert (poly.pts >= 1).all()
             assert (poly.pts <= 2).all()
@@ -59,7 +59,7 @@ def test_floor_plan_rotated():
     s = floor_plan(plan, height, rot_angle=rotate)
     assert np.isclose(s.volume, 1, rtol=GEOM_RTOL)
 
-    for w in s.get_walls():
+    for w in s.children.values():
         for poly in w.get_polygons():
             if "wall" in poly.name:
                 assert np.isclose(abs(poly.vn[0]) , abs(poly.vn[1]))

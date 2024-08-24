@@ -4,6 +4,8 @@ from typing import Sequence
 import numpy as np
 
 from building3d import random_id
+from building3d.geom.paths import PATH_SEP
+from building3d.geom.exceptions import GeometryError
 from building3d.geom.paths.validate_name import validate_name
 from building3d.geom.numba.wall import Wall
 from building3d.geom.numba.types import PointType, IndexType
@@ -60,33 +62,37 @@ class Solid:
     def parent(self, zone):
         self._parent = zone
 
+    @property
+    def path(self) -> str:
+        if self.parent is not None:
+            p = PATH_SEP.join([self.parent.path, self.name])
+            return p
+        else:
+            return self.name
+
     def add_wall(self, wall: Wall) -> None:
         """Add a Wall instance to the solid."""
+        if wall.name in self.children.keys():
+            raise GeometryError(f"Wall {wall.name} already exists in {self.name}")
+
+        wall.parent = self
         self.walls[wall.name] = wall
 
     def replace_wall(self, old_name: str, new_wall: Wall):
         del self.walls[old_name]
         self.add_wall(new_wall)
 
-    def get_wall_names(self) -> list[str]:
-        """Get list of wall names."""
-        return list(self.walls.keys())
-
-    def get_walls(self) -> list[Wall]:
-        """Get list of walls."""
-        return list(self.walls.values())
-
-    def get_object(self, path: str) -> Wall | Polygon:
+    def get(self, path: str) -> Wall | Polygon:
         """Get object by the path. The path contains names of nested components."""
         names = path.split("/")
         wall_name = names.pop(0)
 
-        if wall_name not in self.get_wall_names():
+        if wall_name not in self.children.keys():
             raise ValueError(f"Wall not found: {wall_name}")
         elif len(names) == 0:
             return self.walls[wall_name]
         else:
-            return self.walls[wall_name].get_object("/".join(names))
+            return self.walls[wall_name].get("/".join(names))
 
     def get_mesh(self) -> tuple[PointType, IndexType]:
         """Get vertices and faces of this solid's walls.
@@ -96,7 +102,7 @@ class Solid:
         Return:
             tuple of vertices, shaped (num_pts, 3), and faces, shaped (num_tri, 3)
         """
-        return get_mesh_from_walls(self.get_walls())
+        return get_mesh_from_walls(list(self.children.values()))
 
     def bbox(self) -> tuple[PointType, PointType]:
         pts, _ = self.get_mesh()
@@ -132,7 +138,7 @@ class Solid:
         vec /= np.linalg.norm(vec)
 
         num_crossings = 0
-        all_polys = [p for w in self.get_walls() for p in w.get_polygons()]
+        all_polys = [p for w in self.children.values() for p in w.children.values()]
         for poly in all_polys:
             p_crosses_polygon = is_point_inside_projection(pt, vec, poly.pts, poly.tri)
             if p_crosses_polygon:
@@ -149,7 +155,7 @@ class Solid:
 
     def is_point_at_boundary(self, pt: PointType) -> bool:
         """Checks whether the point p lays on any of the boundary polygons."""
-        all_polys = [p for w in self.get_walls() for p in w.get_polygons()]
+        all_polys = [p for w in self.children.values() for p in w.get_polygons()]
         for poly in all_polys:
             if poly.is_point_inside(pt):
                 return True
@@ -171,8 +177,8 @@ class Solid:
             True if the solids are adjacent
         """
         # TODO: Polygons can be sorted based on the distance of their centroids
-        this_all_polys = [p for w in self.get_walls() for p in w.get_polygons()]
-        other_all_polys = [p for w in sld.get_walls() for p in w.get_polygons()]
+        this_all_polys = [p for w in self.children.values() for p in w.children.values()]
+        other_all_polys = [p for w in sld.children.values() for p in w.children.values()]
 
         for this_poly in this_all_polys:
             for other_poly in other_all_polys:
@@ -190,7 +196,7 @@ class Solid:
     def volume(self) -> float:
         """Based on: http://chenlab.ece.cornell.edu/Publication/Cha/icip01_Cha.pdf"""
         total_volume = 0.0
-        all_polys = [p for w in self.get_walls() for p in w.get_polygons()]
+        all_polys = [p for w in self.children.values() for p in w.children.values()]
         for poly in all_polys:
             for tri in poly.tri:
                 p0 = new_point(0.0, 0.0, 0.0)
@@ -213,7 +219,7 @@ class Solid:
         return abs(float(total_volume))
 
     def __str__(self):
-        return f"Solid(name={self.name}, walls={self.get_wall_names()}, id={hex(id(self))})"
+        return f"Solid(name={self.name}, walls={list(self.children.keys())}, id={hex(id(self))})"
 
     def __repr__(self):
         return self.__str__()

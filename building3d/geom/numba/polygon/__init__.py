@@ -3,6 +3,7 @@ import logging
 import numpy as np
 
 from building3d import random_id
+from building3d.geom.paths import PATH_SEP
 from building3d.config import GEOM_ATOL
 from building3d.geom.paths.validate_name import validate_name
 from building3d.geom.numba.types import PointType, VectorType, IndexType, FLOAT
@@ -81,6 +82,14 @@ class Polygon:
     @parent.setter
     def parent(self, wall):
         self._parent = wall
+
+    @property
+    def path(self) -> str:
+        if self.parent is not None:
+            p = PATH_SEP.join([self.parent.path, self.name])
+            return p
+        else:
+            return self.name
 
     def bbox(self) -> tuple[PointType, PointType]:
         return bounding_box(self.pts)

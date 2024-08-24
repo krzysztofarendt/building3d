@@ -2,6 +2,7 @@ import logging
 from typing import Sequence
 
 from building3d import random_id
+from building3d.geom.paths import PATH_SEP
 from building3d.geom.paths.validate_name import validate_name
 from building3d.geom.numba.points import bounding_box
 from building3d.geom.numba.types import PointType, IndexType
@@ -65,12 +66,23 @@ class Zone:
     def parent(self, bdg):
         self._parent = bdg
 
+    @property
+    def path(self) -> str:
+        if self.parent is not None:
+            p = PATH_SEP.join([self.parent.path, self.name])
+            return p
+        else:
+            return self.name
+
     def add_solid(self, sld: Solid) -> None:
         """Add a Solid instance to the zone.
 
         Args:
             sld: solid to be added
         """
+        if sld.name in self.children.keys():
+            raise GeometryError(f"Solid {sld.name} already exists in {self.name}")
+
         # Check if it is adjacent to existing solids
         if len(self.solids) > 1:
             adjacent = False
@@ -84,28 +96,21 @@ class Zone:
                 )
 
         # Add solid
+        sld.parent = self
         self.solids[sld.name] = sld
         logger.info(f"Solid {sld.name} added: {self}")
 
-    def get_solid_names(self) -> list[str]:
-        """Get list of solid names."""
-        return list(self.solids.keys())
-
-    def get_solids(self) -> list[Solid]:
-        """Get list of solids."""
-        return list(self.solids.values())
-
-    def get_object(self, path: str) -> Solid | Wall | Polygon:
+    def get(self, path: str) -> Solid | Wall | Polygon:
         """Get object by the path. The path contains names of nested components."""
         names = path.split("/")
         solid_name = names.pop(0)
 
-        if solid_name not in self.get_solid_names():
+        if solid_name not in self.children.keys():
             raise ValueError(f"Solid not found: {solid_name}")
         elif len(names) == 0:
             return self.solids[solid_name]
         else:
-            return self.solids[solid_name].get_object("/".join(names))
+            return self.solids[solid_name].get("/".join(names))
 
     def bbox(self) -> tuple[PointType, PointType]:
         pts, _ = self.get_mesh()
@@ -119,7 +124,7 @@ class Zone:
         Return:
             tuple of vertices, shaped (num_pts, 3), and faces, shaped (num_tri, 3)
         """
-        return get_mesh_from_solids(self.get_solids())
+        return get_mesh_from_solids(list(self.children.values()))
 
     def volume(self) -> float:
         """Calculate zone volume as the sum of solid volumes."""
@@ -130,7 +135,7 @@ class Zone:
 
     def __str__(self):
         s = f"Zone(name={self.name}, "
-        s += f"solids={self.get_solid_names()}, "
+        s += f"solids={list(self.children.keys())}, "
         s += f"id={hex(id(self))})"
         return s
 

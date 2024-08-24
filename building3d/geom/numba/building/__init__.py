@@ -3,6 +3,7 @@ import logging
 from typing import Sequence
 
 from building3d import random_id
+from building3d.geom.exceptions import GeometryError
 from building3d.geom.paths.object_path import object_path
 from building3d.geom.paths.validate_name import validate_name
 from building3d.geom.paths import PATH_SEP
@@ -60,30 +61,30 @@ class Building:
     def parent(self) -> None:
         return None
 
+    @property
+    def path(self) -> str:
+        return self.name
+
     def add_zone(self, zone: Zone) -> None:
         """Add a Zone instance."""
+        if zone.name in self.children.keys():
+            raise GeometryError(f"Zone {zone.name} already exists in {self.name}")
+
+        zone.parent = self
         self.zones[zone.name] = zone
         logger.info(f"Zone {zone.name} added: {self}")
 
-    def get_zone_names(self) -> list[str]:
-        """Get list of zone names."""
-        return list(self.zones.keys())
-
-    def get_zones(self) -> list[Zone]:
-        """Get list of zones."""
-        return list(self.zones.values())
-
-    def get_object(self, path: str) -> Zone | Solid | Wall | Polygon:
+    def get(self, path: str) -> Zone | Solid | Wall | Polygon:
         """Get object by the path. The path contains names of nested components."""
         names = path.split("/")
         zone_name = names.pop(0)
 
-        if zone_name not in self.get_zone_names():
+        if zone_name not in self.children.keys():
             raise ValueError(f"Zone {zone_name} not found")
         elif len(names) == 0:
             return self.zones[zone_name]
         else:
-            return self.zones[zone_name].get_object("/".join(names))
+            return self.zones[zone_name].get("/".join(names))
 
     def get_graph(self, recalc=False) -> dict[str, str | None]:
         """Return graph matching adjacent polygons.
@@ -104,10 +105,10 @@ class Building:
 
             # TODO: DON'T LOVE BELOW CODE
             # For each polygon find the adjacent polygon (there can be only 1)
-            for zone in self.get_zones():
-                for solid in zone.get_solids():
-                    for wall in solid.get_walls():
-                        for poly in wall.get_polygons():
+            for zone in self.children.values():
+                for solid in zone.children.values():
+                    for wall in solid.children.values():
+                        for poly in wall.children.values():
                             found = False
                             poly_path = PATH_SEP.join([zone.name, solid.name, wall.name, poly.name])
                             graph[poly_path] = None
@@ -115,10 +116,10 @@ class Building:
                             solid_path = PATH_SEP.join([zone.name, solid.name])
                             for a_solid_path in adjacent_solids[solid_path]:
                                 z, s = a_solid_path.split(PATH_SEP)  # Adjacent zone and solid names
-                                for w in self.zones[z].solids[s].get_wall_names():
-                                    for p in self.zones[z].solids[s].walls[w].get_polygon_names():
+                                for w in self.zones[z].solids[s].walls.keys():
+                                    for p in self.zones[z].solids[s].walls[w].polygons.keys():
                                         adj_poly_path = PATH_SEP.join([z, s, w, p])
-                                        adj_poly = self.get_object(adj_poly_path)
+                                        adj_poly = self.get(adj_poly_path)
                                         if poly.is_facing_polygon(adj_poly):
                                             graph[poly_path] = adj_poly_path
                                             found = True
@@ -141,12 +142,12 @@ class Building:
         if len(self.adj_solids) > 0 and recalc is False:
             return self.adj_solids
         else:
-            zones = self.get_zones()
+            zones = list(self.children.values())
             adjacent = {}
             for i in range(len(zones)):
                 for j in range(i, len(zones)):
-                    solids_i = zones[i].get_solids()
-                    solids_j = zones[j].get_solids()
+                    solids_i = zones[i].children.values()
+                    solids_j = zones[j].children.values()
                     for si in solids_i:
                         for sj in solids_j:
                             path_to_si = object_path(zones[i], si)
@@ -181,7 +182,7 @@ class Building:
     def volume(self) -> float:
         """Calculate building volume as the sum of zone volumes."""
         volume = 0.0
-        for z in self.get_zones():
+        for z in self.children.values():
             volume += z.volume()
         return volume
 
@@ -197,11 +198,11 @@ class Building:
         Return:
             tuple of vertices and faces
         """
-        return get_mesh_from_zones(self.get_zones())
+        return get_mesh_from_zones(list(self.children.values()))
 
     def __str__(self):
         s = f"Building(name={self.name}, "
-        s += f"zones={self.get_zone_names()}, "
+        s += f"zones={list(self.children.keys())}, "
         s += f"id={hex(id(self))})"
         return s
 

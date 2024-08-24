@@ -1,6 +1,7 @@
 from typing import Sequence
 
 from building3d import random_id
+from building3d.geom.paths import PATH_SEP
 from building3d.geom.paths.validate_name import validate_name
 from building3d.geom.numba.points import bounding_box
 from building3d.geom.numba.polygon import Polygon
@@ -59,6 +60,14 @@ class Wall:
     def parent(self, sld):
         self._parent = sld
 
+    @property
+    def path(self) -> str:
+        if self.parent is not None:
+            p = PATH_SEP.join([self.parent.path, self.name])
+            return p
+        else:
+            return self.name
+
     def add_polygon(self, poly: Polygon):
         """Add polygon to the wall.
 
@@ -68,6 +77,7 @@ class Wall:
         if poly.name in self.polygons.keys():
             raise GeometryError(f"Polygon {poly.name} already exists in the wall")
 
+        poly.parent = self
         self.polygons[poly.name] = poly
 
     def replace_polygon(self, old_name: str, *new_poly: Polygon):
@@ -83,7 +93,7 @@ class Wall:
         """Return list of all polygons."""
         return list(self.polygons.values())
 
-    def get_object(self, path: str) -> Polygon:
+    def get(self, path: str) -> Polygon:
         """Get object by the path. The path contains names of nested components."""
         names = path.split("/")
         poly_name = names.pop(0)
