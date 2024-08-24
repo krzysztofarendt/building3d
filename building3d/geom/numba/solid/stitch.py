@@ -172,3 +172,4 @@ def remove_outside_points(poly: Polygon, slicing_pts: PointType) -> PointType:
             pts[j] = pt
             j += 1
     return pts[:j]
+
