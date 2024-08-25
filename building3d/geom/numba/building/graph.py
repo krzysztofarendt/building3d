@@ -2,37 +2,12 @@ from typing import Iterable
 
 import numpy as np
 
+from building3d.geom.paths import PATH_SEP
 from building3d.geom.numba.polygon import Polygon
 from building3d.geom.numba.wall import Wall
 from building3d.geom.numba.solid import Solid
 from building3d.geom.numba.zone import Zone
 from building3d.geom.numba.building import Building
-
-
-def iter_polygons(bdg: Building) -> Iterable[Polygon]:
-    for _, zv in bdg.children.items():
-        for _, sv in zv.children.items():
-            for _, wv in sv.children.items():
-                for _, pv in wv.children.items():
-                    yield pv
-
-
-def iter_walls(bdg: Building) -> Iterable[Wall]:
-    for _, zv in bdg.children.items():
-        for _, sv in zv.children.items():
-            for _, wv in sv.children.items():
-                yield wv
-
-
-def iter_solids(bdg: Building) -> Iterable[Solid]:
-    for _, zv in bdg.children.items():
-        for _, sv in zv.children.items():
-            yield sv
-
-
-def iter_zones(bdg: Building) -> Iterable[Zone]:
-    for _, zv in bdg.children.items():
-        yield zv
 
 
 def graph_polygon(
@@ -82,10 +57,121 @@ def graph_polygon(
     return g
 
 
-def graph_wall(bdg: Building) -> dict[str, list[str]]: ...
+def graph_wall(
+    bdg: Building,
+    facing=True,
+    overlapping=True,
+    touching=False,
+) -> dict[str, list[str]]:
+    """Makes a building graph based on wall connections.
+
+    The output is based on the analysis of the underlaying polygons.
+
+    Args:
+        bdg: building instance
+        facing: if True will include polygons which are facing
+        overlapping: if True will include polygons which are overlapping
+        touching: if True will include polygons which are touching
+
+    Retruns:
+        graph dictionary
+    """
+    return strip_graph(graph_polygon(bdg, facing, overlapping, touching), n=1)
 
 
-def graph_solid(bdg: Building) -> dict[str, list[str]]: ...
+def graph_solid(
+    bdg: Building,
+    facing=True,
+    overlapping=True,
+    touching=False,
+) -> dict[str, list[str]]:
+    """Makes a building graph based on solid connections.
+
+    The output is based on the analysis of the underlaying polygons.
+
+    Args:
+        bdg: building instance
+        facing: if True will include polygons which are facing
+        overlapping: if True will include polygons which are overlapping
+        touching: if True will include polygons which are touching
+
+    Retruns:
+        graph dictionary
+    """
+    return strip_graph(graph_polygon(bdg, facing, overlapping, touching), n=2)
 
 
-def graph_zone(bdg: Building) -> dict[str, list[str]]: ...
+def graph_zone(
+    bdg: Building,
+    facing=True,
+    overlapping=True,
+    touching=False,
+) -> dict[str, list[str]]:
+    """Makes a building graph based on solid connections.
+
+    The output is based on the analysis of the underlaying polygons.
+
+    Args:
+        bdg: building instance
+        facing: if True will include polygons which are facing
+        overlapping: if True will include polygons which are overlapping
+        touching: if True will include polygons which are touching
+
+    Retruns:
+        graph dictionary
+    """
+    return strip_graph(graph_polygon(bdg, facing, overlapping, touching), n=3)
+
+
+def strip_graph(
+    g: dict[str, list[str]],
+    n: int,
+) -> dict[str, list[str]]:
+    """Removes `n` last components of all paths in the graph `g`.
+    """
+    gnew = {}
+    for k, v in g.items():
+        gnew[remove_last(k, n=n)] = list(set([remove_last(x, n=n) for x in v]))
+    return gnew
+
+
+def remove_last(path: str, n: int = 1) -> str:
+    """Removes `n` last components of of `path`.
+    """
+    for _ in range(n):
+        path = PATH_SEP.join(path.split(PATH_SEP)[:-1])
+    return path
+
+
+def iter_polygons(bdg: Building) -> Iterable[Polygon]:
+    """Generator iterating over all polygons of the building.
+    """
+    for _, zv in bdg.children.items():
+        for _, sv in zv.children.items():
+            for _, wv in sv.children.items():
+                for _, pv in wv.children.items():
+                    yield pv
+
+
+def iter_walls(bdg: Building) -> Iterable[Wall]:
+    """Generator iterating over all walls of the building.
+    """
+    for _, zv in bdg.children.items():
+        for _, sv in zv.children.items():
+            for _, wv in sv.children.items():
+                yield wv
+
+
+def iter_solids(bdg: Building) -> Iterable[Solid]:
+    """Generator iterating over all solids of the building.
+    """
+    for _, zv in bdg.children.items():
+        for _, sv in zv.children.items():
+            yield sv
+
+
+def iter_zones(bdg: Building) -> Iterable[Zone]:
+    """Generator iterating over all zones of the building.
+    """
+    for _, zv in bdg.children.items():
+        yield zv
