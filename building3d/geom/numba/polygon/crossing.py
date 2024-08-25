@@ -9,6 +9,7 @@ from building3d.geom.numba.points import are_points_coplanar
 from building3d.geom.numba.polygon.edges import polygon_edges
 from building3d.geom.numba.polygon.ispointinside import is_point_inside
 from building3d.geom.numba.types import PointType, IndexType
+from building3d.geom.numba.points import bounding_box
 
 
 @njit
@@ -20,6 +21,11 @@ def are_polygons_crossing(
 ) -> bool:
     """Checks if two polygons are crossing (overlapping to some extent).
     """
+    bbox1 = bounding_box(pts1)
+    bbox2 = bounding_box(pts2)
+    if not are_bboxes_overlapping(bbox1, bbox2):
+        return False
+
     if not are_points_coplanar(np.vstack((pts1, pts2))):
         return False
 
@@ -50,3 +56,11 @@ def are_polygons_crossing(
                 else:
                     return True
     return False
+
+
+@njit
+def are_bboxes_overlapping(bbox1, bbox2):
+    if (bbox1[1] < bbox2[0]).any() or (bbox1[0] > bbox2[1]).any():
+        return False
+    else:
+        return True

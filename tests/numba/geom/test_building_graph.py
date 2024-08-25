@@ -40,9 +40,8 @@ def test_building_graph():
     assert set(g_ove["b/z0/s2/wall-3/wall-3"]) == set(["b/z0/s0/wall-1/wall-1",
                                                        "b/z0/s1/wall-1/wall-1"])
 
-    # TODO: This takes a lot of time
-    # g_all = graph_polygon(bdg, facing=True, overlapping=True, touching=True)
-    # assert len(g_all.keys()) > len(g_def.keys())
+    g_all = graph_polygon(bdg, facing=True, overlapping=True, touching=True)
+    assert len(g_all.keys()) > len(g_def.keys())
 
 
 if __name__ == "__main__":

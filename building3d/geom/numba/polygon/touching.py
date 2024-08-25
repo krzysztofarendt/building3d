@@ -5,6 +5,7 @@ from building3d.geom.numba.points import new_point_between_2_points, points_equa
 from building3d.geom.numba.polygon.ispointinside import is_point_at_boundary
 from building3d.geom.numba.polygon.ispointinside import is_point_inside
 from building3d.geom.numba.types import PointType, IndexType
+from building3d.geom.numba.points import bounding_box
 
 
 @njit
@@ -29,6 +30,11 @@ def are_polygons_touching(
     Returns:
         True if polygons are touching
     """
+    bbox1 = bounding_box(pts1)
+    bbox2 = bounding_box(pts2)
+    if not are_bboxes_overlapping(bbox1, bbox2):
+        return False
+
     if are_all_points_same(pts1, pts2):
         return False
 
@@ -43,6 +49,14 @@ def are_polygons_touching(
 
     # Not touching, not not crossing
     return False
+
+
+@njit
+def are_bboxes_overlapping(bbox1, bbox2):
+    if (bbox1[1] < bbox2[0]).any() or (bbox1[0] > bbox2[1]).any():
+        return False
+    else:
+        return True
 
 
 @njit
