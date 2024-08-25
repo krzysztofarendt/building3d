@@ -114,13 +114,9 @@ class Solid:
         and count how many times it intersects with the edges of the
         solid; if the number of intersections is odd, it is inside.
         """
-        vertices, _ = self.get_mesh()
-        max_x = vertices[:, 0].max()
-        max_y = vertices[:, 1].max()
-        max_z = vertices[:, 2].max()
-        min_x = vertices[:, 0].min()
-        min_y = vertices[:, 1].min()
-        min_z = vertices[:, 2].min()
+        bbox = self.bbox()
+        min_x, min_y, min_z = bbox[0]
+        max_x, max_y, max_z = bbox[1]
 
         # Check if it is possible that the point is inside the solid
         if pt[0] > max_x or pt[1] > max_y or pt[2] > max_z:
