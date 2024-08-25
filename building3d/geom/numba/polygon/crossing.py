@@ -5,6 +5,7 @@ from building3d.geom.numba.points.distance import distance_point_to_edge
 from building3d.geom.numba.points.intersections import line_segment_intersection
 from building3d.geom.numba.points import new_point_between_2_points
 from building3d.geom.numba.points import points_equal
+from building3d.geom.numba.points import are_points_coplanar
 from building3d.geom.numba.polygon.edges import polygon_edges
 from building3d.geom.numba.polygon.ispointinside import is_point_inside
 from building3d.geom.numba.types import PointType, IndexType
@@ -19,6 +20,9 @@ def are_polygons_crossing(
 ) -> bool:
     """Checks if two polygons are crossing (overlapping to some extent).
     """
+    if not are_points_coplanar(np.vstack((pts1, pts2))):
+        return False
+
     for e1 in polygon_edges(pts1):
         for e2 in polygon_edges(pts2):
             if (

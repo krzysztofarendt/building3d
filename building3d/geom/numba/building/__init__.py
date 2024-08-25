@@ -8,13 +8,9 @@ from building3d.geom.paths.validate_name import validate_name
 from building3d.geom.paths import PATH_SEP
 from building3d.geom.numba.points import bounding_box
 from building3d.geom.numba.zone import Zone
-from building3d.geom.numba.solid import Solid
-from building3d.geom.numba.wall import Wall
-from building3d.geom.numba.polygon import Polygon
 from building3d.geom.numba.types import PointType, IndexType
 from building3d.geom.numba.building.get_mesh import get_mesh_from_zones
 from building3d.geom.numba.solid.stitch import stitch_solids
-from building3d.geom.numba.building.graph import graph
 
 
 logger = logging.getLogger(__name__)
@@ -110,51 +106,6 @@ class Building:
             return self[zone][solid][wall][polygon][index]
         else:
             raise ValueError(f"Incorrect absolute path: {abspath}")
-
-    def get_graph(self, recalc=False) -> dict[str, str | None]:
-        """Return graph matching adjacent polygons.
-
-        Each polygon can have only 0 or 1 adjacent polygons. (TODO -> NOT TRUE? Why list then?)
-        Polygons that are partially overlapping are considered non-adjacent.
-
-        Expect return value in the following format:
-        ```
-        graph["zone0/solid0/wall0/polygon0"] = "zone1/solid1/wall1/polygon1"
-        ```
-        """
-        if len(self.graph) > 0 and recalc is False:
-            return self.graph
-        else:
-            self.graph = graph(self)
-            return self.graph
-            # TODO: DELETE BELOW CODE ONCE REIMPLEMENTED
-            # adjacent_solids = self.find_adjacent_solids()
-            # # For each polygon find the adjacent polygon (there can be only 1)
-            # for zone in self.children.values():
-            #     for solid in zone.children.values():
-            #         for wall in solid.children.values():
-            #             for poly in wall.children.values():
-            #                 found = False
-            #                 poly_path = PATH_SEP.join([zone.name, solid.name, wall.name, poly.name])
-            #                 graph[poly_path] = None
-            #                 # Find adjacent polygon (look only at the adjacent solids)
-            #                 solid_path = PATH_SEP.join([zone.name, solid.name])
-            #                 for a_solid_path in adjacent_solids[solid_path]:
-            #                     z, s = a_solid_path.split(PATH_SEP)  # Adjacent zone and solid names
-            #                     for w in self.zones[z].solids[s].walls.keys():
-            #                         for p in self.zones[z].solids[s].walls[w].polygons.keys():
-            #                             adj_poly_path = PATH_SEP.join([z, s, w, p])
-            #                             adj_poly = self.get(adj_poly_path)
-            #                             if poly.is_facing_polygon(adj_poly):
-            #                                 graph[poly_path] = adj_poly_path
-            #                                 found = True
-            #                             if found:
-            #                                 break
-            #                         if found:
-            #                             break
-            #                     if found:
-            #                         break
-            # self.graph = graph
 
     def find_adjacent_solids(self, recalc=False) -> dict[str, list[str]]:
         """Return a dict mapping adjacent solids.

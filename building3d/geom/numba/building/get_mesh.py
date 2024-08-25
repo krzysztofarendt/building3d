@@ -18,4 +18,3 @@ def get_mesh_from_zones(zones: list[Zone]) -> tuple[PointType, IndexType]:
     t_pts = tuple(msh[0] for msh in object_meshes)
     t_tri = tuple(msh[1] for msh in object_meshes)
     return vstack_mesh(t_pts, t_tri)
-

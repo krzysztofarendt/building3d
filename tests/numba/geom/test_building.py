@@ -55,16 +55,6 @@ def test_zone():
     assert isinstance(b["zone"]["solid0"]["walls"], Wall)
     assert isinstance(b["zone"]["solid0"]["walls"]["w2"], Polygon)
 
-    graph = b.get_graph()
-    # TODO
-    # for key in graph.keys():
-    #     if key == "building/zone/solid1/walls/w3":
-    #         assert graph[key] == "zone/solid0/walls/w1"
-    #     elif key == "building/zone/solid0/walls/w1":
-    #         assert graph[key] == "building/zone/solid1/walls/w3"
-    #     else:
-    #         assert graph[key] is None
-
     verts, faces = b.get_mesh()
     assert verts.shape == (2 * 6 * 4, 3)  # NOTE: points not unique
     assert faces.shape == (2 * 12, 3)     # NOTE: points not unique

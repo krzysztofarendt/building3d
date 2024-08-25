@@ -83,25 +83,13 @@ class Zone:
         if sld.name in self.children.keys():
             raise GeometryError(f"Solid {sld.name} already exists in {self.name}")
 
-        # Check if it is adjacent to existing solids
-        if len(self.solids) > 1:
-            adjacent = False
-            for _, existing_sld in self.solids.items():
-                if sld.is_adjacent_to_solid(existing_sld, exact=False):
-                    adjacent = True
-            if not adjacent:
-                raise GeometryError(
-                    f"Cannot add solid {sld.name}, because it is disconnected "
-                    f"from other solids in this zone: {self.solids.keys}"
-                )
-
         # Add solid
         sld.parent = self
         self.solids[sld.name] = sld
         logger.info(f"Solid {sld.name} added: {self}")
 
     def get(self, abspath: str):
-        """Get object by the path. The path contains names of nested components."""
+        """Get object by the absolute path."""
         obj = self
         while obj.parent is not None:
             obj = obj.parent

@@ -18,6 +18,7 @@ from building3d.geom.numba.polygon.plane import plane_coefficients
 from building3d.geom.numba.polygon.ispointinside import is_point_inside, is_point_inside_margin
 from building3d.geom.numba.polygon.facing import are_polygons_facing
 from building3d.geom.numba.polygon.touching import are_polygons_touching
+from building3d.geom.numba.polygon.crossing import are_polygons_crossing
 
 
 logger = logging.getLogger(__name__)
@@ -137,11 +138,6 @@ class Polygon:
     def is_point_inside(self, pt: PointType, boundary_in: bool = True) -> bool:
         return is_point_inside(pt, self.pts, self.tri, boundary_in)
 
-    def is_facing_polygon(self, other, exact: bool = True) -> bool:
-        return are_polygons_facing(
-            self.pts, self.tri, self.vn, other.pts, other.tri, other.vn, exact
-        )
-
     def contains_polygon(self, other) -> bool:
         """Checks if the other polygon is completely inside this one.
         """
@@ -149,6 +145,16 @@ class Polygon:
             if not is_point_inside_margin(pt, GEOM_ATOL, self.pts, self.tri):
                 return False
         return True
+
+    def is_facing_polygon(self, other) -> bool:
+        """Checks is the polygon is facing another one. Compares points and normals.
+        """
+        return are_polygons_facing(self.pts, self.vn, other.pts, other.vn)
+
+    def is_crossing_polygon(self, other) -> bool:
+        """Checks if the polygon crosses (overlaps) with another one.
+        """
+        return are_polygons_crossing(self.pts, self.tri, other.pts, other.tri)
 
     def is_touching_polygon(self, other) -> bool:
         """Checks if the polygon touches (but doesn't cross) another one.

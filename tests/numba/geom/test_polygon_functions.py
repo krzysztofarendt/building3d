@@ -14,6 +14,7 @@ from building3d.geom.numba.polygon.ispointinside import is_point_inside_ortho_pr
 from building3d.geom.numba.polygon.ispointinside import is_point_inside_projection
 from building3d.geom.numba.polygon.facing import are_polygons_facing
 from building3d.geom.numba.polygon.touching import are_polygons_touching
+from building3d.geom.numba.polygon.crossing import are_polygons_crossing
 from building3d.geom.numba.triangles import triangulate
 from building3d.geom.numba.vectors import normal
 from building3d.geom.numba.types import INT
@@ -219,10 +220,10 @@ def test_are_polygons_facing():
     pts1, tri1 = triangulate(pts1, vn1)
     pts2, tri2 = triangulate(pts2, vn2)
 
-    assert are_polygons_facing(pts1, tri1, vn1, pts2, tri2, vn2) is True  # exact=True by default
-    assert are_polygons_facing(pts1, tri1, vn1, pts2, tri2, vn2, exact=True) is True
-    assert are_polygons_facing(pts1, tri1, vn1, pts2, tri2, vn2, exact=False) is True
-    assert are_polygons_facing(pts2, tri2, vn2, pts1, tri1, vn1) is True
+    assert are_polygons_facing(pts1, vn1, pts2, vn2) is True
+    assert are_polygons_facing(pts2, vn2, pts1, vn1) is True
+    assert are_polygons_crossing(pts1, tri1, pts2, tri2) is False  # because they are facing
+    assert are_polygons_touching(pts1, tri1, pts2, tri2) is False  # because they are facing
 
 
 def test_are_polygons_facing_different_sizes():
@@ -243,9 +244,8 @@ def test_are_polygons_facing_different_sizes():
     pts2, tri2 = triangulate(pts2, vn2)
 
     assert are_polygons_touching(pts1, tri1, pts2, tri2) is False
-    assert are_polygons_facing(pts1, tri1, vn1, pts2, tri2, vn2) is False  # exact=True by default
-    assert are_polygons_facing(pts1, tri1, vn1, pts2, tri2, vn2, exact=True) is False
-    assert are_polygons_facing(pts1, tri1, vn1, pts2, tri2, vn2, exact=False) is True
+    assert are_polygons_facing(pts1, vn1, pts2, vn2) is False
+    assert are_polygons_crossing(pts1, tri1, pts2, tri2) is True
 
 
 def test_are_polygons_facing_orthogonal_overlapping():
@@ -269,9 +269,8 @@ def test_are_polygons_facing_orthogonal_overlapping():
     assert np.allclose(vn1, -1 * vn2)
 
     assert are_polygons_touching(pts1, tri1, pts2, tri2) is False
-    assert are_polygons_facing(pts1, tri1, vn1, pts2, tri2, vn2) is False  # exact=True by default
-    assert are_polygons_facing(pts1, tri1, vn1, pts2, tri2, vn2, exact=True) is False
-    assert are_polygons_facing(pts1, tri1, vn1, pts2, tri2, vn2, exact=False) is True
+    assert are_polygons_facing(pts1, vn1, pts2, vn2) is False
+    assert are_polygons_crossing(pts1, tri1, pts2, tri2,) is True
 
 
 def test_are_polygons_not_facing():
@@ -291,9 +290,8 @@ def test_are_polygons_not_facing():
     pts1, tri1 = triangulate(pts1, vn1)
     pts2, tri2 = triangulate(pts2, vn2)
 
-    assert are_polygons_facing(pts1, tri1, vn1, pts2, tri2, vn2) is False  # exact=True by default
-    assert are_polygons_facing(pts1, tri1, vn1, pts2, tri2, vn2, exact=True) is False
-    assert are_polygons_facing(pts1, tri1, vn1, pts2, tri2, vn2, exact=False) is False
+    assert are_polygons_facing(pts1, vn1, pts2, vn2) is False
+    assert are_polygons_crossing(pts1, tri1, pts2, tri2) is False
 
 
 def test_distance_point_to_polygon():

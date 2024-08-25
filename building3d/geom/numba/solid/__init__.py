@@ -11,8 +11,8 @@ from building3d.geom.numba.wall import Wall
 from building3d.geom.numba.types import PointType, IndexType
 from building3d.geom.numba.points import bounding_box
 from building3d.geom.numba.points import new_point
-from building3d.geom.numba.polygon import Polygon
 from building3d.geom.numba.polygon.ispointinside import is_point_inside_projection
+from building3d.geom.numba.polygon.crossing import are_polygons_crossing
 from building3d.geom.numba.polygon.facing import are_polygons_facing
 from building3d.geom.numba.tetrahedrons import tetrahedron_volume
 from building3d.geom.numba.solid.get_mesh import get_mesh_from_walls
@@ -157,17 +157,11 @@ class Solid:
                 return True
         return False
 
-    def is_adjacent_to_solid(self, sld, exact: bool = False) -> bool:
+    def is_adjacent_to_solid(self, sld) -> bool:
         """Checks if this solid is adjacent to another solid.
-
-        The argument `exact` has the same meaning as in Polygon.is_facing_polygon().
-        If `exact` is True, all points of adjacent polygons must be equal.
-        If `exact` is False, the method checks only in points are coplanar and
-        normal vectors are opposite.
 
         Args:
             sld: other solid
-            exact: if True, the solid must be exactly adjacent
 
         Return:
             True if the solids are adjacent
@@ -184,7 +178,9 @@ class Solid:
                 pts2 = other_poly.pts
                 tri2 = other_poly.tri
                 vn2 = other_poly.vn
-                if are_polygons_facing(pts1, tri1, vn1, pts2, tri2, vn2, exact=exact):
+                if are_polygons_crossing(pts1, tri1, pts2, tri2):
+                    return True
+                elif are_polygons_facing(pts1, vn1, pts2, vn2):
                     return True
         return False
 

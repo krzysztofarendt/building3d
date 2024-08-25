@@ -33,16 +33,8 @@ def next_adjacent_polygons(s1: Solid, s2: Solid) -> tuple[Polygon, Polygon] | No
     """
     for _, p1 in get_walls_and_polygons(s1):
         for _, p2 in get_walls_and_polygons(s2):
-            facing_exactly = p1.is_facing_polygon(p2, exact=True)
-            if facing_exactly:
-                # Nothing to slice
-                continue
-            touching = p1.is_touching_polygon(p2)
-            if touching:
-                # Nothing to slice
-                continue
-            adjacent = p1.is_facing_polygon(p2, exact=False)
-            if adjacent:
+            overlapping = p1.is_crossing_polygon(p2)
+            if overlapping:
                 # These can be sliced
                 return p1, p2
     # There are no adjacent polygons anymore
