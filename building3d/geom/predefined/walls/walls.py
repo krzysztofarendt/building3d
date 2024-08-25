@@ -4,6 +4,7 @@ The walls are vertical by default and located on the XZ plane.
 Their orientation can be changed using the `rot_vec` and `rot_angle` parameters.
 Their location can be changed using the `translate` parameter.
 """
+
 import numpy as np
 
 from building3d.display.plot_objects import plot_objects
@@ -51,9 +52,9 @@ def vertical_wall(
 
     if rot_angle != 0:
         (p0, p1, p2, p3), _ = rotate_points_around_vector(
-            points = [p0, p1, p2, p3],
-            u = vec,
-            phi = rot_angle,
+            points=[p0, p1, p2, p3],
+            u=vec,
+            phi=rot_angle,
         )
 
     p0 += translate
@@ -122,15 +123,15 @@ def vertical_wall_with_aperture(
     if rot_angle != 0:
         # Rotate wall points
         (p0, p1, p2, p3), _ = rotate_points_around_vector(
-            points = [p0, p1, p2, p3],
-            u = vec,
-            phi = rot_angle,
+            points=[p0, p1, p2, p3],
+            u=vec,
+            phi=rot_angle,
         )
         # Rotate aperture points
         (ap0, ap1, ap2, ap3), _ = rotate_points_around_vector(
-            points = [ap0, ap1, ap2, ap3],
-            u = vec,
-            phi = rot_angle,
+            points=[ap0, ap1, ap2, ap3],
+            u=vec,
+            phi=rot_angle,
         )
 
     # Move wall points

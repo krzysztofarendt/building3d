@@ -89,9 +89,13 @@ class Ray:
             if len(self.target_surface) > 0 and len(self.location) > 0:
                 z, s, _, _ = self.target_surface.split(PATH_SEP)
                 target_solid = z + PATH_SEP + s
-                self.location = find_location(self.position, self.building, target_solid, self.location)
+                self.location = find_location(
+                    self.position, self.building, target_solid, self.location
+                )
             elif len(self.location) > 0:
-                self.location = find_location(self.position, self.building, self.location)
+                self.location = find_location(
+                    self.position, self.building, self.location
+                )
             else:
                 self.location = find_location(self.position, self.building)
 
@@ -111,12 +115,12 @@ class Ray:
         logger.debug(f"Update target surface for {self}")
         try:
             self.target_surface = find_target(
-                position = self.position,
-                velocity = self.velocity,
-                location = self.location,
-                building = self.building,
-                transparent = Ray.transparent,
-                checked_locations = set(),
+                position=self.position,
+                velocity=self.velocity,
+                location=self.location,
+                building=self.building,
+                transparent=Ray.transparent,
+                checked_locations=set(),
             )
             self.target_absorption = get_property(
                 self.target_surface,

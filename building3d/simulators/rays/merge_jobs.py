@@ -30,7 +30,9 @@ def merge_state(
         if w.step > max_step_num:
             max_step_num = w.step
 
-    max_job_num += 1  # must increase, becasue if jobs==N, max. job number in job_<job> is N-1
+    max_job_num += (
+        1  # must increase, becasue if jobs==N, max. job number in job_<job> is N-1
+    )
     max_step_num += 1  # like above
 
     mrg_enr_wp = WildcardPath(mrg_enr_template)
@@ -82,7 +84,9 @@ def merge_hits(
     for w in job_hit_map.keys():
         if w.job > max_job_num:
             max_job_num = w.job
-    max_job_num += 1  # must increase, becasue if jobs==N, max. job number in job_<job> is N-1
+    max_job_num += (
+        1  # must increase, becasue if jobs==N, max. job number in job_<job> is N-1
+    )
 
     job_hits = []
     for job in range(max_job_num):

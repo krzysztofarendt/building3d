@@ -1,4 +1,5 @@
 """Functions related to triangles."""
+
 import numpy as np
 
 from building3d.geom.point import Point
@@ -32,9 +33,9 @@ def triangle_area(p1: Point, p2: Point, p3: Point) -> float:
 
 
 def triangle_centroid(p1: Point, p2: Point, p3: Point) -> Point:
-    cx = (p1.x + p2.x + p3.x) / 3.
-    cy = (p1.y + p2.y + p3.y) / 3.
-    cz = (p1.z + p2.z + p3.z) / 3.
+    cx = (p1.x + p2.x + p3.x) / 3.0
+    cy = (p1.y + p2.y + p3.y) / 3.0
+    cz = (p1.z + p2.z + p3.z) / 3.0
 
     return Point(cx, cy, cz)
 
@@ -55,7 +56,9 @@ def is_point_on_correct_side(ptest: Point, p1: Point, p2: Point, pref: Point) ->
         # This point lies on the edge connecting p1 and p2
         # Add jitter (move ptest a bit)
         jitter = (np.random.random(3) - 0.5) * GEOM_ATOL
-        ptest_jitter = Point(ptest.x + jitter[0], ptest.y + jitter[1], ptest.z + jitter[2])
+        ptest_jitter = Point(
+            ptest.x + jitter[0], ptest.y + jitter[1], ptest.z + jitter[2]
+        )
         return is_point_on_correct_side(ptest_jitter, p1, p2, pref)
     else:
         vtest /= len_vtest
@@ -83,12 +86,12 @@ def is_point_inside(ptest: Point, p1: Point, p2: Point, p3: Point) -> bool:
             y = np.round(ptest.y, POINT_NUM_DEC)
             z = np.round(ptest.z, POINT_NUM_DEC)
             if (
-                x > np.round(max(pair[0].x, pair[1].x), POINT_NUM_DEC) or \
-                y > np.round(max(pair[0].y, pair[1].y), POINT_NUM_DEC) or \
-                z > np.round(max(pair[0].z, pair[1].z), POINT_NUM_DEC) or \
-                x < np.round(min(pair[0].x, pair[1].x), POINT_NUM_DEC) or \
-                y < np.round(min(pair[0].y, pair[1].y), POINT_NUM_DEC) or \
-                z < np.round(min(pair[0].z, pair[1].z), POINT_NUM_DEC)
+                x > np.round(max(pair[0].x, pair[1].x), POINT_NUM_DEC)
+                or y > np.round(max(pair[0].y, pair[1].y), POINT_NUM_DEC)
+                or z > np.round(max(pair[0].z, pair[1].z), POINT_NUM_DEC)
+                or x < np.round(min(pair[0].x, pair[1].x), POINT_NUM_DEC)
+                or y < np.round(min(pair[0].y, pair[1].y), POINT_NUM_DEC)
+                or z < np.round(min(pair[0].z, pair[1].z), POINT_NUM_DEC)
             ):
                 return False
             else:
@@ -113,7 +116,7 @@ def is_corner_convex(p0: Point, p1: Point, p2: Point, n: np.ndarray) -> bool:
     It is done by comparing the polygon normal vector with the
     cross product p1->p2 x p1->p0.
     """
-    assert np.abs(length(n) - 1.) < GEOM_ATOL
+    assert np.abs(length(n) - 1.0) < GEOM_ATOL
     v1 = vector(p1, p2)
     v2 = vector(p1, p0)
     v1_v2_normal = np.cross(v1, v2)

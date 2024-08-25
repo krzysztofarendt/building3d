@@ -103,7 +103,7 @@ def delaunay_triangulation(
                         is_far_from_all = False
                         break
                 if is_far_from_all:
-                    if poly_2d.is_point_inside_margin(p, margin=delta/2):
+                    if poly_2d.is_point_inside_margin(p, margin=delta / 2):
                         points_2d.append(p)
 
         # Add polygon points to fixed
@@ -135,16 +135,18 @@ def delaunay_triangulation(
 
         # Remove vertices with too small area
         # but keep fixed vertices
-        logger.debug("Removing unconnected points and points connected to too small faces")
+        logger.debug(
+            "Removing unconnected points and points connected to too small faces"
+        )
         unique_tri_indices = np.unique(triangles)
         final_points_2d = []
         for i, p in enumerate(points_2d):
             if i in unique_tri_indices:
                 if (
-                        (pt_to_area[i] > min_area) or \
-                        (p in fixed_2d) or \
-                        (p in edge_points) or \
-                        (p in poly_points_2d)
+                    (pt_to_area[i] > min_area)
+                    or (p in fixed_2d)
+                    or (p in edge_points)
+                    or (p in poly_points_2d)
                 ):
                     final_points_2d.append(p)
 
@@ -167,9 +169,8 @@ def delaunay_triangulation(
             if fp not in points_2d:
                 missing_fixed_point = True
                 break
-        if (
-            not missing_fixed_point and \
-            are_points_in_set(edge_points, points_2d)
+        if not missing_fixed_point and are_points_in_set(
+            edge_points, points_2d
         ):  # TODO: any other conditions?
             mesh_quality_ok = True
         else:
@@ -210,9 +211,15 @@ def delaunay_triangulation(
 
     for face_num in range(len(faces)):
         face_n = face_normal(face_num)
-        if np.isclose(face_n * -1., poly.normal).all():
-            logger.debug(f"Reordering face no. {face_num} vertices to flip the normal vector")
-            faces[face_num] = [faces[face_num][0], faces[face_num][2], faces[face_num][1]]
+        if np.isclose(face_n * -1.0, poly.normal).all():
+            logger.debug(
+                f"Reordering face no. {face_num} vertices to flip the normal vector"
+            )
+            faces[face_num] = [
+                faces[face_num][0],
+                faces[face_num][2],
+                faces[face_num][1],
+            ]
 
     mesh_normal = face_normal(0)
 
@@ -220,9 +227,10 @@ def delaunay_triangulation(
         # Vertex ordering is correct
         pass
     else:
-        error_msg = \
-            f"Mesh face normal points in a different direction ({mesh_normal}) " + \
-            f"than polygon normal ({poly.normal})."
+        error_msg = (
+            f"Mesh face normal points in a different direction ({mesh_normal}) "
+            + f"than polygon normal ({poly.normal})."
+        )
         logger.error(error_msg)
         raise MeshError(error_msg)
 

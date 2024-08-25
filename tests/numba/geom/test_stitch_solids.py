@@ -74,6 +74,7 @@ def test_stitch_solids(show=False):
 
 if __name__ == "__main__":
     from building3d.display.numba.plot_objects import plot_objects
+
     s = test_stitch_solids(show=True)
     assert s is not None
     plot_objects(s)

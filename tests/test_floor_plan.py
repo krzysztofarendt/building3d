@@ -106,7 +106,7 @@ def test_floor_plan_rotated(show=False):
     assert np.isclose(vol, 5 * 5 * 1)
 
     if show:
-        plot_objects((zone, ))
+        plot_objects((zone,))
 
 
 def test_floor_plan_translated(show=False):
@@ -128,7 +128,7 @@ def test_floor_plan_translated(show=False):
     assert np.isclose(vol, 5 * 5 * 3)
 
     if show:
-        plot_objects((zone, ))
+        plot_objects((zone,))
 
 
 def test_floor_plan_rotated_and_translated(show=False):
@@ -147,7 +147,7 @@ def test_floor_plan_rotated_and_translated(show=False):
     assert np.isclose(vol, 5 * 5 * 1)
 
     if show:
-        plot_objects((zone, ))
+        plot_objects((zone,))
 
 
 def test_floor_plan_with_apertures(show=False):
@@ -190,7 +190,7 @@ def test_floor_plan_with_apertures(show=False):
     assert type(obj) is Polygon
 
     if show:
-        plot_objects((zone, ))
+        plot_objects((zone,))
 
 
 def test_floor_plan_with_apertures_and_translation(show=False):
@@ -234,7 +234,7 @@ def test_floor_plan_with_apertures_and_translation(show=False):
     assert type(obj) is Polygon
 
     if show:
-        plot_objects((zone, ))
+        plot_objects((zone,))
 
 
 if __name__ == "__main__":

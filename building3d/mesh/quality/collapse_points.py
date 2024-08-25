@@ -53,8 +53,9 @@ def collapse_points(
             # Replace point to be deleted with the one to keep in each face
             for k in range(len(elements)):
                 if p_to_delete in elements[k]:
-                    elements[k] = \
-                        [x if x != p_to_delete else p_to_keep for x in elements[k]]
+                    elements[k] = [
+                        x if x != p_to_delete else p_to_keep for x in elements[k]
+                    ]
 
     # Reindex
     for_deletion = sorted(list(for_deletion), reverse=True)

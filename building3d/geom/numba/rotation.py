@@ -1,4 +1,5 @@
 """Rotation functions."""
+
 from numba import njit
 import numpy as np
 from numpy.typing import NDArray
@@ -41,12 +42,12 @@ def rotation_matrix(u: VectorType, phi: float) -> NDArray[FLOAT]:
     # Method 2 (more stable numerically):
     # https://en.wikipedia.org/wiki/Rodrigues%27_rotation_formula
     # https://math.stackexchange.com/questions/142821/matrix-for-rotation-around-a-vector
-    assert np.isclose(np.linalg.norm(u), 1.0), "rotation_matrix() requires u to be a unit vector"
+    assert np.isclose(
+        np.linalg.norm(u), 1.0
+    ), "rotation_matrix() requires u to be a unit vector"
 
-    W = np.array([[0, -u[2], u[1]],
-                  [u[2], 0, -u[0]],
-                  [-u[1], u[0], 0]])
-    R = np.eye(3) + np.sin(phi) * W + (2 * np.sin(phi/2) ** 2) * np.dot(W, W)
+    W = np.array([[0, -u[2], u[1]], [u[2], 0, -u[0]], [-u[1], u[0], 0]])
+    R = np.eye(3) + np.sin(phi) * W + (2 * np.sin(phi / 2) ** 2) * np.dot(W, W)
 
     return R
 
@@ -86,10 +87,7 @@ def rotate_points_around_vector(
 
 @njit
 def rotate_points_to_plane(
-    pts: PointType,
-    anchor: PointType,
-    u: VectorType,
-    d: float = 0.0
+    pts: PointType, anchor: PointType, u: VectorType, d: float = 0.0
 ) -> tuple[PointType, NDArray[FLOAT], float]:
     """Rotate and translate points to a plane defined by a normal vec. and dist. from origin d.
 

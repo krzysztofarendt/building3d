@@ -44,8 +44,12 @@ class DumpReader:
         The buffers are initialized with zeros. The newest value is at `[...,0]`.
         The oldest value is at `[..., -1]`.
         """
-        pos_fpath = WildcardPath(DumpReader.position_file_template).fill(self.state_dir, step=step)
-        enr_fpath = WildcardPath(DumpReader.energy_file_template).fill(self.state_dir, step=step)
+        pos_fpath = WildcardPath(DumpReader.position_file_template).fill(
+            self.state_dir, step=step
+        )
+        enr_fpath = WildcardPath(DumpReader.energy_file_template).fill(
+            self.state_dir, step=step
+        )
 
         if not os.path.exists(pos_fpath) or not os.path.exists(enr_fpath):
             logger.warning(f"No state file for step {step}. Return None.")
@@ -59,7 +63,9 @@ class DumpReader:
             self.position = np.zeros((self.num_rays, 3, DumpReader.buffer_size))
             self.energy = np.ones((self.num_rays, DumpReader.buffer_size))
 
-        self.position = np.roll(self.position, shift=1, axis=2)  # TODO: seems to be slow
+        self.position = np.roll(
+            self.position, shift=1, axis=2
+        )  # TODO: seems to be slow
         self.energy = np.roll(self.energy, shift=1, axis=1)  # TODO: seems to be slow
         self.position[:, :, 0] = position
         self.energy[:, 0] = energy

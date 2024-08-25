@@ -5,11 +5,8 @@ from building3d.geom.vector import length
 from building3d.config import GEOM_ATOL
 
 
-
 def create_point_between_2_points_at_distance(
-    p1: Point,
-    p2: Point,
-    distance: float
+    p1: Point, p2: Point, distance: float
 ) -> Point:
     """Create new point along the edge spanning from p1 to p2.
 
@@ -143,7 +140,9 @@ def distance_point_to_edge(ptest: Point, p1: Point, p2: Point) -> float:
         return length(closest_point.vector() - ptest.vector())
 
 
-def line_intersection(pt1: Point, d1: np.ndarray, pt2: Point, d2: np.ndarray) -> Point | None:
+def line_intersection(
+    pt1: Point, d1: np.ndarray, pt2: Point, d2: np.ndarray
+) -> Point | None:
     """Determine the intersection point of two lines in 3D space.
 
     Args:
@@ -193,7 +192,9 @@ def line_intersection(pt1: Point, d1: np.ndarray, pt2: Point, d2: np.ndarray) ->
         return None
 
 
-def line_segment_intersection(pa1: Point, pb1: Point, pa2: Point, pb2: Point) -> Point | None:
+def line_segment_intersection(
+    pa1: Point, pb1: Point, pa2: Point, pb2: Point
+) -> Point | None:
     """Determine the intersection point between two line segments: pa1->pb1 and pa2->pb2.
 
     Return None if:
@@ -209,7 +210,9 @@ def line_segment_intersection(pa1: Point, pb1: Point, pa2: Point, pb2: Point) ->
         return None
     else:
         # Check if the candidate point lies within both edges
-        if is_point_on_segment(candidate, pa1, pb1) and is_point_on_segment(candidate, pa2, pb2):
+        if is_point_on_segment(candidate, pa1, pb1) and is_point_on_segment(
+            candidate, pa2, pb2
+        ):
             return candidate
         else:
             return None

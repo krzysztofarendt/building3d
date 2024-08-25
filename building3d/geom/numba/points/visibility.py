@@ -30,7 +30,6 @@ def visibility_matrix(pts, *block_edges):
         for j in range(i + 1, num_pts):
             vis_matrix[i, j] = are_points_visible(pts[i], pts[j], *block_edges)
 
-
     # Reflect symmetrically across the diagonal
     for i in range(num_pts):
         for j in range(0, i):
@@ -46,10 +45,10 @@ def are_points_visible(pt0: PointType, pt1: PointType, *block_edges: PointType) 
     for bed in block_edges:
         for e0, e1 in bed:
             if (
-                points_equal(e0, pt0) or
-                points_equal(e0, pt1) or
-                points_equal(e1, pt0) or
-                points_equal(e1, pt1)
+                points_equal(e0, pt0)
+                or points_equal(e0, pt1)
+                or points_equal(e1, pt0)
+                or points_equal(e1, pt1)
             ):
                 continue
             else:

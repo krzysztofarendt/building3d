@@ -26,11 +26,13 @@ def test_new_point():
 def test_is_point_in_array():
     pt = new_point(0.0, 0.0, 0.0)
 
-    arr = np.vstack((
-        new_point(1.0, 1.0, 1.0),
-        new_point(-1.0, -1.0, -1.0),
-        new_point(0.0, 0.0, 0.0),
-    ))
+    arr = np.vstack(
+        (
+            new_point(1.0, 1.0, 1.0),
+            new_point(-1.0, -1.0, -1.0),
+            new_point(0.0, 0.0, 0.0),
+        )
+    )
 
     assert is_point_in_array(pt, arr) is True
     assert is_point_in_array(pt, arr[:2]) is False
@@ -101,14 +103,17 @@ def test_many_new_points_between_2_points():
     pt2 = new_point(1, 0, 0)
     num = 4
     pts = many_new_points_between_2_points(pt1, pt2, num)
-    expected = np.array([
-        [0.0, 0, 0],
-        [0.2, 0, 0],
-        [0.4, 0, 0],
-        [0.6, 0, 0],
-        [0.8, 0, 0],
-        [1.0, 0, 0],
-    ], dtype=FLOAT)
+    expected = np.array(
+        [
+            [0.0, 0, 0],
+            [0.2, 0, 0],
+            [0.4, 0, 0],
+            [0.6, 0, 0],
+            [0.8, 0, 0],
+            [1.0, 0, 0],
+        ],
+        dtype=FLOAT,
+    )
     assert np.allclose(pts, expected)
 
 

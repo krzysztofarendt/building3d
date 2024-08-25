@@ -21,4 +21,4 @@ if __name__ == "__main__":
 
     wall = Wall(polys)
 
-    plot_objects((wall, ))
+    plot_objects((wall,))

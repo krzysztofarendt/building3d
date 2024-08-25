@@ -1,4 +1,5 @@
 """dotbim (.bim) file I/O."""
+
 from collections import defaultdict
 import json
 
@@ -18,8 +19,7 @@ TOOL_NAME = "Building3D"
 
 
 def write_dotbim(path: str, bdg: Building) -> None:
-    """Save model to .bim.
-    """
+    """Save model to .bim."""
     mesh_id = 0
     meshes = []
     elements = []
@@ -76,19 +76,16 @@ def write_dotbim(path: str, bdg: Building) -> None:
     file_info = {
         "building_name": bdg.name,
         "building_uid": bdg.uid,
-        "generated_by": TOOL_NAME
+        "generated_by": TOOL_NAME,
     }
 
     # Instantiate and save File object
-    file = dotbimpy.File(
-        "1.0.0", meshes=meshes, elements=elements, info=file_info
-    )
+    file = dotbimpy.File("1.0.0", meshes=meshes, elements=elements, info=file_info)
     file.save(path)
 
 
 def read_dotbim(path: str) -> Building:
-    """Load model from .bim.
-    """
+    """Load model from .bim."""
     bim = {}
     with open(path, "r") as f:
         bim = json.load(f)
@@ -163,12 +160,14 @@ def read_dotbim(path: str) -> Building:
                 polys = []
                 for pkey in model[bname][zkey][skey][wkey].keys():
                     puid, pname = pkey
-                    polys.append(Polygon(
-                        pts=model[bname][zkey][skey][wkey][pkey]["vertices"],
-                        name=pname,
-                        tri=model[bname][zkey][skey][wkey][pkey]["faces"],
-                        uid=puid,
-                    ))
+                    polys.append(
+                        Polygon(
+                            pts=model[bname][zkey][skey][wkey][pkey]["vertices"],
+                            name=pname,
+                            tri=model[bname][zkey][skey][wkey][pkey]["faces"],
+                            uid=puid,
+                        )
+                    )
                 walls.append(Wall(polygons=polys, name=wname, uid=wuid))
             solids.append(Solid(walls=walls, name=sname, uid=suid))
         zone = Zone(name=zname, uid=zuid)

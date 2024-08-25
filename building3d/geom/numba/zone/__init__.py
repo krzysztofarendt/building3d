@@ -23,12 +23,13 @@ class Zone:
 
     Zone is used to model 3D phenomena (e.g. ray tracing, heat transfer, CFD).
     """
+
     def __init__(
         self,
         solids: Sequence[Solid] = (),
         name: str | None = None,
         uid: str | None = None,
-        parent = None,
+        parent=None,
     ):
         """Initialize the zone.
 
@@ -50,7 +51,6 @@ class Zone:
 
         for sld in solids:
             self.add_solid(sld)
-
 
         logger.info(f"Zone created: {self}")
 

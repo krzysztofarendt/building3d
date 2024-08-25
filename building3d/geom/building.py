@@ -1,4 +1,5 @@
 """Building class"""
+
 from __future__ import annotations
 import logging
 
@@ -26,6 +27,7 @@ class Building:
 
     Zones do not have to be adjacent. They can even be separate buildings.
     """
+
     def __init__(self, name: str | None = None, uid: str | None = None):
         """Initialize the building.
 
@@ -96,14 +98,23 @@ class Building:
                     for wall in solid.get_walls():
                         for poly in wall.get_polygons():
                             found = False
-                            poly_path = PATH_SEP.join([zone.name, solid.name, wall.name, poly.name])
+                            poly_path = PATH_SEP.join(
+                                [zone.name, solid.name, wall.name, poly.name]
+                            )
                             graph[poly_path] = None
                             # Find adjacent polygon (look only at the adjacent solids)
                             solid_path = PATH_SEP.join([zone.name, solid.name])
                             for a_solid_path in adjacent_solids[solid_path]:
-                                z, s = a_solid_path.split(PATH_SEP)  # Adjacent zone and solid names
+                                z, s = a_solid_path.split(
+                                    PATH_SEP
+                                )  # Adjacent zone and solid names
                                 for w in self.zones[z].solids[s].get_wall_names():
-                                    for p in self.zones[z].solids[s].walls[w].get_polygon_names():
+                                    for p in (
+                                        self.zones[z]
+                                        .solids[s]
+                                        .walls[w]
+                                        .get_polygon_names()
+                                    ):
                                         adj_poly_path = PATH_SEP.join([z, s, w, p])
                                         adj_poly = self.get_object(adj_poly_path)
                                         if poly.is_facing_polygon(adj_poly):

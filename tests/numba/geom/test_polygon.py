@@ -94,4 +94,3 @@ def test_polygon_is_touching_other():
     poly4 = Polygon(pts4)
     assert poly0.is_touching_polygon(poly4) is True
     assert poly4.is_touching_polygon(poly0) is True
-

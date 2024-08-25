@@ -15,4 +15,4 @@ if __name__ == "__main__":
     )
     building = Building([zone], "building")
 
-    plot_objects((building, ))
+    plot_objects((building,))

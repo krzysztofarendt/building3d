@@ -32,4 +32,3 @@ def purge_mesh(
         vertices.pop(p_to_delete)
 
     return vertices, elements
-

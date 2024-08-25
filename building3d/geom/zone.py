@@ -1,4 +1,5 @@
 """Zone class"""
+
 import logging
 
 import numpy as np
@@ -23,6 +24,7 @@ class Zone:
 
     Zone is used to model 3D phenomena (e.g. ray tracing, heat transfer, CFD).
     """
+
     def __init__(self, name: str | None = None, uid: str | None = None):
         """Initialize the zone.
 

@@ -21,6 +21,7 @@ class Building:
 
     Zones do not have to be adjacent. They can even be separate buildings.
     """
+
     def __init__(
         self,
         zones: Sequence[Zone] = (),
@@ -133,8 +134,7 @@ class Building:
             return adjacent
 
     def stitch_solids(self):
-        """Find adjacent solids and stitch them.
-        """
+        """Find adjacent solids and stitch them."""
         logger.info(f"Stitching solids in building {self}")
 
         adj_solids = self.find_adjacent_solids()

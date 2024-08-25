@@ -26,7 +26,7 @@ def polygon_area(pts: PointType, vn: VectorType) -> float:
         if i == num_pts - 1:
             pt2 = pts[0]
         else:
-            pt2 = pts[i+1]
+            pt2 = pts[i + 1]
 
         total += np.cross(pt1, pt2)
 

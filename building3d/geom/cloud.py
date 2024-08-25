@@ -69,8 +69,9 @@ def are_points_coplanar(*pts: Point, tol: float = GEOM_ATOL) -> bool:
         if (np.abs(vec_n) > tol).any():
             break
         else:
-            assert is_point_colinear(pts[0], pts[1], pts[2]), \
-                "This case must mean they are colinear. If not, debugging needed."
+            assert is_point_colinear(
+                pts[0], pts[1], pts[2]
+            ), "This case must mean they are colinear. If not, debugging needed."
             pts = tuple(roll_back(list(pts)))
         num_tries += 1
         if num_tries > max_tries:

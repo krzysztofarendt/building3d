@@ -34,7 +34,9 @@ def simulation_job(
     logfile: None | str,
 ) -> None:
 
-    init_logger(logfile)  # TODO: Each process has a separate log file. Should it stay like this?
+    init_logger(
+        logfile
+    )  # TODO: Each process has a separate log file. Should it stay like this?
 
     raysim = RaySimulator(
         building=building,
@@ -59,6 +61,7 @@ class RaySimulator(BaseSimulator):
     - absorption
     - when to finish
     """
+
     def __init__(
         self,
         building: Building,
@@ -97,7 +100,9 @@ class RaySimulator(BaseSimulator):
                 parent_dir.mkdir(parents=True)
             self.csv_file = csv_file
         else:
-            logger.warning("No output CSV file specified. Receiver results will not be saved!")
+            logger.warning(
+                "No output CSV file specified. Receiver results will not be saved!"
+            )
             self.csv_file = None
 
         self.state_dump_dir = state_dump_dir
@@ -112,9 +117,9 @@ class RaySimulator(BaseSimulator):
         """Set initial, random direction to all rays."""
         for i in range(len(self.rays)):
             self.rays[i].set_direction(
-                dx = random_between(-1, 1),  # TODO: direction within xlim possible
-                dy = random_between(-1, 1),  # TODO: direction within ylim possible
-                dz = random_between(-1, 1),  # TODO: direction within zlim possible
+                dx=random_between(-1, 1),  # TODO: direction within xlim possible
+                dy=random_between(-1, 1),  # TODO: direction within ylim possible
+                dz=random_between(-1, 1),  # TODO: direction within zlim possible
             )
 
     def forward(self) -> None:
@@ -139,7 +144,9 @@ class RaySimulator(BaseSimulator):
                 self.rays[i].forward()
 
                 for sink in self.sinks:
-                    hit = self.check_hit(self.rays[i], sink, self.sink_radius, self.step)
+                    hit = self.check_hit(
+                        self.rays[i], sink, self.sink_radius, self.step
+                    )
                     if hit:
                         self.rays[i].energy = 0
                         break

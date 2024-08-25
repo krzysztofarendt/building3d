@@ -7,14 +7,17 @@ from building3d.geom.numba.polygon.edges import polygon_edges
 
 def test_visibility_matrix():
     # L-shape
-    pts = np.array([
-        [0, 0, 0],
-        [0.5, 0, 0],
-        [0.5, 0.9, 0],
-        [1, 0.9, 0],
-        [1, 1, 0],
-        [0, 1, 0],
-    ], dtype=FLOAT)
+    pts = np.array(
+        [
+            [0, 0, 0],
+            [0.5, 0, 0],
+            [0.5, 0.9, 0],
+            [1, 0.9, 0],
+            [1, 1, 0],
+            [0, 1, 0],
+        ],
+        dtype=FLOAT,
+    )
 
     edges = polygon_edges(pts)
 
@@ -30,4 +33,3 @@ def test_visibility_matrix():
 
 if __name__ == "__main__":
     test_visibility_matrix()
-

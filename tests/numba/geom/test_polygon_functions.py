@@ -26,10 +26,12 @@ def test_polygon_centroid_square():
     pt2 = new_point(1, 1, 0)
     pt3 = new_point(0, 1, 0)
     pts = np.vstack((pt0, pt1, pt2, pt3))
-    tri = np.array([
+    tri = np.array(
+        [
             [0, 1, 2],
             [2, 3, 0],
-    ])
+        ]
+    )
     ctr = polygon_centroid(pts, tri)
     assert np.allclose(ctr, [0.5, 0.5, 0.0])
 
@@ -92,10 +94,12 @@ def test_is_point_inside():
     pt2 = new_point(1, 1, 0)
     pt3 = new_point(0, 1, 0)
     pts = np.vstack((pt0, pt1, pt2, pt3))
-    tri = np.array([
+    tri = np.array(
+        [
             [0, 1, 2],
             [2, 3, 0],
-    ])
+        ]
+    )
     ptest = new_point(0.5, 0.5, 0)
     assert is_point_inside(ptest, pts, tri) is True
     ptest = new_point(0.1, 0.9, 0)
@@ -122,10 +126,12 @@ def test_is_point_inside_margin():
     pt2 = new_point(1.0, 1.0, 0.0)
     pt3 = new_point(0.0, 1.0, 0.0)
     pts = np.vstack((pt0, pt1, pt2, pt3))
-    tri = np.array([
+    tri = np.array(
+        [
             [0, 1, 2],
             [2, 3, 0],
-    ])
+        ]
+    )
 
     ptest = new_point(0.1, 0.1, 0.0)
 
@@ -139,10 +145,13 @@ def test_is_point_inside_ortho_projection():  # TODO: Doesn't pass in njit mode
     pt2 = new_point(1.0, 1.0, 1.0)
     pt3 = new_point(1.0, 0.0, 1.0)
     pts = np.vstack((pt0, pt1, pt2, pt3))
-    tri = np.array([
+    tri = np.array(
+        [
             [0, 1, 2],
             [2, 3, 0],
-    ], dtype=INT)
+        ],
+        dtype=INT,
+    )
 
     ptest = new_point(1.0, 0.5, 0.5)
     assert is_point_inside_ortho_projection(ptest, pts, tri) is True
@@ -166,10 +175,13 @@ def test_is_point_inside_projection_fwd_only():
     pt2 = new_point(1.0, 1.0, 1.0)
     pt3 = new_point(1.0, 0.0, 1.0)
     pts = np.vstack((pt0, pt1, pt2, pt3))
-    tri = np.array([
+    tri = np.array(
+        [
             [0, 1, 2],
             [2, 3, 0],
-    ], dtype=INT)
+        ],
+        dtype=INT,
+    )
 
     ptest = new_point(2.0, 0.5, 0.5)
     vec = np.array([1.0, 0.0, 0.0])
@@ -222,8 +234,12 @@ def test_are_polygons_facing():
 
     assert are_polygons_facing(pts1, vn1, pts2, vn2) is True
     assert are_polygons_facing(pts2, vn2, pts1, vn1) is True
-    assert are_polygons_crossing(pts1, tri1, pts2, tri2) is False  # because they are facing
-    assert are_polygons_touching(pts1, tri1, pts2, tri2) is False  # because they are facing
+    assert (
+        are_polygons_crossing(pts1, tri1, pts2, tri2) is False
+    )  # because they are facing
+    assert (
+        are_polygons_touching(pts1, tri1, pts2, tri2) is False
+    )  # because they are facing
 
 
 def test_are_polygons_facing_different_sizes():
@@ -270,7 +286,15 @@ def test_are_polygons_facing_orthogonal_overlapping():
 
     assert are_polygons_touching(pts1, tri1, pts2, tri2) is False
     assert are_polygons_facing(pts1, vn1, pts2, vn2) is False
-    assert are_polygons_crossing(pts1, tri1, pts2, tri2,) is True
+    assert (
+        are_polygons_crossing(
+            pts1,
+            tri1,
+            pts2,
+            tri2,
+        )
+        is True
+    )
 
 
 def test_are_polygons_not_facing():
@@ -306,7 +330,9 @@ def test_distance_point_to_polygon():
     ptest5 = new_point(2.0, 1.0, 1.0)  # distance = np.sqrt(2)
     ptest6 = new_point(-1.0, -1.0, 0.0)  # distance = np.sqrt(2)
     ptest7 = new_point(0.9, 0.1, 3.0)  # distance = 3
-    ptest8 = new_point(0.5, 2.0, 0.0)  # distance = 1 TODO: must calc. dist. to edge, not to vertex
+    ptest8 = new_point(
+        0.5, 2.0, 0.0
+    )  # distance = 1 TODO: must calc. dist. to edge, not to vertex
 
     pts = np.vstack((p0, p1, p2, p3))
     vn = normal(pts[-1], pts[0], pts[1])
@@ -346,4 +372,3 @@ def test_distance_point_to_polygon():
 
 if __name__ == "__main__":
     test_are_polygons_facing_different_sizes()
-

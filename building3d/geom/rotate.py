@@ -1,4 +1,5 @@
 """Rotation functions."""
+
 import logging
 
 import numpy as np
@@ -43,12 +44,12 @@ def rotation_matrix(u: np.ndarray, phi: float) -> np.ndarray:
     # Method 2 (more stable numerically):
     # https://en.wikipedia.org/wiki/Rodrigues%27_rotation_formula
     # https://math.stackexchange.com/questions/142821/matrix-for-rotation-around-a-vector
-    assert np.isclose(length(u), 1.0), "rotation_matrix() requires u to be a unit vector"
+    assert np.isclose(
+        length(u), 1.0
+    ), "rotation_matrix() requires u to be a unit vector"
 
-    W = np.array([[0, -u[2], u[1]],
-                  [u[2], 0, -u[0]],
-                  [-u[1], u[0], 0]])
-    R = np.eye(3) + np.sin(phi) * W + (2 * np.sin(phi/2) ** 2) * np.dot(W, W)
+    W = np.array([[0, -u[2], u[1]], [u[2], 0, -u[0]], [-u[1], u[0], 0]])
+    R = np.eye(3) + np.sin(phi) * W + (2 * np.sin(phi / 2) ** 2) * np.dot(W, W)
 
     logger.debug(f"Rotation matrix:\n{R=}")
 

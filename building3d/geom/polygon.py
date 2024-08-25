@@ -1,4 +1,5 @@
 """Polygon class"""
+
 import logging
 
 import numpy as np
@@ -35,6 +36,7 @@ class Polygon:
     - If triangulation was done before (e.g. when reading from a file), `triangles` can
       be passed as an argument
     """
+
     def __init__(
         self,
         points: list[Point] = [],
@@ -186,10 +188,13 @@ class Polygon:
         num_at_edge = sum([1 for loc, _ in sl_pt_loc.values() if loc == "at_edge"])
         num_interior = sum([1 for loc, _ in sl_pt_loc.values() if loc == "interior"])
         sl_edges = set([index for loc, index in sl_pt_loc.values() if loc == "at_edge"])
-        sl_vertices = set([index for loc, index in sl_pt_loc.values() if loc == "at_vertex"])
+        sl_vertices = set(
+            [index for loc, index in sl_pt_loc.values() if loc == "at_vertex"]
+        )
 
-        assert num_at_vertex + num_at_edge + num_interior == len(points), \
-            "Slicing point location counting must have a bug"
+        assert num_at_vertex + num_at_edge + num_interior == len(
+            points
+        ), "Slicing point location counting must have a bug"
 
         # Make sure there is enough slicing points (at least 2)
         if len(points) < 2:
@@ -396,12 +401,12 @@ class Polygon:
             poly_1 = Polygon(points_1, name=name1)
 
             # Polygon 2 must go the other way around ####
-            points_2 = []                               #
-            current = pi_start                          #
-            last = pi_end                               #
-            while current != last:                      #
-                points_2.append(self.points[current])   #
-                current -= 1 # <------------------------#
+            points_2 = []  #
+            current = pi_start  #
+            last = pi_end  #
+            while current != last:  #
+                points_2.append(self.points[current])  #
+                current -= 1  # <------------------------#
                 if current < 0:
                     current = len(self.points) - 1
 
@@ -418,9 +423,7 @@ class Polygon:
             pt1_in_poly1 = poly_1.is_point_inside(pt1)
             pt1_in_poly2 = poly_2.is_point_inside(pt1)
             if pt1_in_poly1 and pt1_in_poly2:
-                raise GeometryError(
-                    f"{pt1=} is inside both of the sliced polygons"
-                )
+                raise GeometryError(f"{pt1=} is inside both of the sliced polygons")
             elif pt1_in_poly1:
                 pass  # OK, no need to swap poly1 with poly2
             elif pt1_in_poly2:
@@ -429,16 +432,12 @@ class Polygon:
                 poly_1 = Polygon(points_2, name=name1)
                 poly_2 = Polygon(points_1, name=name2)
             else:
-                raise GeometryError(
-                    f"{pt1=} is not inside any of the sliced polygons"
-                )
+                raise GeometryError(f"{pt1=} is not inside any of the sliced polygons")
         elif pt2 is not None:
             pt2_in_poly1 = poly_1.is_point_inside(pt2)
             pt2_in_poly2 = poly_2.is_point_inside(pt2)
             if pt2_in_poly1 and pt2_in_poly2:
-                raise GeometryError(
-                    f"{pt2=} is inside both of the sliced polygons"
-                )
+                raise GeometryError(f"{pt2=} is inside both of the sliced polygons")
             elif pt2_in_poly2:
                 pass  # OK, no need to swap poly1 with poly2
             elif pt2_in_poly1:
@@ -447,9 +446,7 @@ class Polygon:
                 poly_1 = Polygon(points_2, name=name1)
                 poly_2 = Polygon(points_1, name=name2)
             else:
-                raise GeometryError(
-                    f"{pt2=} is not inside any of the sliced polygons"
-                )
+                raise GeometryError(f"{pt2=} is not inside any of the sliced polygons")
         else:
             pass
 
@@ -500,7 +497,9 @@ class Polygon:
 
         return sl_pt_loc
 
-    def _remove_trailing_boundary_touching_points(self, slicing_pts: list[Point]) -> list[Point]:
+    def _remove_trailing_boundary_touching_points(
+        self, slicing_pts: list[Point]
+    ) -> list[Point]:
         """Remove all heading and trailing slicing points touching a vertex or an edge.
 
         The returned list of points starts with a single vertex touching polygon's
@@ -603,9 +602,9 @@ class Polygon:
                 and next_loc_ix is not None
             ):
                 d = distance_point_to_edge(
-                    ptest = this_pt,
-                    p1 = self.edges[next_loc_ix][0],
-                    p2 = self.edges[next_loc_ix][1],
+                    ptest=this_pt,
+                    p1=self.edges[next_loc_ix][0],
+                    p2=self.edges[next_loc_ix][1],
                 )
                 if np.isclose(d, 0):
                     continue
@@ -617,16 +616,18 @@ class Polygon:
                 and next_pt is not None
             ):
                 d = distance_point_to_edge(
-                    ptest = next_pt,
-                    p1 = self.edges[this_loc_ix][0],
-                    p2 = self.edges[this_loc_ix][1],
+                    ptest=next_pt,
+                    p1=self.edges[this_loc_ix][0],
+                    p2=self.edges[this_loc_ix][1],
                 )
                 if np.isclose(d, 0):
                     continue
                 else:
                     new_points.append(this_pt)
             else:
-                raise RuntimeError("This should never happen. Some case is not considered (bug!).")
+                raise RuntimeError(
+                    "This should never happen. Some case is not considered (bug!)."
+                )
 
         return new_points
 
@@ -769,10 +770,7 @@ class Polygon:
         return is_inside
 
     def is_point_inside_projection(
-        self,
-        p: Point,
-        vec: np.ndarray,
-        fwd_only: bool = True
+        self, p: Point, vec: np.ndarray, fwd_only: bool = True
     ) -> bool:
         """Checks whether a projected point hits the surface.
 
@@ -799,19 +797,27 @@ class Polygon:
             # Vector vec is colinear with the plane
             # The point lays inside this projection only if it is inside this polygon
             # logger.warning(f"Projection vector {vec} is colinear with the polygon {self.name}")
-            logger.debug(f"{vec} is colinear with the polygon's plane. Will check if its inside.")
+            logger.debug(
+                f"{vec} is colinear with the polygon's plane. Will check if its inside."
+            )
             return self.is_point_inside(p)
         else:
             # Projection crosses the surface of the plane
-            s = (-d - a * p.x - b * p.y - c * p.z) / (a * vec[0] + b * vec[1] + c * vec[2])
+            s = (-d - a * p.x - b * p.y - c * p.z) / (
+                a * vec[0] + b * vec[1] + c * vec[2]
+            )
 
             if fwd_only and s < 0:
                 # The plane is in the other direction than the one pointed by vec
-                logger.debug("The plane is in the other direction than the one pointed by vec")
+                logger.debug(
+                    "The plane is in the other direction than the one pointed by vec"
+                )
                 return False
 
             p = p + s * vec
-            logger.debug(f"Check if projected point is inside the polygon: {p} ({p.x}, {p.y}, {p.z})")
+            logger.debug(
+                f"Check if projected point is inside the polygon: {p} ({p.x}, {p.y}, {p.z})"
+            )
             is_inside = self.is_point_inside(p)
             return is_inside
 
@@ -846,7 +852,9 @@ class Polygon:
             # Condition 1: points must be  coplanar
             points_coplanar = are_points_coplanar(*all_points)
             # Condition 2: normal vectors must be opposite
-            normals_opposite = np.isclose(self.normal, poly.normal * -1, rtol=GEOM_RTOL).all()
+            normals_opposite = np.isclose(
+                self.normal, poly.normal * -1, rtol=GEOM_RTOL
+            ).all()
             # Condition 3: polygons must be overlapping
             this_in_other = np.array([self.is_point_inside(p) for p in other_points])
             other_in_this = np.array([poly.is_point_inside(p) for p in this_points])
@@ -904,7 +912,7 @@ class Polygon:
         """
         poly = [(p.x, p.y, p.z) for p in self.points]
 
-        if len(poly) < 3: # not a plane - no area
+        if len(poly) < 3:  # not a plane - no area
             return 0
 
         total = [0, 0, 0]
@@ -914,7 +922,7 @@ class Polygon:
             if i == N - 1:
                 vi2 = poly[0]
             else:
-                vi2 = poly[i+1]
+                vi2 = poly[i + 1]
             prod = np.cross(vi1, vi2)
             total[0] += prod[0]
             total[1] += prod[1]
@@ -974,7 +982,9 @@ class Polygon:
 
         weighted_centroids = tri_ctr_arr * weights_arr
 
-        vec = weighted_centroids.sum(axis=0) / weights_arr.sum()  # TODO: wieghts_arr.sum()?
+        vec = (
+            weighted_centroids.sum(axis=0) / weights_arr.sum()
+        )  # TODO: wieghts_arr.sum()?
         ctr = Point(vec[0], vec[1], vec[2])
 
         return ctr

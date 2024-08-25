@@ -99,16 +99,16 @@ def is_point_inside(
         pts = np.vstack((pair[0], pair[1], ptest))
         if are_points_collinear(pts):
             # ptest is collinear, but is it on the edge or outside the triangle?
-            xt, yt, zt = np.round(ptest, POINT_NUM_DEC)     # TODO: is np.round needed?
-            x0, y0, z0 = np.round(pair[0], POINT_NUM_DEC)   # TODO: is np.round needed?
-            x1, y1, z1 = np.round(pair[1], POINT_NUM_DEC)   # TODO: is np.round needed?
+            xt, yt, zt = np.round(ptest, POINT_NUM_DEC)  # TODO: is np.round needed?
+            x0, y0, z0 = np.round(pair[0], POINT_NUM_DEC)  # TODO: is np.round needed?
+            x1, y1, z1 = np.round(pair[1], POINT_NUM_DEC)  # TODO: is np.round needed?
             if (
-                xt > max(x0, x1) or
-                yt > max(y0, y1) or
-                zt > max(z0, z1) or
-                xt < min(x0, x1) or
-                yt < min(y0, y1) or
-                zt < min(z0, z1)
+                xt > max(x0, x1)
+                or yt > max(y0, y1)
+                or zt > max(z0, z1)
+                or xt < min(x0, x1)
+                or yt < min(y0, y1)
+                or zt < min(z0, z1)
             ):
                 return False
             else:
@@ -150,10 +150,14 @@ def is_corner_convex(
     Returns:
         True if the corner is convex, else False
     """
-    assert np.abs(np.linalg.norm(vn) - 1.0) < atol, "Normal vector doesn't have a unit length"
+    assert (
+        np.abs(np.linalg.norm(vn) - 1.0) < atol
+    ), "Normal vector doesn't have a unit length"
     v1 = pt2 - pt1
     v2 = pt3 - pt2
-    v1v2_n = np.cross(v1, v2)  # NOTE: different order in building3d.geom.triangle.is_corner_convex
+    v1v2_n = np.cross(
+        v1, v2
+    )  # NOTE: different order in building3d.geom.triangle.is_corner_convex
     v1v2_n_len = np.linalg.norm(v1v2_n)
 
     if v1v2_n_len < atol:

@@ -206,7 +206,9 @@ def test_distance_point_to_polygon():
     ptest5 = Point(2.0, 1.0, 1.0)  # distance = np.sqrt(2)
     ptest6 = Point(-1.0, -1.0, 0.0)  # distance = np.sqrt(2)
     ptest7 = Point(0.9, 0.1, 3.0)  # distance = 3
-    ptest8 = Point(0.5, 2.0, 0.0)  # distance = 1 (TODO: must calc. dist. to edge, not to vertex)
+    ptest8 = Point(
+        0.5, 2.0, 0.0
+    )  # distance = 1 (TODO: must calc. dist. to edge, not to vertex)
 
     poly = Polygon([p0, p1, p2, p3])
 
@@ -757,7 +759,6 @@ def test_is_point_inside_margin():
     ptest = Point(0.1, 0.1, 0.0)
     assert poly.is_point_inside_margin(ptest, 0.099)
     assert not poly.is_point_inside_margin(ptest, 0.11)
-
 
 
 if __name__ == "__main__":

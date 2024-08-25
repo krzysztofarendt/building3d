@@ -44,14 +44,14 @@ def partition_plan(
     # Rotate
     if not np.isclose(rot_angle, 0):
         floor_pts, _ = rotate_points_around_vector(
-            points = floor_pts,
-            u = rot_vec,
-            phi = rot_angle,
+            points=floor_pts,
+            u=rot_vec,
+            phi=rot_angle,
         )
         ceiling_pts, _ = rotate_points_around_vector(
-            points = ceiling_pts,
-            u = rot_vec,
-            phi = rot_angle,
+            points=ceiling_pts,
+            u=rot_vec,
+            phi=rot_angle,
         )
 
     # Translate

@@ -18,12 +18,13 @@ class Wall:
 
     Wall is used to model 1D phenomena (e.g. heat transfer).
     """
+
     def __init__(
         self,
         polygons: Sequence[Polygon] = (),
         name: str | None = None,
         uid: str | None = None,
-        parent = None,
+        parent=None,
     ):
         """Initialize the wall.
 

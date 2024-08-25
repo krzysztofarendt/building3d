@@ -1,4 +1,5 @@
 """Wall class"""
+
 import numpy as np
 
 from building3d import random_id
@@ -16,6 +17,7 @@ class Wall:
 
     Wall is used to model 1D phenomena (e.g. heat transfer).
     """
+
     def __init__(
         self,
         polygons: list[Polygon] = [],
@@ -75,11 +77,15 @@ class Wall:
             # Assert polygon is inside parent polygon
             for p in poly.points:
                 if not self.polygons[parent].is_point_inside(p):
-                    raise GeometryError(f"Polygon {poly.name} is not entirely inside {parent}")
+                    raise GeometryError(
+                        f"Polygon {poly.name} is not entirely inside {parent}"
+                    )
 
         # Sanity check
         if parent is not None:
-            assert poly.name not in self.polygraph.keys(), "Subpolygon cannot be a parent polygon"
+            assert (
+                poly.name not in self.polygraph.keys()
+            ), "Subpolygon cannot be a parent polygon"
 
     def get_polygon_names(self, children=False) -> list[str]:
         """Return list of parent polygon names."""
@@ -90,7 +96,9 @@ class Wall:
 
     def get_polygons(self, children=False) -> list[Polygon]:
         """Return list of all polygons (parents and optionally subpolygons)."""
-        return [self.polygons[name] for name in self.get_polygon_names(children=children)]
+        return [
+            self.polygons[name] for name in self.get_polygon_names(children=children)
+        ]
 
     def get_subpolygons(self, parent: str) -> list[Polygon]:
         """Return list of subpolygons of the given parent polygon."""
@@ -172,4 +180,3 @@ class Wall:
 
     def __repr__(self):
         return self.__str__()
-

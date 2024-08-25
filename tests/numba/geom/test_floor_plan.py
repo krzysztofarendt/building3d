@@ -62,5 +62,5 @@ def test_floor_plan_rotated():
     for w in s.children.values():
         for poly in w.children.values():
             if "wall" in poly.name:
-                assert np.isclose(abs(poly.vn[0]) , abs(poly.vn[1]))
-                assert np.isclose(poly.vn[2] , 0)
+                assert np.isclose(abs(poly.vn[0]), abs(poly.vn[1]))
+                assert np.isclose(poly.vn[2], 0)

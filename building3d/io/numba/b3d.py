@@ -27,6 +27,7 @@ Format:
     },
 }
 """
+
 from pathlib import Path
 import json
 
@@ -63,8 +64,12 @@ def write_b3d(path: str, bdg: Building, parents: bool = True) -> None:
         for s in z.get_solids():
             for w in s.get_walls():
                 for p in w.get_polygons():
-                    bdict["zones"][z.name][s.name][w.name][p.name]["pts"] = p.pts.tolist()
-                    bdict["zones"][z.name][s.name][w.name][p.name]["tri"] = p.tri.tolist()
+                    bdict["zones"][z.name][s.name][w.name][p.name][
+                        "pts"
+                    ] = p.pts.tolist()
+                    bdict["zones"][z.name][s.name][w.name][p.name][
+                        "tri"
+                    ] = p.tri.tolist()
                     bdict["zones"][z.name][s.name][w.name][p.name]["uid"] = p.uid
 
     # Save to JSON
@@ -73,8 +78,7 @@ def write_b3d(path: str, bdg: Building, parents: bool = True) -> None:
 
 
 def read_b3d(path: str) -> Building:
-    """Read the model and its mesh from B3D file.
-    """
+    """Read the model and its mesh from B3D file."""
     with open(path, "r") as f:
         bdict = json.load(f)
 
@@ -95,7 +99,8 @@ def read_b3d(path: str) -> Building:
                         pts=np.array(pts, dtype=FLOAT),
                         name=pname,
                         uid=uid,
-                        tri=np.array(tri, dtype=INT))
+                        tri=np.array(tri, dtype=INT),
+                    )
                     wall.add_polygon(poly)
                 walls.append(wall)
             solid = Solid(walls=walls, name=sname)

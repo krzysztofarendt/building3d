@@ -11,7 +11,7 @@ from building3d.display.numba.colors import random_rgb_color
 logger = logging.getLogger(__name__)
 
 
-def plot_objects(objects: tuple, output_file = None) -> None:
+def plot_objects(objects: tuple, output_file=None) -> None:
     """Plot multiple objects (like Building, Zone, Solid, Wall, RayCluster).
 
     The faces array is organized as:
@@ -57,7 +57,9 @@ def plot_objects(objects: tuple, output_file = None) -> None:
         has_get_mesh = callable(getattr(obj, "get_mesh", None))
         has_get_lines = callable(getattr(obj, "get_lines", None))
         has_get_points = callable(getattr(obj, "get_points", None))
-        assert has_get_mesh or has_get_lines or has_get_points, f"{obj} has nothing to plot"
+        assert (
+            has_get_mesh or has_get_lines or has_get_points
+        ), f"{obj} has nothing to plot"
 
         if has_get_mesh:
             verts, faces = obj.get_mesh()

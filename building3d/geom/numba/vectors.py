@@ -26,8 +26,7 @@ def normal(pt0: PointType, pt1: PointType, pt2: PointType) -> VectorType:
 
 @njit
 def angle(v1: VectorType, v2: VectorType) -> FLOAT:
-    """Calculates angle in radians between two vectors.
-    """
+    """Calculates angle in radians between two vectors."""
     dot_v1_v2 = np.dot(v1 / np.linalg.norm(v1), v2 / np.linalg.norm(v2))
 
     # Clip to [-1, 1]
@@ -39,6 +38,6 @@ def angle(v1: VectorType, v2: VectorType) -> FLOAT:
 
     rad = np.arccos(dot_v1_v2)
     if rad < 0:
-        rad = 2. * np.pi  + rad
+        rad = 2.0 * np.pi + rad
 
     return rad

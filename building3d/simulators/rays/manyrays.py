@@ -14,8 +14,8 @@ logger = logging.getLogger(__name__)
 
 
 class ManyRays:
-    """Collection of `Ray` instances located in a `Building`.
-    """
+    """Collection of `Ray` instances located in a `Building`."""
+
     def __init__(
         self,
         num_rays: int,
@@ -42,7 +42,9 @@ class ManyRays:
         if not os.path.exists(dump_dir):
             os.makedirs(dump_dir)
 
-        position = np.array([self.rays[i].position.vector() for i in range(len(self.rays))])
+        position = np.array(
+            [self.rays[i].position.vector() for i in range(len(self.rays))]
+        )
         energy = np.array(self.get_energy())
 
         position_file = WildcardPath(POSITION_FILE).fill(parent=dump_dir, step=step)

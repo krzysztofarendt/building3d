@@ -50,8 +50,9 @@ def move_and_reflect(ray, max_room_dim):
         assert prev_position != ray.position, f"Ray not moving? ({step=})"
 
         if not np.isclose(ray.velocity, prev_velocity).all():
-            assert ray.num_steps_after_contact == 1, \
-                f"Something's wrong with the reflection logic: {ray.num_steps_after_contact=}"
+            assert (
+                ray.num_steps_after_contact == 1
+            ), f"Something's wrong with the reflection logic: {ray.num_steps_after_contact=}"
             break
 
         prev_position = ray.position.copy()
@@ -59,7 +60,9 @@ def move_and_reflect(ray, max_room_dim):
 
         step += 1
         if step > max_num_steps:
-            raise RuntimeError(f"Ray is moving for too long ({step} steps) without a reflection.")
+            raise RuntimeError(
+                f"Ray is moving for too long ({step} steps) without a reflection."
+            )
 
 
 def test_ray_single_solid_building(single_solid_building):

@@ -60,7 +60,7 @@ def test_single_solid():
 
     verts, faces = solid.get_mesh()
     assert verts.shape == (6 * 4, 3)  # NOTE: points not unique
-    assert faces.shape == (12, 3)     # NOTE: points not unique
+    assert faces.shape == (12, 3)  # NOTE: points not unique
 
 
 def test_adjacent_solids():

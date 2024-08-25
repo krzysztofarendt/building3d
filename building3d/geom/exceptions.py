@@ -1,5 +1,6 @@
 """Custom exceptions"""
 
+
 class GeometryError(Exception):
     """Error due to incorrectly defined geometry."""
 

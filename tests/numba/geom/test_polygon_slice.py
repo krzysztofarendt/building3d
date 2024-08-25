@@ -6,48 +6,65 @@ from building3d.geom.numba.triangles import triangulate
 from building3d.geom.numba.polygon import Polygon
 from building3d.geom.numba.polygon.edges import polygon_edges
 from building3d.geom.numba.polygon.slice import slice_polygon
-from building3d.geom.numba.polygon.slice.locate_slicing_points import locate_slicing_points
-from building3d.geom.numba.polygon.slice.remove_redundant_points import remove_redundant_points
-from building3d.geom.numba.polygon.slice.constants import INTERIOR, VERTEX, EDGE, INVALID_INDEX
+from building3d.geom.numba.polygon.slice.locate_slicing_points import (
+    locate_slicing_points,
+)
+from building3d.geom.numba.polygon.slice.remove_redundant_points import (
+    remove_redundant_points,
+)
+from building3d.geom.numba.polygon.slice.constants import (
+    INTERIOR,
+    VERTEX,
+    EDGE,
+    INVALID_INDEX,
+)
 
 
 def test_slicing_point_location():
-    pts = np.vstack((
-        new_point(0, 0, 0),
-        new_point(1, 0, 0),
-        new_point(1, 1, 0),
-        new_point(0, 1, 0),
-    ))
+    pts = np.vstack(
+        (
+            new_point(0, 0, 0),
+            new_point(1, 0, 0),
+            new_point(1, 1, 0),
+            new_point(0, 1, 0),
+        )
+    )
     vn = normal(pts[-1], pts[0], pts[1])
     pts, tri = triangulate(pts, vn)
     edges = polygon_edges(pts)
 
     # Check different slices
-    slicing_pts = np.vstack((
-        new_point(0.5, 0, 0),
-        new_point(0.5, 1, 0),
-    ))
+    slicing_pts = np.vstack(
+        (
+            new_point(0.5, 0, 0),
+            new_point(0.5, 1, 0),
+        )
+    )
     loc = locate_slicing_points(slicing_pts, pts, tri, edges)
     assert loc[0] == (EDGE, 0)
     assert loc[1] == (EDGE, 2)
 
-    slicing_pts = np.vstack((
-        new_point(0, 0, 0),
-        new_point(0.5, 0, 0),
-        new_point(0.5, 1, 0),
-    ))
+    slicing_pts = np.vstack(
+        (
+            new_point(0, 0, 0),
+            new_point(0.5, 0, 0),
+            new_point(0.5, 1, 0),
+        )
+    )
     loc = locate_slicing_points(slicing_pts, pts, tri, edges)
     assert loc[0] == (VERTEX, 0)
     assert loc[1] == (EDGE, 0)
     assert loc[2] == (EDGE, 2)
 
-    slicing_pts = np.vstack((
-        new_point(0, 0, 0),
-        new_point(0.5, 0, 0),
-        new_point(0.5, 0.5, 0),
-        new_point(0.5, 1, 0),
-        new_point(1, 0, 0),
-    ))
+    slicing_pts = np.vstack(
+        (
+            new_point(0, 0, 0),
+            new_point(0.5, 0, 0),
+            new_point(0.5, 0.5, 0),
+            new_point(0.5, 1, 0),
+            new_point(1, 0, 0),
+        )
+    )
     loc = locate_slicing_points(slicing_pts, pts, tri, edges)
     assert loc[0] == (VERTEX, 0)
     assert loc[1] == (EDGE, 0)
@@ -63,59 +80,69 @@ def test_remove_redundant_points():
                 return True
         return False
 
-    pts = np.vstack((
-        new_point(0, 0, 0),
-        new_point(1, 0, 0),
-        new_point(1, 1, 0),
-        new_point(0, 1, 0),
-    ))
+    pts = np.vstack(
+        (
+            new_point(0, 0, 0),
+            new_point(1, 0, 0),
+            new_point(1, 1, 0),
+            new_point(0, 1, 0),
+        )
+    )
     vn = normal(pts[-1], pts[0], pts[1])
     pts, tri = triangulate(pts, vn)
 
     # Check different slices
-    slicing_pts = np.vstack((
-        new_point(0.5, 0, 0),
-        new_point(0.5, 1, 0),
-    ))
+    slicing_pts = np.vstack(
+        (
+            new_point(0.5, 0, 0),
+            new_point(0.5, 1, 0),
+        )
+    )
     kept = remove_redundant_points(slicing_pts, pts, tri)
     assert kept.shape == (2, 3)
 
     assert is_point_in(kept[0], slicing_pts)
     assert is_point_in(kept[1], slicing_pts)
 
-    slicing_pts = np.vstack((
-        new_point(0, 0, 0),
-        new_point(0.5, 0, 0),
-        new_point(0.5, 1, 0),
-    ))
+    slicing_pts = np.vstack(
+        (
+            new_point(0, 0, 0),
+            new_point(0.5, 0, 0),
+            new_point(0.5, 1, 0),
+        )
+    )
     kept = remove_redundant_points(slicing_pts, pts, tri)
     assert kept.shape == (2, 3)
     assert is_point_in(kept[0], slicing_pts[1:])
     assert is_point_in(kept[1], slicing_pts[1:])
 
-    slicing_pts = np.vstack((
-        new_point(0, 0, 0),
-        new_point(0.5, 0, 0),
-        new_point(0.5, 0.5, 0),
-        new_point(0.5, 1, 0),
-        new_point(1, 0, 0),
-    ))
+    slicing_pts = np.vstack(
+        (
+            new_point(0, 0, 0),
+            new_point(0.5, 0, 0),
+            new_point(0.5, 0.5, 0),
+            new_point(0.5, 1, 0),
+            new_point(1, 0, 0),
+        )
+    )
     kept = remove_redundant_points(slicing_pts, pts, tri)
     assert kept.shape == (3, 3)
     assert is_point_in(kept[0], slicing_pts[1:4])
     assert is_point_in(kept[1], slicing_pts[1:4])
     assert is_point_in(kept[2], slicing_pts[1:4])
 
-    slicing_pts = np.vstack((
-        new_point(-2, -2, -2),  # Point outside polygon
-        new_point(-1, -1, -1),  # Point outside polygon
-        new_point(0, 0, 0),
-        new_point(0.5, 0, 0),
-        new_point(0.5, 0.5, 0),
-        new_point(0.5, 1, 0),
-        new_point(1, 0, 0),
-        new_point(3, 3, 3),  # Point outside polygon
-    ))
+    slicing_pts = np.vstack(
+        (
+            new_point(-2, -2, -2),  # Point outside polygon
+            new_point(-1, -1, -1),  # Point outside polygon
+            new_point(0, 0, 0),
+            new_point(0.5, 0, 0),
+            new_point(0.5, 0.5, 0),
+            new_point(0.5, 1, 0),
+            new_point(1, 0, 0),
+            new_point(3, 3, 3),  # Point outside polygon
+        )
+    )
     kept = remove_redundant_points(slicing_pts, pts, tri)
     assert kept.shape == (3, 3)
     assert is_point_in(kept[0], slicing_pts[3:6])
@@ -129,20 +156,24 @@ def test_remove_redundant_points():
 
 
 def test_slice_polygon():
-    pts = np.vstack((
-        new_point(0, 0, 0),
-        new_point(1, 0, 0),
-        new_point(1, 1, 0),
-        new_point(0, 1, 0),
-    ))
+    pts = np.vstack(
+        (
+            new_point(0, 0, 0),
+            new_point(1, 0, 0),
+            new_point(1, 1, 0),
+            new_point(0, 1, 0),
+        )
+    )
     poly = Polygon(pts, "main")
 
     # Check different slices
     # Start at edge, end at another edge
-    slicing_pts = np.vstack((
-        new_point(0.5, 0, 0),
-        new_point(0.5, 1, 0),
-    ))
+    slicing_pts = np.vstack(
+        (
+            new_point(0.5, 0, 0),
+            new_point(0.5, 1, 0),
+        )
+    )
     name1 = "left"
     pt1 = new_point(0.25, 0.5, 0)
     name2 = "right"
@@ -158,12 +189,14 @@ def test_slice_polygon():
     assert poly2.name == name2
 
     # Start and end at the same edge
-    slicing_pts = np.vstack((
-        new_point(0.6, 0, 0),
-        new_point(0.6, 0.5, 0),
-        new_point(0.4, 0.5, 0),
-        new_point(0.4, 0.0, 0),
-    ))
+    slicing_pts = np.vstack(
+        (
+            new_point(0.6, 0, 0),
+            new_point(0.6, 0.5, 0),
+            new_point(0.4, 0.5, 0),
+            new_point(0.4, 0.0, 0),
+        )
+    )
     name1 = "left"
     pt1 = new_point(0.25, 0.5, 0)
     name2 = "right"
@@ -173,11 +206,13 @@ def test_slice_polygon():
     assert poly2.name == name2
 
     # Start at vertex, end at edge
-    slicing_pts = np.vstack((
-        new_point(0, 0, 0),
-        new_point(0.5, 0.5, 0),
-        new_point(0.5, 1, 0),
-    ))
+    slicing_pts = np.vstack(
+        (
+            new_point(0, 0, 0),
+            new_point(0.5, 0.5, 0),
+            new_point(0.5, 1, 0),
+        )
+    )
     name1 = "left"
     pt1 = new_point(0.25, 0.9, 0)
     name2 = "right"
@@ -187,10 +222,12 @@ def test_slice_polygon():
     assert poly2.name == name2
 
     # Start at vertex, end at different vertex
-    slicing_pts = np.vstack((
-        new_point(0, 0, 0),
-        new_point(1, 1, 0),
-    ))
+    slicing_pts = np.vstack(
+        (
+            new_point(0, 0, 0),
+            new_point(1, 1, 0),
+        )
+    )
     name1 = "left"
     pt1 = new_point(0.1, 0.9, 0)
     name2 = "right"

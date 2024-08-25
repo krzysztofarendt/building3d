@@ -44,23 +44,25 @@ def test_ray_simulator(plot=False):
         movie_path = None
 
     raysim = RaySimulator(
-        building = building,
-        source = Point(0.3, 0.3, 0.3),
-        sinks = [Point(0.6, 0.6, 0.6)],
-        sink_radius = 0.1,
-        num_rays = 100,
-        csv_file = csv_file,
+        building=building,
+        source=Point(0.3, 0.3, 0.3),
+        sinks=[Point(0.6, 0.6, 0.6)],
+        sink_radius=0.1,
+        num_rays=100,
+        csv_file=csv_file,
     )
     locations = [r.location for r in raysim.rays]
     unique_locations = np.unique(locations)
-    assert len(unique_locations) == 1, \
-        "Rays located in more than 1 solid at the beginning of simulation?"
+    assert (
+        len(unique_locations) == 1
+    ), "Rays located in more than 1 solid at the beginning of simulation?"
 
     raysim.simulate(100)
     locations = [r.location for r in raysim.rays]
     unique_locations = np.unique(locations)
-    assert len(unique_locations) == 3, \
-        "Rays not in all three solids at the end of simulation?"
+    assert (
+        len(unique_locations) == 3
+    ), "Rays not in all three solids at the end of simulation?"
 
     assert os.path.exists(csv_file)
 

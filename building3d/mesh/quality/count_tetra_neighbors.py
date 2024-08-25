@@ -4,7 +4,9 @@ from building3d.geom.point import Point
 from .tetra_graph import find_neighbors_numba_wrap
 
 
-def count_tetra_neighbors(vertices: list[Point], elements: list[tuple[int, ...]]) -> np.ndarray:
+def count_tetra_neighbors(
+    vertices: list[Point], elements: list[tuple[int, ...]]
+) -> np.ndarray:
     """Count the number of neighbors for each mesh (tetrahedral) element.
 
     Args:
@@ -16,8 +18,8 @@ def count_tetra_neighbors(vertices: list[Point], elements: list[tuple[int, ...]]
     """
     # Find all neighboring elements
     neighbors = find_neighbors_numba_wrap(
-        vertices = vertices,
-        elements = elements,
+        vertices=vertices,
+        elements=elements,
     )
 
     # Count neighboring elements

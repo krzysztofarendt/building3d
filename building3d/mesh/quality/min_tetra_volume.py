@@ -11,6 +11,5 @@ def minimum_tetra_volume(delta: float = MESH_DELTA) -> float:
         Point(0.0, delta, 0.0),
         Point(0.0, 0.0, delta),
     )
-    min_vol= ref_volume / 50.
+    min_vol = ref_volume / 50.0
     return min_vol
-

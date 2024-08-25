@@ -20,6 +20,7 @@ solid name
 endsolid name
 ---------------------------------------
 """
+
 import logging
 from pathlib import Path
 
@@ -97,15 +98,17 @@ def read_stl(path: str) -> Zone:
 
         line = lines[i].strip()
 
-        if line[:len("solid")] == "solid":
+        if line[: len("solid")] == "solid":
             # Start new solid with one wall and multiple polygons
-            solid_uid = line[len("solid"):].strip()
+            solid_uid = line[len("solid") :].strip()
             wall = Wall()
 
         elif line[:5] == "facet":
             # Start new polygon
             # Read normal from STL
-            normal_coord_list = line[len("facet"):].split("normal")[1].strip().split(" ")
+            normal_coord_list = (
+                line[len("facet") :].split("normal")[1].strip().split(" ")
+            )
             normal_x = float(normal_coord_list[0])
             normal_y = float(normal_coord_list[1])
             normal_z = float(normal_coord_list[2])
@@ -118,9 +121,9 @@ def read_stl(path: str) -> Zone:
             for k in range(3):
                 i += 1
                 line = lines[i].strip()
-                assert line[:len("vertex")] == "vertex"
+                assert line[: len("vertex")] == "vertex"
                 v = np.array(
-                    [float(v) for v in line[len("vertex"):].strip().split(" ")],
+                    [float(v) for v in line[len("vertex") :].strip().split(" ")],
                     dtype=FLOAT,
                 )
                 vertices[k, :] = v
@@ -141,8 +144,8 @@ def read_stl(path: str) -> Zone:
             else:
                 raise ValueError("No wall created, so cannot add polygons to it.")
 
-        elif line[:len("endsolid")] == "endsolid":
-            assert line[len("endsolid"):].strip() == solid_uid
+        elif line[: len("endsolid")] == "endsolid":
+            assert line[len("endsolid") :].strip() == solid_uid
             # Add solid to wall
             if wall is not None:
                 if solid_uid is None or solid_uid == "":

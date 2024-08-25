@@ -102,4 +102,3 @@ def mesh_stats(vertices: list[Point], elements: list[list[int]]) -> str:
         msg = f"Mesh format unknown. Elements contain {len(elements[0])} vertices."
         logger.error(msg)
         return msg
-

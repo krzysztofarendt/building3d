@@ -3,10 +3,10 @@ from building3d.geom.paths.validate_name import validate_name
 
 
 def object_path(
-    zone = None,
-    solid = None,
-    wall = None,
-    poly = None,
+    zone=None,
+    solid=None,
+    wall=None,
+    poly=None,
 ) -> str:
     """Return an object path suitable for get_object() methods.
 

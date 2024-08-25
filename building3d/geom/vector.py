@@ -1,4 +1,5 @@
 """Various functions related to vectors"""
+
 import logging
 
 import numpy as np
@@ -28,8 +29,7 @@ def normal(p0: Point, p1: Point, p2: Point) -> np.ndarray:
 
 
 def angle(v1: np.ndarray, v2: np.ndarray) -> float:
-    """Calculate angle in radians between two vectors.
-    """
+    """Calculate angle in radians between two vectors."""
     rad = np.arccos(
         np.clip(
             np.dot(v1 / length(v1), v2 / length(v2)),
@@ -38,7 +38,7 @@ def angle(v1: np.ndarray, v2: np.ndarray) -> float:
         )
     )
     if rad < 0:
-        rad = 2. * np.pi  + rad
+        rad = 2.0 * np.pi + rad
     return rad
 
 

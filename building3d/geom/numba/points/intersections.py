@@ -82,7 +82,9 @@ def line_segment_intersection(
         return INVALID_PT
     else:
         # Check if the candidate point lies within both edges
-        if is_point_on_segment(candidate, pa1, pb1) and is_point_on_segment(candidate, pa2, pb2):
+        if is_point_on_segment(candidate, pa1, pb1) and is_point_on_segment(
+            candidate, pa2, pb2
+        ):
             return candidate
         else:
             return INVALID_PT

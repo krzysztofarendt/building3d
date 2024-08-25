@@ -15,4 +15,3 @@ def recursive_default_dict_to_dict(rdd):
     """
     d = json.loads(json.dumps(rdd))
     return d
-

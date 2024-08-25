@@ -21,7 +21,6 @@ if __name__ == "__main__":
     p6 = new_point(1.0, 1.0, 1.0) * stretch + translate
     p7 = new_point(0.0, 1.0, 1.5) * stretch + translate
 
-
     poly_floor = Polygon(np.vstack((p0, p3, p2, p1)))
     poly_wall0 = Polygon(np.vstack((p0, p1, p5, p4)))
     poly_wall1 = Polygon(np.vstack((p1, p2, p6, p5)))
@@ -43,4 +42,4 @@ if __name__ == "__main__":
 
     zone = Zone([solid], "zone")
 
-    plot_objects((zone, ))
+    plot_objects((zone,))

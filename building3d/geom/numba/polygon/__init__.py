@@ -15,7 +15,10 @@ from building3d.geom.numba.triangles import triangle_centroid
 from building3d.geom.numba.polygon.centroid import polygon_centroid
 from building3d.geom.numba.polygon.area import polygon_area
 from building3d.geom.numba.polygon.plane import plane_coefficients
-from building3d.geom.numba.polygon.ispointinside import is_point_inside, is_point_inside_margin
+from building3d.geom.numba.polygon.ispointinside import (
+    is_point_inside,
+    is_point_inside_margin,
+)
 from building3d.geom.numba.polygon.facing import are_polygons_facing
 from building3d.geom.numba.polygon.touching import are_polygons_touching
 from building3d.geom.numba.polygon.crossing import are_polygons_crossing
@@ -32,7 +35,7 @@ class Polygon:
         uid: str | None = None,
         tri: IndexType | None = None,
         vn: VectorType | None = None,
-        parent = None,
+        parent=None,
     ):
         # Sanity checks
         assert are_points_coplanar(pts), "Polygon points must be coplanar"
@@ -70,7 +73,9 @@ class Polygon:
 
         self.ctr: PointType = polygon_centroid(self.pts, self.tri)
         self.area: float = polygon_area(self.pts, self.vn)
-        self.plane_coefficients: tuple[FLOAT, FLOAT, FLOAT, FLOAT] = plane_coefficients(self.pts)
+        self.plane_coefficients: tuple[FLOAT, FLOAT, FLOAT, FLOAT] = plane_coefficients(
+            self.pts
+        )
 
     @property
     def children(self) -> PointType:
@@ -139,26 +144,22 @@ class Polygon:
         return is_point_inside(pt, self.pts, self.tri, boundary_in)
 
     def contains_polygon(self, other) -> bool:
-        """Checks if the other polygon is completely inside this one.
-        """
+        """Checks if the other polygon is completely inside this one."""
         for pt in other.pts:
             if not is_point_inside_margin(pt, GEOM_ATOL, self.pts, self.tri):
                 return False
         return True
 
     def is_facing_polygon(self, other) -> bool:
-        """Checks is the polygon is facing another one. Compares points and normals.
-        """
+        """Checks is the polygon is facing another one. Compares points and normals."""
         return are_polygons_facing(self.pts, self.vn, other.pts, other.vn)
 
     def is_crossing_polygon(self, other) -> bool:
-        """Checks if the polygon crosses (overlaps) with another one.
-        """
+        """Checks if the polygon crosses (overlaps) with another one."""
         return are_polygons_crossing(self.pts, self.tri, other.pts, other.tri)
 
     def is_touching_polygon(self, other) -> bool:
-        """Checks if the polygon touches (but doesn't cross) another one.
-        """
+        """Checks if the polygon touches (but doesn't cross) another one."""
         return are_polygons_touching(self.pts, self.tri, other.pts, other.tri)
 
     def __eq__(self, other):
@@ -168,7 +169,9 @@ class Polygon:
             return False
 
     def __str__(self):
-        return f"Polygon(name={self.name}, pts.shape={self.pts.shape}, id={hex(id(self))})"
+        return (
+            f"Polygon(name={self.name}, pts.shape={self.pts.shape}, id={hex(id(self))})"
+        )
 
     def __repr__(self):
         return self.__str__()

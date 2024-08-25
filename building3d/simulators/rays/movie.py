@@ -21,7 +21,9 @@ from .config import (
 logger = logging.getLogger(__name__)
 
 
-def make_movie(output_file: str, state_dump_dir: str, building_file: str, num_steps: int = 0):
+def make_movie(
+    output_file: str, state_dump_dir: str, building_file: str, num_steps: int = 0
+):
     """Generate movie from the saved states and building file (b3d).
 
     Args:
@@ -64,7 +66,9 @@ def make_movie(output_file: str, state_dump_dir: str, building_file: str, num_st
 
     for i, state in enumerate(DumpReader(state_dump_dir)):
         logger.info(f"Processing frame {i}")
-        position_buffer = state["position"]  # shape: (num_rays, 3, DumpReader.buffer_size)
+        position_buffer = state[
+            "position"
+        ]  # shape: (num_rays, 3, DumpReader.buffer_size)
         energy_buffer = state["energy"]  # shape: (num_rays, DumpReader.buffer_size)
 
         if num_steps > 0 and i == num_steps:

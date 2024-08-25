@@ -7,8 +7,7 @@ from building3d.config import GEOM_ATOL
 
 
 def find_neighbors(
-    vertices: list[Point],
-    elements: list[tuple[int, ...]]
+    vertices: list[Point], elements: list[tuple[int, ...]]
 ) -> list[list[int]]:
     """Find neighboring elements (facing one another).
 
@@ -33,14 +32,13 @@ def find_neighbors(
 
 
 def find_neighbors_numba_wrap(
-    vertices: list[Point],
-    elements: list[tuple[int, ...]]
+    vertices: list[Point], elements: list[tuple[int, ...]]
 ) -> list[list[int]]:
     """Wrapper for the numba equivalent which fixes the input/output data types."""
     neighbors_arr = find_neighbors_numba(
-        vertices = points_to_array(vertices),
-        elements = np.array(elements),
-        epsilon = GEOM_ATOL,
+        vertices=points_to_array(vertices),
+        elements=np.array(elements),
+        epsilon=GEOM_ATOL,
     )
     neighbors = []
     for ngb in neighbors_arr:
@@ -50,9 +48,7 @@ def find_neighbors_numba_wrap(
 
 @njit
 def find_neighbors_numba(
-    vertices: np.ndarray,
-    elements: np.ndarray,
-    epsilon:float
+    vertices: np.ndarray, elements: np.ndarray, epsilon: float
 ) -> np.ndarray:
     """Numba equivalent of find_neighbors().
 
@@ -76,9 +72,9 @@ def find_neighbors_numba(
             for p1 in el1_pts:
                 for p2 in el2_pts:
                     if (
-                        (np.abs(p1[0] - p2[0]) < epsilon) and \
-                        (np.abs(p1[1] - p2[1]) < epsilon) and \
-                        (np.abs(p1[2] - p2[2]) < epsilon)
+                        (np.abs(p1[0] - p2[0]) < epsilon)
+                        and (np.abs(p1[1] - p2[1]) < epsilon)
+                        and (np.abs(p1[2] - p2[2]) < epsilon)
                     ):
                         num_shared += 1
             if num_shared == 3:

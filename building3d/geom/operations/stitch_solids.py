@@ -57,7 +57,7 @@ def stitch_solids(
     elif poly2.area > poly1.area and poly1_points_in_poly2.all():
         case = 3
     else:
-        assert (poly1_points_in_poly2.any() or poly2_points_in_poly1.any())
+        assert poly1_points_in_poly2.any() or poly2_points_in_poly1.any()
         case = 4  # They must be partially overlapping
 
     # Slice the facing polygons
@@ -124,7 +124,9 @@ def find_n_closest_points_between_2_polygons(
     return pairs
 
 
-def replace_polygons_in_solid(sld: Solid, to_replace: Polygon, new_polys: list[Polygon]) -> Solid:
+def replace_polygons_in_solid(
+    sld: Solid, to_replace: Polygon, new_polys: list[Polygon]
+) -> Solid:
     """Replaces a polygon in the solid with a list of new polygons.
 
     Args:
@@ -155,10 +157,13 @@ def replace_polygons_in_solid(sld: Solid, to_replace: Polygon, new_polys: list[P
 
     return sld_new
 
+
 # =============================================
 # Auxiliary functions to limit boilerplate code
 # =============================================
-def _case_2(sld1: Solid, poly1: Polygon, sld2: Solid, poly2: Polygon) -> tuple[Solid, Solid]:
+def _case_2(
+    sld1: Solid, poly1: Polygon, sld2: Solid, poly2: Polygon
+) -> tuple[Solid, Solid]:
     # 2) poly1 is bigger, the poly2 polygon is fully within poly1 -> slice poly1
     # Divide poly1 into 2 smaller polygons, one of them facing poly2
     slicing_points = [pt for pt in poly2.points if pt not in poly1.points]
@@ -169,9 +174,9 @@ def _case_2(sld1: Solid, poly1: Polygon, sld2: Solid, poly2: Polygon) -> tuple[S
         # points do not touch any vertex or edges
         poly1_int, poly1_ext = poly1.slice(
             slicing_points,
-            name1 = f"{poly1.name}-1",
-            pt1 = poly2.some_interior_point(),
-            name2 = f"{poly1.name}-2",
+            name1=f"{poly1.name}-1",
+            pt1=poly2.some_interior_point(),
+            name2=f"{poly1.name}-2",
         )
 
     except GeometryError:
@@ -188,9 +193,9 @@ def _case_2(sld1: Solid, poly1: Polygon, sld2: Solid, poly2: Polygon) -> tuple[S
         # so expect triangulation warning messages during the below operation
         poly1_sup, poly1_main = poly1.slice(
             sup_slicing_points,
-            name1 = f"{poly1.name}-sup",
-            pt1 = ref_poly.some_interior_point(),
-            name2 = f"{poly1.name}-main",  # This one will be sliced further
+            name1=f"{poly1.name}-sup",
+            pt1=ref_poly.some_interior_point(),
+            name2=f"{poly1.name}-main",  # This one will be sliced further
         )
 
         # Make the main slice, needed to stitch poly2 to poly1
@@ -202,9 +207,9 @@ def _case_2(sld1: Solid, poly1: Polygon, sld2: Solid, poly2: Polygon) -> tuple[S
             try:
                 poly1_int, poly1_ext = poly1_main.slice(
                     slicing_points,
-                    name1 = f"{poly1.name}-{poly2.name}",
-                    pt1 = poly2.some_interior_point(),
-                    name2 = f"{poly1.name}",
+                    name1=f"{poly1.name}-{poly2.name}",
+                    pt1=poly2.some_interior_point(),
+                    name2=f"{poly1.name}",
                 )
                 break
             except GeometryError as err:
@@ -223,7 +228,9 @@ def _case_2(sld1: Solid, poly1: Polygon, sld2: Solid, poly2: Polygon) -> tuple[S
     return sld1_new, sld2
 
 
-def _case_4(sld1: Solid, poly1: Polygon, sld2: Solid, poly2: Polygon) -> tuple[Solid, Solid]:
+def _case_4(
+    sld1: Solid, poly1: Polygon, sld2: Solid, poly2: Polygon
+) -> tuple[Solid, Solid]:
     # 4) They are partially overlapping -> slice both
     # TODO: This function should be tested with polygons with more vertices (than 4)
 
@@ -269,7 +276,9 @@ def _case_4(sld1: Solid, poly1: Polygon, sld2: Solid, poly2: Polygon) -> tuple[S
                 new_polys=[poly_a_int, poly_a_ext],
             )
         else:
-            raise ValueError(f"New polygons not assigned, so cannot replace {poly_a} in {sld_a}")
+            raise ValueError(
+                f"New polygons not assigned, so cannot replace {poly_a} in {sld_a}"
+            )
 
         return sld_a_new
 

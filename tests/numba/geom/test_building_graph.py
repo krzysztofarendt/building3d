@@ -26,8 +26,9 @@ def test_building_graph():
     g_ove = graph_polygon(bdg, facing=False, overlapping=True, touching=False)
 
     assert set(g_def["b/z0/s0/wall-1/wall-1"]) == set(["b/z0/s2/wall-3/wall-3"])
-    assert set(g_def["b/z0/s2/wall-3/wall-3"]) == set(["b/z0/s0/wall-1/wall-1",
-                                                       "b/z0/s1/wall-1/wall-1"])
+    assert set(g_def["b/z0/s2/wall-3/wall-3"]) == set(
+        ["b/z0/s0/wall-1/wall-1", "b/z0/s1/wall-1/wall-1"]
+    )
     assert set(g_def["b/z0/s0/wall-2/wall-2"]) == set(["b/z0/s1/wall-0/wall-0"])
     assert set(g_def["b/z0/s1/wall-0/wall-0"]) == set(["b/z0/s0/wall-2/wall-2"])
     assert set(g_def["b/z0/s1/wall-1/wall-1"]) == set(["b/z0/s2/wall-3/wall-3"])
@@ -36,9 +37,10 @@ def test_building_graph():
     assert set(g_fac["b/z0/s1/wall-0/wall-0"]) == set(["b/z0/s0/wall-2/wall-2"])
 
     assert set(g_ove["b/z0/s0/wall-1/wall-1"]) == set(["b/z0/s2/wall-3/wall-3"])
-    assert set(g_ove["b/z0/s1/wall-1/wall-1"]) == set(['b/z0/s2/wall-3/wall-3'])
-    assert set(g_ove["b/z0/s2/wall-3/wall-3"]) == set(["b/z0/s0/wall-1/wall-1",
-                                                       "b/z0/s1/wall-1/wall-1"])
+    assert set(g_ove["b/z0/s1/wall-1/wall-1"]) == set(["b/z0/s2/wall-3/wall-3"])
+    assert set(g_ove["b/z0/s2/wall-3/wall-3"]) == set(
+        ["b/z0/s0/wall-1/wall-1", "b/z0/s1/wall-1/wall-1"]
+    )
 
     g_all = graph_polygon(bdg, facing=True, overlapping=True, touching=True)
     assert len(g_all.keys()) > len(g_def.keys())

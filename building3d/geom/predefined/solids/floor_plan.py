@@ -71,7 +71,7 @@ def floor_plan(
         wall_name = apertures[ap_name][0]
         ap_center = apertures[ap_name][1]  # Relative center axis (w.r.t. wall width)
         ap_bottom = apertures[ap_name][2]  # Relative bottom axis (w.r.t. wall height)
-        ap_width = apertures[ap_name][3]   # Relative width (w.r.t. wall width)
+        ap_width = apertures[ap_name][3]  # Relative width (w.r.t. wall width)
         ap_height = apertures[ap_name][4]  # Relative height (w.r.t. wall height)
 
         aperture_parent_walls[wall_name].append(ap_name)
@@ -92,17 +92,19 @@ def floor_plan(
         wall_right_pt = floor_pts[right_index]
 
         left = create_point_between_2_points_at_distance(
-            p1 = wall_left_pt,
-            p2 = wall_right_pt,
-            distance = ap_center - ap_width / 2,
+            p1=wall_left_pt,
+            p2=wall_right_pt,
+            distance=ap_center - ap_width / 2,
         )
         right = create_point_between_2_points_at_distance(
-            p1 = wall_left_pt,
-            p2 = wall_right_pt,
-            distance = ap_center + ap_width / 2,
+            p1=wall_left_pt,
+            p2=wall_right_pt,
+            distance=ap_center + ap_width / 2,
         )
 
-        vert_offset = height * ap_bottom  # Wall's height * relative position of the bottom
+        vert_offset = (
+            height * ap_bottom
+        )  # Wall's height * relative position of the bottom
         abs_height = height * ap_height  # Wall's height * relative height of aperture
 
         ap_p0 = left + (0, 0, vert_offset)
@@ -115,21 +117,21 @@ def floor_plan(
     # Rotate
     if not np.isclose(rot_angle, 0):
         floor_pts, _ = rotate_points_around_vector(
-            points = floor_pts,
-            u = rot_vec,
-            phi = rot_angle,
+            points=floor_pts,
+            u=rot_vec,
+            phi=rot_angle,
         )
         ceiling_pts, _ = rotate_points_around_vector(
-            points = ceiling_pts,
-            u = rot_vec,
-            phi = rot_angle,
+            points=ceiling_pts,
+            u=rot_vec,
+            phi=rot_angle,
         )
         for ap_name in aperture_pts.keys():
             original_points = aperture_pts[ap_name][1]
             rotated_points, _ = rotate_points_around_vector(
-                points = original_points,
-                u = rot_vec,
-                phi = rot_angle,
+                points=original_points,
+                u=rot_vec,
+                phi=rot_angle,
             )
             aperture_pts[ap_name][1] = rotated_points
 
@@ -220,7 +222,10 @@ def floor_plan(
             if len(floor_adjacent_pts) == 2:
                 break
 
-        if wall_z0_pts[0] == floor_adjacent_pts[1] and wall_z0_pts[1] == floor_adjacent_pts[0]:
+        if (
+            wall_z0_pts[0] == floor_adjacent_pts[1]
+            and wall_z0_pts[1] == floor_adjacent_pts[0]
+        ):
             # Direction is OK
             pass
         else:

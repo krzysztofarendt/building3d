@@ -6,15 +6,16 @@ from building3d.geom.numba.types import PointType
 from building3d.geom.numba.points.find_close_pairs import find_close_pairs
 from building3d.geom.numba.polygon import Polygon
 from building3d.geom.numba.polygon.slice import slice_polygon
-from building3d.geom.numba.polygon.slice.add_intersection_points import add_intersection_points
+from building3d.geom.numba.polygon.slice.add_intersection_points import (
+    add_intersection_points,
+)
 from building3d.geom.numba.wall import Wall
 from building3d.geom.numba.solid import Solid
 from building3d.geom.numba.types import FLOAT
 
 
 def stitch_solids(s1: Solid, s2: Solid) -> None:
-    """Slice adjacent polygons of two solids so that they share vertices and edges.
-    """
+    """Slice adjacent polygons of two solids so that they share vertices and edges."""
     # Find next tuple of adjacent polygons
     adj = next_adjacent_polygons(s1, s2)
 
@@ -29,8 +30,7 @@ def stitch_solids(s1: Solid, s2: Solid) -> None:
 
 
 def next_adjacent_polygons(s1: Solid, s2: Solid) -> tuple[Polygon, Polygon] | None:
-    """Returns a pair of adjacent polygons. Those matching exactly are omitted.
-    """
+    """Returns a pair of adjacent polygons. Those matching exactly are omitted."""
     for _, p1 in get_walls_and_polygons(s1):
         for _, p2 in get_walls_and_polygons(s2):
             overlapping = p1.is_crossing_polygon(p2)
@@ -42,8 +42,7 @@ def next_adjacent_polygons(s1: Solid, s2: Solid) -> tuple[Polygon, Polygon] | No
 
 
 def slice_both_and_replace(s1: Solid, p1: Polygon, s2: Solid, p2: Polygon) -> None:
-    """Slices polygons `p1` and `p2` and replaces them in solids `s1` and `s2` (in-place).
-    """
+    """Slices polygons `p1` and `p2` and replaces them in solids `s1` and `s2` (in-place)."""
     p2_in_p1 = p1.contains_polygon(p2)
     p1_in_p2 = p2.contains_polygon(p1)
 
@@ -94,9 +93,7 @@ def get_sup_cut(pairs: PointType) -> PointType:
 
 
 def slice_one_and_replace(
-    s: Solid,
-    p: Polygon,
-    slicing_pts: PointType
+    s: Solid, p: Polygon, slicing_pts: PointType
 ) -> tuple[Polygon | None, Polygon | None]:
     """Slices polygon `p` with `slicing_pts` and replaces it in solid `s` (in-place).
 
@@ -133,8 +130,7 @@ def slice_one_and_replace(
 
 
 def replace_polygon(s: Solid, old_poly: Polygon, *new_poly: Polygon) -> None:
-    """Replaces `old_poly` with an arbitraty number of `new_poly` (in-place).
-    """
+    """Replaces `old_poly` with an arbitraty number of `new_poly` (in-place)."""
     wpl = get_walls_and_polygons(s)
     for wall, poly in wpl:
         if poly.name == old_poly.name:
@@ -142,8 +138,7 @@ def replace_polygon(s: Solid, old_poly: Polygon, *new_poly: Polygon) -> None:
 
 
 def get_walls_and_polygons(s: Solid) -> list[tuple[Wall, Polygon]]:
-    """Returns a list of tuples with walls and polygons for this solid.
-    """
+    """Returns a list of tuples with walls and polygons for this solid."""
     walls = s.children.values()
     wpl = []
     for w in walls:
@@ -154,8 +149,7 @@ def get_walls_and_polygons(s: Solid) -> list[tuple[Wall, Polygon]]:
 
 
 def remove_outside_points(poly: Polygon, slicing_pts: PointType) -> PointType:
-    """Returns only those slicing points which are inside `poly` (boundary included).
-    """
+    """Returns only those slicing points which are inside `poly` (boundary included)."""
     pts = np.zeros(slicing_pts.shape, dtype=FLOAT)
     j = 0
     for i in range(slicing_pts.shape[0]):
@@ -164,4 +158,3 @@ def remove_outside_points(poly: Polygon, slicing_pts: PointType) -> PointType:
             pts[j] = pt
             j += 1
     return pts[:j]
-

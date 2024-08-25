@@ -67,13 +67,13 @@ if __name__ == "__main__":
     }
 
     parallel_simulation(
-        building = building,
-        source = Point(1, 1, 1),
-        sinks = [Point(3, 3, 2), Point(6, 6, 2)],
-        sink_radius = 0.6,
-        num_rays = 160000,
-        properties = acoustic_properties,
-        sim_dir = project_dir,
-        steps = 1000,
-        num_jobs = 8,
+        building=building,
+        source=Point(1, 1, 1),
+        sinks=[Point(3, 3, 2), Point(6, 6, 2)],
+        sink_radius=0.6,
+        num_rays=160000,
+        properties=acoustic_properties,
+        sim_dir=project_dir,
+        steps=1000,
+        num_jobs=8,
     )

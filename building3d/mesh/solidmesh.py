@@ -77,17 +77,17 @@ class SolidMesh:
                 logger.debug(f"Trying to mesh a solid: {sld.name} (try #{num_tries})")
 
                 if num_tries >= SOLID_MESH_MAX_TRIES:
-                    msg = f"Meshing the solid failed after {num_tries} tries "\
+                    msg = (
+                        f"Meshing the solid failed after {num_tries} tries "
                         f"(volume error = {error * 100.:.4f}%). Try using smaller delta."
+                    )
                     logger.warning(msg)
                     raise MeshError(msg)
 
                 num_tries += 1
 
                 vertices, elements = delaunay_tetrahedralization(
-                    sld=sld,
-                    boundary_vmap=boundary_vertices,
-                    delta=self.delta
+                    sld=sld, boundary_vmap=boundary_vertices, delta=self.delta
                 )
 
                 mesh_volume = total_volume(vertices, elements)
@@ -103,9 +103,10 @@ class SolidMesh:
         # Calculate volumes
         self._recalc_volumes()
 
-    def copy(self,
-             elements: None | list = None,
-             max_vol: None | float = None,
+    def copy(
+        self,
+        elements: None | list = None,
+        max_vol: None | float = None,
     ) -> SolidMesh:
         """Create a filtered copy of itself."""
         mesh = SolidMesh(delta=self.delta)
@@ -120,7 +121,9 @@ class SolidMesh:
         elif max_vol is not None:
             # Filtered copy
             mesh.vertices = self.vertices
-            mesh.elements = [el for el, vol in zip(self.elements, self.volumes) if vol < max_vol]
+            mesh.elements = [
+                el for el, vol in zip(self.elements, self.volumes) if vol < max_vol
+            ]
             mesh.vertices, mesh.elements = purge_mesh(mesh.vertices, mesh.elements)
             mesh.volumes = [vol for vol in self.volumes if vol < max_vol]
         else:
@@ -159,4 +162,3 @@ class SolidMesh:
             p3 = self.vertices[el[3]]
             vol = tetrahedron_volume(p0, p1, p2, p3)
             self.volumes.append(vol)
-

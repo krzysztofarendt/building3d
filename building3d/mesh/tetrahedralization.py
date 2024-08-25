@@ -28,10 +28,10 @@ def imbalance(vols):
 
 
 def recalc_selected_volumes(
-        volumes: dict[int, float],
-        indices: list[int],
-        vertices: list[Point],
-        elements: list[tuple[int, ...]]
+    volumes: dict[int, float],
+    indices: list[int],
+    vertices: list[Point],
+    elements: list[tuple[int, ...]],
 ) -> dict[int, float]:
     """Calculated volumes of selected elements.
 
@@ -111,7 +111,6 @@ def get_invalid_points(
     return invalid
 
 
-
 def delaunay_tetrahedralization(
     sld: Solid,
     boundary_vmap: dict[str, list[Point]],
@@ -128,7 +127,9 @@ def delaunay_tetrahedralization(
         (list of mesh points, list of tetrahedra)
     """
     logger.debug(f"Starting tetrahedralization of {sld} with {delta=}")
-    logger.debug(f"Number of polygons passed in boundary_vertices = {len(boundary_vmap.keys())}")
+    logger.debug(
+        f"Number of polygons passed in boundary_vertices = {len(boundary_vmap.keys())}"
+    )
     for name in boundary_vmap:
         logger.debug(f"boundary vertifces for {name} = {len(boundary_vmap[name])}")
 
@@ -142,7 +143,9 @@ def delaunay_tetrahedralization(
     # Collect meshes from the boundary polygons
     # -> boundary_vertices, boundary_faces
     if len(boundary_vmap.keys()) == 0:
-        logger.debug("Need to create boundary mesh via triangulation of the surrounding polygons")
+        logger.debug(
+            "Need to create boundary mesh via triangulation of the surrounding polygons"
+        )
         for wall in sld.get_walls():
             for poly in wall.get_polygons(children=False):
                 polymesh_vertices, _ = delaunay_triangulation(poly, delta=delta)
@@ -170,7 +173,9 @@ def delaunay_tetrahedralization(
 
     # Make sure delta smaller than bbox dimensions
     if delta >= xmax - xmin or delta >= ymax - ymin or delta >= zmax - zmin:
-        raise MeshError(f"Solid {sld.name} cannot be meshed due to too large delta ({delta})")
+        raise MeshError(
+            f"Solid {sld.name} cannot be meshed due to too large delta ({delta})"
+        )
 
     xgrid = np.arange(xmin + delta, xmax, delta)
     ygrid = np.arange(ymin + delta, ymax, delta)
@@ -249,10 +254,16 @@ def delaunay_tetrahedralization(
                 zero_volume_index.append(i)
 
         if len(zero_volume_index) > 0:  # TODO: Remove
-            print("!!! ZERO VOLUME ELEMENTS REMOVED !!! I DID NOT KNOW IT EVER HAPPENS! :)")
+            print(
+                "!!! ZERO VOLUME ELEMENTS REMOVED !!! I DID NOT KNOW IT EVER HAPPENS! :)"
+            )
 
-        logger.debug(f"Number of removed zero volume elements = {len(zero_volume_index)}")
-        tetrahedra = [el for i, el in enumerate(tetrahedra) if i not in zero_volume_index]
+        logger.debug(
+            f"Number of removed zero volume elements = {len(zero_volume_index)}"
+        )
+        tetrahedra = [
+            el for i, el in enumerate(tetrahedra) if i not in zero_volume_index
+        ]
         vertices, tetrahedra = purge_mesh(vertices, tetrahedra)
 
         # Remove vertices attached to invalid elements
@@ -263,7 +274,9 @@ def delaunay_tetrahedralization(
         invalid_vertices = get_invalid_points(
             vertices, tetrahedra, boundary_pts_indices, min_volume
         )
-        vertices = [vertices[i] for i in range(len(vertices)) if i not in invalid_vertices]
+        vertices = [
+            vertices[i] for i in range(len(vertices)) if i not in invalid_vertices
+        ]
 
         logger.debug(
             f"Number of vertices before->after removal: {num_vert_before}->{len(vertices)}"
@@ -279,11 +292,15 @@ def delaunay_tetrahedralization(
         mesh_ok = zero_volume_ok and invalid_vert_ok
 
         logger.debug(f"(Mesh quality) Elements have volume > 0 is {zero_volume_ok}")
-        logger.debug(f"(Mesh quality) Vertices connected to good elements is {invalid_vert_ok}")
+        logger.debug(
+            f"(Mesh quality) Vertices connected to good elements is {invalid_vert_ok}"
+        )
         logger.debug(f"Mesh quality OK? {mesh_ok}")
 
     # Remove external elements (can happen in non-convex solids)
-    logger.debug("Attempting to find and remove elements with outside (non-convex) solid")
+    logger.debug(
+        "Attempting to find and remove elements with outside (non-convex) solid"
+    )
     outside_index = []
     for i, el in enumerate(tetrahedra):
         p0 = vertices[el[0]]
@@ -305,7 +322,9 @@ def delaunay_tetrahedralization(
 
     # Are all mesh vertices used by elements?
     unique_indices = np.unique(tetrahedra)
-    assert len(unique_indices) == len(vertices), "Not all vertices have been used for mesh!"
+    assert len(unique_indices) == len(
+        vertices
+    ), "Not all vertices have been used for mesh!"
 
     # Are all solid vertices present in the mesh?
     for pt in sld.get_vertices():
@@ -338,17 +357,20 @@ def delaunay_tetrahedralization(
 
     if np.sum(count_interior) == 0:
         logger.warning(
-            "It seems that there are no interior elements in the mesh. " + \
-            "Is delta large w.r.t. to the solid dimensions?"
+            "It seems that there are no interior elements in the mesh. "
+            + "Is delta large w.r.t. to the solid dimensions?"
         )
     else:
         # If there are interior elements, they need to have 4 neighbors each
-        assert set(np.unique(count_interior)) == set([0, 4]), \
-            "Some interior elements have < 4 neighbors"
+        assert set(np.unique(count_interior)) == set(
+            [0, 4]
+        ), "Some interior elements have < 4 neighbors"
 
     # End sanity checks =================================================================
 
     logger.debug(f"Final number of tetrahedra in {sld.name} = {len(tetrahedra)}")
-    logger.debug(f"Final number of vertices used in {sld.name} = {len(np.unique(tetrahedra))}")
+    logger.debug(
+        f"Final number of vertices used in {sld.name} = {len(np.unique(tetrahedra))}"
+    )
 
     return vertices, tetrahedra

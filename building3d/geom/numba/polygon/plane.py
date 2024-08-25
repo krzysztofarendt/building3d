@@ -6,7 +6,9 @@ from building3d.geom.numba.types import PointType, VectorType, FLOAT
 
 
 @njit
-def projection_coefficients(pt: PointType, vn: VectorType) -> tuple[FLOAT, FLOAT, FLOAT, FLOAT]:
+def projection_coefficients(
+    pt: PointType, vn: VectorType
+) -> tuple[FLOAT, FLOAT, FLOAT, FLOAT]:
     """Returns array [a, b, c, d] from the equation ax + by + cz + d = 0.
 
     Uses the vector normal to a plane and the point p

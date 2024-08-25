@@ -39,7 +39,9 @@ def get_property(target_surface: str, prop_name: str, property_dict: dict) -> fl
         return property_dict[prop_name][target_surface]
     else:
         # Need to find the parent object and update the property_dict to speed up future queries
-        parent = find_parent(target_surface, candidates=list(property_dict[prop_name].keys()))
+        parent = find_parent(
+            target_surface, candidates=list(property_dict[prop_name].keys())
+        )
         prop_val = property_dict[prop_name][parent]
         property_dict[prop_name][target_surface] = prop_val
         return property_dict[prop_name][target_surface]
@@ -59,7 +61,9 @@ def find_parent(obj: str, candidates: list[str]):
     candidates = [x for x in candidates if ((len(x) < len(obj)) and (x in obj))]
 
     if len(candidates) == 0:
-        raise ValueError(f"No parent found for {obj} within filtered candidates: {candidates}")
+        raise ValueError(
+            f"No parent found for {obj} within filtered candidates: {candidates}"
+        )
     elif len(candidates) > 1:
         parent = get_longest_string(candidates)
     else:

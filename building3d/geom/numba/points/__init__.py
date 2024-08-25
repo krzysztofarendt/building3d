@@ -23,7 +23,7 @@ def is_valid_pt(pt: PointType) -> bool:
 @njit
 def is_point_in_array(ptest: PointType, arr: PointType) -> bool:
     """Checks if a point is in the 2D array of points."""
-    assert ptest.shape == (3, )
+    assert ptest.shape == (3,)
     assert len(arr.shape) == 2 and arr.shape[1] == 3
     num_pts = arr.shape[0]
     for i in range(num_pts):
@@ -61,14 +61,14 @@ def roll_forward(pts: PointType) -> PointType:
         if i == 0:
             new_pts[i] = pts[-1]
         else:
-            new_pts[i] = pts[i-1]
+            new_pts[i] = pts[i - 1]
     return new_pts
 
 
 # njit doesn't support f-strings
 def point_to_str(pt: np.ndarray) -> str:
     """Returns a string representation of the point."""
-    assert pt.shape == (3, ), "point_to_str() works only with single points."
+    assert pt.shape == (3,), "point_to_str() works only with single points."
     return f"pt(x={pt[0]:.2f},y={pt[1]:.2f},z={pt[2]:.2f},id={hex(id(pt))})"
 
 
@@ -91,7 +91,10 @@ def bounding_box(pts: PointType) -> tuple[PointType, PointType]:
     xmin, xmax = np.min(pts[:, 0]), np.max(pts[:, 0])
     ymin, ymax = np.min(pts[:, 1]), np.max(pts[:, 1])
     zmin, zmax = np.min(pts[:, 2]), np.max(pts[:, 2])
-    return (np.array([xmin, ymin, zmin], dtype=FLOAT), np.array([xmax, ymax, zmax], dtype=FLOAT))
+    return (
+        np.array([xmin, ymin, zmin], dtype=FLOAT),
+        np.array([xmax, ymax, zmax], dtype=FLOAT),
+    )
 
 
 @njit
@@ -119,13 +122,15 @@ def are_points_coplanar(
     vec_n = new_vector(np.nan, np.nan, np.nan)
     i = 0
     while np.isnan(vec_n).any():
-        if i+2 >= num_pts:
+        if i + 2 >= num_pts:
             if are_points_coplanar(pts):
                 return True
             else:
-                raise RuntimeError("Points not coplanar, yet all normal vectors have zero length")
+                raise RuntimeError(
+                    "Points not coplanar, yet all normal vectors have zero length"
+                )
 
-        vec_n = normal(pts[i], pts[i+1], pts[i+2])
+        vec_n = normal(pts[i], pts[i + 1], pts[i + 2])
         i += 1
 
     # Plane equation:
@@ -175,10 +180,8 @@ def are_points_collinear(
     are_collinear = True
     num_vectors = vectors.shape[0]
     for i in range(1, num_vectors):
-        if (
-            np.allclose(vectors[i], vectors[i-1], atol=atol)
-            or
-            np.allclose(vectors[i], -1 * vectors[i-1], atol=atol)
+        if np.allclose(vectors[i], vectors[i - 1], atol=atol) or np.allclose(
+            vectors[i], -1 * vectors[i - 1], atol=atol
         ):
             pass
         else:
@@ -190,9 +193,7 @@ def are_points_collinear(
 
 @njit
 def new_point_between_2_points(
-    pt1: PointType,
-    pt2: PointType,
-    rel_d: float
+    pt1: PointType, pt2: PointType, rel_d: float
 ) -> PointType:
     """Creates new point along the edge pt1->pt2.
 

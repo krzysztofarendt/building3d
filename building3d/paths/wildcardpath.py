@@ -7,8 +7,8 @@ import re
 
 
 class WildcardPath:
-    """Custom path class which allows to use wildcards which can be read or replaced with numbers.
-    """
+    """Custom path class which allows to use wildcards which can be read or replaced with numbers."""
+
     wcard_sep: tuple[str, str] = ("<", ">")
 
     def __init__(self, path: str):
@@ -98,8 +98,9 @@ class WildcardPath:
                     if wname not in paths[f]:
                         paths[f][wname] = int(val)
                     else:
-                        assert int(val) == paths[f][wname], \
-                            f"Multiple values for one wildcard in a path are not allowed: {f}"
+                        assert (
+                            int(val) == paths[f][wname]
+                        ), f"Multiple values for one wildcard in a path are not allowed: {f}"
         return paths
 
     def get_matching_paths_namedtuple_keys(self, parent: str) -> dict[NamedTuple, str]:
@@ -128,7 +129,9 @@ class WildcardPath:
 
         return paths
 
-    def to_dict_with_namedtuple_keys(self, d: dict[str, dict[str, int]]) -> dict[NamedTuple, str]:
+    def to_dict_with_namedtuple_keys(
+        self, d: dict[str, dict[str, int]]
+    ) -> dict[NamedTuple, str]:
         dnew = {}
         for p, wd in d.items():
             s = self.Case(**wd)
@@ -163,7 +166,9 @@ class WildcardPath:
         path = self.path
 
         if len(kwargs.keys()) != len(self._wildcards):
-            raise ValueError(f"Number of wildcards and provided arguments does not match")
+            raise ValueError(
+                f"Number of wildcards and provided arguments does not match"
+            )
 
         for k, v in kwargs.items():
             if k not in self._wildcards:

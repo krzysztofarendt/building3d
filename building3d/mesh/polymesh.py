@@ -91,7 +91,9 @@ class PolyMesh:
 
             fixed = []
             if poly_uid in fixed_points.keys():
-                logger.debug(f"Adding {len(fixed_points[poly_uid])} init. vert. for {poly_uid}")
+                logger.debug(
+                    f"Adding {len(fixed_points[poly_uid])} init. vert. for {poly_uid}"
+                )
                 fixed = fixed_points[poly_uid]
 
             # Check if matching polygon was already meshed and add its points if yes

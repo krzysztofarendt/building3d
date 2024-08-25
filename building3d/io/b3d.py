@@ -57,6 +57,7 @@ Format:
     }
 }
 """
+
 from pathlib import Path
 import json
 
@@ -97,29 +98,37 @@ def write_b3d(path: str, bdg: Building, parents: bool = True) -> None:
                 for poly in wall.get_polygons(children=True):
                     points = points_to_nested_list(poly.points)
                     triangles = poly.triangles
-                    bdict["zones"][zone.name][solid.name][wall.name][poly.name]["points"] \
-                        = points
-                    bdict["zones"][zone.name][solid.name][wall.name][poly.name]["triangles"] \
-                        = triangles
+                    bdict["zones"][zone.name][solid.name][wall.name][poly.name][
+                        "points"
+                    ] = points
+                    bdict["zones"][zone.name][solid.name][wall.name][poly.name][
+                        "triangles"
+                    ] = triangles
 
                     children = [x.name for x in wall.get_subpolygons(poly.name)]
-                    bdict["zones"][zone.name][solid.name][wall.name][poly.name]["children"] \
-                        = children  # Not used when loading, but useful for debugging
+                    bdict["zones"][zone.name][solid.name][wall.name][poly.name][
+                        "children"
+                    ] = children  # Not used when loading, but useful for debugging
 
                     parent = wall.get_parent_name(poly.name)
-                    bdict["zones"][zone.name][solid.name][wall.name][poly.name]["parent"] \
-                        = parent
+                    bdict["zones"][zone.name][solid.name][wall.name][poly.name][
+                        "parent"
+                    ] = parent
 
     # Polygon mesh
     bdict["mesh"]["polymesh"]["delta"] = bdg.mesh.polymesh.delta
-    bdict["mesh"]["polymesh"]["vertices"] = points_to_nested_list(bdg.mesh.polymesh.vertices)
+    bdict["mesh"]["polymesh"]["vertices"] = points_to_nested_list(
+        bdg.mesh.polymesh.vertices
+    )
     bdict["mesh"]["polymesh"]["faces"] = bdg.mesh.polymesh.faces
     bdict["mesh"]["polymesh"]["vertex_owners"] = bdg.mesh.polymesh.vertex_owners
     bdict["mesh"]["polymesh"]["face_owners"] = bdg.mesh.polymesh.face_owners
 
     # Solid mesh
     bdict["mesh"]["solidmesh"]["delta"] = bdg.mesh.solidmesh.delta
-    bdict["mesh"]["solidmesh"]["vertices"] = points_to_nested_list(bdg.mesh.solidmesh.vertices)
+    bdict["mesh"]["solidmesh"]["vertices"] = points_to_nested_list(
+        bdg.mesh.solidmesh.vertices
+    )
     bdict["mesh"]["solidmesh"]["elements"] = bdg.mesh.solidmesh.elements
     bdict["mesh"]["solidmesh"]["vertex_owners"] = bdg.mesh.solidmesh.vertex_owners
     bdict["mesh"]["solidmesh"]["element_owners"] = bdg.mesh.solidmesh.element_owners

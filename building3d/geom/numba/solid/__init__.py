@@ -23,12 +23,13 @@ logger = logging.getLogger(__name__)
 
 class Solid:
     """Solid is a space enclosed by polygons."""
+
     def __init__(
         self,
         walls: Sequence[Wall] = (),
         name: str | None = None,
         uid: str | None = None,
-        parent = None,
+        parent=None,
     ):
         """Initialize the solid
 
@@ -163,8 +164,12 @@ class Solid:
             True if the solids are adjacent
         """
         # TODO: Polygons can be sorted based on the distance of their centroids
-        this_all_polys = [p for w in self.children.values() for p in w.children.values()]
-        other_all_polys = [p for w in sld.children.values() for p in w.children.values()]
+        this_all_polys = [
+            p for w in self.children.values() for p in w.children.values()
+        ]
+        other_all_polys = [
+            p for w in sld.children.values() for p in w.children.values()
+        ]
 
         for this_poly in this_all_polys:
             for other_poly in other_all_polys:

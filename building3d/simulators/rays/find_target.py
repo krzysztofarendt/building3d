@@ -36,7 +36,9 @@ def find_target(
     Return:
         path to the polygon that the particle is moving towards
     """
-    logger.debug(f"Called find_target({position=}, {velocity=}, {location=}, {building=}, {transparent=})")
+    logger.debug(
+        f"Called find_target({position=}, {velocity=}, {location=}, {building=}, {transparent=})"
+    )
     target_surface = ""
 
     found = False
@@ -54,7 +56,9 @@ def find_target(
 
                 if poly_path in transparent:
                     # Recursively search adjacent solids
-                    logger.debug("...but it's transparent! Have to look into adjacent solid.")
+                    logger.debug(
+                        "...but it's transparent! Have to look into adjacent solid."
+                    )
                     adj_poly = building.get_graph()[poly_path]
                     adj_z, adj_s, _, _ = split_path(adj_poly)
                     new_location = adj_z + PATH_SEP + adj_s

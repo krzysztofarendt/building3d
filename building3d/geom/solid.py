@@ -1,4 +1,5 @@
 """Solid class"""
+
 import logging
 from typing import Sequence
 
@@ -20,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 class Solid:
     """Solid is a space enclosed by polygons."""
+
     def __init__(
         self,
         walls: Sequence[Wall] = [],
@@ -258,7 +260,9 @@ class Solid:
 
         if not has_duplicates.all():
             errors.append(
-                GeometryError(f"Some points in solid {self.name} are attached to only 1 wall")
+                GeometryError(
+                    f"Some points in solid {self.name} are attached to only 1 wall"
+                )
             )
 
         # Print encountered geometry errors

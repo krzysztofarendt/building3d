@@ -223,7 +223,9 @@ def test_stitch_solids_2_corners_additional_points_in_b1():
     p6 = Point(1.0, 1.0, 1.0)
     p7 = Point(0.0, 1.0, 1.0)
 
-    floor = Wall([Polygon([p0, p3, p2, p1b, p1])])  # Additional point must be added here...
+    floor = Wall(
+        [Polygon([p0, p3, p2, p1b, p1])]
+    )  # Additional point must be added here...
     wall0 = Wall([Polygon([p0, p1, p5, p4])])
     poly1 = Polygon([p1, p1b, p2, p6, p5])
     wall1 = Wall([poly1])  # ...and here (Polygon adjacent to b2)

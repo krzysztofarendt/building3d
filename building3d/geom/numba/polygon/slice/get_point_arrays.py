@@ -1,12 +1,18 @@
 from numba import njit
 import numpy as np
 
-from building3d.geom.numba.points import points_equal, is_point_in_array, list_pts_to_array
+from building3d.geom.numba.points import (
+    points_equal,
+    is_point_in_array,
+    list_pts_to_array,
+)
 from building3d.geom.numba.types import PointType, IndexType
 from building3d.geom.exceptions import GeometryError
 from building3d.geom.numba.vectors import normal
 from building3d.geom.numba.polygon.edges import polygon_edges
-from building3d.geom.numba.polygon.slice.locate_slicing_points import locate_slicing_points
+from building3d.geom.numba.polygon.slice.locate_slicing_points import (
+    locate_slicing_points,
+)
 from .constants import VERTEX, EDGE
 
 
@@ -157,7 +163,7 @@ def get_point_arrays(
             points_2.append(p)
             if not slice_points_included:
                 if is_point_in_array(p, edges[edge_num]):
-                # Slicing ocurred at this edge - need to add slice_points
+                    # Slicing ocurred at this edge - need to add slice_points
                     for sp in slicing_pts:
                         points_2.append(sp)
                     slice_points_included = True
@@ -254,12 +260,12 @@ def get_point_arrays(
             points_1.append(slicing_pts[i])
 
         # Polygon 2 must go the other way around ####
-        points_2 = []                               #
-        current = pi_start                          #
-        last = pi_end                               #
-        while current != last:                      #
-            points_2.append(pts[current])   #
-            current -= 1 # <------------------------#
+        points_2 = []  #
+        current = pi_start  #
+        last = pi_end  #
+        while current != last:  #
+            points_2.append(pts[current])  #
+            current -= 1  # <------------------------#
             if current < 0:
                 current = len(pts) - 1
 

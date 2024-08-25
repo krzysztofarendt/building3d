@@ -16,4 +16,3 @@ def plot_building(building: Building):
     # Plot with PyVista
     mesh = pv.PolyData(varr, faces=farr)
     mesh.plot(show_edges=True, opacity=0.9)
-

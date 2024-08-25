@@ -16,11 +16,13 @@ def tetrahedron_volume(p0: Point, p1: Point, p2: Point, p3: Point) -> float:
     e = length(vector(p2, p3))
     f = length(vector(p1, p3))
 
-    x = (b ** 2 + c ** 2 - e ** 2)
-    y = (a ** 2 + c ** 2 - f ** 2)
-    z = (a ** 2 + b ** 2 - d ** 2)
+    x = b**2 + c**2 - e**2
+    y = a**2 + c**2 - f**2
+    z = a**2 + b**2 - d**2
 
-    nominator = 4 * a**2 * b**2 * c**2 - a**2 * x ** 2 - b**2 * y ** 2 - c**2 * z ** 2 + x * y * z
+    nominator = (
+        4 * a**2 * b**2 * c**2 - a**2 * x**2 - b**2 * y**2 - c**2 * z**2 + x * y * z
+    )
     vol = np.sqrt(nominator + EPSILON) / 12.0
 
     return vol

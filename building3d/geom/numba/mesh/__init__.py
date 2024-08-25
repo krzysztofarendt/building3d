@@ -9,8 +9,7 @@ def vstack_mesh(
     t_pts: tuple[PointType, ...],
     t_tri: tuple[IndexType, ...],
 ) -> tuple[PointType, IndexType]:
-    """Takes tuples of points and triangles and stacks them vertically.
-    """
+    """Takes tuples of points and triangles and stacks them vertically."""
     num_objects = len(t_pts)
     assert num_objects == len(t_tri)
 
@@ -36,11 +35,11 @@ def vstack_mesh(
     for i in range(num_objects):
         for j in range(t_tri[i].shape[0]):
             if j == 0 and i > 0:
-                tri_offset += num_tri_per_obj[i-1]
+                tri_offset += num_tri_per_obj[i - 1]
             faces[j + tri_offset] = t_tri[i][j] + num_pts_added
         for j in range(t_pts[i].shape[0]):
             if j == 0 and i > 0:
-                pts_offset += num_pts_per_obj[i-1]
+                pts_offset += num_pts_per_obj[i - 1]
             verts[j + pts_offset] = t_pts[i][j]
             num_pts_added += 1
 

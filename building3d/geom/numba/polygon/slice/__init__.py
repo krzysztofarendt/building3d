@@ -7,8 +7,12 @@ from building3d.geom.numba.types import PointType, VectorType
 from building3d.geom.numba.points import are_points_coplanar
 from building3d.geom.numba.polygon import Polygon
 from building3d.geom.numba.polygon.slice.get_point_arrays import get_point_arrays
-from building3d.geom.numba.polygon.slice.add_intersection_points import add_intersection_points
-from building3d.geom.numba.polygon.slice.remove_redundant_points import remove_redundant_points
+from building3d.geom.numba.polygon.slice.add_intersection_points import (
+    add_intersection_points,
+)
+from building3d.geom.numba.polygon.slice.remove_redundant_points import (
+    remove_redundant_points,
+)
 
 
 def slice_polygon(
@@ -40,10 +44,11 @@ def slice_polygon(
     Raises:
         GeometryError: if slicing not possible
     """
-    assert are_points_coplanar(np.vstack((poly.pts, slicing_pts))), \
-        "Polygon points are not coplanar with slicing points"
+    assert are_points_coplanar(
+        np.vstack((poly.pts, slicing_pts))
+    ), "Polygon points are not coplanar with slicing points"
 
-    _,  slicing_pts = add_intersection_points(poly.pts, slicing_pts)
+    _, slicing_pts = add_intersection_points(poly.pts, slicing_pts)
 
     slicing_pts = remove_redundant_points(slicing_pts, poly.pts, poly.tri)
 

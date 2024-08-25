@@ -80,7 +80,7 @@ class Mesh:
         time_boundary = t_boundary_vertices - t_polymesh
         time_solid = t_solidmesh - t_boundary_vertices
         logger.info(
-            f"Mesh generation time: poly mesh = {time_poly:.2f}s, " + \
-            f"collect boundary vertices = {time_boundary:.2f}s, " + \
-            f"solid mesh = {time_solid:.2f}s"
+            f"Mesh generation time: poly mesh = {time_poly:.2f}s, "
+            + f"collect boundary vertices = {time_boundary:.2f}s, "
+            + f"solid mesh = {time_solid:.2f}s"
         )

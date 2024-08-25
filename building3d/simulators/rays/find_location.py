@@ -41,8 +41,7 @@ def find_location(p: Point, building: Building, *first_look_at: str) -> str:
             raise TypeError(f"Incorrect solid type: {s}")
 
     if not found:
-        raise RuntimeError(
-            f"Point ({p}) not found in any of the solids of {building}")
+        raise RuntimeError(f"Point ({p}) not found in any of the solids of {building}")
 
     assert len(location) > 0
 

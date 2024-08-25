@@ -1,7 +1,9 @@
 from building3d.util.roll_back import roll_back
 from building3d.geom.polygon import Polygon
 from building3d.geom.exceptions import GeometryError
-from building3d.geom.operations.stitch_solids import find_n_closest_points_between_2_polygons
+from building3d.geom.operations.stitch_solids import (
+    find_n_closest_points_between_2_polygons,
+)
 
 
 def imprint_polygon(poly_ext: Polygon, poly_int: Polygon) -> list[Polygon]:
@@ -33,9 +35,9 @@ def imprint_polygon(poly_ext: Polygon, poly_int: Polygon) -> list[Polygon]:
                 ref_poly = Polygon(slicing_points)
                 poly_ext_int, poly_ext_ext = poly_ext.slice(
                     slicing_points,
-                    name1 = f"{poly_ext.name}-1",
-                    pt1 = ref_poly.some_interior_point(),
-                    name2 = f"{poly_ext.name}-2",
+                    name1=f"{poly_ext.name}-1",
+                    pt1=ref_poly.some_interior_point(),
+                    name2=f"{poly_ext.name}-2",
                 )
                 ret_polygons = [poly_ext_int, poly_ext_ext]
                 break
@@ -45,7 +47,6 @@ def imprint_polygon(poly_ext: Polygon, poly_int: Polygon) -> list[Polygon]:
                 num_tries += 1
                 if num_tries >= max_tries:
                     raise err
-
 
     except GeometryError:
         # poly_ext must be sliced twice, because poly_int is not touching any edge
@@ -61,9 +62,9 @@ def imprint_polygon(poly_ext: Polygon, poly_int: Polygon) -> list[Polygon]:
         # so expect triangulation warning messages during the below operation
         poly_ext_sup, poly_ext_main = poly_ext.slice(
             sup_slicing_points,
-            name1 = f"{poly_ext.name}-sup",
-            pt1 = ref_poly.some_interior_point(),
-            name2 = f"{poly_ext.name}-main",  # This one will be sliced further
+            name1=f"{poly_ext.name}-sup",
+            pt1=ref_poly.some_interior_point(),
+            name2=f"{poly_ext.name}-main",  # This one will be sliced further
         )
 
         ref_poly = Polygon(slicing_points)
@@ -76,9 +77,9 @@ def imprint_polygon(poly_ext: Polygon, poly_int: Polygon) -> list[Polygon]:
                 # so expect triangulation warning messages during the below operation
                 poly_ext_int, poly_ext_ext = poly_ext_main.slice(
                     slicing_points,
-                    name1 = f"{poly_ext.name}-{poly_int.name}",
-                    pt1 = ref_poly.some_interior_point(),
-                    name2 = f"{poly_ext.name}",
+                    name1=f"{poly_ext.name}-{poly_int.name}",
+                    pt1=ref_poly.some_interior_point(),
+                    name2=f"{poly_ext.name}",
                 )
                 ret_polygons = [poly_ext_int, poly_ext_sup, poly_ext_ext]
                 break

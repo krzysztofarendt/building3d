@@ -15,8 +15,7 @@ from building3d.geom.numba.vectors import normal
 
 @njit
 def is_point_at_boundary(ptest: PointType, pts: PointType) -> bool:
-    """Checks if the point lays on any of the edges of `pts`.
-    """
+    """Checks if the point lays on any of the edges of `pts`."""
     edges = polygon_edges(pts)
     for pt1, pt2 in edges:
         if is_point_on_segment(ptest, pt1, pt2):
@@ -175,7 +174,9 @@ def is_point_inside_projection(
         return is_point_inside(ptest, pts, tri)
     else:
         # Projection crosses the surface of the plane
-        s = (-d - a * ptest[0] - b * ptest[1] - c * ptest[2]) / (a * v[0] + b * v[1] + c * v[2])
+        s = (-d - a * ptest[0] - b * ptest[1] - c * ptest[2]) / (
+            a * v[0] + b * v[1] + c * v[2]
+        )
 
         if fwd_only and s < 0:
             # The plane is in the other direction than the one pointed by vec

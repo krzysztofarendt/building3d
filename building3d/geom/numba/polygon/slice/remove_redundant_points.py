@@ -4,7 +4,9 @@ import numpy as np
 from building3d.geom.numba.types import PointType, IndexType, FLOAT
 from building3d.geom.numba.points import roll_forward
 from building3d.geom.numba.points import is_point_in_array
-from building3d.geom.numba.polygon.slice.locate_slicing_points import locate_slicing_points
+from building3d.geom.numba.polygon.slice.locate_slicing_points import (
+    locate_slicing_points,
+)
 from building3d.geom.numba.polygon.edges import polygon_edges
 from .constants import EXTERIOR, INTERIOR, VERTEX, EDGE, INVALID_INDEX, INVALID_LOC
 
@@ -46,7 +48,9 @@ def remove_redundant_points(
         if num_try > len(slicing_pts):
             return slicing_pts[0:1]  # Return empty list
         else:
-            return remove_redundant_points(roll_forward(slicing_pts), pts, tri, num_try + 1)
+            return remove_redundant_points(
+                roll_forward(slicing_pts), pts, tri, num_try + 1
+            )
 
     num_interior = sum([1 for loc, _ in sploc if loc == INTERIOR])
 
@@ -90,7 +94,7 @@ def remove_redundant_points(
 
         elif next_loc_type == INTERIOR and this_loc_type in (VERTEX, EDGE):
             # Points thouching a vertex or edge are included if the next one is inside the polygon
-             new_points.append(this_pt)
+            new_points.append(this_pt)
 
         elif prev_loc_type == INTERIOR and this_loc_type in (VERTEX, EDGE):
             # This is the last needed point
@@ -152,13 +156,17 @@ def remove_redundant_points(
                 continue
 
         elif this_loc_type == EDGE and next_loc_type == VERTEX:
-            if num_interior == 0 and not is_point_in_array(pts[next_loc_ix], edges[this_loc_ix]):
+            if num_interior == 0 and not is_point_in_array(
+                pts[next_loc_ix], edges[this_loc_ix]
+            ):
                 new_points.append(this_pt)
             else:
                 continue
 
         elif this_loc_type == EDGE and prev_loc_type == VERTEX:
-            if num_interior == 0 and not is_point_in_array(pts[prev_loc_ix], edges[this_loc_ix]):
+            if num_interior == 0 and not is_point_in_array(
+                pts[prev_loc_ix], edges[this_loc_ix]
+            ):
                 new_points.append(this_pt)
             else:
                 continue

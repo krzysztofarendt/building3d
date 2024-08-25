@@ -1,4 +1,5 @@
 """Point class"""
+
 from typing import Sequence
 
 import numpy as np
@@ -54,9 +55,7 @@ class Point:
 
     def __add__(self, other: Sequence | np.ndarray):
         if (
-                type(other) is list or \
-                type(other) is tuple or \
-                type(other) is np.ndarray \
+            type(other) is list or type(other) is tuple or type(other) is np.ndarray
         ) and (len(other) == 3):
             return self.add(other)
         else:
@@ -76,9 +75,7 @@ class Point:
 
     def __mul__(self, other: Sequence | np.ndarray):
         if (
-                type(other) is list or \
-                type(other) is tuple or \
-                type(other) is np.ndarray \
+            type(other) is list or type(other) is tuple or type(other) is np.ndarray
         ) and (len(other) == 3):
             return self.multiply(other)
         else:

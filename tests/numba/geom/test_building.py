@@ -57,5 +57,4 @@ def test_zone():
 
     verts, faces = b.get_mesh()
     assert verts.shape == (2 * 6 * 4, 3)  # NOTE: points not unique
-    assert faces.shape == (2 * 12, 3)     # NOTE: points not unique
-
+    assert faces.shape == (2 * 12, 3)  # NOTE: points not unique

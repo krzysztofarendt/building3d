@@ -11,7 +11,7 @@ def test_tetrahedron_centroid():
     pt2 = new_point(0, 1, 0)
     pt3 = new_point(0, 0, 1)
     ctr = tetrahedron_centroid(pt0, pt1, pt2, pt3)
-    assert np.allclose(ctr, [1/4, 1/4, 1/4])
+    assert np.allclose(ctr, [1 / 4, 1 / 4, 1 / 4])
 
 
 def test_tetrahedron_volume():

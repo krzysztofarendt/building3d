@@ -59,19 +59,21 @@ def floor_plan(
 
     # Set up floor and ceiling Points
     floor_pts = np.vstack([new_point(float(x), float(y), 0.0) for x, y in plan])
-    ceiling_pts = np.vstack([new_point(float(x), float(y), float(height)) for x, y in plan])
+    ceiling_pts = np.vstack(
+        [new_point(float(x), float(y), float(height)) for x, y in plan]
+    )
 
     # Rotate
     if not np.isclose(rot_angle, 0):
         floor_pts, _ = rotate_points_around_vector(
-            pts = floor_pts,
-            u = rot_vec,
-            phi = rot_angle,
+            pts=floor_pts,
+            u=rot_vec,
+            phi=rot_angle,
         )
         ceiling_pts, _ = rotate_points_around_vector(
-            pts = ceiling_pts,
-            u = rot_vec,
-            phi = rot_angle,
+            pts=ceiling_pts,
+            u=rot_vec,
+            phi=rot_angle,
         )
 
     # Translate
@@ -145,9 +147,8 @@ def floor_plan(
             if len(floor_adjacent_pts) == 2:
                 break
 
-        if (
-            points_equal(wall_z0_pts[0], floor_adjacent_pts[1]) and
-            points_equal(wall_z0_pts[1], floor_adjacent_pts[0])
+        if points_equal(wall_z0_pts[0], floor_adjacent_pts[1]) and points_equal(
+            wall_z0_pts[1], floor_adjacent_pts[0]
         ):
             # Direction is OK
             pass

@@ -23,25 +23,24 @@ def test_find_target_surface_direction(single_solid_building):
     position = Point(0.5, 0.5, 0.5)
     velocity = np.array([1.0, 0.0, 0.0])
     target_1 = find_target(
-        position = position,
-        velocity = velocity,
-        location = "zone" + PATH_SEP + "solid",
-        building = single_solid_building,
-        transparent = [],
-        checked_locations = set(),
+        position=position,
+        velocity=velocity,
+        location="zone" + PATH_SEP + "solid",
+        building=single_solid_building,
+        transparent=[],
+        checked_locations=set(),
     )
     assert target_1 is not None and len(target_1) > 0
-
 
     position = Point(0.5, 0.5, 0.5)
     velocity = np.array([-1.0, 0.0, 0.0])
     target_2 = find_target(
-        position = position,
-        velocity = velocity,
-        location = "zone" + PATH_SEP + "solid",
-        building = single_solid_building,
-        transparent = [],
-        checked_locations = set(),
+        position=position,
+        velocity=velocity,
+        location="zone" + PATH_SEP + "solid",
+        building=single_solid_building,
+        transparent=[],
+        checked_locations=set(),
     )
     assert target_2 is not None and len(target_2) > 0
 
@@ -52,12 +51,12 @@ def test_find_target_edge_direction(single_solid_building):
     position = Point(0.5, 0.5, 0.5)
     velocity = np.array([1.0, 1.0, 0.0])
     target = find_target(
-        position = position,
-        velocity = velocity,
-        location = "zone" + PATH_SEP + "solid",
-        building = single_solid_building,
-        transparent = [],
-        checked_locations = set(),
+        position=position,
+        velocity=velocity,
+        location="zone" + PATH_SEP + "solid",
+        building=single_solid_building,
+        transparent=[],
+        checked_locations=set(),
     )
     assert target is not None and len(target) > 0
 
@@ -66,12 +65,12 @@ def test_find_target_corner_direction(single_solid_building):
     position = Point(0.5, 0.5, 0.5)
     velocity = np.array([1.0, 1.0, 1.0])
     target = find_target(
-        position = position,
-        velocity = velocity,
-        location = "zone" + PATH_SEP + "solid",
-        building = single_solid_building,
-        transparent = [],
-        checked_locations = set(),
+        position=position,
+        velocity=velocity,
+        location="zone" + PATH_SEP + "solid",
+        building=single_solid_building,
+        transparent=[],
+        checked_locations=set(),
     )
     assert target is not None and len(target) > 0
 
@@ -81,10 +80,10 @@ def test_find_target_incorrect_position(single_solid_building):
     velocity = np.array([1.0, 1.0, 1.0])
     with pytest.raises(RuntimeError):
         _ = find_target(
-            position = position,
-            velocity = velocity,
-            location = "zone" + PATH_SEP + "solid",
-            building = single_solid_building,
-            transparent = [],
-            checked_locations = set(),
+            position=position,
+            velocity=velocity,
+            location="zone" + PATH_SEP + "solid",
+            building=single_solid_building,
+            transparent=[],
+            checked_locations=set(),
         )

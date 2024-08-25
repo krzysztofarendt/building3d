@@ -10,7 +10,9 @@ from .constants import INVALID_INDEX
 
 
 @njit
-def add_intersection_points(pts1: PointType, pts2: PointType) -> tuple[PointType, PointType]:
+def add_intersection_points(
+    pts1: PointType, pts2: PointType
+) -> tuple[PointType, PointType]:
     """Adds new points to `pts1` and `pts2` where edges of both point lists intersect."""
     edges1 = polygon_edges(pts1)
     edges2 = polygon_edges(pts2)

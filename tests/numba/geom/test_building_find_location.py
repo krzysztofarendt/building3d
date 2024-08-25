@@ -48,6 +48,7 @@ def test_point_in_b2(bdg):
     assert find_location(pt, bdg, "bdg/z1/b2") == "bdg/z1/b2"
     assert find_location(pt, bdg, "bdg/z1/b3") == "bdg/z1/b2"
 
+
 def test_point_in_b3(bdg):
     pt = new_point(3.5, 1.0, 1.0)  # corner
     assert find_location(pt, bdg) == "bdg/z1/b3"
