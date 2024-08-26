@@ -62,6 +62,7 @@ def graph_wall(
     facing=True,
     overlapping=True,
     touching=False,
+    g: dict | None = None
 ) -> dict[str, list[str]]:
     """Makes a building graph based on wall connections.
 
@@ -76,7 +77,11 @@ def graph_wall(
     Retruns:
         graph dictionary
     """
-    return strip_graph(graph_polygon(bdg, facing, overlapping, touching), n=1)
+    if g is not None:
+        g = graph_polygon(bdg, facing, overlapping, touching)
+    else:
+        g = {}
+    return strip_graph(g, n=1)
 
 
 def graph_solid(
@@ -84,6 +89,7 @@ def graph_solid(
     facing=True,
     overlapping=True,
     touching=False,
+    g: dict | None = None
 ) -> dict[str, list[str]]:
     """Makes a building graph based on solid connections.
 
@@ -98,7 +104,11 @@ def graph_solid(
     Retruns:
         graph dictionary
     """
-    return strip_graph(graph_polygon(bdg, facing, overlapping, touching), n=2)
+    if g is not None:
+        g = graph_polygon(bdg, facing, overlapping, touching)
+    else:
+        g = {}
+    return strip_graph(g, n=2)
 
 
 def graph_zone(
@@ -106,6 +116,7 @@ def graph_zone(
     facing=True,
     overlapping=True,
     touching=False,
+    g: dict | None = None
 ) -> dict[str, list[str]]:
     """Makes a building graph based on solid connections.
 
@@ -120,7 +131,11 @@ def graph_zone(
     Retruns:
         graph dictionary
     """
-    return strip_graph(graph_polygon(bdg, facing, overlapping, touching), n=3)
+    if g is not None:
+        g = graph_polygon(bdg, facing, overlapping, touching)
+    else:
+        g = {}
+    return strip_graph(g, n=3)
 
 
 def strip_graph(
@@ -131,7 +146,13 @@ def strip_graph(
     """
     gnew = {}
     for k, v in g.items():
-        gnew[remove_last(k, n=n)] = list(set([remove_last(x, n=n) for x in v]))
+        new_k = remove_last(k, n=n)
+        new_v = list(set([remove_last(x, n=n) for x in v]))
+        new_v = [x for x in new_v if x != new_k]
+        if len(new_v) > 0:
+            gnew[new_k] = new_v
+        else:
+            pass
     return gnew
 
 
