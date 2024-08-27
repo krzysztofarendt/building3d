@@ -30,6 +30,7 @@ from building3d import random_id
 from building3d.geom.numba.polygon import Polygon
 from building3d.geom.numba.wall import Wall
 from building3d.geom.numba.zone import Zone
+from building3d.geom.numba.building import Building
 from building3d.geom.numba.solid import Solid
 from building3d.geom.numba.types import FLOAT
 
@@ -37,7 +38,7 @@ from building3d.geom.numba.types import FLOAT
 logger = logging.getLogger(__name__)
 
 
-def write_stl(path: str, zone: Zone) -> None:
+def write_stl(path: str, bdg: Building, parent_dirs: bool = True) -> None:
     """Read STL file.
 
     STL does not contain information about how facets (triangles)
@@ -45,46 +46,60 @@ def write_stl(path: str, zone: Zone) -> None:
 
     It means that if you write a zone to STL and then read it again,
     they may have different number of polygons!
+
+    Args:
+        path: path to the output file
+        bdg: Building instance
+        parent_dirs: if True, parent directories will be created
     """
-    logger.debug(f"Writing zone {zone.name} ({zone.uid}) to STL: {path}")
+    logger.debug(f"Writing building {bdg.name} ({bdg.uid}) to STL: {path}")
+
+    if parent_dirs is True:
+        p = Path(path)
+        if not p.parent.exists():
+            p.parent.mkdir(parents=True)
+
     lines = []
     l1 = " " * 2
     l2 = " " * 4
     l3 = " " * 6
-    for sld in zone.solids.values():
-        lines.append(f"solid {sld.uid}\n")
-        for wall in sld.walls.values():
-            for _, poly in wall.polygons.items():
-                ni, nj, nk = poly.vn
-                for facet in poly.tri:
-                    lines.append(f"{l1}facet normal {ni} {nj} {nk}\n")
-                    lines.append(f"{l2}outer loop\n")
-                    v1x, v1y, v1z = poly.pts[facet[0]]
-                    v2x, v2y, v2z = poly.pts[facet[1]]
-                    v3x, v3y, v3z = poly.pts[facet[2]]
-                    lines.append(f"{l3}vertex {v1x} {v1y} {v1z}\n")
-                    lines.append(f"{l3}vertex {v2x} {v2y} {v2z}\n")
-                    lines.append(f"{l3}vertex {v3x} {v3y} {v3z}\n")
-                    lines.append(f"{l2}endloop\n")
-                    lines.append(f"{l1}endfacet\n")
-        lines.append(f"endsolid {sld.uid}\n")
+    for zone in bdg.zones.values():
+        for sld in zone.solids.values():
+            lines.append(f"solid {sld.uid}\n")
+            for wall in sld.walls.values():
+                for _, poly in wall.polygons.items():
+                    ni, nj, nk = poly.vn
+                    for facet in poly.tri:
+                        lines.append(f"{l1}facet normal {ni} {nj} {nk}\n")
+                        lines.append(f"{l2}outer loop\n")
+                        v1x, v1y, v1z = poly.pts[facet[0]]
+                        v2x, v2y, v2z = poly.pts[facet[1]]
+                        v3x, v3y, v3z = poly.pts[facet[2]]
+                        lines.append(f"{l3}vertex {v1x} {v1y} {v1z}\n")
+                        lines.append(f"{l3}vertex {v2x} {v2y} {v2z}\n")
+                        lines.append(f"{l3}vertex {v3x} {v3y} {v3z}\n")
+                        lines.append(f"{l2}endloop\n")
+                        lines.append(f"{l1}endfacet\n")
+            lines.append(f"endsolid {sld.uid}\n")
     with open(path, "w") as f:
         f.writelines(lines)
     logger.debug(f"Number of lines in STL file = {len(lines)}")
 
 
-def read_stl(path: str) -> Zone:
-    """Reat zone from an STL file.
+def read_stl(path: str) -> Building:
+    """Read a building from an STL file.
 
-    STL does not contain information about how facets (triangles)
-    are grouped together, so each facet is treated as a separate triangular wall/polygon.
+    Information about zones is lost. Information about walls is lost.
+    The output building has 1 zone with as many walls and polygons as
+    there are triangles.
 
-    It means that if you write a zone to STL and then read it again,
-    they may have different number of polygons!
+    This is because STL does not contain information about how facets (triangles)
+    are grouped together.
     """
     logger.debug(f"Reading a zone from STL: {path}")
 
-    zone = Zone(name=Path(path).stem)
+    zone = Zone()
+    bdg = Building([zone], name=Path(path).stem)
 
     logger.debug(f"Assuming zone name based on filename: {zone.name}")
 
@@ -163,4 +178,4 @@ def read_stl(path: str) -> Zone:
     logger.debug(f"Zone read from STL: {zone}")
     logger.debug(f"Number of solids in zone {zone.name} = {len(zone.solids.keys())}")
 
-    return zone
+    return bdg

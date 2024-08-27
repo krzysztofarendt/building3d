@@ -42,15 +42,15 @@ from building3d.geom.numba.types import FLOAT, INT
 from building3d.types.recursive_default_dict import recursive_default_dict
 
 
-def write_b3d(path: str, bdg: Building, parents: bool = True) -> None:
+def write_b3d(path: str, bdg: Building, parent_dirs: bool = True) -> None:
     """Write the model and its mesh to B3D file.
 
     Args:
         path: path to the output file
         bdg: Building instance
-        parents: if True, parent directories will be created
+        parent_dirs: if True, parent directories will be created
     """
-    if parents is True:
+    if parent_dirs is True:
         p = Path(path)
         if not p.parent.exists():
             p.parent.mkdir(parents=True)
@@ -60,10 +60,10 @@ def write_b3d(path: str, bdg: Building, parents: bool = True) -> None:
     bdict = recursive_default_dict()
     bdict["name"] = bdg.name
 
-    for z in bdg.get_zones():
-        for s in z.get_solids():
-            for w in s.get_walls():
-                for p in w.get_polygons():
+    for z in bdg.zones.values():
+        for s in z.solids.values():
+            for w in s.walls.values():
+                for p in w.polygons.values():
                     bdict["zones"][z.name][s.name][w.name][p.name][
                         "pts"
                     ] = p.pts.tolist()

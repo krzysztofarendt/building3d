@@ -2,6 +2,7 @@
 
 from collections import defaultdict
 import json
+from pathlib import Path
 
 import dotbimpy
 import numpy as np
@@ -18,16 +19,27 @@ from building3d.types.recursive_default_dict import recursive_default_dict
 TOOL_NAME = "Building3D"
 
 
-def write_dotbim(path: str, bdg: Building) -> None:
-    """Save model to .bim."""
+def write_dotbim(path: str, bdg: Building, parent_dirs: bool = True) -> None:
+    """Save model to .bim.
+
+    Args:
+        path: path to the output file
+        bdg: Building instance
+        parent_dirs: if True, parent directories will be created
+    """
+    if parent_dirs is True:
+        p = Path(path)
+        if not p.parent.exists():
+            p.parent.mkdir(parents=True)
+
     mesh_id = 0
     meshes = []
     elements = []
 
-    for zone in bdg.get_zones():
-        for sld in zone.get_solids():
-            for wall in sld.get_walls():
-                for poly in wall.get_polygons():
+    for zone in bdg.zones.values():
+        for sld in zone.solids.values():
+            for wall in sld.walls.values():
+                for poly in wall.polygons.values():
                     coordinates = poly.pts.flatten().tolist()
                     indices = poly.tri.flatten().tolist()
 
