@@ -43,6 +43,7 @@ def line_intersection(
 
     try:
         # Solve for t and s using least squares to handle potential overdetermined system
+        # TODO: rcond=None is needed to suppress deprecation warning, but numba doesn't support it
         t_s, _, _, s = np.linalg.lstsq(A, b)
     except Exception:  # numba does not support other types of exceptions
         return INVALID_PT

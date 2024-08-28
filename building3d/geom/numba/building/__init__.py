@@ -42,7 +42,6 @@ class Building:
         else:
             self.uid = random_id()
         self.zones: dict[str, Zone] = {}  # {Zone.name: Zone}
-        self.graph = {}
         self.adj_solids = {}
 
         for zn in zones:
