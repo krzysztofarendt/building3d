@@ -7,11 +7,10 @@ from building3d.geom.numba.polygon import Polygon
 from building3d.geom.numba.wall import Wall
 from building3d.geom.numba.solid import Solid
 from building3d.geom.numba.zone import Zone
-from building3d.geom.numba.building import Building
 
 
 def graph_polygon(
-    bdg: Building,
+    bdg,  # Can't declare type Building due to circular import
     facing=True,
     overlapping=True,
     touching=False,
@@ -32,9 +31,16 @@ def graph_polygon(
 
     for pl1 in iter_polygons(bdg):
         for pl2 in iter_polygons(bdg):
+
             if pl1 is pl2:
                 continue
+
             if (pl1.path, pl2.path) not in checked:
+                if pl1.path not in g:
+                    g[pl1.path] = []
+                if pl2.path not in g:
+                    g[pl2.path] = []
+
                 cond = []
                 if facing:
                     cond.append(pl1.is_facing_polygon(pl2))
@@ -44,21 +50,16 @@ def graph_polygon(
                     cond.append(pl1.is_touching_polygon(pl2))
 
                 if np.array(cond).any():
-                    if pl1.path in g:
-                        g[pl1.path].append(pl2.path)
-                    else:
-                        g[pl1.path] = [pl2.path]
-                    if pl2.path in g:
-                        g[pl2.path].append(pl1.path)
-                    else:
-                        g[pl2.path] = [pl1.path]
+                    g[pl1.path].append(pl2.path)
+                    g[pl2.path].append(pl1.path)
                     checked.add((pl1.path, pl2.path))
                     checked.add((pl2.path, pl1.path))
+
     return g
 
 
 def graph_wall(
-    bdg: Building,
+    bdg,
     facing=True,
     overlapping=True,
     touching=False,
@@ -73,19 +74,18 @@ def graph_wall(
         facing: if True will include polygons which are facing
         overlapping: if True will include polygons which are overlapping
         touching: if True will include polygons which are touching
+        g: optional polygon graph (if not given, will have to calculate it)
 
     Retruns:
         graph dictionary
     """
-    if g is not None:
+    if g is None or len(g) == 0:
         g = graph_polygon(bdg, facing, overlapping, touching)
-    else:
-        g = {}
     return strip_graph(g, n=1)
 
 
 def graph_solid(
-    bdg: Building,
+    bdg,
     facing=True,
     overlapping=True,
     touching=False,
@@ -100,19 +100,18 @@ def graph_solid(
         facing: if True will include polygons which are facing
         overlapping: if True will include polygons which are overlapping
         touching: if True will include polygons which are touching
+        g: optional polygon graph (if not given, will have to calculate it)
 
     Retruns:
         graph dictionary
     """
-    if g is not None:
+    if g is None or len(g) == 0:
         g = graph_polygon(bdg, facing, overlapping, touching)
-    else:
-        g = {}
     return strip_graph(g, n=2)
 
 
 def graph_zone(
-    bdg: Building,
+    bdg,
     facing=True,
     overlapping=True,
     touching=False,
@@ -127,14 +126,13 @@ def graph_zone(
         facing: if True will include polygons which are facing
         overlapping: if True will include polygons which are overlapping
         touching: if True will include polygons which are touching
+        g: optional polygon graph (if not given, will have to calculate it)
 
     Retruns:
         graph dictionary
     """
-    if g is not None:
+    if g is None or len(g) == 0:
         g = graph_polygon(bdg, facing, overlapping, touching)
-    else:
-        g = {}
     return strip_graph(g, n=3)
 
 
@@ -147,12 +145,17 @@ def strip_graph(
     gnew = {}
     for k, v in g.items():
         new_k = remove_last(k, n=n)
-        new_v = list(set([remove_last(x, n=n) for x in v]))
+        new_v = [remove_last(x, n=n) for x in v]
         new_v = [x for x in new_v if x != new_k]
-        if len(new_v) > 0:
-            gnew[new_k] = new_v
+
+        if new_k in gnew:
+            gnew[new_k].extend(new_v)
         else:
-            pass
+            gnew[new_k] = new_v
+
+    for k in gnew:
+        gnew[k] = list(set(gnew[k]))
+
     return gnew
 
 
@@ -164,7 +167,7 @@ def remove_last(path: str, n: int = 1) -> str:
     return path
 
 
-def iter_polygons(bdg: Building) -> Iterable[Polygon]:
+def iter_polygons(bdg) -> Iterable[Polygon]:
     """Generator iterating over all polygons of the building.
     """
     for _, zv in bdg.children.items():
@@ -174,7 +177,7 @@ def iter_polygons(bdg: Building) -> Iterable[Polygon]:
                     yield pv
 
 
-def iter_walls(bdg: Building) -> Iterable[Wall]:
+def iter_walls(bdg) -> Iterable[Wall]:
     """Generator iterating over all walls of the building.
     """
     for _, zv in bdg.children.items():
@@ -183,7 +186,7 @@ def iter_walls(bdg: Building) -> Iterable[Wall]:
                 yield wv
 
 
-def iter_solids(bdg: Building) -> Iterable[Solid]:
+def iter_solids(bdg) -> Iterable[Solid]:
     """Generator iterating over all solids of the building.
     """
     for _, zv in bdg.children.items():
@@ -191,7 +194,7 @@ def iter_solids(bdg: Building) -> Iterable[Solid]:
             yield sv
 
 
-def iter_zones(bdg: Building) -> Iterable[Zone]:
+def iter_zones(bdg) -> Iterable[Zone]:
     """Generator iterating over all zones of the building.
     """
     for _, zv in bdg.children.items():

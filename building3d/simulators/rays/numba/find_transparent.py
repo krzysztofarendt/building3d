@@ -23,17 +23,18 @@ def find_transparent(building: Building) -> list[str]:
 
     for k, v in graph.items():
         assert isinstance(v, list)
-        assert len(v) == 1, f"Expected one facing polygon, but found {len(v)}"
+        assert len(v) <= 1, f"Expected one facing polygon, but found more ({len(v)})"
 
-        if k not in added or v[0] not in added:
-            bdg0, z0, sld0, wll0, plg0 = split_path(k)
-            bdg1, z1, sld1, wll1, plg1 = split_path(v[0])
+        if len(v) == 1:
+            if k not in added or v[0] not in added:
+                bdg0, z0, sld0, wll0, plg0 = split_path(k)
+                bdg1, z1, sld1, wll1, plg1 = split_path(v[0])
 
-            # Doesn't have to check if plg0 is facing plg1,
-            # because if they are in the graph, they must be
-            if z0 == z1:
-                transparent_plg.extend([k, v[0]])
-                added.add(k)
-                added.add(v[0])
+                # Doesn't have to check if plg0 is facing plg1,
+                # because if they are in the graph, they must be
+                if z0 == z1:
+                    transparent_plg.extend([k, v[0]])
+                    added.add(k)
+                    added.add(v[0])
 
     return transparent_plg

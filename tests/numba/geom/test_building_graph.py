@@ -1,3 +1,5 @@
+import time
+
 import pytest
 
 from building3d.geom.numba.solid.box import box
@@ -45,12 +47,11 @@ def g_ove(bdg):
 
 
 @pytest.fixture
-def g_all(bdg):
-    g_all = graph_polygon(bdg, facing=True, overlapping=True, touching=True)
-    return g_all
+def gz_all(bdg):
+    return graph_zone(bdg, facing=True, overlapping=True, touching=True)
 
 
-def test_graph_polygon(g_def, g_fac, g_ove, g_all):
+def test_graph_polygon(g_def, g_fac, g_ove, gz_all):
     assert set(g_def["b/z0/s0/wall-1/wall-1"]) == set(["b/z0/s2/wall-3/wall-3"])
     assert set(g_def["b/z0/s2/wall-3/wall-3"]) == set(
         ["b/z0/s0/wall-1/wall-1", "b/z0/s1/wall-1/wall-1"]
@@ -68,7 +69,8 @@ def test_graph_polygon(g_def, g_fac, g_ove, g_all):
         ["b/z0/s0/wall-1/wall-1", "b/z0/s1/wall-1/wall-1"]
     )
 
-    assert len(g_all.keys()) > len(g_def.keys())
+    assert gz_all["b/z1"] == ["b/z0"]
+    assert gz_all["b/z0"] == ["b/z1"]
 
 
 def test_graph_wall_solid_zone(bdg, g_def):
@@ -82,4 +84,28 @@ def test_graph_wall_solid_zone(bdg, g_def):
 
     gz = graph_zone(bdg, g=g_def)
     assert len(list(gz.keys())) < len(list(gs.keys()))  # Because there's less zones than solids
-    assert ("b/z0" not in gz) and ("b/z1" not in gz)  # Because they are only touching
+    assert (gz["b/z0"] == []) and (gz["b/z1"] == [])  # Because they are only touching
+
+
+def timed(f, *args, **kwargs):
+    t0 = time.time()
+    r = f(*args, **kwargs)
+    t = time.time() - t0
+    return t, r
+
+
+def test_graph_method_caching(bdg):
+    # Make sure it takes less time to get cached graphs (any after the first one)
+    time_z, gz = timed(bdg.get_graph, new=False, level="zone")
+    time_s, gs = timed(bdg.get_graph, new=False, level="solid")
+    time_w, gw = timed(bdg.get_graph, new=False, level="wall")
+    time_p, gp = timed(bdg.get_graph, new=False, level="polygon")
+
+    assert time_z > time_s
+    assert time_z > time_w
+    assert time_z > time_p
+
+    assert "b/z0" in gz
+    assert "b/z0/s0" in gs
+    assert "b/z0/s0/wall-0" in gw
+    assert "b/z0/s0/wall-0/wall-0" in gp

@@ -10,6 +10,10 @@ from building3d.geom.numba.points import bounding_box
 from building3d.geom.numba.zone import Zone
 from building3d.geom.numba.types import PointType, IndexType
 from building3d.geom.numba.building.get_mesh import get_mesh_from_zones
+from building3d.geom.numba.building.graph import graph_polygon
+from building3d.geom.numba.building.graph import graph_wall
+from building3d.geom.numba.building.graph import graph_solid
+from building3d.geom.numba.building.graph import graph_zone
 from building3d.geom.numba.solid.stitch import stitch_solids
 
 
@@ -46,6 +50,11 @@ class Building:
 
         for zn in zones:
             self.add_zone(zn)
+
+        self.graph = {}
+        self.graph_wall = {}
+        self.graph_solid = {}
+        self.graph_zone = {}
 
         logger.info(f"Building created: {self}")
 
@@ -107,36 +116,45 @@ class Building:
         else:
             raise ValueError(f"Incorrect absolute path: {abspath}")
 
-    def find_adjacent_solids(self, recalc=False) -> dict[str, list[str]]:
-        """Return a dict mapping adjacent solids.
+    def get_graph(self, new: bool = False, level: str = "polygon") -> dict[str, list[str]]:
+        """Returns the graph of this building. Uses cached dict or makes new if requested.
 
-        The keys of the returned dict are solid paths, i.e. "zone_name/solid_name".
-        The values are lists of adjacent solid paths.
+        Args:
+            new: if True, recalculates the graph
+            level: "polygon" | "wall" | "solid" | "zone"
+
+        Returns:
+            dict with connections at a specified level
         """
-        # TODO: Add unit test
-        if len(self.adj_solids) > 0 and recalc is False:
-            return self.adj_solids
+        if len(self.graph) == 0:
+            new = True
+
+        if new is True:
+            facing = True
+            not_overlapping = False
+            not_touching = False
+            self.graph = graph_polygon(self, facing, not_overlapping, not_touching)
+            self.graph_wall = graph_wall(self, facing, not_overlapping, not_touching, self.graph)
+            self.graph_solid = graph_solid(self, facing, not_overlapping, not_touching, self.graph)
+            self.graph_zone = graph_zone(self, facing, not_overlapping, not_touching, self.graph)
+
+        if level == "polygon":
+            return self.graph
+        elif level == "wall":
+            return self.graph_wall
+        elif level == "solid":
+            return self.graph_solid
+        elif level == "zone":
+            return self.graph_zone
         else:
-            zones = self.children.values()
-            adjacent = {}
-            for zi in zones:
-                for zj in zones:
-                    solids_i = zi.children.values()
-                    solids_j = zj.children.values()
-                    for si in solids_i:
-                        for sj in solids_j:
-                            if si.path not in adjacent:
-                                adjacent[si.path] = []
-                            if si.is_adjacent_to_solid(sj, exact=False):
-                                adjacent[si.path].append(sj.path)
-            self.adj_solids = adjacent
-            return adjacent
+            raise ValueError(f"Level not recognized: {level}")
 
     def stitch_solids(self):
         """Find adjacent solids and stitch them."""
         logger.info(f"Stitching solids in building {self}")
 
-        adj_solids = self.find_adjacent_solids()
+        # Find adjacent solids
+        adj_solids = self.get_graph(new=False, level="solid")
         done = []
 
         for s_path in adj_solids.keys():

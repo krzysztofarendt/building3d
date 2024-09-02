@@ -44,7 +44,7 @@ def get_zone() -> Zone:
     return zone
 
 
-def test_zone():
+def test_building():
     z = get_zone()
     b = Building([z], "building")
 
