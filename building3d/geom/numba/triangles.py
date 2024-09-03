@@ -8,6 +8,7 @@ from building3d.config import GEOM_RTOL
 from building3d.config import POINT_NUM_DEC
 from building3d.geom.numba.types import PointType, VectorType, IndexType, INT
 from building3d.geom.numba.points import are_points_collinear
+from building3d.geom.numba.points import is_point_inside_bbox
 
 
 @njit
@@ -90,6 +91,10 @@ def is_point_inside(
 
     This function does not test if the point is coplanar with the triangle.
     """
+    # Check if point is inside the bounding box
+    if not is_point_inside_bbox(ptest, np.vstack((pt1, pt2, pt3))):
+        return False
+
     # Test if the point is at any of the three vertices
     if np.allclose(ptest, pt1) or np.allclose(ptest, pt2) or np.allclose(ptest, pt3):
         return True

@@ -8,7 +8,7 @@ from building3d.geom.numba.triangles import is_point_inside as is_point_inside_t
 from building3d.geom.numba.polygon.edges import polygon_edges
 from building3d.geom.numba.points.distance import distance_point_to_edge
 from building3d.geom.numba.points import is_point_on_segment
-from building3d.geom.numba.points import bounding_box
+from building3d.geom.numba.points import is_point_inside_bbox
 from building3d.geom.numba.polygon.plane import plane_coefficients
 from building3d.geom.numba.polygon.plane import projection_coefficients
 from building3d.geom.numba.vectors import normal
@@ -22,16 +22,6 @@ def is_point_at_boundary(ptest: PointType, pts: PointType) -> bool:
         if is_point_on_segment(ptest, pt1, pt2):
             return True
     return False
-
-
-@njit
-def is_point_inside_bbox(ptest: PointType, pts: PointType) -> bool:
-    """Checks whether a point is inside the bounding box for `pts`."""
-    bbox = bounding_box(pts)
-    if (ptest < bbox[0]).any() or (ptest > bbox[1]).any():
-        return False
-    else:
-        return True
 
 
 @njit

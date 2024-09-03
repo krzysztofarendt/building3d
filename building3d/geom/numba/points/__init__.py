@@ -98,6 +98,16 @@ def bounding_box(pts: PointType) -> tuple[PointType, PointType]:
 
 
 @njit
+def is_point_inside_bbox(ptest: PointType, pts: PointType) -> bool:
+    """Checks whether a point is inside the bounding box for `pts`."""
+    bbox = bounding_box(pts)
+    if (ptest < bbox[0]).any() or (ptest > bbox[1]).any():
+        return False
+    else:
+        return True
+
+
+@njit
 def are_points_coplanar(
     pts: PointType,
     atol: float = GEOM_ATOL,

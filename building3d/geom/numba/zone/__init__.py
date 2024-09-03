@@ -7,8 +7,6 @@ from building3d.geom.paths.validate_name import validate_name
 from building3d.geom.numba.points import bounding_box
 from building3d.geom.numba.types import PointType, IndexType
 from building3d.geom.numba.solid import Solid
-from building3d.geom.numba.wall import Wall
-from building3d.geom.numba.polygon import Polygon
 from building3d.geom.numba.zone.get_mesh import get_mesh_from_solids
 from building3d.geom.exceptions import GeometryError
 
