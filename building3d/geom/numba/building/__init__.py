@@ -119,6 +119,11 @@ class Building:
     def get_graph(self, new: bool = False, level: str = "polygon") -> dict[str, list[str]]:
         """Returns the graph of this building. Uses cached dict or makes new if requested.
 
+        Assumes that connections are only when polygons are:
+        - facing
+        - not overlapping
+        - not touching
+
         Args:
             new: if True, recalculates the graph
             level: "polygon" | "wall" | "solid" | "zone"
