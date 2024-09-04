@@ -98,6 +98,12 @@ class Ray:
 
         return default
 
+    def set_direction(self, dx: float, dy: float, dz: float) -> None:
+        d = np.array([float(dx), float(dy), float(dz)])
+        d /= np.linalg.norm(d)
+        d *= Ray.speed
+        self.vel = d
+
     def update_location(self) -> None:
         if self.energy <= 0:
             return
@@ -174,3 +180,92 @@ class Ray:
             self.dist = distance_point_to_polygon(self.pos, poly.pts, poly.tri, poly.vn)
             self.dist_inc = self.dist - self.dist_prev
             logger.debug(f"{self.dist=}, {self.dist_prev=}, {self.dist_inc=}")
+
+    def forward(self) -> None:
+        """Run one step forward and update the position."""
+        if self.energy <= 0:
+            return
+
+        # If distance below threshold, reflect (change direction)
+        max_allowed_lags = 10
+
+        if self.num_step == 0:
+            assert len(self.loc) > 0, "Ray initial location not set"
+            self.update_target_surface()
+            self.update_distance(fast_calc=False)
+
+        # Schedule at least 1 step forward
+        lag = 1
+
+        # Move forward until lag is reduced to 0
+        # (there may be additional lag when the ray is reflected near a corner
+        #  and can't immediately move, because it would go outside the building)
+        while lag > 0:
+            if self.dist <= Ray.min_distance:
+                logger.debug(f"Ray needs to be reflected: {self}")
+
+                assert self.trg_surf not in Ray.transparent
+
+                # Reflect
+                poly = self.bdg.get(self.trg_surf)
+                assert isinstance(poly, Polygon)
+                self.reflect(poly.vn)
+                if self.energy <= 0:
+                    break
+                self.update_location()
+                self.update_target_surface()
+                self.num_steps_after_contact = 0
+                self.update_distance(fast_calc=False)
+
+                # Check if can move forward in the next step
+                # (if the next target surface is not too close)
+                if self.dist <= Ray.min_distance:
+                    logger.debug(
+                        f"{self} is too close to the surface {self.trg_surf} to move forward."
+                    )
+                    # Remember that this ray is 1 step behind due to corner reflection
+                    # The lag has to be reduced by moving forward multiple times once
+                    # the target surface which is far enough is found
+                    lag += 1
+                    continue
+
+                if lag >= max_allowed_lags:
+                    raise RuntimeError("Too many reflections caused too high ray lag.")
+
+            # Move forward
+            self.pos += self.vel * Ray.time_step
+            fast_calc = True if self.num_steps_after_contact > 1 else False
+            self.update_distance(fast_calc)
+            lag -= 1
+
+            # Add current position to buffer
+            self.past_pos.appendleft(self.pos)
+            if len(self.past_pos) > Ray.buff_size:
+                _ = self.past_pos.pop()
+
+            self.num_step += 1
+
+        self.num_steps_after_contact += 1
+
+    def reflect(self, vn: np.ndarray) -> None:
+        """Bounce ray off a surface.
+
+        Args:
+            vn: surface normal vector (should have unit length)
+        """
+        logger.debug(f"Reflect: {self}")
+        speed_before = np.linalg.norm(self.vel)
+
+        dot = np.dot(vn, self.vel)
+        self.vel = self.vel - 2 * dot * vn
+
+        speed_after = np.linalg.norm(self.vel)
+        assert np.isclose(speed_before, speed_after)
+
+        # Absorp part of the ray energy
+        self.energy -= self.target_absorption
+
+        if self.energy <= 0:
+            logger.debug(f"Ray stopped, energy=0: {self}")
+            self.vel = np.array([0.0, 0.0, 0.0])
+            self.energy = 0.0

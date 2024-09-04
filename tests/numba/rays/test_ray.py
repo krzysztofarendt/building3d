@@ -63,3 +63,11 @@ def test_ray_init(double_solid_building):
 
     ray.update_distance(fast_calc=False)
     assert np.isclose(ray.dist, 0.5)
+
+
+def test_ray_set_direction(single_solid_building):
+    bdg = single_solid_building
+    pos = new_point(0.5, 0.5, 0.5)
+    ray = Ray(pos, bdg)
+    ray.set_direction(1, 0, 0)
+    assert np.allclose(ray.vel, [Ray.speed, 0, 0])
