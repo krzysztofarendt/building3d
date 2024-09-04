@@ -14,7 +14,7 @@ from .find_transparent import find_transparent
 from .find_target import find_target
 from building3d.geom.paths.object_path import object_path, split_path
 from building3d.simulators.rays.numba.find_transparent import find_transparent
-# from .get_property import get_property
+from .get_property import get_property
 from .config import RAY_LINE_LEN
 
 
@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 class Ray:
     buff_size: int = RAY_LINE_LEN  # Used only for plotting
-    transparent = []
+    transparent: set = set()
     transparent_checked = False
 
     speed: float = 343.0
@@ -87,7 +87,7 @@ class Ray:
     def default_properties(building: Building):
         """Return default acoustic properties."""
         # Default values
-        default_absorption = 0.1
+        default_absorption = 0.1  # TODO: add to config
 
         # Fill in the property dict
         default = {"absorption": {}}
@@ -111,10 +111,29 @@ class Ray:
             first_look_at.append(self.loc)
 
         if len(self.trg_surf) > 0:
-            z, s, _, _ = split_path(self.trg_surf)
-            trg_sld = object_path(zone=z, solid=s)
+            b, z, s, _, _ = split_path(self.trg_surf)
+            trg_sld = PATH_SEP.join((b, z, s))
             first_look_at.append(trg_sld)
 
         self.loc = find_location(self.pos, self.bdg, *first_look_at)
 
         logger.debug(f"Update ray location to: {self.loc}")
+
+    def update_target_surface(self):
+        if self.enr <= 0:
+            return
+
+        logger.debug(f"Update target surface for {self}")
+        self.trg_surf = find_target(
+            pos=self.pos,
+            vel=self.vel,
+            loc=self.loc,
+            bdg=self.bdg,
+            trans=Ray.transparent,
+            chk=set(),
+        )
+        self.target_absorption = get_property(
+            self.trg_surf,
+            "absorption",
+            self.prop,
+        )
