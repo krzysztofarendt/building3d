@@ -5,6 +5,7 @@ import numpy as np
 
 from building3d.geom.numba.points import new_point
 from building3d.geom.numba.polygon import Polygon
+from building3d.geom.numba.polygon.distance import distance_point_to_polygon
 from building3d.geom.numba.building import Building
 from building3d.geom.numba.building.find_location import find_location
 from building3d.geom.numba.vectors import normal, new_vector
@@ -43,7 +44,7 @@ class Ray:
         # Velocity
         self.vel = new_vector(0.0, 0.0, 0.0)
         # Energy
-        self.enr = 1.0
+        self.energy = 1.0
 
         # Current location (path to solid)
         self.loc: str = ""
@@ -97,8 +98,8 @@ class Ray:
 
         return default
 
-    def update_location(self):
-        if self.enr <= 0:
+    def update_location(self) -> None:
+        if self.energy <= 0:
             return
 
         logger.debug(f"Update location of {self}")
@@ -119,8 +120,8 @@ class Ray:
 
         logger.debug(f"Update ray location to: {self.loc}")
 
-    def update_target_surface(self):
-        if self.enr <= 0:
+    def update_target_surface(self) -> None:
+        if self.energy <= 0:
             return
 
         logger.debug(f"Update target surface for {self}")
@@ -137,3 +138,39 @@ class Ray:
             "absorption",
             self.prop,
         )
+
+    def update_distance(self, fast_calc: bool) -> None:
+        """Update distance to the target surface.
+
+        This function is sped up by avoiding recalculating the distance
+        at each step. The ray moves along straight lines and the surrounding
+        geometry does not change, so we can cache the distance increments.
+
+        The actual distance calculation must take place only after reflection.
+
+        Args:
+            fast_calc: whether to use use fast calculation method or the accurate one
+
+        Return:
+            None
+        """
+        if self.trg_surf == "":
+            return
+
+        if self.energy <= 0:
+            return
+
+        if fast_calc:
+            # This method should be called only when far enough from the target surface
+            self.dist_prev = self.dist
+            self.dist += self.dist_inc
+        else:
+            # TODO: This used to be very slow. Can it be faster?
+            logger.debug(f"Accurate distance calculation for {self}")
+            poly = self.bdg.get(self.trg_surf)
+            assert isinstance(poly, Polygon)
+
+            self.dist_prev = self.dist
+            self.dist = distance_point_to_polygon(self.pos, poly.pts, poly.tri, poly.vn)
+            self.dist_inc = self.dist - self.dist_prev
+            logger.debug(f"{self.dist=}, {self.dist_prev=}, {self.dist_inc=}")

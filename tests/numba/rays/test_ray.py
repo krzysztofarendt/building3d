@@ -36,7 +36,6 @@ def test_ray_init(double_solid_building):
     assert "b/z/s0/wall-1/wall-1" in ray.transparent
     assert "b/z/s1/wall-3/wall-3" in ray.transparent
 
-
     # Make sure location is empty
     # (it shouldn't be auto-calculated, because it is slow; it's better to assign it explicitly)
     assert ray.loc == ""
@@ -53,6 +52,14 @@ def test_ray_init(double_solid_building):
     ray.update_target_surface()
     assert ray.trg_surf == "b/z/s1/wall-1/wall-1"
 
+    # Calculate distance to target surface
+    ray.update_distance(fast_calc=False)
+    assert np.isclose(ray.dist, 1.5)
+
+    # Change direction and again find target surface and distance
     ray.vel[0] = -1.0  # x
     ray.update_target_surface()
     assert ray.trg_surf == "b/z/s0/wall-3/wall-3"
+
+    ray.update_distance(fast_calc=False)
+    assert np.isclose(ray.dist, 0.5)
