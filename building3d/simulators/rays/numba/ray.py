@@ -3,17 +3,16 @@ import logging
 
 import numpy as np
 
-from building3d.geom.numba.points import new_point
 from building3d.geom.numba.polygon import Polygon
 from building3d.geom.numba.polygon.distance import distance_point_to_polygon
 from building3d.geom.numba.building import Building
 from building3d.geom.numba.building.find_location import find_location
-from building3d.geom.numba.vectors import normal, new_vector
+from building3d.geom.numba.vectors import new_vector
 from building3d.geom.paths import PATH_SEP
 from building3d.geom.numba.types import PointType
 from .find_transparent import find_transparent
 from .find_target import find_target
-from building3d.geom.paths.object_path import object_path, split_path
+from building3d.geom.paths.object_path import split_path
 from building3d.simulators.rays.numba.find_transparent import find_transparent
 from .get_property import get_property
 from .config import RAY_LINE_LEN
@@ -28,8 +27,8 @@ class Ray:
     transparent_checked = False
 
     speed: float = 343.0
-    time_step: float = 0.0000625  # 62.5 ms, sampling rate = 16 kHz
-    min_distance: float = speed * time_step * 1.1  # Cannot move closer the wall
+    time_step: float = 0.00003125  # 31.25 ms, sampling rate = 32 kHz
+    min_dist: float = speed * time_step * 1.1  # Cannot move closer the wall
 
     def __init__(
         self,
@@ -54,9 +53,9 @@ class Ray:
         self.trg_absorption: float = 0.0
 
         # Distance to target surface (current, from last step, increment)
-        self.dist = np.inf
-        self.dist_prev = np.inf
-        self.dist_inc = 0
+        self.dist = 0.0
+        self.dist_prev = 0.0
+        self.dist_inc = 0.0
 
         # Simulation step
         self.num_step = 0
@@ -170,6 +169,10 @@ class Ray:
             # This method should be called only when far enough from the target surface
             self.dist_prev = self.dist
             self.dist += self.dist_inc
+
+            if self.num_step == 0:
+                raise ValueError("Cannot use fast_calc in the first time step.")
+
         else:
             # TODO: This used to be very slow. Can it be faster?
             logger.debug(f"Accurate distance calculation for {self}")
@@ -179,6 +182,11 @@ class Ray:
             self.dist_prev = self.dist
             self.dist = distance_point_to_polygon(self.pos, poly.pts, poly.tri, poly.vn)
             self.dist_inc = self.dist - self.dist_prev
+
+            if self.num_step == 0:
+                self.dist_prev = self.dist
+                self.dist_inc = 0.0
+
             logger.debug(f"{self.dist=}, {self.dist_prev=}, {self.dist_inc=}")
 
     def forward(self) -> None:
@@ -201,7 +209,7 @@ class Ray:
         # (there may be additional lag when the ray is reflected near a corner
         #  and can't immediately move, because it would go outside the building)
         while lag > 0:
-            if self.dist <= Ray.min_distance:
+            if self.dist <= Ray.min_dist:
                 logger.debug(f"Ray needs to be reflected: {self}")
 
                 assert self.trg_surf not in Ray.transparent
@@ -219,7 +227,7 @@ class Ray:
 
                 # Check if can move forward in the next step
                 # (if the next target surface is not too close)
-                if self.dist <= Ray.min_distance:
+                if self.dist <= Ray.min_dist:
                     logger.debug(
                         f"{self} is too close to the surface {self.trg_surf} to move forward."
                     )
@@ -269,3 +277,19 @@ class Ray:
             logger.debug(f"Ray stopped, energy=0: {self}")
             self.vel = np.array([0.0, 0.0, 0.0])
             self.energy = 0.0
+
+    def __str__(self):
+        s = "Ray("
+        s += f"id={hex(id(self))}, "
+        s += f"pos={self.pos}, "
+        s += f"enr={self.energy:.2f}, "
+        s += f"loc={self.loc}, "
+        s += f"trg={self.trg_surf}, "
+        s += f"dst={self.dist:.3f}, "
+        s += f"inc={self.dist_inc:.3f}, "
+        s += f"vel={self.vel*Ray.time_step}"
+        s += "}"
+        return s
+
+    def __repr__(self):
+        return self.__str__()

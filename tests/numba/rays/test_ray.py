@@ -71,3 +71,31 @@ def test_ray_set_direction(single_solid_building):
     ray = Ray(pos, bdg)
     ray.set_direction(1, 0, 0)
     assert np.allclose(ray.vel, [Ray.speed, 0, 0])
+
+
+def test_ray_forward_and_reflect(single_solid_building):
+    # Initialize building and ray
+    bdg = single_solid_building
+    pos = new_point(0.5, 0.5, 0.5)
+    ray = Ray(pos, bdg)
+    ray.set_direction(1, 0, 0)
+    ray.update_location()
+    ray.update_target_surface()
+    ray.update_distance(fast_calc=False)
+
+    # Move forward for as many steps as possible without reflection
+    dist_without_reflect = ray.dist - Ray.min_dist
+    num_steps_to_surf = int(np.floor(dist_without_reflect / ray.speed / ray.time_step))
+
+    for i in range(num_steps_to_surf):
+        ray.forward()
+        assert np.allclose(ray.vel, (ray.speed, 0, 0))
+
+    # Reflection should not happen after the next step, because the ray first checks
+    # if it is close the surface, and if not, it moves forward
+    ray.forward()
+    assert np.allclose(ray.vel, (ray.speed, 0, 0))
+
+    # But now the ray will reflect
+    ray.forward()
+    assert np.allclose(ray.vel, (-ray.speed, 0, 0))
