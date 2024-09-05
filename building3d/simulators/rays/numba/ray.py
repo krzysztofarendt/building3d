@@ -14,7 +14,7 @@ from .find_transparent import find_transparent
 from .find_target import find_target
 from building3d.geom.paths.object_path import split_path
 from building3d.simulators.rays.numba.find_transparent import find_transparent
-from .get_property import get_property
+from .properties import default_properties, get_property
 from .config import RAY_LINE_LEN
 
 
@@ -23,9 +23,6 @@ logger = logging.getLogger(__name__)
 
 class Ray:
     buff_size: int = RAY_LINE_LEN  # Used only for plotting
-    transparent: set = set()
-    transparent_checked = False
-
     speed: float = 343.0
     time_step: float = 0.00003125  # 31.25 ms, sampling rate = 32 kHz
     min_dist: float = speed * time_step * 1.1  # Cannot move closer the wall
@@ -69,7 +66,7 @@ class Ray:
         if isinstance(properties, dict):
             self.prop = properties
         else:
-            self.prop = Ray.default_properties(self.bdg)
+            self.prop = default_properties(self.bdg)
 
         # Initialize buffer of previous positions
         self.past_pos = deque(maxlen=Ray.buff_size)
@@ -77,25 +74,9 @@ class Ray:
             self.past_pos.appendleft(self.pos)
 
         # Find transparent surfaces
-        if not Ray.transparent_checked:
-            Ray.transparent = find_transparent(self.bdg)
-            Ray.transparent_checked = True
+        self.transparent = find_transparent(self.bdg)
 
         logger.debug(f"Ray created: {self}")
-
-    @staticmethod
-    def default_properties(building: Building):
-        """Return default acoustic properties."""
-        # Default values
-        default_absorption = 0.1  # TODO: add to config
-
-        # Fill in the property dict
-        default = {"absorption": {}}
-
-        for z in building.zones.keys():
-            default["absorption"][z] = default_absorption
-
-        return default
 
     def set_direction(self, dx: float, dy: float, dz: float) -> None:
         d = np.array([float(dx), float(dy), float(dz)])
@@ -135,7 +116,7 @@ class Ray:
             vel=self.vel,
             loc=self.loc,
             bdg=self.bdg,
-            trans=Ray.transparent,
+            trans=self.transparent,
             chk=set(),
         )
         self.target_absorption = get_property(
@@ -212,7 +193,7 @@ class Ray:
             if self.dist <= Ray.min_dist:
                 logger.debug(f"Ray needs to be reflected: {self}")
 
-                assert self.trg_surf not in Ray.transparent
+                assert self.trg_surf not in self.transparent
 
                 # Reflect
                 poly = self.bdg.get(self.trg_surf)

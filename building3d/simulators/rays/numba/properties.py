@@ -1,9 +1,24 @@
 import logging
 
+from building3d.geom.numba.building import Building
 from building3d.geom.paths import PATH_SEP
 
 
 logger = logging.getLogger(__name__)
+
+
+def default_properties(building: Building):
+    """Return default acoustic properties."""
+    # Default values
+    default_absorption = 0.1  # TODO: add to config
+
+    # Fill in the property dict
+    default = {"absorption": {}}
+
+    for z in building.zones.keys():
+        default["absorption"][z] = default_absorption
+
+    return default
 
 
 def get_property(target_surface: str, prop_name: str, property_dict: dict) -> float:

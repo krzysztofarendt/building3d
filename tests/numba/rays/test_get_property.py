@@ -1,6 +1,6 @@
 import pytest
 
-from building3d.simulators.rays.numba.get_property import get_property
+from building3d.simulators.rays.numba.properties import get_property
 
 
 @pytest.fixture
