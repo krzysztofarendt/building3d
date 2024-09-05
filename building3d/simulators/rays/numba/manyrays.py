@@ -3,7 +3,6 @@ import logging
 
 import numpy as np
 
-from building3d.geom.numba.points import new_point
 from building3d.geom.numba.types import PointType, IndexType, FLOAT, INT
 from building3d.geom.numba.building import Building
 from building3d.paths.wildcardpath import WildcardPath
