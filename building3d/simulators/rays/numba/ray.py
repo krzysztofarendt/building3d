@@ -10,7 +10,6 @@ from building3d.geom.numba.building.find_location import find_location
 from building3d.geom.numba.vectors import new_vector
 from building3d.geom.paths import PATH_SEP
 from building3d.geom.numba.types import PointType
-from .find_transparent import find_transparent
 from .find_target import find_target
 from building3d.geom.paths.object_path import split_path
 from building3d.simulators.rays.numba.find_transparent import find_transparent
