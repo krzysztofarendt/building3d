@@ -78,11 +78,16 @@ def points_equal(pt1: PointType, pt2: PointType, atol: float = GEOM_ATOL) -> boo
     return np.allclose(pt1, pt2, atol=atol)
 
 
-# njit doesn't support hash() and tuple()
+# njit doesn't support tuple()
+def point_to_tuple(pt: PointType, decimals: int = POINT_NUM_DEC) -> tuple[float, float, float]:
+    pt = np.round(pt, decimals=decimals)
+    return tuple(pt)
+
+
+# njit doesn't support hash()
 def point_to_hash(pt: PointType, decimals: int = POINT_NUM_DEC) -> int:
     """Calculates a hash value for the point, assuming a chosen number of decimals."""
-    pt = np.round(pt, decimals=decimals)
-    return hash(tuple(pt))
+    return hash(point_to_tuple(pt, decimals))
 
 
 @njit
@@ -101,7 +106,7 @@ def bounding_box(pts: PointType) -> tuple[PointType, PointType]:
 def is_point_inside_bbox(ptest: PointType, pts: PointType) -> bool:
     """Checks whether a point is inside the bounding box for `pts`."""
     bbox = bounding_box(pts)
-    if (ptest < bbox[0]).any() or (ptest > bbox[1]).any():
+    if (ptest < bbox[0] - EPSILON).any() or (ptest > bbox[1] + EPSILON).any():
         return False
     else:
         return True

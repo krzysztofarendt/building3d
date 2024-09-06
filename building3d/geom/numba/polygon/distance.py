@@ -36,7 +36,7 @@ def distance_point_to_polygon(
     _, _, _, d = plane_coefficients(pts)
     _, _, _, dp = projection_coefficients(ptest, vn)
 
-    # Distance
+    # Distance (sign neglected!)
     # Negative distance -> point behind the polygon
     # Positive distance -> point in front of the polygon
     dist = np.abs(d - dp)

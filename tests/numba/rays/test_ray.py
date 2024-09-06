@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 
+from building3d import random_between
 from building3d.simulators.rays.numba.ray import Ray
 from building3d.geom.numba.points import new_point
 from building3d.geom.numba.building import Building
@@ -87,7 +88,7 @@ def test_ray_forward_and_reflect(single_solid_building):
     dist_without_reflect = ray.dist - Ray.min_dist
     num_steps_to_surf = int(np.floor(dist_without_reflect / ray.speed / ray.time_step))
 
-    for i in range(num_steps_to_surf):
+    for _ in range(num_steps_to_surf):
         ray.forward()
         assert np.allclose(ray.vel, (ray.speed, 0, 0))
 
@@ -99,3 +100,50 @@ def test_ray_forward_and_reflect(single_solid_building):
     # But now the ray will reflect
     ray.forward()
     assert np.allclose(ray.vel, (-ray.speed, 0, 0))
+
+
+def test_ray_forward_and_reflect_going_towards_corner(single_solid_building):
+    # Initialize building and ray
+    bdg = single_solid_building
+    pos = new_point(0.5, 0.5, 0.5)
+    ray = Ray(pos, bdg)
+    ray.set_direction(1, 1, 0)
+    ray.update_location()
+    ray.update_target_surface()
+    ray.update_distance(fast_calc=False)
+
+    # Move forward for as many steps as possible without reflection
+    while np.allclose(ray.vel, (ray.speed / np.sqrt(2.), ray.speed / np.sqrt(2.), 0)):
+        ray.forward()
+
+    # Ray reflected, make sure the direction is reversed
+    assert np.allclose(ray.vel, (-ray.speed / np.sqrt(2.), -ray.speed / np.sqrt(2.), 0))
+
+
+def test_ray_forward_and_reflect_going_random_direction(single_solid_building):
+    # Initialize building and ray
+    bdg = single_solid_building
+    pos = new_point(0.5, 0.5, 0.5)
+    ray = Ray(pos, bdg)
+
+    for _ in range(10):
+        p = np.clip(np.random.random(3), 0.1, 0.9)
+        pos = new_point(*p)
+        ray = Ray(pos, bdg)
+        ray.set_direction(
+            dx=random_between(-1, 1),
+            dy=random_between(-1, 1),
+            dz=random_between(-1, 1),
+        )
+        ray.update_location()
+        ray.update_target_surface()
+        ray.update_distance(fast_calc=False)
+        init_vel = ray.vel.copy()
+
+        # Move forward for as many steps as possible without reflection
+        while np.allclose(ray.vel, init_vel):
+            ray.forward()
+
+        # Reflect and move a bit
+        for _ in range(10000):
+            ray.forward()

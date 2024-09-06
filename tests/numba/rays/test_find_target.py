@@ -32,3 +32,12 @@ def test_find_target(bdg):
     vel = new_vector(-1, 0, 0)
     trg = find_target(pos, vel, "b/z/s0", bdg, trans, set())
     assert trg == "b/z/s0/wall-3/wall-3"
+
+    # Test with large velocity
+    mag = 1000.0
+    vel = new_vector(mag, 0, 0)
+    trg = find_target(pos, vel, "b/z/s0", bdg, trans, set())
+    assert trg == "b/z/s1/wall-1/wall-1"
+    vel = new_vector(-mag, 0, 0)
+    trg = find_target(pos, vel, "b/z/s0", bdg, trans, set())
+    assert trg == "b/z/s0/wall-3/wall-3"

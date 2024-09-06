@@ -41,9 +41,6 @@ def find_target(
     )
     trg_surf = ""
 
-    # Find transparent surfaces
-
-
     found = False
     path = split_path(loc)
     assert len(path) == 3, f"Incorrect path length ({len(path)}). Should be 3."
@@ -87,7 +84,7 @@ def find_target(
             break
 
     if not found:
-        raise RuntimeError("Particle isn't moving towards any surface")
+        raise RuntimeError(f"Particle isn't moving towards any surface: {pos=}, {vel=}")
 
     assert len(trg_surf) > 0
     assert isinstance(bdg.get(trg_surf), Polygon)

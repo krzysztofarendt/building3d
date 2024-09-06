@@ -16,6 +16,7 @@ from building3d.geom.paths.object_path import split_path
 from building3d.simulators.rays.numba.find_transparent import find_transparent
 from .properties import default_properties, get_property
 from .config import RAY_LINE_LEN
+from building3d.config import EPSILON
 
 
 logger = logging.getLogger(__name__)
@@ -25,7 +26,7 @@ class Ray:
     buff_size: int = RAY_LINE_LEN  # Used only for plotting
     speed: float = 343.0
     time_step: float = 0.00003125  # 31.25 ms, sampling rate = 32 kHz
-    min_dist: float = speed * time_step * 1.1  # Cannot move closer the wall
+    min_dist: float = speed * time_step * 2.0  # Cannot move closer the wall
 
     def __init__(
         self,
@@ -50,12 +51,10 @@ class Ray:
         self.trg_absorption: float = 0.0
 
         # Distance to target surface (current, from last step, increment)
-        self.dist = 0.0
-        self.dist_prev = 0.0
+        self.dist = np.inf
+        self.dist_prev = np.inf
         self.dist_inc = 0.0
 
-        # Simulation step
-        self.num_step = 0
         # Number of steps after touching last surface
         self.num_steps_after_contact = 0
 
@@ -146,13 +145,10 @@ class Ray:
         if self.energy <= 0:
             return
 
-        if fast_calc:
+        if fast_calc and self.dist_inc < 0 and not np.isnan(self.dist_inc):
             # This method should be called only when far enough from the target surface
             self.dist_prev = self.dist
             self.dist += self.dist_inc
-
-            if self.num_step == 0:
-                raise ValueError("Cannot use fast_calc in the first time step.")
 
         else:
             # TODO: This used to be very slow. Can it be faster?
@@ -164,9 +160,12 @@ class Ray:
             self.dist = distance_point_to_polygon(self.pos, poly.pts, poly.tri, poly.vn)
             self.dist_inc = self.dist - self.dist_prev
 
-            if self.num_step == 0:
-                self.dist_prev = self.dist
+            if np.isinf(self.dist_inc) or np.abs(self.dist_inc) >= Ray.min_dist - EPSILON:
                 self.dist_inc = 0.0
+
+            # Sanity check
+            assert np.abs(self.dist_inc) < Ray.min_dist, \
+                f"{np.abs(self.dist_inc)=}, {Ray.min_dist=}"
 
             logger.debug(f"{self.dist=}, {self.dist_prev=}, {self.dist_inc=}")
 
@@ -175,13 +174,18 @@ class Ray:
         if self.energy <= 0:
             return
 
+        # self.update_distance(fast_calc=False)
+        if self.trg_surf == "":
+            self.update_target_surface()
+        if np.isnan(self.dist):
+            self.update_distance(fast_calc=False)
+
+        # TODO: This is needed, but I don't know why. Without it, rays go outside building.
+        if self.dist <= Ray.min_dist * 2:
+            self.update_distance(fast_calc=False)
+
         # If distance below threshold, reflect (change direction)
         max_allowed_lags = 10
-
-        if self.num_step == 0:
-            assert len(self.loc) > 0, "Ray initial location not set"
-            self.update_target_surface()
-            self.update_distance(fast_calc=False)
 
         # Schedule at least 1 step forward
         lag = 1
@@ -222,17 +226,21 @@ class Ray:
                     raise RuntimeError("Too many reflections caused too high ray lag.")
 
             # Move forward
+            assert (np.abs(self.vel * Ray.time_step) < Ray.min_dist).all()  # Sanity check
             self.pos += self.vel * Ray.time_step
-            fast_calc = True if self.num_steps_after_contact > 1 else False
-            self.update_distance(fast_calc)
             lag -= 1
+
+            # Update distance
+            if self.num_steps_after_contact > 1 and self.dist > Ray.min_dist:
+                fast_calc = True
+            else:
+                fast_calc = False
+            self.update_distance(fast_calc=fast_calc)
 
             # Add current position to buffer
             self.past_pos.appendleft(self.pos)
             if len(self.past_pos) > Ray.buff_size:
                 _ = self.past_pos.pop()
-
-            self.num_step += 1
 
         self.num_steps_after_contact += 1
 
@@ -258,6 +266,7 @@ class Ray:
             logger.debug(f"Ray stopped, energy=0: {self}")
             self.vel = np.array([0.0, 0.0, 0.0])
             self.energy = 0.0
+            self.trg_surf = ""
 
     def __str__(self):
         s = "Ray("
