@@ -55,7 +55,7 @@ def example_simulation():
     plot_objects((building, raysim.rays), output_file="tmp/end.png")
 
     print("Making movie")
-    movie_path = "tmp/test_ray_simulator.mp4"
+    movie_path = "tmp/simulation.mp4"
     make_movie(movie_path, state_dump_dir, b3d_file, 300)
 
 
