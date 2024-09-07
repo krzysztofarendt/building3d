@@ -73,8 +73,8 @@ class RaySimulator:
         logger.info("RaySimulator initialization...")
 
         self.building = building
-        self.source = source
-        self.sinks = sinks
+        self.source = source.copy()
+        self.sinks = [s.copy() for s in sinks]
         self.sink_radius = sink_radius
 
         self.num_steps = 0

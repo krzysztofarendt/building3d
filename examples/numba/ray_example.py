@@ -1,12 +1,13 @@
 import os
 
 from building3d.display.numba.plot_objects import plot_objects
+from building3d.io.numba.b3d import write_b3d
 from building3d.geom.numba.building import Building
 from building3d.geom.numba.solid.box import box
 from building3d.geom.numba.zone import Zone
 from building3d.geom.numba.points import new_point
 from building3d.simulators.rays.numba.simulator import RaySimulator
-# from building3d.simulators.rays.numba.movie import make_movie
+from building3d.simulators.rays.numba.movie import make_movie
 
 
 def example_simulation():
@@ -29,6 +30,8 @@ def example_simulation():
     z = Zone([s1, s2, s3], "z")
 
     building = Building([z], "b")
+    b3d_file = "tmp/building.b3d"
+    write_b3d(b3d_file, building)
 
     csv_file = "tmp/test_result.csv"
     if os.path.exists(csv_file):
@@ -47,13 +50,13 @@ def example_simulation():
     )
     plot_objects((building, raysim.rays), output_file="tmp/start.png")
 
-    raysim.simulate(2000)
+    raysim.simulate(400)
 
     plot_objects((building, raysim.rays), output_file="tmp/end.png")
 
-    # print("Making movie")
-    # movie_path = "tmp/test_ray_simulator.mp4"
-    # make_movie(movie_path, state_dump_dir, b3d_file, 300)
+    print("Making movie")
+    movie_path = "tmp/test_ray_simulator.mp4"
+    make_movie(movie_path, state_dump_dir, b3d_file, 300)
 
 
 if __name__ == "__main__":
