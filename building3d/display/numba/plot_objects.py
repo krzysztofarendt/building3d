@@ -70,22 +70,21 @@ def plot_objects(objects: tuple, output_file=None) -> None:
             mesh = pv.PolyData(verts, faces=faces_flat)
             pl.add_mesh(mesh, show_edges=True, opacity=0.7, color=col)
 
-        # TODO
-        # if has_get_lines:
-        #     verts, lines = obj.get_lines()
-        #     varr = points_to_array(verts)
-        #     larr = []
-        #     for l in lines:
-        #         larr.extend([len(l)])
-        #         larr.extend(l)
-        #     mesh = pv.PolyData(varr, lines=larr)
-        #     pl.add_mesh(mesh, opacity=0.7, color=col)
-        # TODO
-        # if has_get_points:
-        #     verts = obj.get_points()
-        #     varr = points_to_array(verts)
-        #     mesh = pv.PolyData(varr)
-        #     pl.add_mesh(mesh, opacity=0.9, point_size=5, color=col)
+        if has_get_lines:
+            verts, lines = obj.get_lines()
+            lines_flat = []
+            for l in lines:
+                segment = [len(l)]
+                for v in l:
+                    segment.append(int(v))
+                lines_flat.extend(segment)
+            mesh = pv.PolyData(verts, lines=lines_flat)
+            pl.add_mesh(mesh, opacity=0.7, color=col)
+
+        if has_get_points:
+            verts = obj.get_points()
+            mesh = pv.PolyData(verts)
+            pl.add_mesh(mesh, opacity=0.9, point_size=5, color=col)
 
     if output_file is None:
         pl.show()

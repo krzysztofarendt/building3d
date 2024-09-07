@@ -67,7 +67,7 @@ class ManyRays:
             lines.append([curr_index + i for i in range(line_len)])
             curr_index += line_len
 
-        return np.vstack(verts, dtype=FLOAT), np.vstack(lines, dtype=INT)
+        return np.vstack(verts, dtype=FLOAT), np.vstack(lines)  # TODO: missing dtype for lines
 
     def get_points(self) -> PointType:
         """Interface to building3d.display.plot_objects.plot_objects()"""

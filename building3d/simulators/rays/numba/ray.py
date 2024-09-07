@@ -34,7 +34,7 @@ class Ray:
         properties: None | dict = None,
     ):
         # Position
-        self.pos = position
+        self.pos = position.copy()
         # Building instance
         self.bdg = building
         # Velocity
@@ -69,7 +69,7 @@ class Ray:
         # Initialize buffer of previous positions
         self.past_pos = deque(maxlen=Ray.buff_size)
         for _ in range(Ray.buff_size):
-            self.past_pos.appendleft(self.pos)
+            self.past_pos.appendleft(self.pos.copy())
 
         # Find transparent surfaces
         self.transparent = find_transparent(self.bdg)
@@ -79,8 +79,7 @@ class Ray:
     def set_direction(self, dx: float, dy: float, dz: float) -> None:
         d = np.array([float(dx), float(dy), float(dz)])
         d /= np.linalg.norm(d)
-        d *= Ray.speed
-        self.vel = d
+        self.vel = d * Ray.speed * Ray.time_step
 
     def update_location(self) -> None:
         if self.energy <= 0:
@@ -164,7 +163,7 @@ class Ray:
             self.dist = distance_point_to_polygon(self.pos, poly.pts, poly.tri, poly.vn)
             self.dist_inc = self.dist - self.dist_prev
 
-            if np.isinf(self.dist_inc) or np.abs(self.dist_inc) >= Ray.min_dist - EPSILON:
+            if np.isinf(self.dist_inc) or np.abs(self.dist_inc) >= Ray.min_dist:
                 self.dist_inc = 0.0
 
             # Sanity check
@@ -231,7 +230,7 @@ class Ray:
 
             # Move forward
             assert (np.abs(self.vel * Ray.time_step) < Ray.min_dist).all()  # Sanity check
-            self.pos += self.vel * Ray.time_step
+            self.pos += self.vel
             lag -= 1
 
             # Update distance
@@ -242,7 +241,7 @@ class Ray:
             self.update_distance(fast_calc=fast_calc)
 
             # Add current position to buffer
-            self.past_pos.appendleft(self.pos)
+            self.past_pos.appendleft(self.pos.copy())
             if len(self.past_pos) > Ray.buff_size:
                 _ = self.past_pos.pop()
 

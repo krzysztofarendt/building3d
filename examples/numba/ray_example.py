@@ -1,15 +1,15 @@
 import os
 
-import numpy as np
-
+from building3d.display.numba.plot_objects import plot_objects
 from building3d.geom.numba.building import Building
 from building3d.geom.numba.solid.box import box
 from building3d.geom.numba.zone import Zone
 from building3d.geom.numba.points import new_point
 from building3d.simulators.rays.numba.simulator import RaySimulator
+# from building3d.simulators.rays.numba.movie import make_movie
 
 
-def test_ray_simulator(plot=False):
+def example_simulation():
     L = 1
     W = 1
     H = 1
@@ -34,34 +34,27 @@ def test_ray_simulator(plot=False):
     if os.path.exists(csv_file):
         os.remove(csv_file)
 
-    if plot:
-        movie_path = "tmp/test_ray_simulator.mp4"
-    else:
-        movie_path = None
+    state_dump_dir = "tmp/state_dump/"
 
     raysim = RaySimulator(
         building=building,
         source=new_point(0.3, 0.3, 0.3),
         sinks=[new_point(0.6, 0.6, 0.6)],
         sink_radius=0.1,
-        num_rays=20,
+        num_rays=1000,
         csv_file=csv_file,
+        state_dump_dir=state_dump_dir,
     )
-    locations = [r.loc for r in raysim.rays]
-    unique_locations = np.unique(locations)
-    assert (
-        len(unique_locations) == 1
-    ), "Rays located in more than 1 solid at the beginning of simulation?"
+    plot_objects((building, raysim.rays), output_file="tmp/start.png")
 
-    raysim.simulate(400)
-    locations = [r.loc for r in raysim.rays]
-    unique_locations = np.unique(locations)
-    assert (
-        len(unique_locations) == 3
-    ), "Rays not in all three solids at the end of simulation?"
+    raysim.simulate(2000)
 
-    assert os.path.exists(csv_file)
+    plot_objects((building, raysim.rays), output_file="tmp/end.png")
 
-    if plot:
-        assert isinstance(movie_path, str)
-        assert os.path.exists(movie_path)
+    # print("Making movie")
+    # movie_path = "tmp/test_ray_simulator.mp4"
+    # make_movie(movie_path, state_dump_dir, b3d_file, 300)
+
+
+if __name__ == "__main__":
+    example_simulation()
