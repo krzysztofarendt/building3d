@@ -70,6 +70,6 @@ if __name__ == "__main__":
         num_rays=16000,
         properties=acoustic_properties,
         sim_dir=project_dir,
-        steps=2000,
+        steps=1000,
         num_jobs=8,
     )
