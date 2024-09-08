@@ -2,7 +2,7 @@ import os
 from multiprocessing import Process
 
 from building3d.geom.building import Building
-from building3d.geom.point import Point
+from building3d.geom.types import PointType
 from building3d.simulators.rays.movie import make_movie
 from building3d.io.b3d import write_b3d
 from building3d.paths.wildcardpath import WildcardPath
@@ -28,8 +28,8 @@ from .config import (
 
 def parallel_simulation(
     building: Building,
-    source: Point,
-    sinks: list[Point],
+    source: PointType,
+    sinks: list[PointType],
     sink_radius: float,
     num_rays: int,
     properties: None | dict,

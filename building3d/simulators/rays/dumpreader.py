@@ -82,3 +82,4 @@ class DumpReader:
         if self.state is None:
             raise StopIteration
         return self.state
+

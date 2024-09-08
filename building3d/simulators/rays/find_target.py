@@ -1,10 +1,10 @@
 import logging
 
-import numpy as np
-
 from building3d.geom.building import Building
-from building3d.geom.point import Point
-from building3d.geom.paths.object_path import object_path
+from building3d.geom.polygon.ispointinside import is_point_inside_projection
+from building3d.geom.polygon import Polygon
+from building3d.geom.types import PointType, VectorType
+
 from building3d.geom.paths.object_path import split_path
 from building3d.geom.paths import PATH_SEP
 
@@ -13,12 +13,12 @@ logger = logging.getLogger(__name__)
 
 
 def find_target(
-    position: Point,
-    velocity: np.ndarray,
-    location: str,
-    building: Building,
-    transparent: list[str],
-    checked_locations: set,
+    pos: PointType,
+    vel: VectorType,
+    loc: str,
+    bdg: Building,
+    trans: set[str],
+    chk: set[str],
 ) -> str:
     """Find target surface for a moving particle in a building.
 
@@ -26,64 +26,67 @@ def find_target(
     the `transparent` list, it checks the adjacent solids recursively.
 
     Args:
-        position: particle poisition
-        velocity: particle velocity
-        location: location to search (path to solid)
-        building: building containing the solid
-        transparent: list of transparent polygons (paths to polygons)
-        checked_locations: set of solids that were already checked
+        pos: particle poisition
+        vel: particle velocity
+        loc: location to search (path to solid)
+        bdg: building containing the solid
+        trans: set of transparent polygons (paths to polygons)
+        chk: set of solids that were already checked
 
     Return:
         path to the polygon that the particle is moving towards
     """
     logger.debug(
-        f"Called find_target({position=}, {velocity=}, {location=}, {building=}, {transparent=})"
+        f"Called find_target({pos=}, {vel=}, {loc=}, {bdg=}, {trans=})"
     )
-    target_surface = ""
+    trg_surf = ""
 
     found = False
-    zname, sname = split_path(location)
-    z = building.zones[zname]
-    s = z.solids[sname]
-    logger.debug(f"{location=}")
+    path = split_path(loc)
+    assert len(path) == 3, f"Incorrect path length ({len(path)}). Should be 3."
 
-    for w in s.get_walls():
-        for p in w.get_polygons():
+    bname, zname, sname = path
+    assert bname == bdg.name, "Building names do not match"
+
+    z = bdg.zones[zname]
+    s = z.solids[sname]
+    logger.debug(f"{loc=}")
+
+    for w in s.walls.values():
+        for p in w.polygons.values():
             logger.debug(f"Checking {p=}")
-            if p.is_point_inside_projection(position, velocity):
-                poly_path = object_path(z, s, w, p)
+
+            if is_point_inside_projection(ptest=pos, v=vel, pts=p.pts, tri=p.tri, fwd_only=True):
+                poly_path = PATH_SEP.join((bname, z.name, s.name, w.name, p.name))
                 logger.debug(f"Particle will hit this polygon: {poly_path}")
 
-                if poly_path in transparent:
+                if poly_path in trans:
                     # Recursively search adjacent solids
-                    logger.debug(
-                        "...but it's transparent! Have to look into adjacent solid."
-                    )
-                    adj_poly = building.get_graph()[poly_path]
-                    adj_z, adj_s, _, _ = split_path(adj_poly)
-                    new_location = adj_z + PATH_SEP + adj_s
+                    logger.debug("Polygon is transparent. Need to look into adjacent solid.")
 
-                    if new_location not in checked_locations:
-                        checked_locations.add(location)
-                        return find_target(
-                            position,
-                            velocity,
-                            new_location,
-                            building,
-                            transparent,
-                            checked_locations,
-                        )
+                    adj_polygons = bdg.get_graph()[poly_path]
+                    assert len(adj_polygons) == 1, "If polygon is transparent, it must be true"
+
+                    adj_poly = adj_polygons[0]
+
+                    bname, adj_z, adj_s, _, _ = split_path(adj_poly)
+                    new_location = PATH_SEP.join((bname, adj_z, adj_s))
+
+                    if new_location not in chk:
+                        chk.add(loc)
+                        return find_target(pos, vel, new_location, bdg, trans, chk)
 
                 else:
-                    target_surface = object_path(zone=z, solid=s, wall=w, poly=p)
+                    trg_surf = PATH_SEP.join((bname, z.name, s.name, w.name, p.name))
                     found = True
                     break
         if found:
             break
 
     if not found:
-        raise RuntimeError("Particle isn't moving towards any surface")
+        raise RuntimeError(f"Particle isn't moving towards any surface: {pos=}, {vel=}")
 
-    assert len(target_surface) > 0
+    assert len(trg_surf) > 0
+    assert isinstance(bdg.get(trg_surf), Polygon)
 
-    return target_surface
+    return trg_surf

@@ -4,7 +4,6 @@ from pathlib import Path
 import numpy as np
 import pyvista as pv
 
-from building3d.geom.cloud import points_to_array
 from building3d.io.b3d import read_b3d
 from .dumpreader import DumpReader
 from .config import (
@@ -77,12 +76,11 @@ def make_movie(
         if i == 0:
 
             # Draw building
-            bdg_verts, bdg_faces = building.get_mesh(children=True)
-            bdg_varr = points_to_array(bdg_verts)
+            bdg_verts, bdg_faces = building.get_mesh()
             bdg_farr = []
             for f in bdg_faces:
                 bdg_farr.extend([3, f[0], f[1], f[2]])
-            bdg_mesh = pv.PolyData(bdg_varr, faces=bdg_farr)
+            bdg_mesh = pv.PolyData(bdg_verts, faces=bdg_farr)
             plotter.add_mesh(
                 bdg_mesh,
                 show_edges=True,
@@ -164,3 +162,4 @@ def position_buffer_to_lines(pb: np.ndarray) -> tuple[np.ndarray, list[int]]:
             curr_index += 1
     line_varr = np.array(line_varr)
     return line_varr, line_index
+

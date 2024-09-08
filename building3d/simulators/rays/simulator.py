@@ -8,14 +8,11 @@ import pandas as pd
 from building3d import random_between
 from building3d.logger import init_logger
 from building3d.geom.building import Building
-from building3d.geom.point import Point
-from building3d.geom.vector import length
-from building3d.geom.vector import vector
-from building3d.simulators.basesimulator import BaseSimulator
+from building3d.geom.types import PointType
+from building3d.geom.points import point_to_tuple
 from building3d.simulators.rays.manyrays import ManyRays
 from building3d.simulators.rays.ray import Ray
-from .find_location import find_location
-from .ray import Ray
+from building3d.geom.building.find_location import find_location
 
 
 logger = logging.getLogger(__name__)
@@ -23,8 +20,8 @@ logger = logging.getLogger(__name__)
 
 def simulation_job(
     building: Building,
-    source: Point,
-    sinks: list[Point],
+    source: PointType,
+    sinks: list[PointType],
     sink_radius: float,
     num_rays: int,
     properties: None | dict,
@@ -51,7 +48,7 @@ def simulation_job(
     raysim.simulate(steps)
 
 
-class RaySimulator(BaseSimulator):
+class RaySimulator:
     """Simulator class for ray tracing.
 
     Controls:
@@ -65,8 +62,8 @@ class RaySimulator(BaseSimulator):
     def __init__(
         self,
         building: Building,
-        source: Point,
-        sinks: list[Point],
+        source: PointType,
+        sinks: list[PointType],
         sink_radius: float,
         num_rays: int,
         properties: None | dict = None,
@@ -76,8 +73,8 @@ class RaySimulator(BaseSimulator):
         logger.info("RaySimulator initialization...")
 
         self.building = building
-        self.source = source
-        self.sinks = sinks
+        self.source = source.copy()
+        self.sinks = [s.copy() for s in sinks]
         self.sink_radius = sink_radius
 
         self.num_steps = 0
@@ -107,20 +104,45 @@ class RaySimulator(BaseSimulator):
 
         self.state_dump_dir = state_dump_dir
 
-    def set_initial_location(self):
-        """Overwrite the initial location for all rays to speed up the first step."""
+    def initialize(self) -> None:
         init_loc = find_location(self.source, self.building)
-        for i in range(len(self.rays)):
-            self.rays[i].location = init_loc
 
-    def set_initial_direction(self):
-        """Set initial, random direction to all rays."""
         for i in range(len(self.rays)):
             self.rays[i].set_direction(
                 dx=random_between(-1, 1),  # TODO: direction within xlim possible
                 dy=random_between(-1, 1),  # TODO: direction within ylim possible
                 dz=random_between(-1, 1),  # TODO: direction within zlim possible
             )
+            self.rays[i].loc = init_loc
+            self.rays[i].update_target_surface()
+            self.rays[i].update_distance(fast_calc=False)
+
+    def simulate(self, steps: int) -> None:
+        """Simulate chosen number of steps.
+
+        Args:
+            steps: number of steps to simulate
+        """
+        logger.info(f"Simulation started (pid = {os.getpid()})")
+        print(f"Simulation started (pid = {os.getpid()})")
+
+        self.num_steps = steps
+
+        self.initialize()
+
+        for i in range(steps):
+            if self.state_dump_dir is not None:
+                self.rays.dump_state(self.state_dump_dir, i)
+            self.forward()
+
+        if self.state_dump_dir is not None:
+            self.rays.dump_state(self.state_dump_dir, steps - 1)
+
+        logger.info(f"Simulation finished (pid = {os.getpid()})")
+        print(f"Simulation finished (pid = {os.getpid()})")
+
+        if self.csv_file is not None:
+            self.save_results()
 
     def forward(self) -> None:
         """Process next simulation step."""
@@ -132,10 +154,6 @@ class RaySimulator(BaseSimulator):
 
         self.total_energy = 0
         self.num_active_rays = 0
-
-        if self.step == 0:
-            self.set_initial_location()
-            self.set_initial_direction()  # currently, omnidirectional source
 
         for i in range(len(self.rays)):
             logger.debug(f"Processing ray {i}: {self.rays[i]}")
@@ -156,46 +174,20 @@ class RaySimulator(BaseSimulator):
 
         self.step += 1
 
-    def simulate(self, steps: int) -> None:
-        """Simulate chosen number of steps.
-
-        Args:
-            steps: number of steps to simulate
-        """
-        self.num_steps = steps
-
-        logger.info(f"Simulation started (pid = {os.getpid()})")
-        print(f"Simulation started (pid = {os.getpid()})")
-        for i in range(steps):
-            if self.state_dump_dir is not None:
-                self.rays.dump_state(self.state_dump_dir, i)
-            self.forward()
-
-        if self.state_dump_dir is not None:
-            self.rays.dump_state(self.state_dump_dir, steps - 1)
-
-        logger.info(f"Simulation finished (pid = {os.getpid()})")
-        print(f"Simulation finished (pid = {os.getpid()})")
-
-        if self.csv_file is not None:
-            self.save_results()
-
     def save_results(self):
         df = pd.DataFrame(
             index=pd.Index(np.arange(0, self.step) * Ray.time_step, name="time"),
         )
         for i, sink in enumerate(self.sinks):
-            df[i] = self.hits[sink]
+            df[i] = self.hits[point_to_tuple(sink)]
         df.to_csv(self.csv_file)
 
-    def check_hit(self, ray: Ray, sink: Point, radius: float, step: int) -> bool:
-        if sink not in self.hits:
-            self.hits[sink] = np.zeros(self.num_steps)
-        if length(vector(ray.position, sink)) < radius:
-            self.hits[sink][step] += ray.energy
+    def check_hit(self, ray: Ray, sink: PointType, radius: float, step: int) -> bool:
+        sink_tuple = point_to_tuple(sink)
+        if sink_tuple not in self.hits:
+            self.hits[sink_tuple] = np.zeros(self.num_steps)
+        if np.linalg.norm(sink - ray.pos) < radius:
+            self.hits[sink_tuple][step] += ray.energy
             return True
         else:
             return False
-
-    def is_finished(self):  # TODO: Needed?
-        return False

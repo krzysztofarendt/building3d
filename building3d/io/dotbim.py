@@ -2,6 +2,7 @@
 
 from collections import defaultdict
 import json
+from pathlib import Path
 
 import dotbimpy
 import numpy as np
@@ -11,30 +12,36 @@ from building3d.geom.zone import Zone
 from building3d.geom.solid import Solid
 from building3d.geom.wall import Wall
 from building3d.geom.polygon import Polygon
-from building3d.geom.cloud import points_to_flat_list
-from building3d.geom.cloud import flat_list_to_points
+from building3d.geom.types import FLOAT, INT
 from building3d.types.recursive_default_dict import recursive_default_dict
 
 
 TOOL_NAME = "Building3D"
 
 
-def write_dotbim(path: str, bdg: Building) -> None:
+def write_dotbim(path: str, bdg: Building, parent_dirs: bool = True) -> None:
     """Save model to .bim.
 
-    .bim format can be used to store the model geometry without the mesh.
+    Args:
+        path: path to the output file
+        bdg: Building instance
+        parent_dirs: if True, parent directories will be created
     """
+    if parent_dirs is True:
+        p = Path(path)
+        if not p.parent.exists():
+            p.parent.mkdir(parents=True)
+
     mesh_id = 0
     meshes = []
     elements = []
 
-    for zone in bdg.get_zones():
-        for sld in zone.get_solids():
-            for wall in sld.get_walls():
-                for poly in wall.get_polygons(children=True):
-                    verts, faces = poly.points, poly.triangles
-                    coordinates = points_to_flat_list(verts)
-                    indices = np.array(faces).flatten().tolist()
+    for zone in bdg.zones.values():
+        for sld in zone.solids.values():
+            for wall in sld.walls.values():
+                for poly in wall.polygons.values():
+                    coordinates = poly.pts.flatten().tolist()
+                    indices = poly.tri.flatten().tolist()
 
                     # Instantiate Mesh object
                     mesh = dotbimpy.Mesh(
@@ -90,10 +97,7 @@ def write_dotbim(path: str, bdg: Building) -> None:
 
 
 def read_dotbim(path: str) -> Building:
-    """Load model from .bim.
-
-    .bim format can be used to store the model geometry without the mesh.
-    """
+    """Load model from .bim."""
     bim = {}
     with open(path, "r") as f:
         bim = json.load(f)
@@ -110,11 +114,11 @@ def read_dotbim(path: str) -> Building:
         mid = m["mesh_id"]
         coords = m["coordinates"]
         indices = m["indices"]
-        vertices = flat_list_to_points(coords)
-        faces = np.array(indices, dtype=np.int32).reshape((-1, 3)).tolist()
+        vertices = np.array(coords, dtype=FLOAT).reshape((-1, 3))
+        faces = np.array(indices, dtype=INT).reshape((-1, 3))
         data[mid] = {
             "vertices": vertices,
-            "faces": faces,  # NOTE: Not used in reconstruction
+            "faces": faces,
         }
 
     # Get metadata
@@ -153,7 +157,6 @@ def read_dotbim(path: str) -> Building:
         pkey = (poly_uid, poly_name)
 
         model[bname][zkey][skey][wkey][pkey]["vertices"] = data[poly_num]["vertices"]
-        # NOTE: faces not used in reconstruction
         model[bname][zkey][skey][wkey][pkey]["faces"] = data[poly_num]["faces"]
 
     # Reconstruct the Building instance
@@ -171,8 +174,9 @@ def read_dotbim(path: str) -> Building:
                     puid, pname = pkey
                     polys.append(
                         Polygon(
-                            points=model[bname][zkey][skey][wkey][pkey]["vertices"],
+                            pts=model[bname][zkey][skey][wkey][pkey]["vertices"],
                             name=pname,
+                            tri=model[bname][zkey][skey][wkey][pkey]["faces"],
                             uid=puid,
                         )
                     )

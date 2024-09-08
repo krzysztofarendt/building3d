@@ -2,88 +2,42 @@ import numpy as np
 import pytest
 
 from building3d.simulators.rays.find_target import find_target
-from building3d.geom.point import Point
+from building3d.simulators.rays.find_transparent import find_transparent
+from building3d.geom.points import new_point
+from building3d.geom.vectors import new_vector
 from building3d.geom.building import Building
 from building3d.geom.zone import Zone
-from building3d.geom.predefined.solids.box import box
+from building3d.geom.solid.box import box
 from building3d.geom.paths import PATH_SEP
 
 
 @pytest.fixture
-def single_solid_building():
-    solid = box(1, 1, 1, name="solid")
-    zone = Zone("zone")
-    zone.add_solid(solid)
-    bdg = Building()
-    bdg.add_zone(zone)
-    return bdg
+def bdg():
+    s0 = box(1, 1, 1, name="s0")
+    s1 = box(1, 1, 1, (1, 0, 0), name="s1")
+    z = Zone([s0, s1], "z")
+    b = Building([z], "b")
+    return b
 
 
-def test_find_target_surface_direction(single_solid_building):
-    position = Point(0.5, 0.5, 0.5)
-    velocity = np.array([1.0, 0.0, 0.0])
-    target_1 = find_target(
-        position=position,
-        velocity=velocity,
-        location="zone" + PATH_SEP + "solid",
-        building=single_solid_building,
-        transparent=[],
-        checked_locations=set(),
-    )
-    assert target_1 is not None and len(target_1) > 0
+def test_find_target(bdg):
+    # Transparent:
+    # z/s1/wall-3/wall-3
+    # z/s0/wall-1/wall-1
+    pos = new_point(0.5, 0.5, 0.5)
+    vel = new_vector(1, 0, 0)
+    trans = find_transparent(bdg)
+    trg = find_target(pos, vel, "b/z/s0", bdg, trans, set())
+    assert trg == "b/z/s1/wall-1/wall-1"
+    vel = new_vector(-1, 0, 0)
+    trg = find_target(pos, vel, "b/z/s0", bdg, trans, set())
+    assert trg == "b/z/s0/wall-3/wall-3"
 
-    position = Point(0.5, 0.5, 0.5)
-    velocity = np.array([-1.0, 0.0, 0.0])
-    target_2 = find_target(
-        position=position,
-        velocity=velocity,
-        location="zone" + PATH_SEP + "solid",
-        building=single_solid_building,
-        transparent=[],
-        checked_locations=set(),
-    )
-    assert target_2 is not None and len(target_2) > 0
-
-    assert target_1 != target_2
-
-
-def test_find_target_edge_direction(single_solid_building):
-    position = Point(0.5, 0.5, 0.5)
-    velocity = np.array([1.0, 1.0, 0.0])
-    target = find_target(
-        position=position,
-        velocity=velocity,
-        location="zone" + PATH_SEP + "solid",
-        building=single_solid_building,
-        transparent=[],
-        checked_locations=set(),
-    )
-    assert target is not None and len(target) > 0
-
-
-def test_find_target_corner_direction(single_solid_building):
-    position = Point(0.5, 0.5, 0.5)
-    velocity = np.array([1.0, 1.0, 1.0])
-    target = find_target(
-        position=position,
-        velocity=velocity,
-        location="zone" + PATH_SEP + "solid",
-        building=single_solid_building,
-        transparent=[],
-        checked_locations=set(),
-    )
-    assert target is not None and len(target) > 0
-
-
-def test_find_target_incorrect_position(single_solid_building):
-    position = Point(1.5, 0.5, 0.5)
-    velocity = np.array([1.0, 1.0, 1.0])
-    with pytest.raises(RuntimeError):
-        _ = find_target(
-            position=position,
-            velocity=velocity,
-            location="zone" + PATH_SEP + "solid",
-            building=single_solid_building,
-            transparent=[],
-            checked_locations=set(),
-        )
+    # Test with large velocity
+    mag = 1000.0
+    vel = new_vector(mag, 0, 0)
+    trg = find_target(pos, vel, "b/z/s0", bdg, trans, set())
+    assert trg == "b/z/s1/wall-1/wall-1"
+    vel = new_vector(-mag, 0, 0)
+    trg = find_target(pos, vel, "b/z/s0", bdg, trans, set())
+    assert trg == "b/z/s0/wall-3/wall-3"

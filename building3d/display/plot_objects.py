@@ -1,10 +1,10 @@
 import logging
 from pathlib import Path
 
+import numpy as np
 import pyvista as pv
 
-from building3d.geom.cloud import points_to_array
-from building3d.geom.point import Point
+from building3d.geom.types import PointType
 from building3d.display.colors import random_rgb_color
 
 
@@ -14,12 +14,16 @@ logger = logging.getLogger(__name__)
 def plot_objects(objects: tuple, output_file=None) -> None:
     """Plot multiple objects (like Building, Zone, Solid, Wall, RayCluster).
 
-    The object must have at least one of the following methods:
-    - get_mesh(children) - returning points and faces -> tuple[list[Point], list[list[int]]]]
-    - get_lines() - returning points and lines -> tuple[list[Point], list[list[int]]]]
-    - get_points() - returning points -> list[Point]
+    The faces array is organized as:
+    `[n0, p0_0, p0_1, ..., p0_n, n1, p1_0, p1_1, ..., p1_n, ...]`
+    where `n0` is the number of points in face 0, and `pX_Y` is the Y’th point in face X.
 
-    If you want to include subpolygons in the mesh, get_mesh() must be called with children=True.
+    The lines are organized as 2D array shaped `(num_lines, num_points_in_a_line)`.
+
+    The object must have at least one of the following methods:
+    - get_mesh() - returning points and faces -> tuple[PointType, IndexType]
+    - get_lines() - returning points and lines -> tuple[PointType, IndexType]
+    - get_points() - returning points -> PointType
 
     Args:
         objects: objects to plot, described above
@@ -58,28 +62,28 @@ def plot_objects(objects: tuple, output_file=None) -> None:
         ), f"{obj} has nothing to plot"
 
         if has_get_mesh:
-            verts, faces = obj.get_mesh(children=True)
-            varr = points_to_array(verts)
-            farr = []
+            verts, faces = obj.get_mesh()
+            faces_flat = []
             for f in faces:
-                farr.extend([3, f[0], f[1], f[2]])
-            mesh = pv.PolyData(varr, faces=farr)
+                faces_flat.extend([3, f[0], f[1], f[2]])
+            faces_flat = np.array(faces_flat)
+            mesh = pv.PolyData(verts, faces=faces_flat)
             pl.add_mesh(mesh, show_edges=True, opacity=0.7, color=col)
 
         if has_get_lines:
             verts, lines = obj.get_lines()
-            varr = points_to_array(verts)
-            larr = []
+            lines_flat = []
             for l in lines:
-                larr.extend([len(l)])
-                larr.extend(l)
-            mesh = pv.PolyData(varr, lines=larr)
+                segment = [len(l)]
+                for v in l:
+                    segment.append(int(v))
+                lines_flat.extend(segment)
+            mesh = pv.PolyData(verts, lines=lines_flat)
             pl.add_mesh(mesh, opacity=0.7, color=col)
 
         if has_get_points:
             verts = obj.get_points()
-            varr = points_to_array(verts)
-            mesh = pv.PolyData(varr)
+            mesh = pv.PolyData(verts)
             pl.add_mesh(mesh, opacity=0.9, point_size=5, color=col)
 
     if output_file is None:
