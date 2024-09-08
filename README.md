@@ -38,9 +38,8 @@ make coverage
 ```
 
 # Examples
-```
-make examples
-```
+
+See the scripts in `examples/`.
 
 # Roadmap
 
