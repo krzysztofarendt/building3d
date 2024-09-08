@@ -18,5 +18,4 @@ if __name__ == "__main__":
         ]
     )
     poly = Polygon(pts, name="poly0")
-
     plot_objects((poly,))

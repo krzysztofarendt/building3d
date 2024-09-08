@@ -41,6 +41,14 @@ make coverage
 
 See the scripts in `examples/`.
 
+Short script are better to be run without just-in-time compilation, e.g.:
+```
+NUMBA_DISABLE_JIT=1 python examples/building_example.py
+```
+
+However, simulations should be run with it (simply do not use `NUMBA_DISABLE_JIT=1`).
+The compilation of all functions implemented for Numba takes about 2 minutes.
+
 # Roadmap
 
 Loose ideas, to be or not to be implemented, in no particular order:
