@@ -1,0 +1,7 @@
+# Location constants
+EXTERIOR = 0
+INTERIOR = 1
+VERTEX = 2
+EDGE = 3
+INVALID_INDEX = -9999
+INVALID_LOC = -7777

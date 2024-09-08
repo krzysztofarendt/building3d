@@ -16,6 +16,7 @@ def fill_dir(parent: str, num_sub: int, num_subsub: int) -> None:
             subsub = sub / f"b_{i}_{k}"
             subsub.mkdir()
 
+
 def test_wildcardpath_get_matching_paths():
     with tempfile.TemporaryDirectory() as parent:
         num_sub = 5

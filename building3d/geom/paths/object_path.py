@@ -2,11 +2,12 @@ from building3d.geom.paths import PATH_SEP
 from building3d.geom.paths.validate_name import validate_name
 
 
+# TODO: Should include building or make it a simple wrapper over PATH_SEP.join((...))
 def object_path(
-    zone = None,
-    solid = None,
-    wall = None,
-    poly = None,
+    zone=None,
+    solid=None,
+    wall=None,
+    poly=None,
 ) -> str:
     """Return an object path suitable for get_object() methods.
 

@@ -11,7 +11,8 @@ lint-full:
 	flake8 --max-complexity=10 --max-line-length=100 --show-source --statistics building3d/
 
 test:
-	pytest tests/
+	NUMBA_DISABLE_JIT=1 pytest tests/
+	NUMBA_DISABLE_JIT=0 pytest tests/
 
 coverage:
 	pytest --cov=building3d --cov-report=xml --cov-report=term-missing tests/
