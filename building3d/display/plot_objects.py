@@ -4,7 +4,6 @@ from pathlib import Path
 import numpy as np
 import pyvista as pv
 
-from building3d.geom.types import PointType
 from building3d.display.colors import random_rgb_color
 
 

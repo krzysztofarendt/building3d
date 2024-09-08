@@ -19,14 +19,14 @@ if __name__ == "__main__":
 
     building = Building([zone], "building")
 
-    write_b3d("temp/xxx.b3d", building, parent_dirs=True)
-    building = read_b3d("temp/xxx.b3d")
-    plot_objects((building,))
+    # write_b3d("temp/xxx.b3d", building, parent_dirs=True)
+    # building = read_b3d("temp/xxx.b3d")
+    # plot_objects((building,))
 
-    write_dotbim("temp/xxx.bim", building, parent_dirs=True)
-    building = read_dotbim("temp/xxx.bim")
-    plot_objects((building,))
+    # write_dotbim("temp/xxx.bim", building, parent_dirs=True)
+    # building = read_dotbim("temp/xxx.bim")
+    # plot_objects((building,))
 
-    write_stl("temp/xxx.stl", building, parent_dirs=True)
-    building = read_stl("temp/xxx.stl")
+    # write_stl("temp/xxx.stl", building, parent_dirs=True)
+    # building = read_stl("temp/xxx.stl")
     plot_objects((building,))

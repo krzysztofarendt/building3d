@@ -23,15 +23,6 @@ count:
 count-tests:
 	cloc --by-file building3d/ tests/
 
-examples:
-	python examples/example_1.py
-	python examples/example_2.py
-	python examples/example_3.py
-	python examples/example_4.py
-	python examples/example_5.py
-	python examples/read_teapot.py
-	python examples/read_write_dotbim.py
-
 test_publish:
 	-rm -r logs/
 	python -m build
