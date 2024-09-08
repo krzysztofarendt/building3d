@@ -67,9 +67,9 @@ if __name__ == "__main__":
         source=new_point(1, 1, 1),
         sinks=[new_point(3, 3, 2), new_point(6, 6, 2)],
         sink_radius=0.6,
-        num_rays=1600,
+        num_rays=16000,
         properties=acoustic_properties,
         sim_dir=project_dir,
-        steps=1000,
+        steps=2000,
         num_jobs=8,
     )
