@@ -12,7 +12,7 @@ I'm not sure where this project is heading, so there is no documentation yet, bu
 - Solid is a set of walls
 - Zone is a set of solids
 - Building is a set of zones
-- Each object (polygon, wall, solid, zone, building) has a name
+- Each object (polygon, wall, solid, zone, building) has a name which doesn't have to be globally unique, but needs to be locally unique (e.g. 2 walls within a single solid must have different names, but 2 walls from different solids can be named same)
 - Objects can be retrieved in two ways:
     - using path composed with object names, e.g. `building.get("building_name/zone_name/solid_name/wall_name/polygon_name")` to get a particular polygon
     - using square bracket operator, e.g. `building["solid_name"]["zone_name"]["solid_name"]` to get a particular solid
