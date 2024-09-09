@@ -1,5 +1,7 @@
 import os
 
+from building3d.logger import init_logger
+from building3d.simulators.rays.config import MAIN_LOG_FILE
 from building3d.display.plot_objects import plot_objects
 from building3d.io.b3d import write_b3d
 from building3d.geom.building import Building
@@ -11,6 +13,10 @@ from building3d.simulators.rays.movie import make_movie
 
 
 def example_simulation():
+    project_dir = "tmp/ray_example/"
+    main_logfile = os.path.join(project_dir, MAIN_LOG_FILE)
+    init_logger(main_logfile)
+
     L = 1
     W = 1
     H = 1
@@ -30,14 +36,14 @@ def example_simulation():
     z = Zone([s1, s2, s3], "z")
 
     building = Building([z], "b")
-    b3d_file = "tmp/building.b3d"
+    b3d_file = os.path.join(project_dir, "building.b3d")
     write_b3d(b3d_file, building)
 
-    csv_file = "tmp/test_result.csv"
+    csv_file = os.path.join(project_dir, "test_result.csv")
     if os.path.exists(csv_file):
         os.remove(csv_file)
 
-    state_dump_dir = "tmp/state_dump/"
+    state_dump_dir = os.path.join(project_dir, "state_dump")
 
     raysim = RaySimulator(
         building=building,
@@ -48,14 +54,14 @@ def example_simulation():
         csv_file=csv_file,
         state_dump_dir=state_dump_dir,
     )
-    plot_objects((building, raysim.rays), output_file="tmp/start.png")
+    plot_objects((building, raysim.rays), output_file=os.path.join(project_dir, "start.png"))
 
     raysim.simulate(400)
 
-    plot_objects((building, raysim.rays), output_file="tmp/end.png")
+    plot_objects((building, raysim.rays), output_file=os.path.join(project_dir, "end.png"))
 
     print("Making movie")
-    movie_path = "tmp/simulation.mp4"
+    movie_path = os.path.join(project_dir, "simulation.mp4")
     make_movie(movie_path, state_dump_dir, b3d_file, 300)
 
 
