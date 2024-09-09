@@ -1,11 +1,13 @@
 from building3d.display.plot_objects import plot_objects
+from building3d.geom.building import Building
 from building3d.geom.solid.box import box
 from building3d.geom.zone import Zone
-from building3d.geom.building import Building
-from building3d.io.b3d import write_b3d, read_b3d
-from building3d.io.dotbim import write_dotbim, read_dotbim
-from building3d.io.stl import write_stl, read_stl
-
+from building3d.io.b3d import read_b3d
+from building3d.io.b3d import write_b3d
+from building3d.io.dotbim import read_dotbim
+from building3d.io.dotbim import write_dotbim
+from building3d.io.stl import read_stl
+from building3d.io.stl import write_stl
 
 if __name__ == "__main__":
     zone = Zone(

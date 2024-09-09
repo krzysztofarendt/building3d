@@ -3,10 +3,9 @@ import numpy as np
 from building3d.display.plot_objects import plot_objects
 from building3d.geom.points import new_point
 from building3d.geom.polygon import Polygon
-from building3d.geom.wall import Wall
 from building3d.geom.solid import Solid
+from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
-
 
 if __name__ == "__main__":
     size = 3

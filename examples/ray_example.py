@@ -1,15 +1,15 @@
 import os
 
-from building3d.logger import init_logger
-from building3d.simulators.rays.config import MAIN_LOG_FILE
 from building3d.display.plot_objects import plot_objects
-from building3d.io.b3d import write_b3d
 from building3d.geom.building import Building
+from building3d.geom.points import new_point
 from building3d.geom.solid.box import box
 from building3d.geom.zone import Zone
-from building3d.geom.points import new_point
-from building3d.simulators.rays.simulator import RaySimulator
+from building3d.io.b3d import write_b3d
+from building3d.logger import init_logger
+from building3d.simulators.rays.config import MAIN_LOG_FILE
 from building3d.simulators.rays.movie import make_movie
+from building3d.simulators.rays.simulator import RaySimulator
 
 
 def example_simulation():
@@ -54,11 +54,15 @@ def example_simulation():
         csv_file=csv_file,
         state_dump_dir=state_dump_dir,
     )
-    plot_objects((building, raysim.rays), output_file=os.path.join(project_dir, "start.png"))
+    plot_objects(
+        (building, raysim.rays), output_file=os.path.join(project_dir, "start.png")
+    )
 
     raysim.simulate(400)
 
-    plot_objects((building, raysim.rays), output_file=os.path.join(project_dir, "end.png"))
+    plot_objects(
+        (building, raysim.rays), output_file=os.path.join(project_dir, "end.png")
+    )
 
     print("Making movie")
     movie_path = os.path.join(project_dir, "simulation.mp4")

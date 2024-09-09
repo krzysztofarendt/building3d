@@ -3,7 +3,6 @@ import numpy as np
 from building3d.display.plot_objects import plot_objects
 from building3d.geom.polygon import Polygon
 
-
 if __name__ == "__main__":
     pts = np.array(
         [
