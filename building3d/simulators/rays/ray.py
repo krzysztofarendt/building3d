@@ -143,12 +143,7 @@ class Ray:
         if self.energy <= 0:
             return
 
-        if (
-            fast_calc and
-            self.dist_inc < 0 and
-            not np.isinf(self.dist_inc) and
-            not np.isnan(self.dist_inc)
-        ):
+        if (fast_calc and self.dist_inc < 0 and not np.isinf(self.dist_inc)):
             # This method should be called only when far enough from the target surface
             self.dist_prev = self.dist
             self.dist += self.dist_inc
@@ -180,11 +175,11 @@ class Ray:
         # self.update_distance(fast_calc=False)
         if self.trg_surf == "":
             self.update_target_surface()
-        if np.isnan(self.dist):
+        if np.isinf(self.dist):
             self.update_distance(fast_calc=False)
 
         # Ensure accurate distance calculation when close to surfaces to prevent ray escape
-        if self.dist <= Ray.min_dist * 2:
+        if self.dist <= Ray.min_dist:
             self.update_distance(fast_calc=False)
 
         # If distance below threshold, reflect (change direction)
