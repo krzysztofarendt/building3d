@@ -13,7 +13,6 @@ from .config import (
     MERGE_HIT_CSV,
     MERGE_STATE_DIR,
     MOVIE_FILE,
-    MAIN_LOG_FILE,
     B3D_FILE,
     JOB_DIR,
     JOB_STATE_DIR,
@@ -72,7 +71,7 @@ def parallel_simulation(
         jobs[i].join()
 
     # Merge results
-    merge_dir = WildcardPath(MERGE_DIR).mkdir(parent=sim_dir)
+    _ = WildcardPath(MERGE_DIR).mkdir(parent=sim_dir)
     merge_state_dir = WildcardPath(MERGE_STATE_DIR).mkdir(parent=sim_dir)
     merge_state(
         sim_dir=sim_dir,
