@@ -15,7 +15,7 @@ test:
 	NUMBA_DISABLE_JIT=0 pytest tests/
 
 coverage:
-	pytest --cov=building3d --cov-report=xml --cov-report=term-missing tests/
+	NUMBA_DISABLE_JIT=1 pytest --cov=building3d --cov-report=xml --cov-report=term-missing tests/
 
 count:
 	cloc --by-file building3d/
