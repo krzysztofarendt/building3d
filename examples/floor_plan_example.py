@@ -1,7 +1,7 @@
 from building3d.display.plot_objects import plot_objects
+from building3d.geom.building import Building
 from building3d.geom.solid.floor_plan import floor_plan
 from building3d.geom.zone import Zone
-from building3d.geom.building import Building
 
 
 def run():

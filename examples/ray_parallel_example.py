@@ -1,15 +1,14 @@
 import os
 from pathlib import Path
 
-from building3d.logger import init_logger
 from building3d.geom.building import Building
+from building3d.geom.points import new_point
 from building3d.geom.solid.box import box
 from building3d.geom.zone import Zone
-from building3d.geom.points import new_point
-from building3d.simulators.rays.parallel_simulation import parallel_simulation
-from building3d.simulators.rays.config import MAIN_LOG_FILE
 from building3d.io.b3d import write_b3d
-
+from building3d.logger import init_logger
+from building3d.simulators.rays.config import MAIN_LOG_FILE
+from building3d.simulators.rays.parallel_simulation import parallel_simulation
 
 if __name__ == "__main__":
     project_dir = "tmp/parallel/"

@@ -4,7 +4,6 @@ from building3d.display.plot_objects import plot_objects
 from building3d.geom.polygon import Polygon
 from building3d.geom.wall import Wall
 
-
 if __name__ == "__main__":
     pts0 = np.array(
         [

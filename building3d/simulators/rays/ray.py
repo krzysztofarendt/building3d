@@ -143,7 +143,7 @@ class Ray:
         if self.energy <= 0:
             return
 
-        if (fast_calc and self.dist_inc < 0 and not np.isinf(self.dist_inc)):
+        if (fast_calc and (self.dist_inc < 0) and (not np.isinf(self.dist_inc))):
             # This method should be called only when far enough from the target surface
             self.dist_prev = self.dist
             self.dist += self.dist_inc
