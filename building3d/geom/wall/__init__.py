@@ -18,6 +18,7 @@ class Wall:
 
     Wall is used to model 1D phenomena (e.g. heat transfer).
     """
+    count: int = 0
 
     def __init__(
         self,
@@ -48,6 +49,9 @@ class Wall:
 
         for poly in polygons:
             self.add_polygon(poly)
+
+        self.num = Wall.count
+        Wall.count += 1
 
     @property
     def children(self) -> dict[str, Polygon]:
