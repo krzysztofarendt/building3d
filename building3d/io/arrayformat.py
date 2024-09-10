@@ -1,3 +1,4 @@
+from numba import njit
 import numpy as np
 
 from building3d.geom.building import Building
@@ -5,22 +6,22 @@ from building3d.geom.zone import Zone
 from building3d.geom.solid import Solid
 from building3d.geom.wall import Wall
 from building3d.geom.polygon import Polygon
-from building3d.geom.types import FLOAT, INT
+from building3d.geom.types import FLOAT, INT, PointType, IndexType
 
 
 def to_array_format(bdg: Building) -> tuple:
-    """Converts Building to a numba-friendly format.
+    """Converts Building to a numba-friendly array format.
 
     The building is represented as a tuple of arrays defining
     points, faces, polygons, walls, solids, and zones.
 
     The tuple structure is as follows:
-    - array of points, shape (num_points, 3)
-    - array of face point indices, shape (num_faces, 3)
-    - array of polygon faces indices, shape (num_faces, )
-    - array of wall face indices, shape (num_faces, )
-    - array of solid face indices, shape (num_faces, )
-    - array of zone face indices, shape (num_faces, )
+    - points:   array of points, shape `(num_points, 3)`
+    - faces:    array mapping points to faces, shape `(num_faces, 3)`
+    - polygons: array mapping faces to polygons, shape `(num_faces, )`
+    - walls:    array mapping polygons to walls, shape `(num_polygons, )`
+    - solids:   array mapping walls to solids, shape `(num_walls, )`
+    - zones:    array mapping solids to zones, shape `(num_solids, )`
 
     Args:
         bdg: Building instance
@@ -28,56 +29,84 @@ def to_array_format(bdg: Building) -> tuple:
     Returns:
         tuple of arrays as described above
     """
-    _, _, _, _, num_faces, num_pts = count_objects(bdg)
+    num_zones, num_solids, num_walls, num_polys, num_faces, num_pts = count_objects(bdg)
 
-    points = np.zeros((num_pts, 3), dtype=FLOAT)
-    faces = np.zeros((num_faces, 3), dtype=INT)
-    polygons = np.zeros(num_faces, dtype=INT)
-    walls = np.zeros(num_faces, dtype=INT)
-    solids = np.zeros(num_faces, dtype=INT)
-    zones = np.zeros(num_faces, dtype=INT)
+    points = np.zeros((num_pts, 3), dtype=float)
+    faces = np.zeros((num_faces, 3), dtype=int)
+    polygons = np.zeros(num_faces, dtype=int)
+    walls = np.zeros(num_polys, dtype=int)
+    solids = np.zeros(num_walls, dtype=int)
+    zones = np.zeros(num_solids, dtype=int)
 
     pt_offset = 0
     face_offset = 0
     for z in bdg.zones.values():
+        # Sanity check
+        assert z.num <= num_zones, "Zone number higher than the tot. number of zones?"
+
         for s in z.solids.values():
+            # Map solids to zones
+            zones[s.num] = z.num
+
             for w in s.walls.values():
+                # Map walls to solids
+                solids[w.num] = s.num
+
                 for p in w.polygons.values():
+                    # Map polygons to walls
+                    walls[p.num] = w.num
 
+                    # Add points
                     points[pt_offset:pt_offset + p.pts.shape[0]] = p.pts.copy()
-                    pt_offset += p.pts.shape[0]
 
-                    faces[face_offset:face_offset + p.tri.shape[0]] = p.tri.copy() + face_offset
+                    # Map points to faces
+                    faces[face_offset:face_offset + p.tri.shape[0]] = p.tri.copy() + pt_offset
 
+                    # Map faces to polygons
                     for fi in range(face_offset, face_offset + p.tri.shape[0]):
                         polygons[fi] = p.num
-                        walls[fi] = w.num
-                        solids[fi] = s.num
-                        zones[fi] = z.num
 
+                    pt_offset += p.pts.shape[0]
                     face_offset += p.tri.shape[0]
 
     return points, faces, polygons, walls, solids, zones
 
 
-def from_array_format(points, faces, polygons, walls, solids, zones) -> Building:
+def from_array_format(
+    points: PointType,
+    faces: IndexType,
+    polygons: IndexType,
+    walls: IndexType,
+    solids: IndexType,
+    zones: IndexType,
+) -> Building:
     """Creates a building from the array format.
 
     Object UUIDs and names are not part of the format, so they will be random.
 
     Args:
-        points: array of points
-        faces: array of face point indices
-        polygons: array of polygon face indices
-        walls: array of wall face indices
-        solids: array of solid face indices
-        zones: array of zone face indices
+        points:   array of points, shape `(num_points, 3)`
+        faces:    array mapping points to faces, shape `(num_faces, 3)`
+        polygons: array mapping faces to polygons, shape `(num_faces, )`
+        walls:    array mapping polygons to walls, shape `(num_polygons, )`
+        solids:   array mapping walls to solids, shape `(num_walls, )`
+        zones:    array mapping solids to zones, shape `(num_solids, )`
 
     Return:
         a new Building instance
     """
     # Create polygons
-    ...  # TODO
+    num_polys = len(walls)
+
+    polys = []
+    for pi in range(num_polys):
+        pts, tri = get_polygon_points_and_faces(points, faces, polygons, pi)
+        polys.append(Polygon(pts, tri=tri))
+        print(pts)
+        print(polys[-1])
+
+    # Create walls
+    ... # TODO
 
 
 def count_objects(bdg: Building) -> tuple[int, int, int, int, int, int]:
@@ -101,3 +130,67 @@ def count_objects(bdg: Building) -> tuple[int, int, int, int, int, int]:
                     num_pts += p.pts.shape[0]
 
     return num_zones, num_solids, num_walls, num_polys, num_faces, num_pts
+
+
+@njit
+def get_polygon_points_and_faces(
+    points: PointType,
+    faces: IndexType,
+    polygons: IndexType,
+    poly_num: int,
+) -> tuple[PointType, IndexType]:
+    """Reconstruct arrays of points and faces for a chosen polygon.
+
+    Args:
+        points: array of points in the building
+        faces: array of all faces in the building
+        polygons: array mapping faces to polygons, shape `(num_faces, )`
+        poly_num: selected polygon number
+
+    Returns:
+        tuple of points and faces
+    """
+    # Collect face indices of the chosen polygon
+    tri_index = []
+    for fci, pli in enumerate(polygons):
+        if pli == poly_num:
+            tri_index.append(fci)
+
+    # Collect point indices of the chosen polygon
+    pt_set = set()
+    for fci, f in enumerate(faces):
+        if fci in tri_index:
+            pt_set.add(int(f[0]))
+            pt_set.add(int(f[1]))
+            pt_set.add(int(f[2]))
+    pt_index = sorted(list(pt_set))
+
+    # Map point indices from `points` to output indices in `poly_pts`
+    # This is needed to avoid a situation like this:
+    # > poly_pts
+    # array([[0., 0., 0.],
+    #        [1., 0., 0.],
+    #        [1., 0., 1.],
+    #        [0., 0., 1.]])
+    # > poly_tri
+    # array([[7, 4, 5],  <- Indices larger than the shape of poly_pts
+    #        [7, 5, 6]])
+    recount = {}
+    new_num = 0
+    for pti in pt_index:
+        recount[pti] = new_num
+        new_num += 1
+
+    # Create arrays of points and faces for the chosen polygon
+    poly_pts = np.zeros((len(pt_index), 3), dtype=FLOAT)
+    for i in range(len(pt_index)):
+        poly_pts[i] = points[pt_index[i]]
+
+    poly_tri = np.zeros((len(tri_index), 3), dtype=INT)
+    for i in range(len(tri_index)):
+        for j in range(3):
+            # Cannot take original index, because poly_pts.shape[0] < points.shape[0]
+            # So the index must be "recounted"
+            poly_tri[i, j] = recount[faces[tri_index[i], j]]
+
+    return poly_pts, poly_tri
