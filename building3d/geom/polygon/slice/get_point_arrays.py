@@ -259,13 +259,13 @@ def get_point_arrays(
         for i in range(len(slicing_pts) - 1, 0, -1):
             points_1.append(slicing_pts[i])
 
-        # Polygon 2 must go the other way around ####
-        points_2 = []  #
-        current = pi_start  #
-        last = pi_end  #
-        while current != last:  #
-            points_2.append(pts[current])  #
-            current -= 1  # <------------------------#
+        # Polygon 2 must go the other way around ---\
+        points_2 = []  #                            |
+        current = pi_start  #                       |
+        last = pi_end  #                            |
+        while current != last:  #                   |
+            points_2.append(pts[current])  #        |
+            current -= 1  # <-----------------------/
             if current < 0:
                 current = len(pts) - 1
 
