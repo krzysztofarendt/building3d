@@ -88,7 +88,7 @@ def from_array_format(
         points:   array of points, shape `(num_points, 3)`
         faces:    array mapping points to faces, shape `(num_faces, 3)`
         polygons: array mapping faces to polygons, shape `(num_faces, )`
-        walls:    array mapping polygons to walls, shape `(num_polygons, )`
+        walls:    array mapping polygons to walls, shape `(num_polys, )`
         solids:   array mapping walls to solids, shape `(num_walls, )`
         zones:    array mapping solids to zones, shape `(num_solids, )`
 
@@ -97,16 +97,36 @@ def from_array_format(
     """
     # Create polygons
     num_polys = len(walls)
+    num_walls = len(solids)
+    num_solids = len(zones)
+    num_zones = np.max(zones) + 1
 
-    polys = []
+    poly_obj = []
     for pi in range(num_polys):
         pts, tri = get_polygon_points_and_faces(points, faces, polygons, pi)
-        polys.append(Polygon(pts, tri=tri))
-        print(pts)
-        print(polys[-1])
+        poly_obj.append(Polygon(pts, tri=tri))
 
     # Create walls
-    ... # TODO
+    wall_obj = []
+    for wi in range(num_walls):
+        wp = [pl for i, pl in enumerate(poly_obj) if walls[i] == wi]
+        wall_obj.append(Wall(wp))
+    assert len(wall_obj) == num_walls
+
+    # Create solids
+    sld_obj = []
+    for si in range(num_solids):
+        sw = [wl for i, wl in enumerate(wall_obj) if solids[i] == si]
+        sld_obj.append(Solid(sw))
+    assert len(sld_obj) == num_solids
+
+    # Create zones
+    zone_obj = []
+    for zi in range(num_zones):
+        zs = [sld for i, sld in enumerate(sld_obj) if zones[i] == zi]
+        zone_obj.append(Zone(zs))
+
+    return Building(zone_obj)
 
 
 def count_objects(bdg: Building) -> tuple[int, int, int, int, int, int]:
