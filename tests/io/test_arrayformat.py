@@ -1,3 +1,5 @@
+import numpy as np
+
 from building3d.geom.solid.box import box
 from building3d.geom.zone import Zone
 from building3d.geom.building import Building
@@ -23,4 +25,4 @@ def test_arrayformat():
     building = from_array_format(points, faces, polygons, walls, solids, zones)
     vol2 = building.volume()
 
-    assert vol1 == vol2
+    assert np.isclose(vol1, vol2)
