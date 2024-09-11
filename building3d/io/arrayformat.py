@@ -15,6 +15,11 @@ def to_array_format(bdg: Building) -> tuple:
     The building is represented as a tuple of arrays defining
     points, faces, polygons, walls, solids, and zones.
 
+    Note:
+        This functions the class variables `num`,
+        which should be 0 before constructing a new building.
+        Counter reset might be needed if you have many buildings.
+
     The tuple structure is as follows:
     - points:   array of points, shape `(num_points, 3)`
     - faces:    array mapping points to faces, shape `(num_faces, 3)`
@@ -42,7 +47,8 @@ def to_array_format(bdg: Building) -> tuple:
     face_offset = 0
     for z in bdg.zones.values():
         # Sanity check
-        assert z.num <= num_zones, "Zone number higher than the tot. number of zones?"
+        assert z.num <= num_zones, \
+            f"Zone number ({z.num}) higher than the tot. number of zones ({num_zones})?"
 
         for s in z.solids.values():
             # Map solids to zones
