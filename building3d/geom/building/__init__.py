@@ -25,6 +25,7 @@ class Building:
 
     Zones do not have to be adjacent. They can even be separate buildings.
     """
+    count: int = 0
 
     def __init__(
         self,
@@ -55,6 +56,9 @@ class Building:
         self.graph_wall = {}
         self.graph_solid = {}
         self.graph_zone = {}
+
+        self.num = Building.count
+        Building.count += 1
 
         logger.info(f"Building created: {self}")
 

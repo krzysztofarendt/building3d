@@ -28,6 +28,9 @@ logger = logging.getLogger(__name__)
 
 
 class Polygon:
+
+    count: int = 0
+
     def __init__(
         self,
         pts: PointType,
@@ -55,6 +58,9 @@ class Polygon:
             self.uid = uid
 
         self.pts: PointType = pts
+
+        self.num = Polygon.count
+        Polygon.count += 1
 
         # Normal vector is calculated using the first corner from `pts`
         # If the first corner is non-convex, the normal will be wrong and triangulation will fail.

@@ -21,6 +21,7 @@ class Zone:
 
     Zone is used to model 3D phenomena (e.g. ray tracing, heat transfer, CFD).
     """
+    count: int = 0
 
     def __init__(
         self,
@@ -49,6 +50,9 @@ class Zone:
 
         for sld in solids:
             self.add_solid(sld)
+
+        self.num = Zone.count
+        Zone.count += 1
 
         logger.info(f"Zone created: {self}")
 
