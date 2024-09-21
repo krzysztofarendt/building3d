@@ -51,7 +51,10 @@ class Simulation:
             zones = zones,
         )
         ray_plotter = RayPlotter(ray_pos)
-        plot_objects((self.building, ray_plotter))
+        colors = ([1.0, 1.0, 1.0], [1.0, 0.0, 0.0])
+        plot_objects((self.building, ray_plotter), colors=colors)
+
+        print(hits)
 
         return
 

@@ -10,7 +10,7 @@ from building3d.display.colors import random_rgb_color
 logger = logging.getLogger(__name__)
 
 
-def plot_objects(objects: tuple, output_file=None) -> None:
+def plot_objects(objects: tuple, output_file=None, colors=()) -> None:
     """Plot multiple objects (like Building, Zone, Solid, Wall, RayCluster).
 
     The faces array is organized as:
@@ -24,9 +24,12 @@ def plot_objects(objects: tuple, output_file=None) -> None:
     - get_lines() - returning points and lines -> tuple[PointType, IndexType]
     - get_points() - returning points -> PointType
 
+    If `colors` are given, the number of colors must be equal to the number of `objects.
+
     Args:
         objects: objects to plot, described above
         output_file: string with the path to output image, if None will show interactive plot
+        colors: tuple of colors, each color defined as a list of 3 floats (RGB)
 
     Return:
         None
@@ -39,18 +42,25 @@ def plot_objects(objects: tuple, output_file=None) -> None:
     if len(objects) == 0:
         raise ValueError("Nothing to plot. No objects passed.")
 
+    if len(colors) > 0 and len(colors) != len(objects):
+        raise ValueError("Number of colors must be same as the number of objects")
+
     if output_file is None:
         pl = pv.Plotter()
     else:
         pl = pv.Plotter(off_screen=True)
 
-    for obj in objects:
+    for obj_num, obj in enumerate(objects):
 
         # If more than 1 object is given, use different color for each
-        if len(objects) > 1:
+        if len(objects) > 1 and len(colors) == 0:
             col = random_rgb_color()
-        else:
+        elif len(objects) > 1 and len(colors) == len(objects):
+            col = [float(x) for x in colors[obj_num]]  # PyVista does not handle integer colors
+        elif len(objects) == 1:
             col = [1.0, 1.0, 1.0]
+        else:
+            raise RuntimeError(f"Unhandled case: {len(objects)=}, {len(colors)=}")
 
         # Plot mesh, lines, or points, depending on which method is present
         has_get_mesh = callable(getattr(obj, "get_mesh", None))
