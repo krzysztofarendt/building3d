@@ -7,8 +7,10 @@ from building3d.geom.zone import Zone
 from building3d.geom.solid import Solid
 from building3d.geom.wall import Wall
 from building3d.geom.polygon import Polygon
-from building3d.geom.types import PointType, IndexType, IntDataType
+from building3d.geom.polygon.ispointinside import is_point_inside_projection
+from building3d.geom.types import PointType, VectorType, IndexType, IntDataType
 from building3d.display.plot_objects import plot_objects
+from .find_transparent import find_transparent
 
 
 class RayPlotter:
@@ -36,8 +38,18 @@ class Simulation:
         self.num_steps = num_steps
 
     def run(self):
+        # Get transparent polygons
+        trans_poly_paths = find_transparent(self.building)
+        trans_poly_nums = set()
+        for poly_path in trans_poly_paths:
+            poly = self.building.get(poly_path)
+            assert isinstance(poly, Polygon)
+            trans_poly_nums.add(poly.num)
+
+        # Convert building to the array format
         points, faces, polygons, walls, solids, zones = to_array_format(self.building)
 
+        # Run simulation loop (JIT compiled)
         ray_pos, hits = simulation_loop(
             self.num_steps,
             self.num_rays,
@@ -49,6 +61,7 @@ class Simulation:
             walls = walls,
             solids = solids,
             zones = zones,
+            trans_poly_nums = trans_poly_nums,
         )
         ray_plotter = RayPlotter(ray_pos)
         colors = ([1.0, 1.0, 1.0], [1.0, 0.0, 0.0])
@@ -73,6 +86,7 @@ def simulation_loop(
     walls: IndexType,
     solids: IndexType,
     zones: IndexType,
+    trans_poly_nums: set[int],
 ) -> tuple[PointType, IntDataType]:
     """Simulation loop compiled to machine code with Numba.
     """
@@ -105,6 +119,19 @@ def simulation_loop(
     for sn in range(num_sinks):
         sink_dist[sn, :] = np.sqrt(np.sum((pos - sinks[sn])**2, axis=1))
 
+    # Target surfaces
+    target_surfs: IndexType = find_target_surfaces(
+        pos,
+        direction,
+        points,
+        faces,
+        polygons,
+        walls,
+        solids,
+        zones,
+        trans_poly_nums,
+    )
+
     # Move rays
     for i in range(num_steps):
         pos += delta_pos
@@ -116,4 +143,23 @@ def simulation_loop(
         rays_hitting_sinks = np.where(sink_dist < sink_radius, 1, 0)
         hits += np.sum(rays_hitting_sinks, axis=1)
 
+        # Reflections
+        ...
+
     return pos, hits
+
+
+def find_target_surfaces(
+    # Rays
+    pos: PointType,
+    direction: VectorType,
+    # Building
+    points: PointType,
+    faces: IndexType,
+    polygons: IndexType,
+    walls: IndexType,
+    solids: IndexType,
+    zones: IndexType,
+    trans_poly_nums: set[int],
+) -> IndexType:
+    ...
