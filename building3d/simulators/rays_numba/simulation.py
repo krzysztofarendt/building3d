@@ -7,7 +7,16 @@ from building3d.geom.zone import Zone
 from building3d.geom.solid import Solid
 from building3d.geom.wall import Wall
 from building3d.geom.polygon import Polygon
-from building3d.geom.types import PointType, IndexType
+from building3d.geom.types import PointType, IndexType, IntDataType
+from building3d.display.plot_objects import plot_objects
+
+
+class RayPlotter:
+    def __init__(self, points):
+        self.points = points
+
+    def get_points(self):
+        return self.points
 
 
 class Simulation:
@@ -29,7 +38,7 @@ class Simulation:
     def run(self):
         points, faces, polygons, walls, solids, zones = to_array_format(self.building)
 
-        num_hits = simulation_loop(
+        ray_pos, hits = simulation_loop(
             self.num_steps,
             self.num_rays,
             source = self.source,
@@ -41,8 +50,10 @@ class Simulation:
             solids = solids,
             zones = zones,
         )
+        ray_plotter = RayPlotter(ray_pos)
+        plot_objects((self.building, ray_plotter))
 
-        return num_hits
+        return
 
 
 @njit
@@ -59,8 +70,10 @@ def simulation_loop(
     walls: IndexType,
     solids: IndexType,
     zones: IndexType,
-):
-    num_hits = 0
+) -> tuple[PointType, IntDataType]:
+    """Simulation loop compiled to machine code with Numba.
+    """
+    hits = np.zeros(len(sinks))
 
     # Simulation parameters (TODO: add to config and/or property dict)
     t_step = 1e-4
@@ -73,6 +86,8 @@ def simulation_loop(
     # Direction and velocity
     speed = 343.
     direction = np.random.rand(num_rays, 3) * 2.0 - 1.0
+    for i in range(num_rays):
+        direction[i] /= np.linalg.norm(direction[i])
     velocity = direction * speed
     delta_pos = velocity * t_step
 
@@ -95,8 +110,7 @@ def simulation_loop(
         for sn in range(num_sinks):
             sink_dist[sn, :] = np.sqrt(np.sum((pos - sinks[sn])**2, axis=1))
 
-        hit = np.where(sink_dist < sink_radius, 1, 0)
+        rays_hitting_sinks = np.where(sink_dist < sink_radius, 1, 0)
+        hits += np.sum(rays_hitting_sinks, axis=1)
 
-        num_hits += np.sum(hit)
-
-    return num_hits
+    return pos, hits

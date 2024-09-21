@@ -24,12 +24,11 @@ if __name__ == "__main__":
     ])
 
     # Rays
-    num_rays = 5000000
-    num_steps = 1000
+    num_rays = 5000
+    num_steps = 30
 
     sim = Simulation(building, source, sinks, num_rays, num_steps)
     t0 = time.time()
-    num_hits = sim.run()
+    sim.run()
     tot_time = time.time() - t0
     print(f"{tot_time=:.2f}")
-    print(f"{num_hits=}")
