@@ -8,7 +8,7 @@ from building3d.geom.solid import Solid
 from building3d.geom.wall import Wall
 from building3d.geom.polygon import Polygon
 from building3d.geom.polygon.ispointinside import is_point_inside_projection
-from building3d.geom.types import PointType, VectorType, IndexType, IntDataType
+from building3d.geom.types import PointType, VectorType, IndexType, IntDataType, FLOAT, INT
 from building3d.display.plot_objects import plot_objects
 from .find_transparent import find_transparent
 
@@ -134,21 +134,27 @@ def simulation_loop(
 
     # Move rays
     for i in range(num_steps):
-        pos += delta_pos
+        for rn in range(num_rays):
+            if energy[rn] == 0.0:
+                continue
 
-        # Check sinks
-        for sn in range(num_sinks):
-            sink_dist[sn, :] = np.sqrt(np.sum((pos - sinks[sn])**2, axis=1))
+            pos[rn] += delta_pos[rn]
 
-        rays_hitting_sinks = np.where(sink_dist < sink_radius, 1, 0)
-        hits += np.sum(rays_hitting_sinks, axis=1)
+            # Check sinks
+            for sn in range(num_sinks):
+                sink_dist[sn, rn] = np.sqrt(np.sum((pos[rn] - sinks[sn])**2))
 
-        # Reflections
-        ...
+                if sink_dist[sn, rn] < sink_radius:
+                    hits[sn] += energy[rn]
+                    energy[rn] = 0.0
+
+            # Reflections
+            ...
 
     return pos, hits
 
 
+@njit
 def find_target_surfaces(
     # Rays
     pos: PointType,
@@ -162,4 +168,47 @@ def find_target_surfaces(
     zones: IndexType,
     trans_poly_nums: set[int],
 ) -> IndexType:
-    ...
+    pts, tri = get_polygon_pts_and_tri(0, points, faces, polygons)  # WIP
+    breakpoint()
+    pass
+
+
+@njit
+def get_polygon_pts_and_tri(
+    poly_num,
+    points,
+    faces,
+    polygons,
+) -> tuple[PointType, IndexType]:
+    """Returns polygon points and faces for a given polygon number.
+    """
+    # Get faces of the selected polygon
+    poly_faces = faces[polygons == poly_num]
+
+    # Point indices needs to be renumbered, a mapping from old to new numbers is needed
+    face_remap = {}
+
+    # Point numbers - this list is used to collect the needed points
+    pt_nums = []
+
+    new_index = 0
+    for old_index in poly_faces.flatten():
+        if old_index not in face_remap:  # We don't want to take a point index twice
+            face_remap[old_index] = new_index
+            pt_nums.append(old_index)
+            new_index += 1
+
+    # Collect the points
+    num_points = len(pt_nums)
+    poly_points = np.zeros((num_points, 3), dtype=FLOAT)
+
+    for i in range(num_points):
+        poly_points[i] = points[pt_nums[i]]
+
+    # Re-number face point indices
+    new_faces = np.zeros_like(poly_faces, dtype=INT)
+    for fn, fc in enumerate(poly_faces):
+        for pn in range(3):
+            new_faces[fn, pn] = face_remap[fc[pn]]
+
+    return poly_points, new_faces
