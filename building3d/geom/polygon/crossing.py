@@ -8,7 +8,8 @@ from building3d.geom.points import points_equal
 from building3d.geom.points import are_points_coplanar
 from building3d.geom.polygon.edges import polygon_edges
 from building3d.geom.polygon.ispointinside import is_point_inside
-from building3d.geom.types import PointType, IndexType
+from building3d.geom.polygon.plane import plane_coefficients
+from building3d.geom.types import PointType, IndexType, FLOAT
 from building3d.geom.points import bounding_box
 
 
@@ -62,3 +63,47 @@ def are_bboxes_overlapping(bbox1, bbox2):
         return False
     else:
         return True
+
+
+@njit
+def is_line_segment_crossing_polygon(
+    seg_start: PointType,
+    seg_end: PointType,
+    pts: PointType,
+    tri: IndexType,
+    epsilon: float = 1e-6
+) -> bool:
+    """
+    Check if a line segment crosses a polygon in 3D space.
+
+    Args:
+        seg_start: Start point of the line segment (shape: (3,))
+        seg_end: End point of the line segment (shape: (3,))
+        pts: Array of polygon vertices (shape: (n, 3) where n is the number of vertices)
+        tri: Array of polygon faces (shape: (f, 3) where f is the number of faces)
+        epsilon: Small value for floating-point comparisons
+
+    Returns:
+        bool: True if the line segment crosses the polygon, False otherwise
+    """
+    # Get the plane equation coefficients
+    a, b, c, d = plane_coefficients(pts)
+    plane_normal = np.array([a, b, c])
+
+    # Check if the line segment is parallel to the polygon's plane
+    segment_direction = (seg_end - seg_start).astype(FLOAT)
+    if abs(np.dot(segment_direction, plane_normal)) < epsilon:
+        return False
+
+    # Calculate the intersection point of the line with the plane
+    t = -(a * seg_start[0] + b * seg_start[1] + c * seg_start[2] + d) / \
+        np.dot(segment_direction, plane_normal)
+
+    # Check if the intersection point is within the line segment
+    if t < 0 or t > 1:
+        return False
+
+    intersect_pt = seg_start + t * segment_direction
+
+    # Check if the intersection point is inside the polygon
+    return is_point_inside(intersect_pt, pts, tri, boundary_in=True)
