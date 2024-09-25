@@ -5,6 +5,7 @@ from building3d.geom.types import FLOAT, INT, PointType, IndexType
 from building3d.geom.polygon.crossing import is_line_segment_crossing_polygon
 
 
+# TODO: Add unit test!
 @njit
 def make_bvh_grid(
     min_xyz: tuple[float, float, float],
@@ -34,27 +35,21 @@ def make_bvh_grid(
     max_x, max_y, max_z = max_xyz
     grid = {}
 
-    x = min_x
-    y = min_y
-    z = min_z
+    x_range = np.arange(min_x, max_x + step, step)
+    y_range = np.arange(min_y, max_y + step, step)
+    z_range = np.arange(min_z, max_z + step, step)
 
     keys = []
-    while z <= max_z:
-        keys.append((int(x / step), int(y / step), int(z / step)))
-        if x < max_x:
-            x += step
-        else:
-            x = min_x
-            if y < max_y:
-                y += step
-            else:
-                z += step
+    for x in x_range:
+        for y in y_range:
+            for z in z_range:
+                keys.append((int(x / step), int(y / step), int(z / step)))
 
     for key in keys:
         # TODO: replace grid values with sets once Numba supports them as values of typed dicts
         # https://numba.pydata.org/numba-doc/dev/reference/pysupported.html#typed-dict
         polynums = []
-        added = set([0])  # Hint for type inference
+        added = set([0])  # Hint for type inference for Numba
         added.remove(0)
 
         for pn, (pts, tri) in enumerate(zip(poly_pts, poly_tri)):
@@ -74,6 +69,7 @@ def is_polygon_crossing_cube(
     tri,
     min_xyz,
     max_xyz,
+    eps: float = 1e-6
 ) -> bool:
     """Check if a polygon intersects with or is contained within a cube.
 
@@ -82,6 +78,7 @@ def is_polygon_crossing_cube(
         tri: List of triangle indices defining the polygon's triangulation.
         min_xyz (tuple): Minimum coordinates (x, y, z) of the cube.
         max_xyz (tuple): Maximum coordinates (x, y, z) of the cube.
+        eps (float): Small number for comparison operations.
 
     Returns:
         bool: True if the polygon intersects with or is contained within the cube, False otherwise.
@@ -89,8 +86,9 @@ def is_polygon_crossing_cube(
     # Check if any polygon vertex is inside the cube
     for pt in pts:
         if (
-            pt[0] < max_xyz[0] and pt[1] < max_xyz[1] and pt[2] < max_xyz[2] and
-            pt[0] >= min_xyz[0] and pt[1] >= min_xyz[1] and pt[2] >= min_xyz[2]
+            pt[0] <= max_xyz[0] + eps and pt[1] <= max_xyz[1] + eps and pt[2] <= max_xyz[2] + eps
+            and
+            pt[0] >= min_xyz[0] - eps and pt[1] >= min_xyz[1] - eps and pt[2] >= min_xyz[2] - eps
         ):
             return True
 
