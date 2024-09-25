@@ -2,6 +2,7 @@ from numba import njit
 import numpy as np
 
 from building3d.io.arrayformat import to_array_format
+from building3d.io.arrayformat import get_polygon_points_and_faces
 from building3d.geom.building import Building
 from building3d.geom.zone import Zone
 from building3d.geom.solid import Solid
@@ -11,7 +12,6 @@ from building3d.geom.polygon.distance import distance_point_to_polygon
 from building3d.geom.types import PointType, VectorType, IndexType, IntDataType, FLOAT, INT
 from building3d.geom.vectors import normal
 from building3d.display.plot_objects import plot_objects
-from building3d.io.arrayformat import get_polygon_points_and_faces
 from .bvh import make_bvh_grid
 from .find_target import find_target_surface
 from .find_transparent import find_transparent
@@ -109,7 +109,7 @@ def simulation_loop(
         poly_tri.append(tri)
 
     # Make BVH grid
-    grid_step = 0.5
+    grid_step = 0.2
     min_x = points[:, 0].min()
     min_y = points[:, 1].min()
     min_z = points[:, 2].min()
@@ -124,6 +124,7 @@ def simulation_loop(
         poly_tri = poly_tri,
         step = grid_step,
     )
+    breakpoint()
 
     # Initial ray energy and received energy
     energy = np.ones(num_rays, dtype=FLOAT)
@@ -158,7 +159,7 @@ def simulation_loop(
         z = int(pos[rn][2] / grid_step)
         polygons_to_check = grid[(x, y, z)]
 
-        target_surfs[rn] = find_target_surface(
+        target_surfs[rn] = find_target_surface(  # TODO: Probably not needed
             pos[rn],
             direction[rn],
             poly_pts,
@@ -190,20 +191,36 @@ def simulation_loop(
             x = int(pos[rn][0] / grid_step)
             y = int(pos[rn][1] / grid_step)
             z = int(pos[rn][2] / grid_step)
-            # near_polygons = grid[(x, y, z)]
-            # min_dist = np.inf
-            nearest = -1
-            # for pn in near_polygons:
-            #     pts = poly_pts[pn]
-            #     tri = poly_tri[pn]
-            #     vn = normal(pts[-1], pts[0], pts[1])
-            #     dist = distance_point_to_polygon(pos[rn], pts, tri, vn)
+            try:
+                near_polygons = grid[(x, y, z)]  # TODO: Grid does not contain all polygons?
+            except KeyError:
+                breakpoint()
+            min_dist = np.inf
+            nearest_vn = np.zeros(3, dtype=FLOAT)
+            for pn in near_polygons:
+                pts = poly_pts[pn]
+                tri = poly_tri[pn]
+                vn = normal(pts[-1], pts[0], pts[1])
+                dist = distance_point_to_polygon(pos[rn], pts, tri, vn)
+                print(f"{dist=}, ({pn=})")
 
-            #     if dist < reflection_dist and dist < min_dist:
-            #         min_dist = dist
-            #         nearest = pn
+                if dist < 0:
+                    raise RuntimeError("Ray behind the nearest polygon")
 
-            # Reflections
-            ...
+                if dist < reflection_dist and dist < min_dist:
+                    min_dist = dist
+                    nearest_vn = vn
+            if (pos[rn] < 0).any():
+                breakpoint()
+
+            if min_dist < reflection_dist:
+                # Reflect from the nearest polygon
+                dot = np.dot(nearest_vn, velocity[rn])
+                velocity[rn] = velocity[rn] - 2 * dot * nearest_vn
+                delta_pos[rn] = velocity[rn] * t_step
+                energy[rn] -= absorption
+                # TODO: Ray may go outside near a corner. Must check if next move will not do it.
+                print(f"Reflection of ray {rn} at {pos[rn]}")
+        print(f"{pos=}")
 
     return pos, hits

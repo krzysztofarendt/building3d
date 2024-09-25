@@ -35,9 +35,9 @@ def make_bvh_grid(
     max_x, max_y, max_z = max_xyz
     grid = {}
 
-    x_range = np.arange(min_x, max_x + step, step)
-    y_range = np.arange(min_y, max_y + step, step)
-    z_range = np.arange(min_z, max_z + step, step)
+    x_range = np.arange(min_x, max_x, step)
+    y_range = np.arange(min_y, max_y, step)
+    z_range = np.arange(min_z, max_z, step)
 
     keys = []
     for x in x_range:

@@ -24,7 +24,7 @@ if __name__ == "__main__":
     ])
 
     # Rays
-    num_rays = 5000
+    num_rays = 5
     num_steps = 30
 
     sim = Simulation(building, source, sinks, num_rays, num_steps)
