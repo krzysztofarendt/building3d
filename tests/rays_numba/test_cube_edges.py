@@ -4,11 +4,14 @@ import pytest
 from building3d.simulators.rays_numba.bvh import cube_edges
 
 
-@pytest.mark.parametrize("min_xyz, max_xyz, expected_shape", [
-    ((0, 0, 0), (1, 1, 1), (12, 2, 3)),
-    ((-1, -1, -1), (1, 1, 1), (12, 2, 3)),
-    ((0.5, 1.5, 2.5), (3.5, 4.5, 5.5), (12, 2, 3)),
-])
+@pytest.mark.parametrize(
+    "min_xyz, max_xyz, expected_shape",
+    [
+        ((0, 0, 0), (1, 1, 1), (12, 2, 3)),
+        ((-1, -1, -1), (1, 1, 1), (12, 2, 3)),
+        ((0.5, 1.5, 2.5), (3.5, 4.5, 5.5), (12, 2, 3)),
+    ],
+)
 def test_cube_edges(min_xyz, max_xyz, expected_shape):
     edges = cube_edges(min_xyz, max_xyz)
     assert isinstance(edges, np.ndarray)

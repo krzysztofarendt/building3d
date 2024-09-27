@@ -124,7 +124,6 @@ def simulation_loop(
         poly_tri = poly_tri,
         step = grid_step,
     )
-    breakpoint()
 
     # Initial ray energy and received energy
     energy = np.ones(num_rays, dtype=FLOAT)
@@ -191,10 +190,7 @@ def simulation_loop(
             x = int(pos[rn][0] / grid_step)
             y = int(pos[rn][1] / grid_step)
             z = int(pos[rn][2] / grid_step)
-            try:
-                near_polygons = grid[(x, y, z)]  # TODO: Grid does not contain all polygons?
-            except KeyError:
-                breakpoint()
+            near_polygons = grid[(x, y, z)]  # TODO: Grid does not contain all polygons?
             min_dist = np.inf
             nearest_vn = np.zeros(3, dtype=FLOAT)
             for pn in near_polygons:
@@ -210,8 +206,6 @@ def simulation_loop(
                 if dist < reflection_dist and dist < min_dist:
                     min_dist = dist
                     nearest_vn = vn
-            if (pos[rn] < 0).any():
-                breakpoint()
 
             if min_dist < reflection_dist:
                 # Reflect from the nearest polygon

@@ -1,5 +1,3 @@
-import numpy as np
-
 from building3d.geom.solid.box import box
 from building3d.geom.polygon import Polygon
 from building3d.geom.wall import Wall
@@ -12,6 +10,8 @@ from building3d.simulators.rays_numba.bvh import make_bvh_grid
 
 
 def test_bvh_grid():
+    """This BVH test was written by Krzysztof. Other BVH tests were written by Claude 3.5 Sonnet.
+    """
     # Need to reset the counters before using the array format functions
     Polygon.count = 0
     Wall.count = 0
@@ -25,7 +25,7 @@ def test_bvh_grid():
     building = Building([zone], "b")
 
     # Convert to array format
-    points, faces, polygons, walls, solids, zones = to_array_format(building)
+    points, faces, polygons, walls, _, _ = to_array_format(building)
 
     # Get polygon points and faces
     poly_pts = []
@@ -38,13 +38,13 @@ def test_bvh_grid():
 
     # Test BVH grid
     grid = make_bvh_grid(
-        min_xyz = (0.0, 0.0, 0.0),
-        max_xyz = (0.2, 0.2, 0.2),
-        poly_pts = poly_pts,
-        poly_tri = poly_tri,
-        step = 0.1,
+        min_xyz=(0.0, 0.0, 0.0),
+        max_xyz=(0.2, 0.2, 0.2),
+        poly_pts=poly_pts,
+        poly_tri=poly_tri,
+        step=0.1,
     )
-    for k, v in grid.items():
+    for _, v in grid.items():
         assert len(v) == 3
 
     assert len(grid) == 8
@@ -52,4 +52,3 @@ def test_bvh_grid():
 
 if __name__ == "__main__":
     test_bvh_grid()
-

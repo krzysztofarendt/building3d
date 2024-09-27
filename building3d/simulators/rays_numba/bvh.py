@@ -49,16 +49,12 @@ def make_bvh_grid(
         # TODO: replace grid values with sets once Numba supports them as values of typed dicts
         # https://numba.pydata.org/numba-doc/dev/reference/pysupported.html#typed-dict
         polynums = []
-        added = set([0])  # Hint for type inference for Numba
-        added.remove(0)
-
         for pn, (pts, tri) in enumerate(zip(poly_pts, poly_tri)):
-            min_xyz = key
-            max_xyz = (key[0] + step, key[1] + step, key[2] + step)
-            if pn not in added:
-                if is_polygon_crossing_cube(pts, tri, min_xyz, max_xyz):
-                    polynums.append(pn)
-            grid[key] = np.array(polynums, dtype=INT)
+            min_xyz_cube = (key[0] * step, key[1] * step, key[2] * step)
+            max_xyz_cube = ((key[0] + 1) * step, (key[1] + 1) * step, (key[2] + 1) * step)
+            if is_polygon_crossing_cube(pts, tri, min_xyz_cube, max_xyz_cube):
+                polynums.append(pn)
+        grid[key] = np.array(polynums, dtype=INT)
 
     return grid
 
