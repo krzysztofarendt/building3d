@@ -99,6 +99,19 @@ def simulation_loop(
     absorption = 0.1
     sink_radius = 0.1
 
+    # Initial ray energy and received energy
+    energy = np.ones(num_rays, dtype=FLOAT)
+    hits = np.zeros(len(sinks), dtype=FLOAT)
+
+    # Direction and velocity
+    speed = 343.
+    init_direction = np.random.rand(num_rays, 3) * 2.0 - 1.0
+    for i in range(num_rays):
+        init_direction[i] /= np.linalg.norm(init_direction[i])
+    velocity = init_direction * speed
+    delta_pos = velocity * t_step
+    reflection_dist = speed * t_step * 2.0
+
     # Get polygon points and faces
     poly_pts = []
     poly_tri = []
@@ -110,6 +123,8 @@ def simulation_loop(
 
     # Make BVH grid
     grid_step = 0.2
+    assert grid_step > speed * t_step, "Can't use grid smaller than ray position increment"
+
     min_x = points[:, 0].min()
     min_y = points[:, 1].min()
     min_z = points[:, 2].min()
@@ -125,19 +140,6 @@ def simulation_loop(
         step = grid_step,
     )
 
-    # Initial ray energy and received energy
-    energy = np.ones(num_rays, dtype=FLOAT)
-    hits = np.zeros(len(sinks), dtype=FLOAT)
-
-    # Direction and velocity
-    speed = 343.
-    direction = np.random.rand(num_rays, 3) * 2.0 - 1.0
-    for i in range(num_rays):
-        direction[i] /= np.linalg.norm(direction[i])
-    velocity = direction * speed
-    delta_pos = velocity * t_step
-    reflection_dist = speed * t_step * 2.0
-
     # Initial position
     pos = np.zeros((num_rays, 3))
     for i in range(num_rays):
@@ -150,30 +152,15 @@ def simulation_loop(
         sink_dist[sn, :] = np.sqrt(np.sum((pos - sinks[sn])**2, axis=1))
 
     # Target surfaces
-    target_surfs = np.full(num_rays, 1, dtype=INT)
-
-    for rn in range(num_rays):
-        x = int(pos[rn][0] / grid_step)
-        y = int(pos[rn][1] / grid_step)
-        z = int(pos[rn][2] / grid_step)
-        polygons_to_check = grid[(x, y, z)]
-
-        target_surfs[rn] = find_target_surface(  # TODO: Probably not needed
-            pos[rn],
-            direction[rn],
-            poly_pts,
-            poly_tri,
-            walls,
-            solids,
-            zones,
-            transparent_polygons,
-            polygons_to_check,
-        )
+    # If the index of the target is -1, it means that the target surface is unknown.
+    # Target surface may be unknown when it is far away, because we only look at nearby polygons.
+    target_surfs = np.full(num_rays, -1, dtype=np.int32)
 
     # Move rays
     for i in range(num_steps):
+        print("Step", i)
         for rn in range(num_rays):
-            if energy[rn] == 0.0:
+            if energy[rn] <= 0.0:
                 continue
 
             pos[rn] += delta_pos[rn]
@@ -190,31 +177,67 @@ def simulation_loop(
             x = int(pos[rn][0] / grid_step)
             y = int(pos[rn][1] / grid_step)
             z = int(pos[rn][2] / grid_step)
-            near_polygons = grid[(x, y, z)]  # TODO: Grid does not contain all polygons?
-            min_dist = np.inf
-            nearest_vn = np.zeros(3, dtype=FLOAT)
-            for pn in near_polygons:
-                pts = poly_pts[pn]
-                tri = poly_tri[pn]
-                vn = normal(pts[-1], pts[0], pts[1])
-                dist = distance_point_to_polygon(pos[rn], pts, tri, vn)
-                print(f"{dist=}, ({pn=})")
 
-                if dist < 0:
-                    raise RuntimeError("Ray behind the nearest polygon")
+            # Get a set of nearby polygon indices to check if the ray
+            # is not going to move outside the building in the next step.
+            # Need to find the target surface and calculate distance from it.
+            polygons_to_check = set()
+            for i in range(-1, 2, 1):
+                for j in range(-1, 2, 1):
+                    for k in range(-1, 2, 1):
+                        if (x + i, y + j, z + k) in grid:
+                            poly_indices = grid[(x + i, y + j, z + k)]
+                            for index in poly_indices:
+                                polygons_to_check.add(index)
 
-                if dist < reflection_dist and dist < min_dist:
-                    min_dist = dist
-                    nearest_vn = vn
+            target_surfs[rn] = find_target_surface(
+                pos[rn],
+                velocity[rn],
+                poly_pts,
+                poly_tri,
+                transparent_polygons,
+                polygons_to_check,
+            )
+            pts = poly_pts[target_surfs[rn]]
+            tri = poly_tri[target_surfs[rn]]
+            vn = normal(pts[-1], pts[0], pts[1])
+            dist = distance_point_to_polygon(pos[rn], pts, tri, vn)
 
-            if min_dist < reflection_dist:
-                # Reflect from the nearest polygon
-                dot = np.dot(nearest_vn, velocity[rn])
-                velocity[rn] = velocity[rn] - 2 * dot * nearest_vn
+            while target_surfs[rn] >= 0 and dist < reflection_dist and energy[rn] > 0:
+                # Reflect from the target polygon
+                # print("Reflect ray", rn, "from", target_surfs[rn], "; energy=", energy[rn])
+                dot = np.dot(vn, velocity[rn])
+                velocity[rn] = velocity[rn] - 2 * dot * vn
                 delta_pos[rn] = velocity[rn] * t_step
                 energy[rn] -= absorption
-                # TODO: Ray may go outside near a corner. Must check if next move will not do it.
-                print(f"Reflection of ray {rn} at {pos[rn]}")
-        print(f"{pos=}")
+
+                if energy[rn] < 0:
+                    energy[rn] = 0.0
+                    break
+
+                # Get a set of nearby polygon indices to check if the ray
+                # is not going to move outside the building in the next step.
+                # Need to find the target surface and calculate distance from it.
+                polygons_to_check = set()
+                for i in range(-1, 2, 1):
+                    for j in range(-1, 2, 1):
+                        for k in range(-1, 2, 1):
+                            if (x + i, y + j, z + k) in grid:
+                                poly_indices = grid[(x + i, y + j, z + k)]
+                                for index in poly_indices:
+                                    polygons_to_check.add(index)
+
+                target_surfs[rn] = find_target_surface(
+                    pos[rn],
+                    velocity[rn],
+                    poly_pts,
+                    poly_tri,
+                    transparent_polygons,
+                    polygons_to_check,
+                )
+                pts = poly_pts[target_surfs[rn]]
+                tri = poly_tri[target_surfs[rn]]
+                vn = normal(pts[-1], pts[0], pts[1])
+                dist = distance_point_to_polygon(pos[rn], pts, tri, vn)
 
     return pos, hits

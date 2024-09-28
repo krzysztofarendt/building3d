@@ -13,7 +13,7 @@ def make_bvh_grid(
     poly_pts: list[PointType],
     poly_tri: list[IndexType],
     step: float = 1.0,
-) -> dict[tuple[int, int, int], set[int]]:
+) -> dict[tuple[int, int, int], IndexType]:
     """Create a Bounding Volume Hierarchy (BVH) grid for faster collision detection.
 
     This function divides the space defined by min_xyz and max_xyz into a grid of cubes,
@@ -27,7 +27,7 @@ def make_bvh_grid(
         step (float, optional): Size of each grid cell. Defaults to 1.0.
 
     Returns:
-        dict[tuple[int, int, int], set[int]]: A dictionary where keys are grid
+        dict[tuple[int, int, int], IndexType]: A dictionary where keys are grid
         cell coordinates and values are sets of polygon indices that intersect
         with or are contained within each cell
     """
