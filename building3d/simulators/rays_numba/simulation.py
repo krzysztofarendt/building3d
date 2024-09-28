@@ -4,12 +4,9 @@ import numpy as np
 from building3d.io.arrayformat import to_array_format
 from building3d.io.arrayformat import get_polygon_points_and_faces
 from building3d.geom.building import Building
-from building3d.geom.zone import Zone
-from building3d.geom.solid import Solid
-from building3d.geom.wall import Wall
 from building3d.geom.polygon import Polygon
 from building3d.geom.polygon.distance import distance_point_to_polygon
-from building3d.geom.types import PointType, VectorType, IndexType, IntDataType, FLOAT, INT
+from building3d.geom.types import PointType, IndexType, IntDataType, FLOAT
 from building3d.geom.vectors import normal
 from building3d.display.plot_objects import plot_objects
 from .bvh import make_bvh_grid
@@ -63,8 +60,6 @@ class Simulation:
             faces = faces,
             polygons = polygons,
             walls = walls,
-            solids = solids,
-            zones = zones,
             transparent_polygons = trans_poly_nums,
         )
         ray_plotter = RayPlotter(ray_pos)
@@ -88,8 +83,6 @@ def simulation_loop(
     faces: IndexType,
     polygons: IndexType,
     walls: IndexType,
-    solids: IndexType,
-    zones: IndexType,
     transparent_polygons: set[int],
 ) -> tuple[PointType, IntDataType]:
     """Simulation loop compiled to machine code with Numba.
@@ -178,9 +171,7 @@ def simulation_loop(
             y = int(pos[rn][1] / grid_step)
             z = int(pos[rn][2] / grid_step)
 
-            # Get a set of nearby polygon indices to check if the ray
-            # is not going to move outside the building in the next step.
-            # Need to find the target surface and calculate distance from it.
+            # Get a set of nearby polygon indices to check the ray distance to next wall
             polygons_to_check = set()
             for i in range(-1, 2, 1):
                 for j in range(-1, 2, 1):
@@ -205,7 +196,6 @@ def simulation_loop(
 
             while target_surfs[rn] >= 0 and dist < reflection_dist and energy[rn] > 0:
                 # Reflect from the target polygon
-                # print("Reflect ray", rn, "from", target_surfs[rn], "; energy=", energy[rn])
                 dot = np.dot(vn, velocity[rn])
                 velocity[rn] = velocity[rn] - 2 * dot * vn
                 delta_pos[rn] = velocity[rn] * t_step
@@ -216,7 +206,7 @@ def simulation_loop(
                     break
 
                 # Get a set of nearby polygon indices to check if the ray
-                # is not going to move outside the building in the next step.
+                # is not going to move outside the building in the next step (after reflection).
                 # Need to find the target surface and calculate distance from it.
                 polygons_to_check = set()
                 for i in range(-1, 2, 1):
