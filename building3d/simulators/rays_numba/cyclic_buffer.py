@@ -3,7 +3,7 @@ from numba import njit
 
 
 @njit
-def cyclic_buffer(buffer: np.ndarray, head: int, tail: int, element: np.ndarray, buffer_size: int):
+def cyclic_buf(buffer: np.ndarray, head: int, tail: int, element: np.ndarray, buffer_size: int):
     """
     Inserts an element into a cyclic (circular) buffer and updates the head and tail pointers.
 
@@ -52,7 +52,7 @@ def cyclic_buffer(buffer: np.ndarray, head: int, tail: int, element: np.ndarray,
         Head: 1 Tail: 0
     """
     # Insert the new element at the head position
-    buffer[head] = element
+    buffer[head, :] = element
     head = (head + 1) % buffer_size  # Circular increment
 
     # If head catches up with tail, we move the tail to maintain buffer size
@@ -60,6 +60,39 @@ def cyclic_buffer(buffer: np.ndarray, head: int, tail: int, element: np.ndarray,
         tail = (tail + 1) % buffer_size  # Overwrite oldest element
 
     return buffer, head, tail
+
+
+@njit
+def convert_to_contiguous(buffer, head, tail, buffer_size):
+    """
+    Converts the current state of the cyclic buffer to a contiguous array where the head becomes
+    index 0 and the tail becomes the last element (-1).
+
+    Args:
+        buffer (np.ndarray): Cyclic buffer (2D or 1D) to be flattened into a contiguous array.
+        head (int): Index where the next element will be written (end of buffer).
+        tail (int): Index where the oldest element is located (start of the logical buffer).
+        buffer_size (int): Size of the cyclic buffer.
+
+    Returns:
+        np.ndarray: A contiguous array with elements arranged in logical order from tail to head.
+    """
+    # Calculate the number of elements in the buffer
+    if head >= tail:
+        num_elements = head - tail
+    else:
+        num_elements = buffer_size - tail + head
+
+    # Allocate the contiguous array
+    contiguous_array = np.empty((num_elements,) + buffer.shape[1:], dtype=buffer.dtype)
+
+    # Copy elements from the buffer into the contiguous array
+    index = 0
+    for i in range(tail, tail + num_elements):
+        contiguous_array[index] = buffer[i % buffer_size]
+        index += 1
+
+    return contiguous_array
 
 
 if __name__ == "__main__":
@@ -70,6 +103,6 @@ if __name__ == "__main__":
 
     for i in range(10):
         new_val = np.random.random(3)
-        buffer, head, tail = cyclic_buffer(buffer, head, tail, new_val, buffer_size)
+        buffer, head, tail = cyclic_buf(buffer, head, tail, new_val, buffer_size)
         print(i)
         print(buffer)

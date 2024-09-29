@@ -13,14 +13,39 @@ from .bvh import make_bvh_grid
 from .find_target import find_target_surface
 from .find_transparent import find_transparent
 from .find_nearby_polygons import find_nearby_polygons
+from .cyclic_buffer import cyclic_buf, convert_to_contiguous
+
+
+BUFF_SIZE = 350
 
 
 class RayPlotter:
-    def __init__(self, points):
-        self.points = points
+    def __init__(self, building, pos_buf, enr_buf):
+        self.building = building
+        self.pos_buf = pos_buf
+        self.enr_buf = enr_buf
+
+    def plot(self):
+        building_color = (1.0, 1.0, 1.0)
+        ray_color = (1.0, 0.0, 0.0)
+        colors = [building_color, ray_color]
+        plot_objects((self.building, self), colors=colors)
 
     def get_points(self):
-        return self.points
+        return self.pos_buf[-1, :, :]
+
+    def get_lines(self):
+        line_len = self.pos_buf.shape[0]
+        num_rays = self.pos_buf.shape[1]
+        verts = []
+        lines = []
+        curr_index = 0
+        for rn in range(num_rays):
+            verts.extend(self.pos_buf[:, rn, :])
+            lines.append([curr_index + i for i in range(line_len)])
+            curr_index += line_len
+
+        return np.vstack(verts, dtype=FLOAT), np.vstack(lines)
 
 
 class Simulation:
@@ -29,13 +54,13 @@ class Simulation:
         self,
         building: Building,
         source: PointType,
-        sinks: PointType,
+        absorbers: PointType,
         num_rays: int,
         num_steps: int,
     ):
         self.building = building
         self.source = source.copy()
-        self.sinks = sinks.copy()
+        self.absorbers = absorbers.copy()
         self.num_rays = num_rays
         self.num_steps = num_steps
 
@@ -52,22 +77,19 @@ class Simulation:
         points, faces, polygons, walls, solids, zones = to_array_format(self.building)
 
         # Run simulation loop (JIT compiled)
-        ray_pos, hits = simulation_loop(
+        pos_buf, vel_buf, enr_buf, hit_buf = simulation_loop(
             self.num_steps,
             self.num_rays,
             source = self.source,
-            sinks = self.sinks,
+            absorbers = self.absorbers,
             points = points,
             faces = faces,
             polygons = polygons,
             walls = walls,
             transparent_polygons = trans_poly_nums,
         )
-        ray_plotter = RayPlotter(ray_pos)
-        colors = ([1.0, 1.0, 1.0], [1.0, 0.0, 0.0])
-        plot_objects((self.building, ray_plotter), colors=colors)
-
-        print(hits)
+        ray_plotter = RayPlotter(self.building, pos_buf, enr_buf)
+        ray_plotter.plot()
 
         return
 
@@ -78,24 +100,45 @@ def simulation_loop(
     num_steps: int,
     num_rays: int,
     source: PointType,
-    sinks: PointType,
+    absorbers: PointType,
     # Building in the array format
     points: PointType,
     faces: IndexType,
     polygons: IndexType,
     walls: IndexType,
     transparent_polygons: set[int],
-) -> tuple[PointType, IntDataType]:
-    """Simulation loop compiled to machine code with Numba.
+) -> tuple[PointType, PointType, PointType, IntDataType]:
+    """Performs a simulation loop for ray tracing in a building environment.
+
+    This function is compiled to machine code with Numba for improved performance. It simulates
+    the movement of rays through a building, handling reflections, absorptions, and hits on absorbers.
+
+    Args:
+        num_steps (int): Number of simulation steps to perform.
+        num_rays (int): Number of rays to simulate.
+        source (PointType): Starting point for all rays.
+        absorbers (PointType): Array of absorber positions.
+        points (PointType): Array of all points in the building geometry.
+        faces (IndexType): Array of face indices for the building geometry.
+        polygons (IndexType): Array of polygon indices for the building geometry.
+        walls (IndexType): Array of wall indices for the building geometry.
+        transparent_polygons (set[int]): Set of indices for transparent polygons.
+
+    Returns:
+        tuple[PointType, PointType, PointType, IntDataType]: A tuple containing:
+            - pos_buf: Buffer of ray positions over time.
+            - vel_buf: Buffer of ray velocities over time.
+            - enr_buf: Buffer of ray energies over time.
+            - hit_buf: Buffer of hit counts for each sink over time.
     """
     # Simulation parameters (TODO: add to config and/or property dict)
-    t_step = 1e-4
+    t_step = 1e-5
     absorption = 0.1
     sink_radius = 0.1
 
     # Initial ray energy and received energy
     energy = np.ones(num_rays, dtype=FLOAT)
-    hits = np.zeros(len(sinks), dtype=FLOAT)
+    hits = np.zeros(len(absorbers), dtype=FLOAT)
 
     # Direction and velocity
     speed = 343.
@@ -104,7 +147,7 @@ def simulation_loop(
         init_direction[i] /= np.linalg.norm(init_direction[i])
     velocity = init_direction * speed
     delta_pos = velocity * t_step
-    reflection_dist = speed * t_step * 2.0
+    reflection_dist = speed * t_step * 1.001
 
     # Get polygon points and faces
     poly_pts = []
@@ -135,15 +178,32 @@ def simulation_loop(
     )
 
     # Initial position
-    pos = np.zeros((num_rays, 3))
+    pos = np.zeros((num_rays, 3), dtype=FLOAT)
     for i in range(num_rays):
         pos[i, :] = source.copy()
 
+    # Cyclic buffers
+    pos_buf = np.zeros((BUFF_SIZE, num_rays, 3), dtype=FLOAT)
+    vel_buf = np.zeros((BUFF_SIZE, num_rays, 3), dtype=FLOAT)
+    enr_buf = np.zeros((BUFF_SIZE, num_rays), dtype=FLOAT)
+    hit_buf = np.zeros((BUFF_SIZE, len(absorbers)), dtype=FLOAT)
+
+    pos_head, pos_tail = 0, 0
+    vel_head, vel_tail = 0, 0
+    enr_head, enr_tail = 0, 0
+    hit_head, hit_tail = 0, 0
+
+    # Update cyclic buffers
+    pos_buf, pos_head, pos_tail = cyclic_buf(pos_buf, pos_head, pos_tail, pos, BUFF_SIZE)
+    vel_buf, vel_head, vel_tail = cyclic_buf(vel_buf, vel_head, vel_tail, velocity, BUFF_SIZE)
+    enr_buf, enr_head, vel_tail = cyclic_buf(enr_buf, enr_head, enr_tail, energy, BUFF_SIZE)
+    hit_buf, hit_head, hit_tail = cyclic_buf(hit_buf, hit_head, hit_tail, hits, BUFF_SIZE)
+
     # Distance to each sink
-    num_sinks = sinks.shape[0]
-    sink_dist = np.zeros((num_sinks, num_rays))
-    for sn in range(num_sinks):
-        sink_dist[sn, :] = np.sqrt(np.sum((pos - sinks[sn])**2, axis=1))
+    num_absorbers = absorbers.shape[0]
+    sink_dist = np.zeros((num_absorbers, num_rays))
+    for sn in range(num_absorbers):
+        sink_dist[sn, :] = np.sqrt(np.sum((pos - absorbers[sn])**2, axis=1))
 
     # Target surfaces
     # If the index of the target is -1, it means that the target surface is unknown.
@@ -159,9 +219,9 @@ def simulation_loop(
 
             pos[rn] += delta_pos[rn]
 
-            # Check sinks
-            for sn in range(num_sinks):
-                sink_dist[sn, rn] = np.sqrt(np.sum((pos[rn] - sinks[sn])**2))
+            # Check absorbers
+            for sn in range(num_absorbers):
+                sink_dist[sn, rn] = np.sqrt(np.sum((pos[rn] - absorbers[sn])**2))
 
                 if sink_dist[sn, rn] < sink_radius:
                     hits[sn] += energy[rn]
@@ -217,4 +277,15 @@ def simulation_loop(
                 vn = normal(pts[-1], pts[0], pts[1])
                 dist = distance_point_to_polygon(pos[rn], pts, tri, vn)
 
-    return pos, hits
+        # Update cyclic buffers
+        pos_buf, pos_head, pos_tail = cyclic_buf(pos_buf, pos_head, pos_tail, pos, BUFF_SIZE)
+        vel_buf, vel_head, vel_tail = cyclic_buf(vel_buf, vel_head, vel_tail, velocity, BUFF_SIZE)
+        enr_buf, enr_head, vel_tail = cyclic_buf(enr_buf, enr_head, enr_tail, energy, BUFF_SIZE)
+        hit_buf, hit_head, hit_tail = cyclic_buf(hit_buf, hit_head, hit_tail, hits, BUFF_SIZE)
+
+    pos_buf = convert_to_contiguous(pos_buf, pos_head, pos_tail, BUFF_SIZE)
+    vel_buf = convert_to_contiguous(vel_buf, vel_head, vel_tail, BUFF_SIZE)
+    enr_buf = convert_to_contiguous(enr_buf, enr_head, enr_tail, BUFF_SIZE)
+    hit_buf = convert_to_contiguous(hit_buf, hit_head, hit_tail, BUFF_SIZE)
+
+    return pos_buf, vel_buf, enr_buf, hit_buf
