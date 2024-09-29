@@ -3,6 +3,8 @@ import time
 
 import numpy as np
 
+from building3d.logger import init_logger
+from building3d.io.stl import read_stl
 from building3d.display.plot_objects import plot_objects
 from building3d.geom.solid.box import box
 from building3d.geom.zone import Zone
@@ -17,21 +19,20 @@ if __name__ == "__main__":
     # Parameters
     project_dir = "tmp"
 
+    main_logfile = os.path.join(project_dir, "log")
+    init_logger(main_logfile)
+
     # Create building
-    solid_0 = box(1, 1, 1, (0, 0, 0), "s0")
-    solid_1 = box(1, 1, 1, (1, 0, 0), "s1")
-    zone = Zone([solid_0, solid_1], "z")
-    building = Building([zone], "b")
+    building = read_stl("resources/utah_teapot.stl")
 
     # Sources and sinks
     source = np.array([0.3, 0.3, 0.3])
     sinks = np.array([
         [0.6, 0.6, 0.6],
-        [0.1, 0.1, 0.6],
     ])
 
     # Rays
-    num_rays = 50000
+    num_rays = 1000
     num_steps = 350
 
     sim = Simulation(building, source, sinks, num_rays, num_steps)

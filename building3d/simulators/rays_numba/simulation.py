@@ -39,7 +39,8 @@ class Simulation:
 
     def run(self):
         # Get transparent polygons
-        trans_poly_paths = find_transparent(self.building)
+        logger.info("Finding transparent surfaces")
+        trans_poly_paths = find_transparent(self.building)  # TODO: Very slow if many polygons
         trans_poly_nums = set()
         for poly_path in trans_poly_paths:
             poly = self.building.get(poly_path)
@@ -47,9 +48,11 @@ class Simulation:
             trans_poly_nums.add(poly.num)
 
         # Convert building to the array format
+        logger.info("Converting the building to the array format")
         points, faces, polygons, walls, solids, zones = to_array_format(self.building)
 
         # Run simulation loop (JIT compiled)
+        logger.info("Starting the simulation")
         pos_buf, vel_buf, enr_buf, hit_buf = simulation_loop(
             self.num_steps,
             self.num_rays,
@@ -61,6 +64,7 @@ class Simulation:
             walls = walls,
             transparent_polygons = trans_poly_nums,
         )
+        logger.info("Finished the simulation")
         return pos_buf, vel_buf, enr_buf, hit_buf
 
 
