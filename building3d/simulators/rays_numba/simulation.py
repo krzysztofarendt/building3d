@@ -1,3 +1,5 @@
+import logging
+
 from numba import njit, prange
 import numpy as np
 
@@ -8,44 +10,15 @@ from building3d.geom.polygon import Polygon
 from building3d.geom.polygon.distance import distance_point_to_polygon
 from building3d.geom.types import PointType, IndexType, IntDataType, FLOAT
 from building3d.geom.vectors import normal
-from building3d.display.plot_objects import plot_objects
 from .bvh import make_bvh_grid
 from .find_target import find_target_surface
 from .find_transparent import find_transparent
 from .find_nearby_polygons import find_nearby_polygons
 from .cyclic_buffer import cyclic_buf, convert_to_contiguous
+from .config import BUFF_SIZE
 
 
-BUFF_SIZE = 350
-
-
-class RayPlotter:
-    def __init__(self, building, pos_buf, enr_buf):
-        self.building = building
-        self.pos_buf = pos_buf
-        self.enr_buf = enr_buf
-
-    def plot(self):
-        building_color = (1.0, 1.0, 1.0)
-        ray_color = (1.0, 0.0, 0.0)
-        colors = [building_color, ray_color]
-        plot_objects((self.building, self), colors=colors)
-
-    def get_points(self):
-        return self.pos_buf[-1, :, :]
-
-    def get_lines(self):
-        line_len = self.pos_buf.shape[0]
-        num_rays = self.pos_buf.shape[1]
-        verts = []
-        lines = []
-        curr_index = 0
-        for rn in range(num_rays):
-            verts.extend(self.pos_buf[:, rn, :])
-            lines.append([curr_index + i for i in range(line_len)])
-            curr_index += line_len
-
-        return np.vstack(verts, dtype=FLOAT), np.vstack(lines)
+logger = logging.getLogger(__name__)
 
 
 class Simulation:
@@ -88,10 +61,7 @@ class Simulation:
             walls = walls,
             transparent_polygons = trans_poly_nums,
         )
-        ray_plotter = RayPlotter(self.building, pos_buf, enr_buf)
-        ray_plotter.plot()
-
-        return
+        return pos_buf, vel_buf, enr_buf, hit_buf
 
 
 @njit(parallel=True)
@@ -184,8 +154,10 @@ def simulation_loop(
 
     # Cyclic buffers
     pos_buf = np.zeros((BUFF_SIZE, num_rays, 3), dtype=FLOAT)
+    for _ in range(3):
+        pos_buf[:, :, :] = source.copy()
     vel_buf = np.zeros((BUFF_SIZE, num_rays, 3), dtype=FLOAT)
-    enr_buf = np.zeros((BUFF_SIZE, num_rays), dtype=FLOAT)
+    enr_buf = np.ones((BUFF_SIZE, num_rays), dtype=FLOAT)
     hit_buf = np.zeros((BUFF_SIZE, len(absorbers)), dtype=FLOAT)
 
     pos_head, pos_tail = 0, 0
@@ -280,7 +252,7 @@ def simulation_loop(
         # Update cyclic buffers
         pos_buf, pos_head, pos_tail = cyclic_buf(pos_buf, pos_head, pos_tail, pos, BUFF_SIZE)
         vel_buf, vel_head, vel_tail = cyclic_buf(vel_buf, vel_head, vel_tail, velocity, BUFF_SIZE)
-        enr_buf, enr_head, vel_tail = cyclic_buf(enr_buf, enr_head, enr_tail, energy, BUFF_SIZE)
+        enr_buf, enr_head, enr_tail = cyclic_buf(enr_buf, enr_head, enr_tail, energy, BUFF_SIZE)
         hit_buf, hit_head, hit_tail = cyclic_buf(hit_buf, hit_head, hit_tail, hits, BUFF_SIZE)
 
     pos_buf = convert_to_contiguous(pos_buf, pos_head, pos_tail, BUFF_SIZE)

@@ -1,3 +1,4 @@
+import os
 import time
 
 import numpy as np
@@ -6,10 +7,17 @@ from building3d.display.plot_objects import plot_objects
 from building3d.geom.solid.box import box
 from building3d.geom.zone import Zone
 from building3d.geom.building import Building
+from building3d.io.b3d import write_b3d
 from building3d.simulators.rays_numba.simulation import Simulation
+from building3d.simulators.rays_numba.dump_buffers import dump_buffers
+from building3d.simulators.rays_numba.ray_buff_plotter import RayBuffPlotter
+from building3d.simulators.rays_numba.movie import make_movie
 
 
 if __name__ == "__main__":
+    # Parameters
+    project_dir = "tmp"
+
     # Create building
     solid_0 = box(1, 1, 1, (0, 0, 0), "s0")
     solid_1 = box(1, 1, 1, (1, 0, 0), "s1")
@@ -24,11 +32,28 @@ if __name__ == "__main__":
     ])
 
     # Rays
-    num_rays = 50000
+    num_rays = 10000
     num_steps = 350
 
     sim = Simulation(building, source, sinks, num_rays, num_steps)
     t0 = time.time()
-    sim.run()
+    pos_buf, vel_buf, enr_buf, hit_buf = sim.run()
     tot_time = time.time() - t0
     print(f"{tot_time=:.2f}")
+
+    # Save building
+    b3d_file = os.path.join(project_dir, "building.b3d")
+    write_b3d(b3d_file, building)
+
+    # Save results
+    dump_buffers(pos_buf, vel_buf, enr_buf, hit_buf, "tmp")
+
+    # Show plot
+    rays = RayBuffPlotter(building, pos_buf, enr_buf)
+    plot_objects((building, rays))
+
+    make_movie(
+        output_file="movie.mp4",
+        state_dump_dir="tmp",
+        building_file=b3d_file,
+    )

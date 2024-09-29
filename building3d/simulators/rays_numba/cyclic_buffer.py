@@ -65,8 +65,8 @@ def cyclic_buf(buffer: np.ndarray, head: int, tail: int, element: np.ndarray, bu
 @njit
 def convert_to_contiguous(buffer, head, tail, buffer_size):
     """
-    Converts the current state of the cyclic buffer to a contiguous array where the head becomes
-    index 0 and the tail becomes the last element (-1).
+    Converts the current state of the cyclic buffer to a contiguous array where the tail becomes
+    index 0 and the head becomes the last element (-1).
 
     Args:
         buffer (np.ndarray): Cyclic buffer (2D or 1D) to be flattened into a contiguous array.
@@ -78,13 +78,16 @@ def convert_to_contiguous(buffer, head, tail, buffer_size):
         np.ndarray: A contiguous array with elements arranged in logical order from tail to head.
     """
     # Calculate the number of elements in the buffer
-    if head >= tail:
+    if head == tail:
+        return np.zeros((0,) + buffer.shape[1:], dtype=buffer.dtype)  # Empty buffer case
+
+    if head > tail:
         num_elements = head - tail
     else:
         num_elements = buffer_size - tail + head
 
     # Allocate the contiguous array
-    contiguous_array = np.empty((num_elements,) + buffer.shape[1:], dtype=buffer.dtype)
+    contiguous_array = np.zeros((num_elements,) + buffer.shape[1:], dtype=buffer.dtype)
 
     # Copy elements from the buffer into the contiguous array
     index = 0
