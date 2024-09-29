@@ -1,4 +1,4 @@
-from numba import njit
+from numba import njit, prange
 import numpy as np
 
 from building3d.io.arrayformat import to_array_format
@@ -12,6 +12,7 @@ from building3d.display.plot_objects import plot_objects
 from .bvh import make_bvh_grid
 from .find_target import find_target_surface
 from .find_transparent import find_transparent
+from .find_nearby_polygons import find_nearby_polygons
 
 
 class RayPlotter:
@@ -71,7 +72,7 @@ class Simulation:
         return
 
 
-@njit
+@njit(parallel=True)
 def simulation_loop(
     # Simulation setup
     num_steps: int,
@@ -152,7 +153,7 @@ def simulation_loop(
     # Move rays
     for i in range(num_steps):
         print("Step", i)
-        for rn in range(num_rays):
+        for rn in prange(num_rays):
             if energy[rn] <= 0.0:
                 continue
 
@@ -172,14 +173,7 @@ def simulation_loop(
             z = int(pos[rn][2] / grid_step)
 
             # Get a set of nearby polygon indices to check the ray distance to next wall
-            polygons_to_check = set()
-            for i in range(-1, 2, 1):
-                for j in range(-1, 2, 1):
-                    for k in range(-1, 2, 1):
-                        if (x + i, y + j, z + k) in grid:
-                            poly_indices = grid[(x + i, y + j, z + k)]
-                            for index in poly_indices:
-                                polygons_to_check.add(index)
+            polygons_to_check = find_nearby_polygons(x, y, z, grid)
 
             target_surfs[rn] = find_target_surface(
                 pos[rn],
@@ -208,14 +202,7 @@ def simulation_loop(
                 # Get a set of nearby polygon indices to check if the ray
                 # is not going to move outside the building in the next step (after reflection).
                 # Need to find the target surface and calculate distance from it.
-                polygons_to_check = set()
-                for i in range(-1, 2, 1):
-                    for j in range(-1, 2, 1):
-                        for k in range(-1, 2, 1):
-                            if (x + i, y + j, z + k) in grid:
-                                poly_indices = grid[(x + i, y + j, z + k)]
-                                for index in poly_indices:
-                                    polygons_to_check.add(index)
+                polygons_to_check = find_nearby_polygons(x, y, z, grid)
 
                 target_surfs[rn] = find_target_surface(
                     pos[rn],
