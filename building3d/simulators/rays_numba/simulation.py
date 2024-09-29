@@ -40,7 +40,9 @@ class Simulation:
     def run(self):
         # Get transparent polygons
         logger.info("Finding transparent surfaces")
-        trans_poly_paths = find_transparent(self.building)  # TODO: Very slow if many polygons
+        # TODO: If below set is empty, Numba cannot guess the type
+        # TODO: Very slow if many polygons
+        trans_poly_paths = find_transparent(self.building)
         trans_poly_nums = set()
         for poly_path in trans_poly_paths:
             poly = self.building.get(poly_path)

@@ -19,9 +19,14 @@ For future queries, fast and deep.
 A poem of logic, clean and neat,
 This building script, a coding feat.
 """
+import logging
+
 from building3d.geom.building import Building
 from building3d.geom.building.graph import graph_polygon
 from building3d.geom.paths.object_path import split_path
+
+
+logger = logging.getLogger(__name__)
 
 
 # Use cache to speed up finding transparent polygons for each ray within a building
@@ -39,16 +44,19 @@ def find_transparent(building: Building) -> set[str]:
     Returns:
         set of paths to polygons
     """
+    logger.debug(f"Finding transparent polygons in {building.name}")
     if id(building) in CACHE:
         return CACHE[id(building)]
 
     else:
         # Find facing polygons (matching exactly)
+        logger.debug("Making graph")
         graph = graph_polygon(building, facing=True, overlapping=False, touching=False)
 
         transparent_polygons = []
         added = set()
 
+        logger.debug("Iterating through the graph items")
         for k, v in graph.items():
             assert isinstance(v, list)
             assert len(v) <= 1, f"Expected one facing polygon, but found more ({len(v)})"
@@ -61,6 +69,7 @@ def find_transparent(building: Building) -> set[str]:
                     # Doesn't have to check if plg0 is facing plg1,
                     # because if they are in the graph, they must be
                     if z0 == z1:
+                        logger.debug(f"Transparent polygons found: {k}, {v[0]}")
                         transparent_polygons.extend([k, v[0]])
                         added.add(k)
                         added.add(v[0])
