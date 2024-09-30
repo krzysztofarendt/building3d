@@ -4,7 +4,7 @@ import numpy as np
 from building3d.geom.types import PointType, IndexType, FLOAT, INT
 
 
-@njit
+# @njit  # TODO: Fails with tuples of len > 1000
 def vstack_mesh(
     t_pts: tuple[PointType, ...],
     t_tri: tuple[IndexType, ...],

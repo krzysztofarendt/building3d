@@ -6,6 +6,7 @@ from building3d.geom.polygon.crossing import is_line_segment_crossing_polygon
 
 
 # TODO: Add unit test!
+# TODO: Rename to simply "grid", because it is not a tree-like structure
 @njit
 def make_bvh_grid(
     min_xyz: tuple[float, float, float],

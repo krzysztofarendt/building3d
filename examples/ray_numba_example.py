@@ -19,8 +19,9 @@ if __name__ == "__main__":
 
     # Create building
     solid_0 = box(1, 1, 1, (0, 0, 0), "s0")
-    solid_1 = box(1, 1, 1, (1, 0, 0), "s1")
-    zone = Zone([solid_0, solid_1], "z")
+    # solid_1 = box(1, 1, 1, (1, 0, 0), "s1")
+    # zone = Zone([solid_0, solid_1], "z")
+    zone = Zone([solid_0], "z")
     building = Building([zone], "b")
 
     # Sources and sinks
@@ -31,8 +32,8 @@ if __name__ == "__main__":
     ])
 
     # Rays
-    num_rays = 50000
-    num_steps = 350
+    num_rays = 50
+    num_steps = 35
 
     sim = Simulation(building, source, sinks, num_rays, num_steps)
     t0 = time.time()

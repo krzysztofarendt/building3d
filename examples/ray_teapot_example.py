@@ -6,9 +6,6 @@ import numpy as np
 from building3d.logger import init_logger
 from building3d.io.stl import read_stl
 from building3d.display.plot_objects import plot_objects
-from building3d.geom.solid.box import box
-from building3d.geom.zone import Zone
-from building3d.geom.building import Building
 from building3d.io.b3d import write_b3d
 from building3d.simulators.rays_numba.simulation import Simulation
 from building3d.simulators.rays_numba.ray_buff_plotter import RayBuffPlotter
@@ -26,18 +23,18 @@ if __name__ == "__main__":
     building = read_stl("resources/utah_teapot.stl")
 
     # Sources and sinks
-    source = np.array([0.3, 0.3, 0.3])
+    source = np.array([3.0, 3.0, 3.0])
     sinks = np.array([
-        [0.6, 0.6, 0.6],
+        [4.0, 4.0, 4.0],
     ])
 
     # Rays
-    num_rays = 1000
-    num_steps = 350
+    num_rays = 100
+    num_steps = 3000
 
-    sim = Simulation(building, source, sinks, num_rays, num_steps)
+    sim = Simulation(building, source, sinks, num_rays, num_steps, search_transparent=False)
     t0 = time.time()
-    pos_buf, vel_buf, enr_buf, hit_buf = sim.run()
+    pos_buf, vel_buf, enr_buf, hit_buf = sim.run()  # TODO: Some rays go outside the teapot
     tot_time = time.time() - t0
     print(f"{tot_time=:.2f}")
 

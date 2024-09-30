@@ -30,20 +30,30 @@ class Simulation:
         absorbers: PointType,
         num_rays: int,
         num_steps: int,
+        search_transparent: bool = True,
     ):
         self.building = building
         self.source = source.copy()
         self.absorbers = absorbers.copy()
         self.num_rays = num_rays
         self.num_steps = num_steps
+        self.search_transparent = search_transparent
 
     def run(self):
         # Get transparent polygons
         logger.info("Finding transparent surfaces")
-        # TODO: If below set is empty, Numba cannot guess the type
-        # TODO: Very slow if many polygons
-        trans_poly_paths = find_transparent(self.building)
-        trans_poly_nums = set()
+        if self.search_transparent:
+            # TODO: Very slow if many polygons
+            # Complexity:
+            # - worst case scenario -> O(n^2),
+            # - best case scenario -> O(n),
+            # where n is the number of polygons.
+            trans_poly_paths = find_transparent(self.building)
+        else:
+            trans_poly_paths = set()
+
+        # Can't have an empty set because of Numba. Polygon -1 doesn't exist anyway.
+        trans_poly_nums = set([-1])
         for poly_path in trans_poly_paths:
             poly = self.building.get(poly_path)
             assert isinstance(poly, Polygon)
@@ -107,6 +117,7 @@ def simulation_loop(
             - enr_buf: Buffer of ray energies over time.
             - hit_buf: Buffer of hit counts for each sink over time.
     """
+    print("Simulation loop started")
     # Simulation parameters (TODO: add to config and/or property dict)
     t_step = 1e-5
     absorption = 0.1
@@ -126,6 +137,7 @@ def simulation_loop(
     reflection_dist = speed * t_step * 1.001
 
     # Get polygon points and faces
+    print("Collecting polygon points and faces from the array format")
     poly_pts = []
     poly_tri = []
     num_polys = len(walls)
@@ -135,7 +147,8 @@ def simulation_loop(
         poly_tri.append(tri)
 
     # Make BVH grid
-    grid_step = 0.2
+    print("Making the BVH grid")
+    grid_step = 2.0  # TODO: Add to input arguments or config
     assert grid_step > speed * t_step, "Can't use grid smaller than ray position increment"
 
     min_x = points[:, 0].min()
@@ -144,6 +157,10 @@ def simulation_loop(
     max_x = points[:, 0].max()
     max_y = points[:, 1].max()
     max_z = points[:, 2].max()
+
+    print("X limits:", min_x, max_x)
+    print("Y limits:", min_y, max_y)
+    print("Z limits:", min_z, max_z)
 
     grid = make_bvh_grid(
         min_xyz = (min_x, min_y, min_z),
@@ -154,6 +171,7 @@ def simulation_loop(
     )
 
     # Initial position
+    print("Initializing arrays: position, velocity, energy, hits")
     pos = np.zeros((num_rays, 3), dtype=FLOAT)
     for i in range(num_rays):
         pos[i, :] = source.copy()
@@ -177,11 +195,12 @@ def simulation_loop(
     enr_buf, enr_head, vel_tail = cyclic_buf(enr_buf, enr_head, enr_tail, energy, BUFF_SIZE)
     hit_buf, hit_head, hit_tail = cyclic_buf(hit_buf, hit_head, hit_tail, hits, BUFF_SIZE)
 
-    # Distance to each sink
+    # Distance to each absorber
+    print("Calculating initial distance to each absorber")
     num_absorbers = absorbers.shape[0]
-    sink_dist = np.zeros((num_absorbers, num_rays))
+    absorber_dist = np.zeros((num_absorbers, num_rays))
     for sn in range(num_absorbers):
-        sink_dist[sn, :] = np.sqrt(np.sum((pos - absorbers[sn])**2, axis=1))
+        absorber_dist[sn, :] = np.sqrt(np.sum((pos - absorbers[sn])**2, axis=1))
 
     # Target surfaces
     # If the index of the target is -1, it means that the target surface is unknown.
@@ -189,6 +208,7 @@ def simulation_loop(
     target_surfs = np.full(num_rays, -1, dtype=np.int32)
 
     # Move rays
+    print("Entering the loop")
     for i in range(num_steps):
         print("Step", i)
         for rn in prange(num_rays):
@@ -199,9 +219,9 @@ def simulation_loop(
 
             # Check absorbers
             for sn in range(num_absorbers):
-                sink_dist[sn, rn] = np.sqrt(np.sum((pos[rn] - absorbers[sn])**2))
+                absorber_dist[sn, rn] = np.sqrt(np.sum((pos[rn] - absorbers[sn])**2))
 
-                if sink_dist[sn, rn] < sink_radius:
+                if absorber_dist[sn, rn] < sink_radius:
                     hits[sn] += energy[rn]
                     energy[rn] = 0.0
 
@@ -261,9 +281,12 @@ def simulation_loop(
         enr_buf, enr_head, enr_tail = cyclic_buf(enr_buf, enr_head, enr_tail, energy, BUFF_SIZE)
         hit_buf, hit_head, hit_tail = cyclic_buf(hit_buf, hit_head, hit_tail, hits, BUFF_SIZE)
 
+    print("Exiting the loop")
+    print("Converting buffers to contiguous arrays")
     pos_buf = convert_to_contiguous(pos_buf, pos_head, pos_tail, BUFF_SIZE)
     vel_buf = convert_to_contiguous(vel_buf, vel_head, vel_tail, BUFF_SIZE)
     enr_buf = convert_to_contiguous(enr_buf, enr_head, enr_tail, BUFF_SIZE)
     hit_buf = convert_to_contiguous(hit_buf, hit_head, hit_tail, BUFF_SIZE)
 
+    print("Exiting the function")
     return pos_buf, vel_buf, enr_buf, hit_buf
