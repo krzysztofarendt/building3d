@@ -7,10 +7,10 @@ LOG_LEVEL = logging.INFO
 # GEOMETRY ====================================================================
 # General epsilon - used to avoid zero division etc.
 # Should be as small as possible
-EPSILON: float = 1e-11
+EPSILON: float = 1e-10
 
 # Geometry absolute tolerance used for comparison operations
-GEOM_ATOL: float = 1e-12  # At least 1e-10 needed for teapot :)
+GEOM_ATOL: float = 1e-10  # At least 1e-10 needed for teapot :)
 
 # Geometry relative tolerance (0.1%)
 GEOM_RTOL: float = 1e-4

@@ -15,11 +15,11 @@ from building3d.geom.vectors import normal
 
 
 @njit
-def is_point_at_boundary(ptest: PointType, pts: PointType) -> bool:
+def is_point_at_boundary(ptest: PointType, pts: PointType, atol: float = GEOM_ATOL) -> bool:
     """Checks if the point lays on any of the edges of `pts`."""
     edges = polygon_edges(pts)
     for pt1, pt2 in edges:
-        if is_point_on_segment(ptest, pt1, pt2):
+        if is_point_on_segment(ptest, pt1, pt2, atol=atol):
             return True
     return False
 
@@ -30,6 +30,7 @@ def is_point_inside(
     pts: PointType,
     tri: IndexType,
     boundary_in: bool = True,
+    atol: float = GEOM_ATOL,
 ) -> bool:
     """Checks whether a point lies on the surface of the polygon.
 
@@ -39,12 +40,13 @@ def is_point_inside(
         ptest: test point, array shape (3, )
         pts: polygon points, array shape (num_points, 3)
         tri: triangle indices, array shape (num_triangles, 3)
+        atol: absolute tolerance
 
     Returns:
         True if ptest is inside the polygon
     """
     # Check if point is inside the bounding box
-    if not is_point_inside_bbox(ptest, pts):
+    if not is_point_inside_bbox(ptest, pts, atol=atol):
         return False
 
     # Check if points are coplanar
@@ -52,7 +54,7 @@ def is_point_inside(
     pts_stacked[:-1] = pts
     pts_stacked[-1] = ptest
 
-    if not are_points_coplanar(pts_stacked):
+    if not are_points_coplanar(pts_stacked, atol=atol):
         return False
 
     # TODO: Sort triangles based on min. distance between ptest and tr. vertices/centroids
@@ -68,7 +70,7 @@ def is_point_inside(
             if boundary_in:
                 return True
             else:
-                if is_point_at_boundary(ptest, pts):
+                if is_point_at_boundary(ptest, pts, atol=atol):
                     return False
                 else:
                     return True
@@ -150,6 +152,7 @@ def is_point_inside_projection(
     pts: PointType,
     tri: IndexType,
     fwd_only: bool = True,
+    atol: float = GEOM_ATOL,
 ) -> bool:
     """Checks whether a projected point hits the surface.
 
@@ -163,6 +166,7 @@ def is_point_inside_projection(
         pts: polygon points array, shape (num_pts, 3)
         tri: polygon triangulation array (num_tri, 3)
         fwd_only: if True, only the forward (positive) direction of vec is considered
+        atol: absolute tolerance
 
     Returns:
         True if the projected point hits the surface
@@ -173,11 +177,11 @@ def is_point_inside_projection(
     # Find the point projection along vec to the plane of the polygon
     denom = a * v[0] + b * v[1] + c * v[2]
 
-    if np.abs(denom) < GEOM_ATOL:
+    if np.abs(denom) < atol:
         # Vector vec is colinear with the plane
         # The point lays inside this projection only if it is inside this polygon
         # logger.warning(f"Projection vector {vec} is colinear with the polygon {self.name}")
-        return is_point_inside(ptest, pts, tri)
+        return is_point_inside(ptest, pts, tri, atol=atol)
     else:
         # Projection crosses the surface of the plane
         s = (-d - a * ptest[0] - b * ptest[1] - c * ptest[2]) / (
@@ -189,5 +193,5 @@ def is_point_inside_projection(
             return False
 
         ptest = ptest + s * v
-        is_inside = is_point_inside(ptest, pts, tri)
+        is_inside = is_point_inside(ptest, pts, tri, atol=atol)
         return is_inside
