@@ -14,6 +14,7 @@ def make_bvh_grid(
     poly_pts: list[PointType],
     poly_tri: list[IndexType],
     step: float = 1.0,
+    eps: float = 1e-6,
 ) -> dict[tuple[int, int, int], IndexType]:
     """Create a Bounding Volume Hierarchy (BVH) grid for faster collision detection.
 
@@ -36,26 +37,43 @@ def make_bvh_grid(
     max_x, max_y, max_z = max_xyz
     grid = {}
 
-    x_range = np.arange(min_x, max_x, step)
-    y_range = np.arange(min_y, max_y, step)
-    z_range = np.arange(min_z, max_z, step)
+    # The range is extended with "+step" to accommodate models
+    # with negative and positive coordinates
+    x_range = np.arange(min_x, max_x + step + eps, step)
+    y_range = np.arange(min_y, max_y + step + eps, step)
+    z_range = np.arange(min_z, max_z + step + eps, step)
 
     keys = []
     for x in x_range:
         for y in y_range:
             for z in z_range:
-                keys.append((int(x / step), int(y / step), int(z / step)))
+                keys.append((
+                    int(np.floor(x / step)),
+                    int(np.floor(y / step)),
+                    int(np.floor(z / step)),
+                ))
 
+    # Set of polygons included in the grid - used for a sanity check
+    used_polygons = set()
+
+    # TODO: This loop could be parallelized with numba.prange()
     for key in keys:
         # TODO: replace grid values with sets once Numba supports them as values of typed dicts
-        # https://numba.pydata.org/numba-doc/dev/reference/pysupported.html#typed-dict
+        #       https://numba.pydata.org/numba-doc/dev/reference/pysupported.html#typed-dict
         polynums = []
         for pn, (pts, tri) in enumerate(zip(poly_pts, poly_tri)):
             min_xyz_cube = (key[0] * step, key[1] * step, key[2] * step)
-            max_xyz_cube = ((key[0] + 1) * step, (key[1] + 1) * step, (key[2] + 1) * step)
+            max_xyz_cube = (
+                min_xyz_cube[0] + step,
+                min_xyz_cube[1] + step,
+                min_xyz_cube[2] + step,
+            )
             if is_polygon_crossing_cube(pts, tri, min_xyz_cube, max_xyz_cube):
                 polynums.append(pn)
+                used_polygons.add(pn)
         grid[key] = np.array(polynums, dtype=INT)
+
+    assert len(used_polygons) == len(poly_pts), "Not all polygons included in the grid."
 
     return grid
 
@@ -82,10 +100,14 @@ def is_polygon_crossing_cube(
     """
     # Check if any polygon vertex is inside the cube
     for pt in pts:
+        x, y, z = pt
+        max_x, max_y, max_z = max_xyz
+        min_x, min_y, min_z = min_xyz
+
         if (
-            pt[0] <= max_xyz[0] + eps and pt[1] <= max_xyz[1] + eps and pt[2] <= max_xyz[2] + eps
-            and
-            pt[0] >= min_xyz[0] - eps and pt[1] >= min_xyz[1] - eps and pt[2] >= min_xyz[2] - eps
+            min_x - eps < x < max_x + eps and
+            min_y - eps < y < max_y + eps and
+            min_z - eps < z < max_z + eps
         ):
             return True
 

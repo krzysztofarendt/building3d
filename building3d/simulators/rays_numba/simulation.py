@@ -15,7 +15,7 @@ from .find_target import find_target_surface
 from .find_transparent import find_transparent
 from .find_nearby_polygons import find_nearby_polygons
 from .cyclic_buffer import cyclic_buf, convert_to_contiguous
-from .config import BUFF_SIZE
+from .config import BUFF_SIZE, GRID_STEP, T_STEP, SPEED
 
 
 logger = logging.getLogger(__name__)
@@ -93,6 +93,7 @@ def simulation_loop(
     polygons: IndexType,
     walls: IndexType,
     transparent_polygons: set[int],
+    eps: float = 1e-6,
 ) -> tuple[PointType, PointType, PointType, IntDataType]:
     """Performs a simulation loop for ray tracing in a building environment.
 
@@ -119,7 +120,7 @@ def simulation_loop(
     """
     print("Simulation loop started")
     # Simulation parameters (TODO: add to config and/or property dict)
-    t_step = 1e-5
+    t_step = T_STEP
     absorption = 0.1
     sink_radius = 0.1
 
@@ -128,7 +129,7 @@ def simulation_loop(
     hits = np.zeros(len(absorbers), dtype=FLOAT)
 
     # Direction and velocity
-    speed = 343.
+    speed = SPEED
     init_direction = np.random.rand(num_rays, 3) * 2.0 - 1.0
     for i in range(num_rays):
         init_direction[i] /= np.linalg.norm(init_direction[i])
@@ -148,7 +149,7 @@ def simulation_loop(
 
     # Make BVH grid
     print("Making the BVH grid")
-    grid_step = 2.0  # TODO: Add to input arguments or config
+    grid_step = GRID_STEP
     assert grid_step > speed * t_step, "Can't use grid smaller than ray position increment"
 
     min_x = points[:, 0].min()
@@ -212,6 +213,18 @@ def simulation_loop(
     for i in range(num_steps):
         print("Step", i)
         for rn in prange(num_rays):
+            # If the ray somehow left the building - set its energy to 0
+            if (
+                pos[rn][0] < min_x - eps or
+                pos[rn][1] < min_y - eps or
+                pos[rn][2] < min_z - eps or
+                pos[rn][0] > max_x + eps or
+                pos[rn][1] > max_y + eps or
+                pos[rn][2] > max_z + eps
+            ):
+                energy[rn] = 0.0
+
+            # If energy is null, the ray should not move
             if energy[rn] <= 0.0:
                 continue
 
