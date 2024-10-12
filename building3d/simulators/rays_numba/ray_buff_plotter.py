@@ -6,6 +6,7 @@ from building3d.geom.types import PointType, FLOAT, FloatDataType
 
 
 class RayBuffPlotter:
+    """Class with methods for plotting the rays as points and lines based on the ray buffer."""
     def __init__(self, building: Building, pos_buf: PointType, enr_buf: FloatDataType):
         self.building = building
         self.pos_buf = pos_buf
