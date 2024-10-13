@@ -74,7 +74,7 @@ def is_point_on_same_side(
     else:
         vtest /= len_vtest
         vref /= len_vref
-        return bool(np.isclose(vtest, vref, rtol=GEOM_RTOL).all())
+        return bool(np.isclose(vtest, vref, atol=atol).all())
 
 
 @njit
@@ -83,6 +83,7 @@ def is_point_inside(
     pt1: PointType,
     pt2: PointType,
     pt3: PointType,
+    atol: float = GEOM_ATOL,
 ) -> bool:
     """Tests if point `ptest` is inside the triangle `(pt1, pt2, pt3)`.
 
@@ -92,37 +93,41 @@ def is_point_inside(
     This function does not test if the point is coplanar with the triangle.
     """
     # Check if point is inside the bounding box
-    if not is_point_inside_bbox(ptest, np.vstack((pt1, pt2, pt3))):
+    if not is_point_inside_bbox(ptest, np.vstack((pt1, pt2, pt3)), atol=atol):
         return False
 
     # Test if the point is at any of the three vertices
-    if np.allclose(ptest, pt1) or np.allclose(ptest, pt2) or np.allclose(ptest, pt3):
+    if (
+        np.allclose(ptest, pt1, atol=atol) or
+        np.allclose(ptest, pt2, atol=atol) or
+        np.allclose(ptest, pt3, atol=atol)
+    ):
         return True
 
     # Test if it's at any of the edges
     for pair in [(pt1, pt2), (pt2, pt3), (pt3, pt1)]:
         pts = np.vstack((pair[0], pair[1], ptest))
-        if are_points_collinear(pts):
+        if are_points_collinear(pts, atol=atol):
             # ptest is collinear, but is it on the edge or outside the triangle?
             xt, yt, zt = np.round(ptest, POINT_NUM_DEC)  # TODO: is np.round needed?
             x0, y0, z0 = np.round(pair[0], POINT_NUM_DEC)  # TODO: is np.round needed?
             x1, y1, z1 = np.round(pair[1], POINT_NUM_DEC)  # TODO: is np.round needed?
             if (
-                xt > max(x0, x1)
-                or yt > max(y0, y1)
-                or zt > max(z0, z1)
-                or xt < min(x0, x1)
-                or yt < min(y0, y1)
-                or zt < min(z0, z1)
+                xt > max(x0, x1) + atol
+                or yt > max(y0, y1) + atol
+                or zt > max(z0, z1) + atol
+                or xt < min(x0, x1) - atol
+                or yt < min(y0, y1) - atol
+                or zt < min(z0, z1) - atol
             ):
                 return False
             else:
                 return True
 
     # Test if ptest is inside
-    side1 = is_point_on_same_side(pt1, pt2, ptest, pt3)
-    side2 = is_point_on_same_side(pt2, pt3, ptest, pt1)
-    side3 = is_point_on_same_side(pt3, pt1, ptest, pt2)
+    side1 = is_point_on_same_side(pt1, pt2, ptest, pt3, atol=atol)
+    side2 = is_point_on_same_side(pt2, pt3, ptest, pt1, atol=atol)
+    side3 = is_point_on_same_side(pt3, pt1, ptest, pt2, atol=atol)
     is_inside = side1 and side2 and side3
 
     if is_inside:
