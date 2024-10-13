@@ -10,12 +10,12 @@ from building3d.geom.polygon import Polygon
 from building3d.geom.polygon.distance import distance_point_to_polygon
 from building3d.geom.types import PointType, IndexType, IntDataType, FLOAT
 from building3d.geom.vectors import normal
-from .bvh import make_bvh_grid
+from .voxel_grid import make_voxel_grid
 from .find_target import find_target_surface
 from .find_transparent import find_transparent
 from .find_nearby_polygons import find_nearby_polygons
 from .cyclic_buffer import cyclic_buf, convert_to_contiguous
-from .config import BUFF_SIZE, GRID_STEP, T_STEP, SPEED
+from .config import BUFF_SIZE, GRID_STEP, T_STEP, SPEED, ABSORB, SINK_RADIUS
 
 
 logger = logging.getLogger(__name__)
@@ -119,10 +119,10 @@ def simulation_loop(
             - hit_buf: Buffer of hit counts for each sink over time.
     """
     print("Simulation loop started")
-    # Simulation parameters (TODO: add to config and/or property dict)
+    # Simulation parameters
     t_step = T_STEP
-    absorption = 0.1
-    sink_radius = 0.1
+    absorption = ABSORB
+    sink_radius = SINK_RADIUS
 
     # Initial ray energy and received energy
     energy = np.ones(num_rays, dtype=FLOAT)
@@ -135,7 +135,8 @@ def simulation_loop(
         init_direction[i] /= np.linalg.norm(init_direction[i])
     velocity = init_direction * speed
     delta_pos = velocity * t_step
-    reflection_dist = speed * t_step * 1.001
+    just_in_case_margin = 1.01
+    reflection_dist = speed * t_step * just_in_case_margin
 
     # Get polygon points and faces
     print("Collecting polygon points and faces from the array format")
@@ -147,10 +148,10 @@ def simulation_loop(
         poly_pts.append(pts)
         poly_tri.append(tri)
 
-    # Make BVH grid
-    print("Making the BVH grid")
+    # Make voxel grid
+    print("Making the voxel grid")
     grid_step = GRID_STEP
-    assert grid_step > speed * t_step, "Can't use grid smaller than ray position increment"
+    assert grid_step > reflection_dist, "Can't use grid smaller than reflection distance"
 
     min_x = points[:, 0].min()
     min_y = points[:, 1].min()
@@ -163,7 +164,7 @@ def simulation_loop(
     print("Y limits:", min_y, max_y)
     print("Z limits:", min_z, max_z)
 
-    grid = make_bvh_grid(
+    grid = make_voxel_grid(
         min_xyz = (min_x, min_y, min_z),
         max_xyz = (max_x, max_y, max_z),
         poly_pts = poly_pts,
@@ -193,7 +194,7 @@ def simulation_loop(
     # Update cyclic buffers
     pos_buf, pos_head, pos_tail = cyclic_buf(pos_buf, pos_head, pos_tail, pos, BUFF_SIZE)
     vel_buf, vel_head, vel_tail = cyclic_buf(vel_buf, vel_head, vel_tail, velocity, BUFF_SIZE)
-    enr_buf, enr_head, vel_tail = cyclic_buf(enr_buf, enr_head, enr_tail, energy, BUFF_SIZE)
+    enr_buf, enr_head, enr_tail = cyclic_buf(enr_buf, enr_head, enr_tail, energy, BUFF_SIZE)
     hit_buf, hit_head, hit_tail = cyclic_buf(hit_buf, hit_head, hit_tail, hits, BUFF_SIZE)
 
     # Distance to each absorber
@@ -214,7 +215,7 @@ def simulation_loop(
         print("Step", i)
         for rn in prange(num_rays):
             # If the ray somehow left the building - set its energy to 0
-            if (
+            if energy[rn] > 0 and (
                 pos[rn][0] < min_x - eps or
                 pos[rn][1] < min_y - eps or
                 pos[rn][2] < min_z - eps or
@@ -232,6 +233,7 @@ def simulation_loop(
 
             # Check absorbers
             for sn in range(num_absorbers):
+                # TODO: Switch to squared distances to avoid calculating sqrt in each iteration
                 absorber_dist[sn, rn] = np.sqrt(np.sum((pos[rn] - absorbers[sn])**2))
 
                 if absorber_dist[sn, rn] < sink_radius:
@@ -239,12 +241,13 @@ def simulation_loop(
                     energy[rn] = 0.0
 
             # Check near polygons
-            x = int(pos[rn][0] / grid_step)
-            y = int(pos[rn][1] / grid_step)
-            z = int(pos[rn][2] / grid_step)
+            x = int(np.floor(pos[rn][0] / grid_step))
+            y = int(np.floor(pos[rn][1] / grid_step))
+            z = int(np.floor(pos[rn][2] / grid_step))
 
             # Get a set of nearby polygon indices to check the ray distance to next wall
-            polygons_to_check = find_nearby_polygons(x, y, z, grid)
+            polygons_to_check = find_nearby_polygons(x, y, z, grid)  # TODO: Some rays are leaving
+            # polygons_to_check = set(polygons)  # TODO: This works better with reflections
 
             target_surfs[rn] = find_target_surface(
                 pos[rn],

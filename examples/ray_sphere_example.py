@@ -29,8 +29,8 @@ if __name__ == "__main__":
     ])
 
     # Rays
-    num_rays = 100
-    num_steps = 3000
+    num_rays = 5000
+    num_steps = 300
 
     sim = Simulation(building, source, sinks, num_rays, num_steps, search_transparent=False)
     t0 = time.time()

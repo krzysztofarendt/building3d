@@ -29,8 +29,10 @@ if __name__ == "__main__":
     ])
 
     # Rays
-    num_rays = 100
-    num_steps = 3000
+    num_rays = 5000
+    num_steps = 1000
+    # num_rays = 50
+    # num_steps = 1000
 
     sim = Simulation(building, source, sinks, num_rays, num_steps, search_transparent=False)
     t0 = time.time()
@@ -46,8 +48,8 @@ if __name__ == "__main__":
     # dump_buffers(pos_buf, vel_buf, enr_buf, hit_buf, "tmp")  # TODO: Refactor
 
     # Show plot
-    rays = RayBuffPlotter(building, pos_buf, enr_buf)
-    plot_objects((building, rays))
+    # rays = RayBuffPlotter(building, pos_buf, enr_buf)
+    # plot_objects((building, rays))
 
     make_movie_from_buffer(
         output_file="movie.mp4",

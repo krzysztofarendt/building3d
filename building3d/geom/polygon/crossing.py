@@ -71,7 +71,7 @@ def is_line_segment_crossing_polygon(
     seg_end: PointType,
     pts: PointType,
     tri: IndexType,
-    epsilon: float = 1e-6
+    epsilon: float = 1e-10
 ) -> bool:
     """
     Check if a line segment crosses a polygon in 3D space.

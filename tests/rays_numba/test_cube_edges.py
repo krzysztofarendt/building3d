@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from building3d.simulators.rays_numba.bvh import cube_edges
+from building3d.simulators.rays_numba.voxel_grid import cube_edges
 
 
 @pytest.mark.parametrize(
