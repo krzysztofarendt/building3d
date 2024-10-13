@@ -246,8 +246,7 @@ def simulation_loop(
             z = int(np.floor(pos[rn][2] / grid_step))
 
             # Get a set of nearby polygon indices to check the ray distance to next wall
-            polygons_to_check = find_nearby_polygons(x, y, z, grid)  # TODO: Some rays are leaving
-            # polygons_to_check = set(polygons)  # TODO: This works better with reflections
+            polygons_to_check = find_nearby_polygons(x, y, z, grid)
 
             target_surfs[rn] = find_target_surface(
                 pos[rn],

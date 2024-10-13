@@ -29,7 +29,7 @@ if __name__ == "__main__":
     ])
 
     # Rays
-    num_rays = 5000
+    num_rays = 20000
     num_steps = 1000
     # num_rays = 50
     # num_steps = 1000

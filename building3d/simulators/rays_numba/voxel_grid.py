@@ -162,18 +162,23 @@ def cube_edges(
     p0 = min_xyz
     p1 = max_xyz
     edges = np.array((
+        # Bottom face
         ((p0[0], p0[1], p0[2]), (p1[0], p0[1], p0[2])),  # Bottom front
         ((p0[0], p0[1], p0[2]), (p0[0], p1[1], p0[2])),  # Bottom left
-        ((p0[0], p0[1], p0[2]), (p0[0], p0[1], p1[2])),  # Front left
-        ((p1[0], p0[1], p0[2]), (p1[0], p1[1], p0[2])),  # Bottom right
-        ((p1[0], p0[1], p0[2]), (p1[0], p0[1], p1[2])),  # Front right
         ((p0[0], p1[1], p0[2]), (p1[0], p1[1], p0[2])),  # Bottom back
-        ((p0[0], p1[1], p0[2]), (p0[0], p1[1], p1[2])),  # Back left
+        ((p1[0], p0[1], p0[2]), (p1[0], p1[1], p0[2])),  # Bottom right
+
+        # Top face
         ((p0[0], p0[1], p1[2]), (p1[0], p0[1], p1[2])),  # Top front
-        ((p0[0], p0[1], p1[2]), (p0[0], p1[1], p1[2])),  # Top left
-        ((p1[0], p1[1], p0[2]), (p1[0], p1[1], p1[2])),  # Back right
-        ((p1[0], p0[1], p1[2]), (p1[0], p1[1], p1[2])),  # Top right
         ((p0[0], p1[1], p1[2]), (p1[0], p1[1], p1[2])),  # Top back
+        ((p0[0], p0[1], p1[2]), (p0[0], p1[1], p1[2])),  # Top left
+        ((p1[0], p0[1], p1[2]), (p1[0], p1[1], p1[2])),  # Top right
+
+        # Vertical edges
+        ((p0[0], p0[1], p0[2]), (p0[0], p0[1], p1[2])),  # Front left vertical
+        ((p1[0], p0[1], p0[2]), (p1[0], p0[1], p1[2])),  # Front right vertical
+        ((p0[0], p1[1], p0[2]), (p0[0], p1[1], p1[2])),  # Back left vertical
+        ((p1[0], p1[1], p0[2]), (p1[0], p1[1], p1[2])),  # Back right vertical
     ))
     return edges
 
