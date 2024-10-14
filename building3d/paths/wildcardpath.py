@@ -14,8 +14,8 @@ class WildcardPath:
     def __init__(self, path: str):
         self._path: str = str(path)
         self._count: defaultdict = defaultdict(int)
-        self._wildcards: list[str] = self.find_wildcards()
-        self._regex: str = self.wildcards_to_regex()
+        self._wildcards: list[str] = self._find_wildcards()
+        self._regex: str = self._wildcards_to_regex()
         self._groups: dict = {}
         self.Case = namedtuple("Case", self._wildcards)
 
@@ -30,39 +30,6 @@ class WildcardPath:
     @path.setter
     def path(self, p: str):
         self.__init__(p)
-
-    def find_wildcards(self) -> list[str]:
-        path = self.path
-        start, stop = WildcardPath.wcard_sep
-        wildcards = re.findall(f"{start}([^{start}{stop}]+){stop}", path)
-        for w in wildcards:
-            self._count[w] += 1
-
-        wildcards = sorted(list(set(wildcards)))
-
-        self._groups = {}
-        for w in wildcards:
-            self._groups[w] = [f"{w}_{i}" for i in range(self._count[w])]
-
-        return wildcards
-
-    def wildcards_to_regex(self) -> str:
-        """Replace wildcards in self.path with regex patterns.
-
-        Regex named groups are used, so that the wildcard values can be
-        later retrieved (see `get_matching_paths_and_values()`).
-        """
-        re_path = self.path
-        start, stop = WildcardPath.wcard_sep
-
-        for wname in self._wildcards:
-            wcard = self.wrap(wname)
-            groups = self._groups[wname]
-
-            for gr in groups:
-                re_path = re_path.replace(wcard, f"(?P{start}{gr}{stop}\\d+)", 1)
-        re_path = ".*" + re_path + "/*$"
-        return re_path
 
     def get_matching_paths_dict_values(self, parent: str) -> dict[str, dict[str, int]]:
         """Return a dict with paths as keys and dicts with wildcard names and values as keys.
@@ -125,18 +92,9 @@ class WildcardPath:
         ```
         """
         paths_dict_vals = self.get_matching_paths_dict_values(parent)
-        paths = self.to_dict_with_namedtuple_keys(paths_dict_vals)
+        paths = self._to_dict_with_namedtuple_keys(paths_dict_vals)
 
         return paths
-
-    def to_dict_with_namedtuple_keys(
-        self, d: dict[str, dict[str, int]]
-    ) -> dict[NamedTuple, str]:
-        dnew = {}
-        for p, wd in d.items():
-            s = self.Case(**wd)
-            dnew[s] = p
-        return dnew
 
     def get_matching_paths(self, parent, **kwargs) -> list[str]:
         """Return matching paths as a list of strings.
@@ -163,6 +121,33 @@ class WildcardPath:
         return paths
 
     def fill(self, parent="", **kwargs) -> str:
+        """Fill wildcards in the path with provided values.
+
+        This method replaces all wildcards in the path with the values provided
+        in kwargs. If a parent directory is specified, it is prepended to the
+        resulting path.
+
+        Args:
+            parent (str, optional): Parent directory to prepend to the path.
+                Defaults to an empty string.
+            **kwargs: Keyword arguments where keys are wildcard names and values
+                are their replacements.
+
+        Returns:
+            str: The path with all wildcards replaced by their corresponding
+                values.
+
+        Raises:
+            ValueError: If the number of provided kwargs doesn't match the
+                number of wildcards in the path.
+            KeyError: If a provided kwarg doesn't correspond to any wildcard in
+                the path.
+
+        Example:
+            >>> wp = WildcardPath("sub_dir_<job>/file_<step>.csv")
+            >>> wp.fill(parent="data", job=5, step=2)
+            'data/sub_dir_5/file_2.csv'
+        """
         path = self.path
 
         if len(kwargs.keys()) != len(self._wildcards):
@@ -208,3 +193,62 @@ class WildcardPath:
         abs_path.mkdir(parents=True, exist_ok=True)
 
         return str(abs_path)
+
+    def _find_wildcards(self) -> list[str]:
+        """Find wildcards within the path string and return as a list."""
+        path = self.path
+        start, stop = WildcardPath.wcard_sep
+        wildcards = re.findall(f"{start}([^{start}{stop}]+){stop}", path)
+        for w in wildcards:
+            self._count[w] += 1
+
+        wildcards = sorted(list(set(wildcards)))
+
+        self._groups = {}
+        for w in wildcards:
+            self._groups[w] = [f"{w}_{i}" for i in range(self._count[w])]
+
+        return wildcards
+
+    def _wildcards_to_regex(self) -> str:
+        """Replace wildcards in self.path with regex patterns.
+
+        Regex named groups are used, so that the wildcard values can be
+        later retrieved (see `get_matching_paths_and_values()`).
+        """
+        re_path = self.path
+        start, stop = WildcardPath.wcard_sep
+
+        for wname in self._wildcards:
+            wcard = self.wrap(wname)
+            groups = self._groups[wname]
+
+            for gr in groups:
+                re_path = re_path.replace(wcard, f"(?P{start}{gr}{stop}\\d+)", 1)
+        re_path = ".*" + re_path + "/*$"
+        return re_path
+
+    def _to_dict_with_namedtuple_keys(
+        self, d: dict[str, dict[str, int]]
+    ) -> dict[NamedTuple, str]:
+        """Convert a dictionary with string keys to a dictionary with namedtuple keys.
+
+        This method takes a dictionary where the keys are strings (file paths) and
+        the values are dictionaries containing wildcard names and their corresponding
+        integer values. It returns a new dictionary where the keys are namedtuples
+        (instances of self.Case) created from the wildcard dictionaries, and the
+        values are the original file paths.
+
+        Args:
+            d (dict[str, dict[str, int]]): A dictionary with string keys (file paths)
+                and dictionary values (wildcard name-value pairs).
+
+        Returns:
+            dict[NamedTuple, str]: A dictionary with namedtuple keys (instances of
+                self.Case) and string values (file paths).
+        """
+        dnew = {}
+        for p, wd in d.items():
+            s = self.Case(**wd)
+            dnew[s] = p
+        return dnew
