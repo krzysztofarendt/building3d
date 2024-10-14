@@ -13,7 +13,7 @@ PointType = NDArray[FLOAT]  # Shape (num_points, 3) or (3, )
 VectorType = NDArray[FLOAT]  # Shape (num_vectors, 3), or (3, )
 IndexType = NDArray[INT]  # Same shape as referenced array
 FloatDataType = NDArray[FLOAT]  # General data array containing floats, arbitrary shape
-IntDataType = NDArray[FLOAT]  # General data array containing floats, arbitrary shape
+IntDataType = NDArray[INT]  # General data array containing floats, arbitrary shape
 
 # Constants
 INVALID_PT = np.full(3, np.nan, dtype=FLOAT)
