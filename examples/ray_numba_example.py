@@ -11,6 +11,7 @@ from building3d.io.b3d import write_b3d
 from building3d.simulators.rays_numba.simulation import Simulation
 from building3d.simulators.rays_numba.ray_buff_plotter import RayBuffPlotter
 from building3d.simulators.rays_numba.movie_from_buffer import make_movie_from_buffer
+from building3d.simulators.rays_numba.dump_buffers import dump_buffers
 
 
 if __name__ == "__main__":
@@ -33,7 +34,7 @@ if __name__ == "__main__":
 
     # Rays
     num_rays = 50
-    num_steps = 35
+    num_steps = 10
 
     sim = Simulation(building, source, sinks, num_rays, num_steps)
     t0 = time.time()
@@ -46,7 +47,12 @@ if __name__ == "__main__":
     write_b3d(b3d_file, building)
 
     # Save results
-    # dump_buffers(pos_buf, vel_buf, enr_buf, hit_buf, "tmp")  # TODO: Refactor
+    dump_buffers(pos_buf, vel_buf, enr_buf, hit_buf, "tmp")  # TODO: Refactor
+    print(f"{pos_buf.shape=}")
+    print(f"{vel_buf.shape=}")
+    print(f"{enr_buf.shape=}")
+    print(f"{hit_buf.shape=}")
+    breakpoint()
 
     # Show plot
     rays = RayBuffPlotter(building, pos_buf, enr_buf)

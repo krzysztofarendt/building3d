@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 class Building:
     """Building is a collection of zones.
 
-    Zones do not have to be adjacent. They can even be separate buildings.
+    Zones do not need to touch one another.
     """
     count: int = 0
 

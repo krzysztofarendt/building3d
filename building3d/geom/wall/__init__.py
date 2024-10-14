@@ -11,12 +11,9 @@ from building3d.geom.wall.get_mesh import get_mesh_from_polygons
 
 
 class Wall:
-    """A wall is a collection of polygons with additional attributes and methods.
+    """A wall is a collection of polygons.
 
     Polygons do not have to be coplanar.
-    Polygons can have subpolygons (e.g. a wall with a window).
-
-    Wall is used to model 1D phenomena (e.g. heat transfer).
     """
     count: int = 0
 

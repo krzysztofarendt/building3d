@@ -53,6 +53,20 @@ def are_polygons_touching(
 
 @njit
 def are_bboxes_overlapping(bbox1, bbox2):
+    """Check if two bounding boxes are overlapping.
+
+    This function determines if two axis-aligned bounding boxes are overlapping
+    in any dimension.
+
+    Args:
+        bbox1 (tuple of points): First bounding box, represented as
+                                 [[min_x, min_y, min_z], [max_x, max_y, max_z]].
+        bbox2 (tuple of points): Second bounding box, represented as
+                                 [[min_x, min_y, min_z], [max_x, max_y, max_z]].
+
+    Returns:
+        bool: True if the bounding boxes overlap, False otherwise.
+    """
     if (bbox1[1] < bbox2[0]).any() or (bbox1[0] > bbox2[1]).any():
         return False
     else:
@@ -61,6 +75,19 @@ def are_bboxes_overlapping(bbox1, bbox2):
 
 @njit
 def are_all_points_same(pts1: PointType, pts2: PointType) -> bool:
+    """Check if all points in two sets are the same.
+
+    This function compares two sets of points and determines if they contain
+    the same points, regardless of order.
+
+    Args:
+        pts1 (PointType): First set of points.
+        pts2 (PointType): Second set of points.
+
+    Returns:
+        bool: True if all points in pts1 have a matching point in pts2,
+              False otherwise.
+    """
     num_matching = 0
     matched = set()
 
@@ -83,7 +110,21 @@ def check_poly_a_against_b(
     tri_a: IndexType,
     pts_b: PointType,
 ) -> tuple[bool, bool]:
+    """Check if points from polygon B touch or are inside polygon A.
 
+    This function checks each point of polygon B against polygon A to determine
+    if any points are on the boundary or inside polygon A.
+
+    Args:
+        pts_a (PointType): Points of polygon A.
+        tri_a (IndexType): Triangles of polygon A.
+        pts_b (PointType): Points of polygon B to check against polygon A.
+
+    Returns:
+        tuple[bool, bool]: A tuple containing two booleans:
+            - First boolean: True if at least one point is on the boundary.
+            - Second boolean: True if at least one point or midpoint is inside.
+    """
     at_least_one_boundary = False
     at_least_one_inside = False
     edge = [pts_b[-1]]

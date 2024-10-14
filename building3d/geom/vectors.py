@@ -6,6 +6,7 @@ from building3d.geom.types import PointType, VectorType, FLOAT
 
 @njit
 def new_vector(x: float, y: float, z: float) -> VectorType:
+    """Create new vector and return it as a numpy array."""
     return np.array([x, y, z], dtype=FLOAT)
 
 

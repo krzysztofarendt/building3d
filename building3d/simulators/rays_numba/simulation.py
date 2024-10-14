@@ -61,7 +61,7 @@ class Simulation:
 
         # Convert building to the array format
         logger.info("Converting the building to the array format")
-        points, faces, polygons, walls, solids, zones = to_array_format(self.building)
+        points, faces, polygons, walls, _, _ = to_array_format(self.building)
 
         # Run simulation loop (JIT compiled)
         logger.info("Starting the simulation")
@@ -110,6 +110,7 @@ def simulation_loop(
         polygons (IndexType): Array of polygon indices for the building geometry.
         walls (IndexType): Array of wall indices for the building geometry.
         transparent_polygons (set[int]): Set of indices for transparent polygons.
+        eps (float): Small number used in comparison operations
 
     Returns:
         tuple[PointType, PointType, PointType, IntDataType]: A tuple containing:
@@ -117,6 +118,10 @@ def simulation_loop(
             - vel_buf: Buffer of ray velocities over time.
             - enr_buf: Buffer of ray energies over time.
             - hit_buf: Buffer of hit counts for each sink over time.
+            - pos_buf: buffer of ray positions, shaped (num_steps + 1, num_rays, 3)
+            - vel_buf: buffer of ray velocity, shaped (num_steps + 1, num_rays, 3)
+            - enr_buf: buffer of ray energy, shaped (num_steps + 1, num_rays)
+            - enr_buf: buffer of ray absorber hits, shaped (num_steps + 1, num_rays)
     """
     print("Simulation loop started")
     # Simulation parameters
@@ -304,4 +309,9 @@ def simulation_loop(
     hit_buf = convert_to_contiguous(hit_buf, hit_head, hit_tail, BUFF_SIZE)
 
     print("Exiting the function")
+    # Shapes:
+    # pos_buf: (num_steps + 1, num_rays, 3)
+    # vel_buf: (num_steps + 1, num_rays, 3)
+    # enr_buf: (num_steps + 1, num_rays)
+    # enr_buf: (num_steps + 1, num_rays)
     return pos_buf, vel_buf, enr_buf, hit_buf

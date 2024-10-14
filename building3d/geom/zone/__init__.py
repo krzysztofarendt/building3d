@@ -15,11 +15,9 @@ logger = logging.getLogger(__name__)
 
 
 class Zone:
-    """Zone is a collection of solids with additional attributes and methods.
+    """Zone is a collection of solids.
 
-    Solids must be adjacent. (TODO: I think, this is not checked at the moment)
-
-    Zone is used to model 3D phenomena (e.g. ray tracing, heat transfer, CFD).
+    Solids do not need to touch one another.
     """
     count: int = 0
 
