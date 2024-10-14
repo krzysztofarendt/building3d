@@ -8,7 +8,12 @@ from building3d.io.arrayformat import get_polygon_points_and_faces
 from building3d.geom.building import Building
 from building3d.geom.polygon import Polygon
 from building3d.geom.polygon.distance import distance_point_to_polygon
-from building3d.geom.types import PointType, IndexType, IntDataType, FLOAT
+from building3d.geom.types import PointType
+from building3d.geom.types import VectorType
+from building3d.geom.types import IndexType
+from building3d.geom.types import FloatDataType
+from building3d.geom.types import IntDataType
+from building3d.geom.types import FLOAT
 from building3d.geom.vectors import normal
 from .voxel_grid import make_voxel_grid
 from .find_target import find_target_surface
@@ -94,7 +99,7 @@ def simulation_loop(
     walls: IndexType,
     transparent_polygons: set[int],
     eps: float = 1e-6,
-) -> tuple[PointType, PointType, PointType, IntDataType]:
+) -> tuple[PointType, VectorType, FloatDataType, IntDataType]:
     """Performs a simulation loop for ray tracing in a building environment.
 
     This function is compiled to machine code with Numba for improved performance. It simulates
@@ -114,14 +119,10 @@ def simulation_loop(
 
     Returns:
         tuple[PointType, PointType, PointType, IntDataType]: A tuple containing:
-            - pos_buf: Buffer of ray positions over time.
-            - vel_buf: Buffer of ray velocities over time.
-            - enr_buf: Buffer of ray energies over time.
-            - hit_buf: Buffer of hit counts for each sink over time.
             - pos_buf: buffer of ray positions, shaped (num_steps + 1, num_rays, 3)
             - vel_buf: buffer of ray velocity, shaped (num_steps + 1, num_rays, 3)
             - enr_buf: buffer of ray energy, shaped (num_steps + 1, num_rays)
-            - enr_buf: buffer of ray absorber hits, shaped (num_steps + 1, num_rays)
+            - hit_buf: buffer of ray absorber hits, shaped (num_steps + 1, num_rays)
     """
     print("Simulation loop started")
     # Simulation parameters
@@ -314,4 +315,5 @@ def simulation_loop(
     # vel_buf: (num_steps + 1, num_rays, 3)
     # enr_buf: (num_steps + 1, num_rays)
     # enr_buf: (num_steps + 1, num_rays)
+    # First shape is 1 larger than num_steps to include the initial state.
     return pos_buf, vel_buf, enr_buf, hit_buf
