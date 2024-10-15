@@ -26,7 +26,6 @@ from building3d.geom.building import Building
 from building3d.geom.building.graph import graph_polygon
 from building3d.geom.paths.object_path import split_path
 
-
 logger = logging.getLogger(__name__)
 
 

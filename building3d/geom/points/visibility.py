@@ -1,11 +1,12 @@
-from numba import njit
 import numpy as np
+from numba import njit
 
-from building3d.geom.types import PointType, FLOAT
+from building3d.geom.points import are_points_coplanar
 from building3d.geom.points import is_valid_pt
 from building3d.geom.points import points_equal
-from building3d.geom.points import are_points_coplanar
 from building3d.geom.points.intersections import line_segment_intersection
+from building3d.geom.types import FLOAT
+from building3d.geom.types import PointType
 
 
 @njit

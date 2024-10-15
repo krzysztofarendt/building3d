@@ -1,12 +1,15 @@
-from numba import njit
 import numpy as np
+from numba import njit
 
-from building3d.geom.types import PointType, VectorType, IndexType
+from building3d.geom.points.distance import distance_point_to_edge
+from building3d.geom.polygon.edges import polygon_edges
+from building3d.geom.polygon.ispointinside import \
+    is_point_inside_ortho_projection
 from building3d.geom.polygon.plane import plane_coefficients
 from building3d.geom.polygon.plane import projection_coefficients
-from building3d.geom.points.distance import distance_point_to_edge
-from building3d.geom.polygon.ispointinside import is_point_inside_ortho_projection
-from building3d.geom.polygon.edges import polygon_edges
+from building3d.geom.types import IndexType
+from building3d.geom.types import PointType
+from building3d.geom.types import VectorType
 
 
 @njit

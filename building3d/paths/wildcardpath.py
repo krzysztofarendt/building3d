@@ -1,9 +1,9 @@
-from typing import NamedTuple
 import os
+import re
 from collections import defaultdict
 from collections import namedtuple
 from pathlib import Path
-import re
+from typing import NamedTuple
 
 
 class WildcardPath:

@@ -5,18 +5,17 @@ import numpy as np
 import pyvista as pv
 
 from building3d.geom.building import Building
-from building3d.geom.types import PointType, FloatDataType
-from .config import (
-    RAY_LINE_LEN,
-    RAY_OPACITY,
-    RAY_TRAIL_OPACITY,
-    RAY_POINT_SIZE,
-    BUILDING_OPACITY,
-    BUILDING_COLOR,
-    FPS,
-    CMAP,
-)
+from building3d.geom.types import FloatDataType
+from building3d.geom.types import PointType
 
+from .config import BUILDING_COLOR
+from .config import BUILDING_OPACITY
+from .config import CMAP
+from .config import FPS
+from .config import RAY_LINE_LEN
+from .config import RAY_OPACITY
+from .config import RAY_POINT_SIZE
+from .config import RAY_TRAIL_OPACITY
 
 logger = logging.getLogger(__name__)
 

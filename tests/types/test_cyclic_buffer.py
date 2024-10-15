@@ -1,4 +1,5 @@
 import numpy as np
+
 from building3d.types.cyclic_buffer import cyclic_buf
 
 

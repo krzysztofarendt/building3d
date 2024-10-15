@@ -4,9 +4,8 @@ import numpy as np
 
 from building3d.geom.point import Point
 from building3d.geom.polygon import Polygon
-from building3d.geom.wall import Wall
 from building3d.geom.rotate import rotate_points_around_vector
-
+from building3d.geom.wall import Wall
 
 logger = logging.getLogger(__name__)
 

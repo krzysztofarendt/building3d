@@ -1,10 +1,9 @@
 from building3d.display.plot_objects import plot_objects
+from building3d.geom.building import Building
 from building3d.geom.solid.box import box
 from building3d.geom.zone import Zone
-from building3d.geom.building import Building
-from building3d.io.arrayformat import to_array_format
 from building3d.io.arrayformat import from_array_format
-
+from building3d.io.arrayformat import to_array_format
 
 if __name__ == "__main__":
     zone = Zone(

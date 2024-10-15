@@ -2,7 +2,9 @@ from numba import njit
 
 from building3d.config import GEOM_ATOL
 from building3d.geom.polygon.ispointinside import is_point_inside_projection
-from building3d.geom.types import PointType, VectorType, IndexType
+from building3d.geom.types import IndexType
+from building3d.geom.types import PointType
+from building3d.geom.types import VectorType
 
 
 @njit

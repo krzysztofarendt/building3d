@@ -1,21 +1,22 @@
 from __future__ import annotations
+
 import logging
 from typing import Sequence
 
 from building3d import random_id
-from building3d.geom.exceptions import GeometryError
-from building3d.geom.paths.validate_name import validate_name
-from building3d.geom.paths import PATH_SEP
-from building3d.geom.points import bounding_box
-from building3d.geom.zone import Zone
-from building3d.geom.types import PointType, IndexType
 from building3d.geom.building.get_mesh import get_mesh_from_zones
 from building3d.geom.building.graph import graph_polygon
-from building3d.geom.building.graph import graph_wall
 from building3d.geom.building.graph import graph_solid
+from building3d.geom.building.graph import graph_wall
 from building3d.geom.building.graph import graph_zone
+from building3d.geom.exceptions import GeometryError
+from building3d.geom.paths import PATH_SEP
+from building3d.geom.paths.validate_name import validate_name
+from building3d.geom.points import bounding_box
 from building3d.geom.solid.stitch import stitch_solids
-
+from building3d.geom.types import IndexType
+from building3d.geom.types import PointType
+from building3d.geom.zone import Zone
 
 logger = logging.getLogger(__name__)
 

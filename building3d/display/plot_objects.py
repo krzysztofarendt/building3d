@@ -6,7 +6,6 @@ import pyvista as pv
 
 from building3d.display.colors import random_rgb_color
 
-
 logger = logging.getLogger(__name__)
 
 

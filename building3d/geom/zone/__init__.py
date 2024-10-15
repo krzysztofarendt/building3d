@@ -2,14 +2,14 @@ import logging
 from typing import Sequence
 
 from building3d import random_id
+from building3d.geom.exceptions import GeometryError
 from building3d.geom.paths import PATH_SEP
 from building3d.geom.paths.validate_name import validate_name
 from building3d.geom.points import bounding_box
-from building3d.geom.types import PointType, IndexType
 from building3d.geom.solid import Solid
+from building3d.geom.types import IndexType
+from building3d.geom.types import PointType
 from building3d.geom.zone.get_mesh import get_mesh_from_solids
-from building3d.geom.exceptions import GeometryError
-
 
 logger = logging.getLogger(__name__)
 

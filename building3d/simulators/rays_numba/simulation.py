@@ -1,26 +1,33 @@
 import logging
 
-from numba import njit, prange
 import numpy as np
+from numba import njit
+from numba import prange
 
-from building3d.io.arrayformat import to_array_format
-from building3d.io.arrayformat import get_polygon_points_and_faces
 from building3d.geom.building import Building
 from building3d.geom.polygon import Polygon
 from building3d.geom.polygon.distance import distance_point_to_polygon
+from building3d.geom.types import FLOAT
+from building3d.geom.types import FloatDataType
+from building3d.geom.types import IndexType
 from building3d.geom.types import PointType
 from building3d.geom.types import VectorType
-from building3d.geom.types import IndexType
-from building3d.geom.types import FloatDataType
-from building3d.geom.types import FLOAT
 from building3d.geom.vectors import normal
-from building3d.types.cyclic_buffer import cyclic_buf, convert_to_contiguous
-from .voxel_grid import make_voxel_grid
+from building3d.io.arrayformat import get_polygon_points_and_faces
+from building3d.io.arrayformat import to_array_format
+from building3d.types.cyclic_buffer import convert_to_contiguous
+from building3d.types.cyclic_buffer import cyclic_buf
+
+from .config import ABSORB
+from .config import BUFF_SIZE
+from .config import GRID_STEP
+from .config import SINK_RADIUS
+from .config import SPEED
+from .config import T_STEP
+from .find_nearby_polygons import find_nearby_polygons
 from .find_target import find_target_surface
 from .find_transparent import find_transparent
-from .find_nearby_polygons import find_nearby_polygons
-from .config import BUFF_SIZE, GRID_STEP, T_STEP, SPEED, ABSORB, SINK_RADIUS
-
+from .voxel_grid import make_voxel_grid
 
 logger = logging.getLogger(__name__)
 

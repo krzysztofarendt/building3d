@@ -1,17 +1,20 @@
-import os
 import logging
+import os
 
 import numpy as np
 
-from building3d.paths.wildcardpath import WildcardPath
-from .config import POSITION_FILE, ENERGY_FILE, VELOCITY_FILE, HITS_FILE
-from building3d.geom.types import PointType
-from building3d.geom.types import VectorType
-from building3d.geom.types import FloatDataType
-from building3d.geom.types import IntDataType
 from building3d.geom.types import FLOAT
 from building3d.geom.types import INT
+from building3d.geom.types import FloatDataType
+from building3d.geom.types import IntDataType
+from building3d.geom.types import PointType
+from building3d.geom.types import VectorType
+from building3d.paths.wildcardpath import WildcardPath
 
+from .config import ENERGY_FILE
+from .config import HITS_FILE
+from .config import POSITION_FILE
+from .config import VELOCITY_FILE
 
 logger = logging.getLogger(__name__)
 

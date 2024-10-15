@@ -4,15 +4,16 @@ import time
 import numpy as np
 
 from building3d.display.plot_objects import plot_objects
+from building3d.geom.building import Building
 from building3d.geom.solid.box import box
 from building3d.geom.zone import Zone
-from building3d.geom.building import Building
 from building3d.io.b3d import write_b3d
-from building3d.simulators.rays_numba.simulation import Simulation
+from building3d.simulators.rays_numba.dump_buffers import dump_buffers
+from building3d.simulators.rays_numba.dump_buffers import read_buffers
+from building3d.simulators.rays_numba.movie_from_buffer import \
+    make_movie_from_buffer
 from building3d.simulators.rays_numba.ray_buff_plotter import RayBuffPlotter
-from building3d.simulators.rays_numba.movie_from_buffer import make_movie_from_buffer
-from building3d.simulators.rays_numba.dump_buffers import dump_buffers, read_buffers
-
+from building3d.simulators.rays_numba.simulation import Simulation
 
 if __name__ == "__main__":
     # Parameters

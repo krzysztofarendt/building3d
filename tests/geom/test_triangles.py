@@ -1,13 +1,13 @@
 import numpy as np
 
-from building3d.geom.triangles import triangle_area
-from building3d.geom.triangles import triangle_centroid
-from building3d.geom.triangles import is_point_on_same_side
-from building3d.geom.triangles import is_point_inside
-from building3d.geom.triangles import is_corner_convex
-from building3d.geom.triangles import triangulate
 from building3d.geom.points import new_point
 from building3d.geom.points import roll_forward
+from building3d.geom.triangles import is_corner_convex
+from building3d.geom.triangles import is_point_inside
+from building3d.geom.triangles import is_point_on_same_side
+from building3d.geom.triangles import triangle_area
+from building3d.geom.triangles import triangle_centroid
+from building3d.geom.triangles import triangulate
 from building3d.geom.vectors import new_vector
 from building3d.geom.vectors import normal
 

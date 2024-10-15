@@ -1,8 +1,8 @@
 import numpy as np
 
-from building3d.geom.types import FLOAT
 from building3d.geom.points.visibility import visibility_matrix
 from building3d.geom.polygon.edges import polygon_edges
+from building3d.geom.types import FLOAT
 
 
 def test_visibility_matrix():

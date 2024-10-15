@@ -1,14 +1,18 @@
-from numba import njit
 import numpy as np
+from numba import njit
 
-from building3d.geom.exceptions import GeometryError, TriangulationError
 from building3d.config import EPSILON
 from building3d.config import GEOM_ATOL
 from building3d.config import GEOM_RTOL
 from building3d.config import POINT_NUM_DEC
-from building3d.geom.types import PointType, VectorType, IndexType, INT
+from building3d.geom.exceptions import GeometryError
+from building3d.geom.exceptions import TriangulationError
 from building3d.geom.points import are_points_collinear
 from building3d.geom.points import is_point_inside_bbox
+from building3d.geom.types import INT
+from building3d.geom.types import IndexType
+from building3d.geom.types import PointType
+from building3d.geom.types import VectorType
 
 
 @njit

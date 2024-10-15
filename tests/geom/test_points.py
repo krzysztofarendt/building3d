@@ -1,20 +1,20 @@
 import numpy as np
 
-from building3d.geom.points import new_point
-from building3d.geom.points import points_equal
-from building3d.geom.points import is_point_in_array
 from building3d.geom.points import are_points_collinear
 from building3d.geom.points import are_points_coplanar
-from building3d.geom.points import point_to_str
-from building3d.geom.points import roll_forward
-from building3d.geom.points import new_point_between_2_points
-from building3d.geom.points import many_new_points_between_2_points
+from building3d.geom.points import is_point_in_array
 from building3d.geom.points import is_point_on_segment
+from building3d.geom.points import many_new_points_between_2_points
+from building3d.geom.points import new_point
+from building3d.geom.points import new_point_between_2_points
+from building3d.geom.points import point_to_str
+from building3d.geom.points import points_equal
+from building3d.geom.points import roll_forward
 from building3d.geom.points.distance import distance_point_to_edge
 from building3d.geom.points.intersections import line_intersection
 from building3d.geom.points.intersections import line_segment_intersection
-from building3d.geom.vectors import new_vector
 from building3d.geom.types import FLOAT
+from building3d.geom.vectors import new_vector
 
 
 def test_new_point():

@@ -8,7 +8,6 @@ from building3d.geom.triangle import triangle_area
 from building3d.geom.vector import length
 from building3d.geom.vector import vector
 
-
 logger = logging.getLogger(__name__)
 
 

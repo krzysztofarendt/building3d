@@ -2,13 +2,13 @@ import time
 
 import pytest
 
-from building3d.geom.solid.box import box
-from building3d.geom.zone import Zone
 from building3d.geom.building import Building
 from building3d.geom.building.graph import graph_polygon
-from building3d.geom.building.graph import graph_wall
 from building3d.geom.building.graph import graph_solid
+from building3d.geom.building.graph import graph_wall
 from building3d.geom.building.graph import graph_zone
+from building3d.geom.solid.box import box
+from building3d.geom.zone import Zone
 
 
 @pytest.fixture

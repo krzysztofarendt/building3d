@@ -1,8 +1,12 @@
-from numba import njit, prange
 import numpy as np
+from numba import njit
+from numba import prange
 
-from building3d.geom.types import FLOAT, INT, PointType, IndexType
 from building3d.geom.polygon.crossing import is_line_segment_crossing_polygon
+from building3d.geom.types import FLOAT
+from building3d.geom.types import INT
+from building3d.geom.types import IndexType
+from building3d.geom.types import PointType
 
 
 # TODO: Add unit test!

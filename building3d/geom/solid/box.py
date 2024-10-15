@@ -1,9 +1,10 @@
 import numpy as np
+
 from building3d.geom.points import new_point
 from building3d.geom.polygon import Polygon
 from building3d.geom.solid import Solid
-from building3d.geom.wall import Wall
 from building3d.geom.types import FLOAT
+from building3d.geom.wall import Wall
 
 
 def box(

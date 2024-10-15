@@ -1,11 +1,12 @@
-from numba import njit
 import numpy as np
+from numba import njit
 
 from building3d.config import GEOM_RTOL
-from building3d.geom.points import points_equal
-from building3d.geom.types import PointType, VectorType
-from building3d.geom.polygon.area import polygon_area
 from building3d.geom.points import bounding_box
+from building3d.geom.points import points_equal
+from building3d.geom.polygon.area import polygon_area
+from building3d.geom.types import PointType
+from building3d.geom.types import VectorType
 
 
 @njit

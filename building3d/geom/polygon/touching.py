@@ -1,11 +1,13 @@
-from numba import njit
 import numpy as np
+from numba import njit
 
-from building3d.geom.points import new_point_between_2_points, points_equal
+from building3d.geom.points import bounding_box
+from building3d.geom.points import new_point_between_2_points
+from building3d.geom.points import points_equal
 from building3d.geom.polygon.ispointinside import is_point_at_boundary
 from building3d.geom.polygon.ispointinside import is_point_inside
-from building3d.geom.types import PointType, IndexType
-from building3d.geom.points import bounding_box
+from building3d.geom.types import IndexType
+from building3d.geom.types import PointType
 
 
 @njit

@@ -1,6 +1,7 @@
 import numpy as np
 
 from building3d.geom.point import Point
+
 from .tetra_graph import find_neighbors_numba_wrap
 
 

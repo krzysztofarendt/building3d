@@ -1,10 +1,13 @@
 import numpy as np
 from numba import njit
 
-from building3d.config import GEOM_ATOL, EPSILON
+from building3d.config import EPSILON
+from building3d.config import GEOM_ATOL
 from building3d.config import POINT_NUM_DEC
-from building3d.geom.types import PointType, FLOAT
-from building3d.geom.vectors import normal, new_vector
+from building3d.geom.types import FLOAT
+from building3d.geom.types import PointType
+from building3d.geom.vectors import new_vector
+from building3d.geom.vectors import normal
 
 
 @njit

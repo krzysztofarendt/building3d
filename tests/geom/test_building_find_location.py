@@ -1,9 +1,9 @@
 import pytest
 
+from building3d.geom.building import Building
+from building3d.geom.building.find_location import find_location
 from building3d.geom.points import new_point
 from building3d.geom.solid.box import box
-from building3d.geom.building.find_location import find_location
-from building3d.geom.building import Building
 from building3d.geom.zone import Zone
 
 

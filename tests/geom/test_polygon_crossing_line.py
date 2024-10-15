@@ -1,6 +1,8 @@
 import numpy as np
+
 from building3d.geom.polygon.crossing import is_line_segment_crossing_polygon
-from building3d.geom.types import INT, FLOAT
+from building3d.geom.types import FLOAT
+from building3d.geom.types import INT
 
 
 def test_line_segment_crosses_polygon():
