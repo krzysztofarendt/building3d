@@ -12,14 +12,13 @@ from building3d.geom.types import PointType
 from building3d.geom.types import VectorType
 from building3d.geom.types import IndexType
 from building3d.geom.types import FloatDataType
-from building3d.geom.types import IntDataType
 from building3d.geom.types import FLOAT
 from building3d.geom.vectors import normal
+from building3d.types.cyclic_buffer import cyclic_buf, convert_to_contiguous
 from .voxel_grid import make_voxel_grid
 from .find_target import find_target_surface
 from .find_transparent import find_transparent
 from .find_nearby_polygons import find_nearby_polygons
-from .cyclic_buffer import cyclic_buf, convert_to_contiguous
 from .config import BUFF_SIZE, GRID_STEP, T_STEP, SPEED, ABSORB, SINK_RADIUS
 
 
@@ -99,7 +98,7 @@ def simulation_loop(
     walls: IndexType,
     transparent_polygons: set[int],
     eps: float = 1e-6,
-) -> tuple[PointType, VectorType, FloatDataType, IntDataType]:
+) -> tuple[PointType, VectorType, FloatDataType, FloatDataType]:
     """Performs a simulation loop for ray tracing in a building environment.
 
     This function is compiled to machine code with Numba for improved performance. It simulates
