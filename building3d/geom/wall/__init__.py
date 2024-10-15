@@ -15,6 +15,7 @@ class Wall:
 
     Polygons do not have to be coplanar.
     """
+
     count: int = 0
 
     def __init__(

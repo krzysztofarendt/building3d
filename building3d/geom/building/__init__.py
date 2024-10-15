@@ -25,6 +25,7 @@ class Building:
 
     Zones do not need to touch one another.
     """
+
     count: int = 0
 
     def __init__(
@@ -120,7 +121,9 @@ class Building:
         else:
             raise ValueError(f"Incorrect absolute path: {abspath}")
 
-    def get_graph(self, new: bool = False, level: str = "polygon") -> dict[str, list[str]]:
+    def get_graph(
+        self, new: bool = False, level: str = "polygon"
+    ) -> dict[str, list[str]]:
         """Returns the graph of this building. Uses cached dict or makes new if requested.
 
         Assumes that connections are only when polygons are:
@@ -143,9 +146,15 @@ class Building:
             not_overlapping = False
             not_touching = False
             self.graph = graph_polygon(self, facing, not_overlapping, not_touching)
-            self.graph_wall = graph_wall(self, facing, not_overlapping, not_touching, self.graph)
-            self.graph_solid = graph_solid(self, facing, not_overlapping, not_touching, self.graph)
-            self.graph_zone = graph_zone(self, facing, not_overlapping, not_touching, self.graph)
+            self.graph_wall = graph_wall(
+                self, facing, not_overlapping, not_touching, self.graph
+            )
+            self.graph_solid = graph_solid(
+                self, facing, not_overlapping, not_touching, self.graph
+            )
+            self.graph_zone = graph_zone(
+                self, facing, not_overlapping, not_touching, self.graph
+            )
 
         if level == "polygon":
             return self.graph

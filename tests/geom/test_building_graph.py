@@ -75,15 +75,21 @@ def test_graph_polygon(g_def, g_fac, g_ove, gz_all):
 
 def test_graph_wall_solid_zone(bdg, g_def):
     gw = graph_wall(bdg, g=g_def)
-    assert len(list(gw.keys())) == len(list(g_def.keys()))  # Because each wall contains 1 polygon
+    assert len(list(gw.keys())) == len(
+        list(g_def.keys())
+    )  # Because each wall contains 1 polygon
 
     gs = graph_solid(bdg, g=g_def)
-    assert len(list(gs.keys())) < len(list(gw.keys()))  # Because there's less solids than walls
+    assert len(list(gs.keys())) < len(
+        list(gw.keys())
+    )  # Because there's less solids than walls
     assert "b/z0/s0" in gs["b/z0/s2"]
     assert "b/z0/s1" in gs["b/z0/s2"]
 
     gz = graph_zone(bdg, g=g_def)
-    assert len(list(gz.keys())) < len(list(gs.keys()))  # Because there's less zones than solids
+    assert len(list(gz.keys())) < len(
+        list(gs.keys())
+    )  # Because there's less zones than solids
     assert (gz["b/z0"] == []) and (gz["b/z1"] == [])  # Because they are only touching
 
 

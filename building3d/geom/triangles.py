@@ -98,9 +98,9 @@ def is_point_inside(
 
     # Test if the point is at any of the three vertices
     if (
-        np.allclose(ptest, pt1, atol=atol) or
-        np.allclose(ptest, pt2, atol=atol) or
-        np.allclose(ptest, pt3, atol=atol)
+        np.allclose(ptest, pt1, atol=atol)
+        or np.allclose(ptest, pt2, atol=atol)
+        or np.allclose(ptest, pt3, atol=atol)
     ):
         return True
 

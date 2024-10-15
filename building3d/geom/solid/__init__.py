@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 
 class Solid:
     """Solid is a space enclosed by polygons."""
+
     count: int = 0
 
     def __init__(

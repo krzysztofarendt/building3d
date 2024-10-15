@@ -72,13 +72,13 @@ class Simulation:
         pos_buf, vel_buf, enr_buf, hit_buf = simulation_loop(
             self.num_steps,
             self.num_rays,
-            source = self.source,
-            absorbers = self.absorbers,
-            points = points,
-            faces = faces,
-            polygons = polygons,
-            walls = walls,
-            transparent_polygons = trans_poly_nums,
+            source=self.source,
+            absorbers=self.absorbers,
+            points=points,
+            faces=faces,
+            polygons=polygons,
+            walls=walls,
+            transparent_polygons=trans_poly_nums,
         )
         logger.info("Finished the simulation")
         return pos_buf, vel_buf, enr_buf, hit_buf
@@ -156,7 +156,9 @@ def simulation_loop(
     # Make voxel grid
     print("Making the voxel grid")
     grid_step = GRID_STEP
-    assert grid_step > reflection_dist, "Can't use grid smaller than reflection distance"
+    assert (
+        grid_step > reflection_dist
+    ), "Can't use grid smaller than reflection distance"
 
     min_x = points[:, 0].min()
     min_y = points[:, 1].min()
@@ -170,11 +172,11 @@ def simulation_loop(
     print("Z limits:", min_z, max_z)
 
     grid = make_voxel_grid(
-        min_xyz = (min_x, min_y, min_z),
-        max_xyz = (max_x, max_y, max_z),
-        poly_pts = poly_pts,
-        poly_tri = poly_tri,
-        step = grid_step,
+        min_xyz=(min_x, min_y, min_z),
+        max_xyz=(max_x, max_y, max_z),
+        poly_pts=poly_pts,
+        poly_tri=poly_tri,
+        step=grid_step,
     )
 
     # Initial position
@@ -197,17 +199,25 @@ def simulation_loop(
     hit_head, hit_tail = 0, 0
 
     # Update cyclic buffers
-    pos_buf, pos_head, pos_tail = cyclic_buf(pos_buf, pos_head, pos_tail, pos, BUFF_SIZE)
-    vel_buf, vel_head, vel_tail = cyclic_buf(vel_buf, vel_head, vel_tail, velocity, BUFF_SIZE)
-    enr_buf, enr_head, enr_tail = cyclic_buf(enr_buf, enr_head, enr_tail, energy, BUFF_SIZE)
-    hit_buf, hit_head, hit_tail = cyclic_buf(hit_buf, hit_head, hit_tail, hits, BUFF_SIZE)
+    pos_buf, pos_head, pos_tail = cyclic_buf(
+        pos_buf, pos_head, pos_tail, pos, BUFF_SIZE
+    )
+    vel_buf, vel_head, vel_tail = cyclic_buf(
+        vel_buf, vel_head, vel_tail, velocity, BUFF_SIZE
+    )
+    enr_buf, enr_head, enr_tail = cyclic_buf(
+        enr_buf, enr_head, enr_tail, energy, BUFF_SIZE
+    )
+    hit_buf, hit_head, hit_tail = cyclic_buf(
+        hit_buf, hit_head, hit_tail, hits, BUFF_SIZE
+    )
 
     # Distance to each absorber
     print("Calculating initial distance to each absorber")
     num_absorbers = absorbers.shape[0]
     absorber_dist = np.zeros((num_absorbers, num_rays))
     for sn in range(num_absorbers):
-        absorber_dist[sn, :] = np.sqrt(np.sum((pos - absorbers[sn])**2, axis=1))
+        absorber_dist[sn, :] = np.sqrt(np.sum((pos - absorbers[sn]) ** 2, axis=1))
 
     # Target surfaces
     # If the index of the target is -1, it means that the target surface is unknown.
@@ -221,12 +231,12 @@ def simulation_loop(
         for rn in prange(num_rays):
             # If the ray somehow left the building - set its energy to 0
             if energy[rn] > 0 and (
-                pos[rn][0] < min_x - eps or
-                pos[rn][1] < min_y - eps or
-                pos[rn][2] < min_z - eps or
-                pos[rn][0] > max_x + eps or
-                pos[rn][1] > max_y + eps or
-                pos[rn][2] > max_z + eps
+                pos[rn][0] < min_x - eps
+                or pos[rn][1] < min_y - eps
+                or pos[rn][2] < min_z - eps
+                or pos[rn][0] > max_x + eps
+                or pos[rn][1] > max_y + eps
+                or pos[rn][2] > max_z + eps
             ):
                 energy[rn] = 0.0
 
@@ -239,7 +249,7 @@ def simulation_loop(
             # Check absorbers
             for sn in range(num_absorbers):
                 # TODO: Switch to squared distances to avoid calculating sqrt in each iteration
-                absorber_dist[sn, rn] = np.sqrt(np.sum((pos[rn] - absorbers[sn])**2))
+                absorber_dist[sn, rn] = np.sqrt(np.sum((pos[rn] - absorbers[sn]) ** 2))
 
                 if absorber_dist[sn, rn] < sink_radius:
                     hits[sn] += energy[rn]
@@ -296,10 +306,18 @@ def simulation_loop(
                 dist = distance_point_to_polygon(pos[rn], pts, tri, vn)
 
         # Update cyclic buffers
-        pos_buf, pos_head, pos_tail = cyclic_buf(pos_buf, pos_head, pos_tail, pos, BUFF_SIZE)
-        vel_buf, vel_head, vel_tail = cyclic_buf(vel_buf, vel_head, vel_tail, velocity, BUFF_SIZE)
-        enr_buf, enr_head, enr_tail = cyclic_buf(enr_buf, enr_head, enr_tail, energy, BUFF_SIZE)
-        hit_buf, hit_head, hit_tail = cyclic_buf(hit_buf, hit_head, hit_tail, hits, BUFF_SIZE)
+        pos_buf, pos_head, pos_tail = cyclic_buf(
+            pos_buf, pos_head, pos_tail, pos, BUFF_SIZE
+        )
+        vel_buf, vel_head, vel_tail = cyclic_buf(
+            vel_buf, vel_head, vel_tail, velocity, BUFF_SIZE
+        )
+        enr_buf, enr_head, enr_tail = cyclic_buf(
+            enr_buf, enr_head, enr_tail, energy, BUFF_SIZE
+        )
+        hit_buf, hit_head, hit_tail = cyclic_buf(
+            hit_buf, hit_head, hit_tail, hits, BUFF_SIZE
+        )
 
     print("Exiting the loop")
     print("Converting buffers to contiguous arrays")

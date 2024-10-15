@@ -27,10 +27,12 @@ if __name__ == "__main__":
 
     # Sources and sinks
     source = np.array([0.3, 0.3, 0.3])
-    sinks = np.array([
-        [0.6, 0.6, 0.6],
-        [0.1, 0.1, 0.6],
-    ])
+    sinks = np.array(
+        [
+            [0.6, 0.6, 0.6],
+            [0.1, 0.1, 0.6],
+        ]
+    )
 
     # Rays
     num_rays = 500

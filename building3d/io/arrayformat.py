@@ -47,8 +47,9 @@ def to_array_format(bdg: Building) -> tuple:
     face_offset = 0
     for z in bdg.zones.values():
         # Sanity check
-        assert z.num <= num_zones, \
-            f"Zone number ({z.num}) higher than the tot. number of zones ({num_zones})?"
+        assert (
+            z.num <= num_zones
+        ), f"Zone number ({z.num}) higher than the tot. number of zones ({num_zones})?"
 
         for s in z.solids.values():
             # Map solids to zones
@@ -63,10 +64,12 @@ def to_array_format(bdg: Building) -> tuple:
                     walls[p.num] = w.num
 
                     # Add points
-                    points[pt_offset:pt_offset + p.pts.shape[0]] = p.pts.copy()
+                    points[pt_offset : pt_offset + p.pts.shape[0]] = p.pts.copy()
 
                     # Map points to faces
-                    faces[face_offset:face_offset + p.tri.shape[0]] = p.tri.copy() + pt_offset
+                    faces[face_offset : face_offset + p.tri.shape[0]] = (
+                        p.tri.copy() + pt_offset
+                    )
 
                     # Map faces to polygons
                     for fi in range(face_offset, face_offset + p.tri.shape[0]):

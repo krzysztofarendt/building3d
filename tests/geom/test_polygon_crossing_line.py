@@ -5,18 +5,10 @@ from building3d.geom.types import INT, FLOAT
 
 def test_line_segment_crosses_polygon():
     # Define a simple square polygon in the XY plane
-    pts = np.array([
-        [0, 0, 0],
-        [1, 0, 0],
-        [1, 1, 0],
-        [0, 1, 0]
-    ], dtype=FLOAT)
+    pts = np.array([[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]], dtype=FLOAT)
 
     # Define the triangulation of the square
-    tri = np.array([
-        [0, 1, 2],
-        [0, 2, 3]
-    ], dtype=INT)
+    tri = np.array([[0, 1, 2], [0, 2, 3]], dtype=INT)
 
     # Test cases
     test_cases = [
@@ -42,6 +34,10 @@ def test_line_segment_crosses_polygon():
 
     # Test with a very small epsilon
     small_epsilon_result = is_line_segment_crossing_polygon(
-        np.array([0.5, -1.0, 1e-10]), np.array([0.5, 2.0, -1e-10]), pts, tri, epsilon=1e-12
+        np.array([0.5, -1.0, 1e-10]),
+        np.array([0.5, 2.0, -1e-10]),
+        pts,
+        tri,
+        epsilon=1e-12,
     )
     assert small_epsilon_result == True, "Failed for small epsilon test"

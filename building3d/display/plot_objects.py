@@ -56,7 +56,9 @@ def plot_objects(objects: tuple, output_file=None, colors=()) -> None:
         if len(objects) > 1 and len(colors) == 0:
             col = random_rgb_color()
         elif len(objects) > 1 and len(colors) == len(objects):
-            col = [float(x) for x in colors[obj_num]]  # PyVista does not handle integer colors
+            col = [
+                float(x) for x in colors[obj_num]
+            ]  # PyVista does not handle integer colors
         elif len(objects) == 1:
             col = [1.0, 1.0, 1.0]
         else:

@@ -79,7 +79,9 @@ def points_equal(pt1: PointType, pt2: PointType, atol: float = GEOM_ATOL) -> boo
 
 
 # njit doesn't support tuple()
-def point_to_tuple(pt: PointType, decimals: int = POINT_NUM_DEC) -> tuple[float, float, float]:
+def point_to_tuple(
+    pt: PointType, decimals: int = POINT_NUM_DEC
+) -> tuple[float, float, float]:
     pt = np.round(pt, decimals=decimals)
     return tuple(pt)
 
@@ -103,7 +105,9 @@ def bounding_box(pts: PointType) -> tuple[PointType, PointType]:
 
 
 @njit
-def is_point_inside_bbox(ptest: PointType, pts: PointType, atol: float = GEOM_ATOL) -> bool:
+def is_point_inside_bbox(
+    ptest: PointType, pts: PointType, atol: float = GEOM_ATOL
+) -> bool:
     """Checks whether a point is inside the bounding box for `pts`."""
     bbox = bounding_box(pts)
     if (ptest < bbox[0] - atol).any() or (ptest > bbox[1] + atol).any():
@@ -258,10 +262,8 @@ def many_new_points_between_2_points(
 
 @njit
 def is_point_on_segment(
-    ptest: PointType,
-    pt1: PointType,
-    pt2: PointType,
-    atol: float = GEOM_ATOL) -> bool:
+    ptest: PointType, pt1: PointType, pt2: PointType, atol: float = GEOM_ATOL
+) -> bool:
     """Checks if point p lies on the line segment defined by points pt1 and pt2.
 
     Args:
@@ -277,7 +279,9 @@ def is_point_on_segment(
         return True
 
     # Check collinearity using the cross product
-    if not np.allclose(np.cross(ptest - pt1, pt2 - pt1), np.zeros(3, dtype=FLOAT), atol=atol):
+    if not np.allclose(
+        np.cross(ptest - pt1, pt2 - pt1), np.zeros(3, dtype=FLOAT), atol=atol
+    ):
         return False
 
     # Check if the point lies within the segment bounds

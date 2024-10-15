@@ -71,7 +71,7 @@ def is_line_segment_crossing_polygon(
     seg_end: PointType,
     pts: PointType,
     tri: IndexType,
-    epsilon: float = 1e-10
+    epsilon: float = 1e-10,
 ) -> bool:
     """
     Check if a line segment crosses a polygon in 3D space.
@@ -96,8 +96,9 @@ def is_line_segment_crossing_polygon(
         return False
 
     # Calculate the intersection point of the line with the plane
-    t = -(a * seg_start[0] + b * seg_start[1] + c * seg_start[2] + d) / \
-        np.dot(segment_direction, plane_normal)
+    t = -(a * seg_start[0] + b * seg_start[1] + c * seg_start[2] + d) / np.dot(
+        segment_direction, plane_normal
+    )
 
     # Check if the intersection point is within the line segment
     if t < 0 or t > 1:

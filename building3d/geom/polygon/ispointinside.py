@@ -15,7 +15,9 @@ from building3d.geom.vectors import normal
 
 
 @njit
-def is_point_at_boundary(ptest: PointType, pts: PointType, atol: float = GEOM_ATOL) -> bool:
+def is_point_at_boundary(
+    ptest: PointType, pts: PointType, atol: float = GEOM_ATOL
+) -> bool:
     """Checks if the point lays on any of the edges of `pts`."""
     edges = polygon_edges(pts)
     for pt1, pt2 in edges:

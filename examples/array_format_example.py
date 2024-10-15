@@ -17,8 +17,8 @@ if __name__ == "__main__":
     )
 
     building = Building([zone], "building")
-    plot_objects((building, ))
+    plot_objects((building,))
 
     points, faces, polygons, walls, solids, zones = to_array_format(building)
     building = from_array_format(points, faces, polygons, walls, solids, zones)
-    plot_objects((building, ))
+    plot_objects((building,))

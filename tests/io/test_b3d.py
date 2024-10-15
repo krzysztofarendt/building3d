@@ -52,4 +52,3 @@ def test_b3d():
 
 if __name__ == "__main__":
     test_b3d()
-

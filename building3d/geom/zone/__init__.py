@@ -19,6 +19,7 @@ class Zone:
 
     Solids do not need to touch one another.
     """
+
     count: int = 0
 
     def __init__(

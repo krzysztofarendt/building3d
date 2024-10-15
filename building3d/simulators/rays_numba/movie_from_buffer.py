@@ -24,8 +24,7 @@ logger = logging.getLogger(__name__)
 def make_movie_from_buffer(
     output_file: str, building: Building, pos_buf: PointType, enr_buf: FloatDataType
 ):
-    """Generate movie.
-    """
+    """Generate movie."""
     logger.info(f"Start making movie: {output_file}")
 
     # Graphics settings

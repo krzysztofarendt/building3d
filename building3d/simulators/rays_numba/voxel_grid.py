@@ -54,11 +54,13 @@ def make_voxel_grid(
     for x in x_range:
         for y in y_range:
             for z in z_range:
-                keys.append((
-                    int(np.floor(x / step)),
-                    int(np.floor(y / step)),
-                    int(np.floor(z / step)),
-                ))
+                keys.append(
+                    (
+                        int(np.floor(x / step)),
+                        int(np.floor(y / step)),
+                        int(np.floor(z / step)),
+                    )
+                )
 
     max_polygons_per_cell = len(poly_pts)  # Worst case: all polygons in one cell
     added_polygons = np.zeros(len(poly_pts), dtype=np.bool_)
@@ -86,13 +88,7 @@ def make_voxel_grid(
 
 
 @njit
-def is_polygon_crossing_cube(
-    pts,
-    tri,
-    min_xyz,
-    max_xyz,
-    eps: float = 1e-3
-) -> bool:
+def is_polygon_crossing_cube(pts, tri, min_xyz, max_xyz, eps: float = 1e-3) -> bool:
     """Check if a polygon intersects with or is contained within a cube.
 
     Args:
@@ -112,9 +108,9 @@ def is_polygon_crossing_cube(
         min_x, min_y, min_z = min_xyz
 
         if (
-            min_x - eps <= x <= max_x + eps and
-            min_y - eps <= y <= max_y + eps and
-            min_z - eps <= z <= max_z + eps
+            min_x - eps <= x <= max_x + eps
+            and min_y - eps <= y <= max_y + eps
+            and min_z - eps <= z <= max_z + eps
         ):
             return True
 
@@ -126,10 +122,10 @@ def is_polygon_crossing_cube(
             edge_end = pts[tri[i][(j + 1) % 3]]
             for face in cube_faces:
                 if is_line_segment_crossing_polygon(
-                        edge_start,
-                        edge_end,
-                        face,
-                        np.array([[0, 1, 2], [0, 2, 3]], dtype=INT),
+                    edge_start,
+                    edge_end,
+                    face,
+                    np.array([[0, 1, 2], [0, 2, 3]], dtype=INT),
                 ):
                     return True
 
@@ -161,25 +157,25 @@ def cube_edges(
     """
     p0 = min_xyz
     p1 = max_xyz
-    edges = np.array((
-        # Bottom face
-        ((p0[0], p0[1], p0[2]), (p1[0], p0[1], p0[2])),  # Bottom front
-        ((p0[0], p0[1], p0[2]), (p0[0], p1[1], p0[2])),  # Bottom left
-        ((p0[0], p1[1], p0[2]), (p1[0], p1[1], p0[2])),  # Bottom back
-        ((p1[0], p0[1], p0[2]), (p1[0], p1[1], p0[2])),  # Bottom right
-
-        # Top face
-        ((p0[0], p0[1], p1[2]), (p1[0], p0[1], p1[2])),  # Top front
-        ((p0[0], p1[1], p1[2]), (p1[0], p1[1], p1[2])),  # Top back
-        ((p0[0], p0[1], p1[2]), (p0[0], p1[1], p1[2])),  # Top left
-        ((p1[0], p0[1], p1[2]), (p1[0], p1[1], p1[2])),  # Top right
-
-        # Vertical edges
-        ((p0[0], p0[1], p0[2]), (p0[0], p0[1], p1[2])),  # Front left vertical
-        ((p1[0], p0[1], p0[2]), (p1[0], p0[1], p1[2])),  # Front right vertical
-        ((p0[0], p1[1], p0[2]), (p0[0], p1[1], p1[2])),  # Back left vertical
-        ((p1[0], p1[1], p0[2]), (p1[0], p1[1], p1[2])),  # Back right vertical
-    ))
+    edges = np.array(
+        (
+            # Bottom face
+            ((p0[0], p0[1], p0[2]), (p1[0], p0[1], p0[2])),  # Bottom front
+            ((p0[0], p0[1], p0[2]), (p0[0], p1[1], p0[2])),  # Bottom left
+            ((p0[0], p1[1], p0[2]), (p1[0], p1[1], p0[2])),  # Bottom back
+            ((p1[0], p0[1], p0[2]), (p1[0], p1[1], p0[2])),  # Bottom right
+            # Top face
+            ((p0[0], p0[1], p1[2]), (p1[0], p0[1], p1[2])),  # Top front
+            ((p0[0], p1[1], p1[2]), (p1[0], p1[1], p1[2])),  # Top back
+            ((p0[0], p0[1], p1[2]), (p0[0], p1[1], p1[2])),  # Top left
+            ((p1[0], p0[1], p1[2]), (p1[0], p1[1], p1[2])),  # Top right
+            # Vertical edges
+            ((p0[0], p0[1], p0[2]), (p0[0], p0[1], p1[2])),  # Front left vertical
+            ((p1[0], p0[1], p0[2]), (p1[0], p0[1], p1[2])),  # Front right vertical
+            ((p0[0], p1[1], p0[2]), (p0[0], p1[1], p1[2])),  # Back left vertical
+            ((p1[0], p1[1], p0[2]), (p1[0], p1[1], p1[2])),  # Back right vertical
+        )
+    )
     return edges
 
 
@@ -200,42 +196,45 @@ def cube_polygons(
     """
     p0 = min_xyz
     p1 = max_xyz
-    polygons = np.array([
-        [  # Front polygon
-            (p0[0], p0[1], p0[2]),
-            (p1[0], p0[1], p0[2]),
-            (p1[0], p1[1], p0[2]),
-            (p0[0], p1[1], p0[2]),
+    polygons = np.array(
+        [
+            [  # Front polygon
+                (p0[0], p0[1], p0[2]),
+                (p1[0], p0[1], p0[2]),
+                (p1[0], p1[1], p0[2]),
+                (p0[0], p1[1], p0[2]),
+            ],
+            [  # Back polygon
+                (p0[0], p1[1], p1[2]),
+                (p1[0], p1[1], p1[2]),
+                (p1[0], p0[1], p1[2]),
+                (p0[0], p0[1], p1[2]),
+            ],
+            [  # Left polygon
+                (p0[0], p0[1], p0[2]),
+                (p0[0], p1[1], p0[2]),
+                (p0[0], p1[1], p1[2]),
+                (p0[0], p0[1], p1[2]),
+            ],
+            [  # Right polygon
+                (p1[0], p0[1], p0[2]),
+                (p1[0], p1[1], p0[2]),
+                (p1[0], p1[1], p1[2]),
+                (p1[0], p0[1], p1[2]),
+            ],
+            [  # Bottom polygon
+                (p0[0], p0[1], p0[2]),
+                (p1[0], p0[1], p0[2]),
+                (p1[0], p0[1], p1[2]),
+                (p0[0], p0[1], p1[2]),
+            ],
+            [  # Top polygon
+                (p0[0], p1[1], p0[2]),
+                (p1[0], p1[1], p0[2]),
+                (p1[0], p1[1], p1[2]),
+                (p0[0], p1[1], p1[2]),
+            ],
         ],
-        [  # Back polygon
-            (p0[0], p1[1], p1[2]),
-            (p1[0], p1[1], p1[2]),
-            (p1[0], p0[1], p1[2]),
-            (p0[0], p0[1], p1[2]),
-        ],
-        [  # Left polygon
-            (p0[0], p0[1], p0[2]),
-            (p0[0], p1[1], p0[2]),
-            (p0[0], p1[1], p1[2]),
-            (p0[0], p0[1], p1[2]),
-        ],
-        [  # Right polygon
-            (p1[0], p0[1], p0[2]),
-            (p1[0], p1[1], p0[2]),
-            (p1[0], p1[1], p1[2]),
-            (p1[0], p0[1], p1[2]),
-        ],
-        [  # Bottom polygon
-            (p0[0], p0[1], p0[2]),
-            (p1[0], p0[1], p0[2]),
-            (p1[0], p0[1], p1[2]),
-            (p0[0], p0[1], p1[2]),
-        ],
-        [  # Top polygon
-            (p0[0], p1[1], p0[2]),
-            (p1[0], p1[1], p0[2]),
-            (p1[0], p1[1], p1[2]),
-            (p0[0], p1[1], p1[2]),
-        ],
-    ], dtype=FLOAT)
+        dtype=FLOAT,
+    )
     return polygons

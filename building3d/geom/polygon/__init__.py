@@ -28,8 +28,8 @@ logger = logging.getLogger(__name__)
 
 
 class Polygon:
-    """Polygon represents an area defined by a collection of sequentially connected points.
-    """
+    """Polygon represents an area defined by a collection of sequentially connected points."""
+
     count: int = 0
 
     def __init__(

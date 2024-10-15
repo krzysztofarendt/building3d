@@ -39,12 +39,7 @@ def find_target_surface(
             continue
 
         if is_point_inside_projection(
-            pos,
-            direction,
-            poly_pts[pn],
-            poly_tri[pn],
-            fwd_only=True,
-            atol=atol
+            pos, direction, poly_pts[pn], poly_tri[pn], fwd_only=True, atol=atol
         ):
             return pn
 

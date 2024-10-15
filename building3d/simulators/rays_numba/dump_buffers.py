@@ -58,7 +58,9 @@ def dump_buffers(
         step += 1
 
 
-def read_buffers(dump_dir: str) -> tuple[PointType, VectorType, FloatDataType, IntDataType]:
+def read_buffers(
+    dump_dir: str,
+) -> tuple[PointType, VectorType, FloatDataType, IntDataType]:
     """Read buffer arrays from a directory.
 
     Args:
@@ -81,8 +83,9 @@ def read_buffers(dump_dir: str) -> tuple[PointType, VectorType, FloatDataType, I
     max_step_vel = max([d["step"] for d in dict_vel.values()])
     max_step_enr = max([d["step"] for d in dict_enr.values()])
     max_step_hit = max([d["step"] for d in dict_hit.values()])
-    assert max_step_pos == max_step_vel == max_step_enr == max_step_hit, \
-        "Different number of buffer steps in the dump dir?"
+    assert (
+        max_step_pos == max_step_vel == max_step_enr == max_step_hit
+    ), "Different number of buffer steps in the dump dir?"
 
     max_step = max_step_pos
 

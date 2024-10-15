@@ -22,12 +22,14 @@ def test_cyclic_buf_full():
     head, tail = 0, 0
 
     for i in range(4):
-        element = np.array([float(i), float(i+1)], dtype=np.float32)
+        element = np.array([float(i), float(i + 1)], dtype=np.float32)
         buffer, head, tail = cyclic_buf(buffer, head, tail, element, buffer_size)
 
     assert head == 1  # New element would be written at this index
     assert tail == 2  # Oldest element is at this index
-    np.testing.assert_array_equal(buffer, np.array([[3.0, 4.0], [1.0, 2.0], [2.0, 3.0]], dtype=np.float32))
+    np.testing.assert_array_equal(
+        buffer, np.array([[3.0, 4.0], [1.0, 2.0], [2.0, 3.0]], dtype=np.float32)
+    )
 
 
 def test_cyclic_buf_wrap_around():
@@ -41,7 +43,9 @@ def test_cyclic_buf_wrap_around():
 
     assert head == 2  # New element would be written at this index
     assert tail == 3  # Oldest element is at this index
-    np.testing.assert_array_equal(buffer, np.array([[4.0], [5.0], [2.0], [3.0]], dtype=np.float32))
+    np.testing.assert_array_equal(
+        buffer, np.array([[4.0], [5.0], [2.0], [3.0]], dtype=np.float32)
+    )
 
 
 def test_cyclic_buf_single_element():

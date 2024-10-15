@@ -19,6 +19,7 @@ For future queries, fast and deep.
 A poem of logic, clean and neat,
 This building script, a coding feat.
 """
+
 import logging
 
 from building3d.geom.building import Building
@@ -59,7 +60,9 @@ def find_transparent(building: Building) -> set[str]:
         logger.debug("Iterating through the graph items")
         for k, v in graph.items():
             assert isinstance(v, list)
-            assert len(v) <= 1, f"Expected one facing polygon, but found more ({len(v)})"
+            assert (
+                len(v) <= 1
+            ), f"Expected one facing polygon, but found more ({len(v)})"
 
             if len(v) == 1:
                 if k not in added or v[0] not in added:
