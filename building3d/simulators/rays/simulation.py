@@ -235,6 +235,16 @@ def simulation_loop(
     print("Entering the loop")
     for i in range(num_steps):
         print("Step", i)
+        # Check absorbers
+        # TODO: This probably shouldn't be inside prange, because of the hits array
+        for rn in range(num_rays):
+            for sn in range(num_absorbers):
+                # TODO: Switch to squared distances to avoid calculating sqrt in each iteration
+                absorber_dist[sn, rn] = np.sqrt(np.sum((pos[rn] - absorbers[sn]) ** 2))
+                if absorber_dist[sn, rn] < sink_radius:
+                    hits[sn] += energy[rn]  # This line shouldn't be inside prange
+                    energy[rn] = 0.0
+
         for rn in prange(num_rays):
             # If the ray somehow left the building - set its energy to 0
             if energy[rn] > 0 and (
@@ -252,15 +262,6 @@ def simulation_loop(
                 continue
 
             pos[rn] += delta_pos[rn]
-
-            # Check absorbers
-            for sn in range(num_absorbers):
-                # TODO: Switch to squared distances to avoid calculating sqrt in each iteration
-                absorber_dist[sn, rn] = np.sqrt(np.sum((pos[rn] - absorbers[sn]) ** 2))
-
-                if absorber_dist[sn, rn] < sink_radius:
-                    hits[sn] += energy[rn]
-                    energy[rn] = 0.0
 
             # Check near polygons
             x = int(np.floor(pos[rn][0] / grid_step))
