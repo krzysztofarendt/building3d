@@ -49,8 +49,8 @@ if __name__ == "__main__":
 
     # Save and read buffers - if the video looks fine, these functions work OK
     # TODO: https://github.com/krzysztofarendt/building3d/issues/74
-    # dump_buffers(pos_buf, vel_buf, enr_buf, hit_buf, "tmp")
-    # pos_buf, vel_buf, enr_buf, hit_buf = read_buffers("tmp")
+    dump_buffers(pos_buf, vel_buf, enr_buf, hit_buf, "tmp")
+    pos_buf, vel_buf, enr_buf, hit_buf = read_buffers("tmp")
 
     # Show plot
     rays = RayBuffPlotter(building, pos_buf, enr_buf)

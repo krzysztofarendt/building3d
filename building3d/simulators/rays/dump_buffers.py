@@ -118,9 +118,9 @@ def read_buffers(
             enr_buf = np.zeros((max_step, num_rays), dtype=FLOAT)
             hit_buf = np.zeros((max_step, num_absorbers), dtype=FLOAT)
 
-        pos_buf[step_num, :, :] = pos
-        vel_buf[step_num, :, :] = vel
-        enr_buf[step_num, :] = enr
-        hit_buf[step_num, :] = hit
+        pos_buf[step_num, 0:num_rays, 0:3] = pos
+        vel_buf[step_num, 0:num_rays, 0:3] = vel
+        enr_buf[step_num, 0:num_rays] = enr
+        hit_buf[step_num, 0:num_absorbers] = hit
 
     return pos_buf, vel_buf, enr_buf, hit_buf
