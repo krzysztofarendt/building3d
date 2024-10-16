@@ -33,13 +33,9 @@ if __name__ == "__main__":
     num_rays = 1000
     num_steps = 500
 
-    sim = Simulation(
-        building, source, sinks, num_rays, num_steps, search_transparent=False
-    )
+    sim = Simulation(building, source, sinks, num_rays, num_steps, search_transparent=False)
     t0 = time.time()
-    pos_buf, vel_buf, enr_buf, hit_buf = (
-        sim.run()
-    )  # TODO: Some rays go outside the teapot
+    pos_buf, vel_buf, enr_buf, hit_buf = sim.run()  # TODO: Some rays go outside the teapot
     tot_time = time.time() - t0
     print(f"{tot_time=:.2f}")
 

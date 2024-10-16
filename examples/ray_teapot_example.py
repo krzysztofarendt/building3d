@@ -33,9 +33,7 @@ if __name__ == "__main__":
     num_rays = 1000
     num_steps = 500
 
-    sim = Simulation(
-        building, source, sinks, num_rays, num_steps, search_transparent=False
-    )
+    sim = Simulation(building, source, sinks, num_rays, num_steps, search_transparent=False)
     t0 = time.time()
     pos_buf, vel_buf, enr_buf, hit_buf = (
         sim.run()

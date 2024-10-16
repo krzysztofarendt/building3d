@@ -42,6 +42,4 @@ if __name__ == "__main__":
 
     plot_objects((solid,))
     plot_objects((walls, floor, roof))
-    plot_objects(
-        (poly_floor, poly_wall0, poly_wall1, poly_wall2, poly_wall3, poly_roof)
-    )
+    plot_objects((poly_floor, poly_wall0, poly_wall1, poly_wall2, poly_wall3, poly_roof))
