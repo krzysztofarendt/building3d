@@ -1,7 +1,7 @@
 .PHONY: format lint lint-full test coverage count count-tests examples test_publish publish
 
 format:
-	black $(shell ls **/*.py)
+	black --line-length=100 $(shell ls **/*.py)
 	isort --sl $(shell ls **/*.py)
 
 lint:
@@ -22,6 +22,20 @@ count:
 
 count-tests:
 	cloc --by-file building3d/ tests/
+
+examples:
+	python examples/array_format_example.py
+	python examples/building_example.py
+	python examples/floor_plan_example.py
+	python examples/polygon_example.py
+	python examples/ray_2_boxes_example.py
+	python examples/ray_cylinder_example.py
+	python examples/ray_sphere_example.py
+	python examples/ray_teapot_example.py
+	python examples/read_teapot.py
+	python examples/solid_example.py
+	python examples/wall_example.py
+	python examples/zone_example.py
 
 test_publish:
 	-rm -r logs/

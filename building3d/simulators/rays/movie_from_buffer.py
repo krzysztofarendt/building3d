@@ -24,7 +24,8 @@ def make_movie_from_buffer(
     output_file: str, building: Building, pos_buf: PointType, enr_buf: FloatDataType
 ):
     """Generate movie."""
-    logger.info(f"Start making movie: {output_file}")
+    logger.info(f"Making movie: {output_file}")
+    print(f"Making movie: {output_file}")
 
     # Graphics settings
     ray_opacity = RAY_OPACITY

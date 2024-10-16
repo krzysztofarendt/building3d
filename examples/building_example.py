@@ -10,6 +10,8 @@ from building3d.io.stl import read_stl
 from building3d.io.stl import write_stl
 
 if __name__ == "__main__":
+    output_dir = "out/building_example"
+
     zone = Zone(
         [
             box(1, 1, 1, (0, 0, 0), "s1"),
@@ -21,14 +23,14 @@ if __name__ == "__main__":
 
     building = Building([zone], "building")
 
-    write_b3d("tmp/building.b3d", building, parent_dirs=True)
-    building = read_b3d("tmp/building.b3d")
+    write_b3d(f"{output_dir}/building.b3d", building, parent_dirs=True)
+    building = read_b3d(f"{output_dir}/building.b3d")
     plot_objects((building,))
 
-    write_dotbim("tmp/building.bim", building, parent_dirs=True)
-    building = read_dotbim("tmp/building.bim")
+    write_dotbim(f"{output_dir}/building.bim", building, parent_dirs=True)
+    building = read_dotbim(f"{output_dir}/building.bim")
     plot_objects((building,))
 
-    write_stl("tmp/building.stl", building, parent_dirs=True)
-    building = read_stl("tmp/building.stl")
+    write_stl(f"{output_dir}/building.stl", building, parent_dirs=True)
+    building = read_stl(f"{output_dir}/building.stl")
     plot_objects((building,))

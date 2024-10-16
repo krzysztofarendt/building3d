@@ -30,10 +30,10 @@ GRID_STEP = 0.5
 
 # Movie settings
 # =============================================================================
-BUFF_SIZE = 1000  # Number of last steps to show in a movie
+BUFF_SIZE = 500  # Number of last steps to show in a movie
 RAY_LINE_LEN = 16
-RAY_OPACITY = 0.2
-RAY_TRAIL_OPACITY = 0.1
+RAY_OPACITY = 0.5
+RAY_TRAIL_OPACITY = 0.3
 RAY_POINT_SIZE = 3  # default 3, looks good if many rays
 BUILDING_OPACITY = 0.1
 BUILDING_COLOR = [0.8, 0.8, 0.8]  # gray

@@ -4,9 +4,7 @@ import os
 import numpy as np
 
 from building3d.geom.types import FLOAT
-from building3d.geom.types import INT
 from building3d.geom.types import FloatDataType
-from building3d.geom.types import IntDataType
 from building3d.geom.types import PointType
 from building3d.geom.types import VectorType
 from building3d.paths.wildcardpath import WildcardPath
@@ -23,7 +21,7 @@ def dump_buffers(
     pos_buf: PointType,
     vel_buf: VectorType,
     enr_buf: FloatDataType,
-    hit_buf: IntDataType,
+    hit_buf: FloatDataType,
     dump_dir: str,
 ):
     """Saves buffer arrays to a chosen directory.
@@ -63,7 +61,7 @@ def dump_buffers(
 
 def read_buffers(
     dump_dir: str,
-) -> tuple[PointType, VectorType, FloatDataType, IntDataType]:
+) -> tuple[PointType, VectorType, FloatDataType, FloatDataType]:
     """Read buffer arrays from a directory.
 
     Args:
@@ -96,7 +94,7 @@ def read_buffers(
     pos_buf = np.array([], dtype=FLOAT)
     vel_buf = np.array([], dtype=FLOAT)
     enr_buf = np.array([], dtype=FLOAT)
-    hit_buf = np.array([], dtype=INT)
+    hit_buf = np.array([], dtype=FLOAT)
 
     for step_num in range(max_step):
         pos_path = wpath_pos.fill(parent=dump_dir, step=step_num)
@@ -118,7 +116,7 @@ def read_buffers(
             pos_buf = np.zeros((max_step, num_rays, 3), dtype=FLOAT)
             vel_buf = np.zeros((max_step, num_rays, 3), dtype=FLOAT)
             enr_buf = np.zeros((max_step, num_rays), dtype=FLOAT)
-            hit_buf = np.zeros((max_step, num_absorbers), dtype=INT)
+            hit_buf = np.zeros((max_step, num_absorbers), dtype=FLOAT)
 
         pos_buf[step_num, :, :] = pos
         vel_buf[step_num, :, :] = vel
