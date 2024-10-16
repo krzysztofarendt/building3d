@@ -4,10 +4,9 @@
 
 I'm not sure where this project is heading, so there is no documentation yet, but it looks as follows:
 
-<video src='https://github.com/user-attachments/assets/414a01c3-0274-4e7a-bf47-b1b1967a9b73'>
+[Cubes](https://github.com/user-attachments/assets/414a01c3-0274-4e7a-bf47-b1b1967a9b73)
 
-<video src='https://github.com/user-attachments/assets/6252ec18-2545-44fb-b39b-60d152c2054e'>
-
+[Sphere](https://github.com/user-attachments/assets/ad794a12-441b-4a4d-a580-1953599535ac)
 
 # Summary
 
