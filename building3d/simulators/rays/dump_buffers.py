@@ -29,10 +29,10 @@ def dump_buffers(
     Each step is saved in a separate file.
 
     Args:
-        pos_buf: buffer of ray positions, shaped (num_steps + 1, num_rays, 3)
-        vel_buf: buffer of ray velocity, shaped (num_steps + 1, num_rays, 3)
-        enr_buf: buffer of ray energy, shaped (num_steps + 1, num_rays)
-        hit_buf: buffer of ray absorber hits, shaped (num_steps + 1, num_rays)
+        pos_buf: buffer of ray positions, shaped (num_steps, num_rays, 3)
+        vel_buf: buffer of ray velocity, shaped (num_steps, num_rays, 3)
+        enr_buf: buffer of ray energy, shaped (num_steps, num_rays)
+        hit_buf: buffer of ray absorber hits, shaped (num_steps, num_absorbers)
         dump_dir: path to the dump directory, will be created if doesn't exist
 
     Returns:
@@ -44,9 +44,9 @@ def dump_buffers(
         os.makedirs(dump_dir)
 
     step = 0
-    num_steps = pos_buf.shape[0] - 1
+    num_steps = pos_buf.shape[0]
 
-    while step <= num_steps:
+    while step < num_steps:
         for data, file in (
             (pos_buf, POSITION_FILE),
             (enr_buf, ENERGY_FILE),
@@ -80,10 +80,10 @@ def read_buffers(
     dict_enr = wpath_enr.get_matching_paths_dict_values(parent=dump_dir)
     dict_hit = wpath_hit.get_matching_paths_dict_values(parent=dump_dir)
 
-    max_step_pos = max([d["step"] for d in dict_pos.values()])
-    max_step_vel = max([d["step"] for d in dict_vel.values()])
-    max_step_enr = max([d["step"] for d in dict_enr.values()])
-    max_step_hit = max([d["step"] for d in dict_hit.values()])
+    max_step_pos = max([d["step"] for d in dict_pos.values()]) + 1  # Because indexing starts at 0
+    max_step_vel = max([d["step"] for d in dict_vel.values()]) + 1
+    max_step_enr = max([d["step"] for d in dict_enr.values()]) + 1
+    max_step_hit = max([d["step"] for d in dict_hit.values()]) + 1
     assert (
         max_step_pos == max_step_vel == max_step_enr == max_step_hit
     ), "Different number of buffer steps in the dump dir?"
