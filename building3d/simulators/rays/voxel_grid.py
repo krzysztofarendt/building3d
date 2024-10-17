@@ -1,6 +1,5 @@
 import numpy as np
 from numba import njit
-from numba import prange
 
 from building3d.geom.polygon.crossing import is_line_segment_crossing_polygon
 from building3d.geom.types import FLOAT
@@ -10,7 +9,7 @@ from building3d.geom.types import PointType
 
 
 # TODO: Add unit test!
-@njit(parallel=True)
+@njit
 def make_voxel_grid(
     min_xyz: tuple[float, float, float],
     max_xyz: tuple[float, float, float],
@@ -69,7 +68,13 @@ def make_voxel_grid(
     max_polygons_per_cell = len(poly_pts)  # Worst case: all polygons in one cell
     added_polygons = np.zeros(len(poly_pts), dtype=np.bool_)
 
-    for ki in prange(len(keys)):
+    # TODO: https://github.com/krzysztofarendt/building3d/issues/73
+    #       Cannot use numba.prange() due to error "double free or corruption (!prev)"
+    #       I don't know what causes this error. It happens only fromt time to time.
+    print("Total number of voxels:", len(keys))
+    for ki in range(len(keys)):
+        if ki % 100 == 0:
+            print("Current voxel:", ki)
         key = keys[ki]
         polynums = np.full(max_polygons_per_cell, -1, dtype=INT)
         counter = 0
@@ -80,6 +85,13 @@ def make_voxel_grid(
                 min_xyz_cube[1] + step,
                 min_xyz_cube[2] + step,
             )
+            for xyz in range(3):
+                # Check if it is possible for this triangle to cross the polygon
+                if (pts[:, xyz] < min_xyz_cube[xyz]).all():
+                    continue
+                if (pts[:, xyz] > max_xyz_cube[xyz]).all():
+                    continue
+            # Below function is very, very slow
             if is_polygon_crossing_cube(pts, tri, min_xyz_cube, max_xyz_cube):
                 polynums[counter] = pn
                 counter += 1
@@ -88,6 +100,7 @@ def make_voxel_grid(
 
     assert np.all(added_polygons), "Not all polygons added to the voxel grid"
 
+    print("Voxels created")
     return grid
 
 
