@@ -1,20 +1,20 @@
 """dotbim (.bim) file I/O."""
 
-from collections import defaultdict
 import json
+from collections import defaultdict
 from pathlib import Path
 
 import dotbimpy
 import numpy as np
 
 from building3d.geom.building import Building
-from building3d.geom.zone import Zone
-from building3d.geom.solid import Solid
-from building3d.geom.wall import Wall
 from building3d.geom.polygon import Polygon
-from building3d.geom.types import FLOAT, INT
+from building3d.geom.solid import Solid
+from building3d.geom.types import FLOAT
+from building3d.geom.types import INT
+from building3d.geom.wall import Wall
+from building3d.geom.zone import Zone
 from building3d.types.recursive_default_dict import recursive_default_dict
-
 
 TOOL_NAME = "Building3D"
 

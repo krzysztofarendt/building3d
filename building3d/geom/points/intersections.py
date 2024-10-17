@@ -1,11 +1,13 @@
 import numpy as np
 from numba import njit
 
-from building3d.geom.types import PointType, VectorType, INVALID_PT
-from building3d.geom.vectors import new_vector
 from building3d.geom.points import is_point_on_segment
 from building3d.geom.points import list_pts_to_array
 from building3d.geom.points import new_point
+from building3d.geom.types import INVALID_PT
+from building3d.geom.types import PointType
+from building3d.geom.types import VectorType
+from building3d.geom.vectors import new_vector
 
 
 @njit

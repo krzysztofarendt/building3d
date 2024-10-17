@@ -3,7 +3,6 @@ import logging
 from building3d.geom.point import Point
 from building3d.geom.tetrahedron import tetrahedron_volume
 
-
 logger = logging.getLogger(__name__)
 
 

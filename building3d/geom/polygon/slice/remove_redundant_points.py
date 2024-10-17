@@ -1,14 +1,21 @@
-from numba import njit
 import numpy as np
+from numba import njit
 
-from building3d.geom.types import PointType, IndexType, FLOAT
-from building3d.geom.points import roll_forward
 from building3d.geom.points import is_point_in_array
-from building3d.geom.polygon.slice.locate_slicing_points import (
-    locate_slicing_points,
-)
+from building3d.geom.points import roll_forward
 from building3d.geom.polygon.edges import polygon_edges
-from .constants import EXTERIOR, INTERIOR, VERTEX, EDGE, INVALID_INDEX, INVALID_LOC
+from building3d.geom.polygon.slice.locate_slicing_points import \
+    locate_slicing_points
+from building3d.geom.types import FLOAT
+from building3d.geom.types import IndexType
+from building3d.geom.types import PointType
+
+from .constants import EDGE
+from .constants import EXTERIOR
+from .constants import INTERIOR
+from .constants import INVALID_INDEX
+from .constants import INVALID_LOC
+from .constants import VERTEX
 
 
 @njit

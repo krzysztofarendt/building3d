@@ -1,9 +1,9 @@
 import numpy as np
 from numba import njit
 
-from building3d.geom.point import Point
-from building3d.geom.cloud import points_to_array
 from building3d.config import GEOM_ATOL
+from building3d.geom.cloud import points_to_array
+from building3d.geom.point import Point
 
 
 def find_neighbors(

@@ -3,16 +3,15 @@ import numpy as np
 from building3d import random_id
 from building3d.config import GEOM_RTOL
 from building3d.geom.exceptions import GeometryError
-from building3d.geom.types import PointType, VectorType
 from building3d.geom.points import are_points_coplanar
 from building3d.geom.polygon import Polygon
+from building3d.geom.polygon.slice.add_intersection_points import \
+    add_intersection_points
 from building3d.geom.polygon.slice.get_point_arrays import get_point_arrays
-from building3d.geom.polygon.slice.add_intersection_points import (
-    add_intersection_points,
-)
-from building3d.geom.polygon.slice.remove_redundant_points import (
-    remove_redundant_points,
-)
+from building3d.geom.polygon.slice.remove_redundant_points import \
+    remove_redundant_points
+from building3d.geom.types import PointType
+from building3d.geom.types import VectorType
 
 
 def slice_polygon(

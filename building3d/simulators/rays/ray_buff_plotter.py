@@ -2,11 +2,14 @@ import numpy as np
 
 from building3d.display.plot_objects import plot_objects
 from building3d.geom.building import Building
-from building3d.geom.types import PointType, FLOAT, FloatDataType
+from building3d.geom.types import FLOAT
+from building3d.geom.types import FloatDataType
+from building3d.geom.types import PointType
 
 
 class RayBuffPlotter:
     """Class with methods for plotting the rays as points and lines based on the ray buffer."""
+
     def __init__(self, building: Building, pos_buf: PointType, enr_buf: FloatDataType):
         self.building = building
         self.pos_buf = pos_buf

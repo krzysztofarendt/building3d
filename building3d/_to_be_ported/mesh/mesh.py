@@ -1,15 +1,15 @@
 from __future__ import annotations
+
 import logging
 import time
 
 import building3d.geom.building
+from building3d.config import MESH_DELTA
 from building3d.geom.polygon import Polygon
 from building3d.geom.solid import Solid
 from building3d.geom.zone import Zone
 from building3d.mesh.polymesh import PolyMesh
 from building3d.mesh.solidmesh import SolidMesh
-from building3d.config import MESH_DELTA
-
 
 logger = logging.getLogger(__name__)
 

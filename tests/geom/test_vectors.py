@@ -1,8 +1,8 @@
 import numpy as np
 
 from building3d.geom.points import new_point
-from building3d.geom.vectors import normal
 from building3d.geom.vectors import angle
+from building3d.geom.vectors import normal
 
 
 def test_normal():

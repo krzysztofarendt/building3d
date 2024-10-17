@@ -1,6 +1,7 @@
-from building3d.geom.types import PointType, IndexType
-from building3d.geom.polygon import Polygon
 from building3d.geom.mesh import vstack_mesh
+from building3d.geom.polygon import Polygon
+from building3d.geom.types import IndexType
+from building3d.geom.types import PointType
 
 
 def get_mesh_from_polygons(polys: list[Polygon]) -> tuple[PointType, IndexType]:

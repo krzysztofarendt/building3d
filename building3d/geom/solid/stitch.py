@@ -1,17 +1,16 @@
-from numba import njit
 import numpy as np
+from numba import njit
 
 from building3d.geom.exceptions import GeometryError
-from building3d.geom.types import PointType
 from building3d.geom.points.find_close_pairs import find_close_pairs
 from building3d.geom.polygon import Polygon
 from building3d.geom.polygon.slice import slice_polygon
-from building3d.geom.polygon.slice.add_intersection_points import (
-    add_intersection_points,
-)
-from building3d.geom.wall import Wall
+from building3d.geom.polygon.slice.add_intersection_points import \
+    add_intersection_points
 from building3d.geom.solid import Solid
 from building3d.geom.types import FLOAT
+from building3d.geom.types import PointType
+from building3d.geom.wall import Wall
 
 
 def stitch_solids(s1: Solid, s2: Solid) -> None:

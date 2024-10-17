@@ -6,7 +6,7 @@ from building3d.geom.types import IndexType
 @njit
 def find_nearby_polygons(
     x: int,
-    y:int,
+    y: int,
     z: int,
     grid: dict[tuple[int, int, int], IndexType],
 ) -> set[int]:

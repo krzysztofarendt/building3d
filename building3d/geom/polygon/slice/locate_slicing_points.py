@@ -1,12 +1,18 @@
-from numba import njit
 import numpy as np
+from numba import njit
 
-from building3d.geom.points import points_equal
-from building3d.geom.types import PointType, IndexType
 from building3d.geom.exceptions import GeometryError
+from building3d.geom.points import points_equal
 from building3d.geom.polygon.distance import distance_point_to_edge
 from building3d.geom.polygon.ispointinside import is_point_inside
-from .constants import EXTERIOR, INTERIOR, VERTEX, EDGE, INVALID_INDEX
+from building3d.geom.types import IndexType
+from building3d.geom.types import PointType
+
+from .constants import EDGE
+from .constants import EXTERIOR
+from .constants import INTERIOR
+from .constants import INVALID_INDEX
+from .constants import VERTEX
 
 
 @njit

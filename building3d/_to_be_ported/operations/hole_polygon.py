@@ -1,5 +1,6 @@
-from .imprint_polygon import imprint_polygon
 from building3d.geom.polygon import Polygon
+
+from .imprint_polygon import imprint_polygon
 
 
 def hole_polygon(poly: Polygon, hole: Polygon) -> list[Polygon]:

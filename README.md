@@ -30,6 +30,8 @@ sudo apt install cloc  # for source code line counting
 
 # Testing
 
+Please note that the package has been tested only on Linux!
+
 Run unit tests:
 ```
 make test
