@@ -85,14 +85,19 @@ def make_voxel_grid(
                 min_xyz_cube[1] + step,
                 min_xyz_cube[2] + step,
             )
+            outside = False
             for xyz in range(3):
                 # Check if it is possible for this triangle to cross the polygon
                 if (pts[:, xyz] < min_xyz_cube[xyz]).all():
-                    continue
+                    outside = True
+                    break
                 if (pts[:, xyz] > max_xyz_cube[xyz]).all():
-                    continue
-            # Below function is very, very slow
-            if is_polygon_crossing_cube(pts, tri, min_xyz_cube, max_xyz_cube):
+                    outside = True
+                    break
+            if outside:
+                continue
+            else:
+                # Previously I had here is_polygon_crossing_cube() but it was redundant
                 polynums[counter] = pn
                 counter += 1
                 added_polygons[pn] = True
@@ -104,6 +109,7 @@ def make_voxel_grid(
     return grid
 
 
+# TODO: Function currently unused
 @njit
 def is_polygon_crossing_cube(pts, tri, min_xyz, max_xyz, eps: float = 1e-3) -> bool:
     """Check if a polygon intersects with or is contained within a cube.
