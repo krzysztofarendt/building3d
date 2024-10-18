@@ -25,6 +25,10 @@ def find_target_surface(
     Transparent polygons are ignored.
     The function checks only the polygons from the set `polygons_to_check`.
 
+    NOTE:
+        `transparent_polygons` and `polygons_to_check` cannot be empty sets if JIT is used.
+        `set([-1])` is a good substitute for an empty set.
+
     Args:
         pos: The starting position of the ray.
         direction: The direction vector of the ray.
