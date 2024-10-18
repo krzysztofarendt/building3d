@@ -1,14 +1,18 @@
 """Rotation functions."""
 
-from numba import njit
 import numpy as np
+from numba import njit
 from numpy.typing import NDArray
 
+from building3d.config import GEOM_ATOL
+
+from .points import new_point
+from .points import points_equal
+from .types import FLOAT
+from .types import PointType
+from .types import VectorType
 from .vectors import angle
 from .vectors import normal
-from .points import new_point, points_equal
-from .types import PointType, VectorType, FLOAT
-from building3d.config import GEOM_ATOL
 
 
 @njit

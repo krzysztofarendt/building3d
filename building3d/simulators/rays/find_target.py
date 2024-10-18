@@ -1,92 +1,52 @@
-import logging
+from numba import njit
 
-from building3d.geom.building import Building
+from building3d.config import GEOM_ATOL
 from building3d.geom.polygon.ispointinside import is_point_inside_projection
-from building3d.geom.polygon import Polygon
-from building3d.geom.types import PointType, VectorType
-
-from building3d.geom.paths.object_path import split_path
-from building3d.geom.paths import PATH_SEP
+from building3d.geom.types import IndexType
+from building3d.geom.types import PointType
+from building3d.geom.types import VectorType
 
 
-logger = logging.getLogger(__name__)
-
-
-def find_target(
+@njit
+def find_target_surface(
+    # Ray position and direction
     pos: PointType,
-    vel: VectorType,
-    loc: str,
-    bdg: Building,
-    trans: set[str],
-    chk: set[str],
-) -> str:
-    """Find target surface for a moving particle in a building.
+    direction: VectorType,
+    # Polygon vertices and faces, each list element contains an array defining a polygon
+    poly_pts: list[PointType],
+    poly_tri: list[IndexType],
+    # Which polygons to check and which to neglect
+    transparent_polygons: set[int],
+    polygons_to_check: set[int],
+    atol: float = GEOM_ATOL,
+) -> int:
+    """Find the target surface for a ray at position `pos` going along `direction`.
 
-    This is a recursive function. If the target surface is in
-    the `transparent` list, it checks the adjacent solids recursively.
+    Transparent polygons are ignored.
+    The function checks only the polygons from the set `polygons_to_check`.
+
+    NOTE:
+        `transparent_polygons` and `polygons_to_check` cannot be empty sets if JIT is used.
+        `set([-1])` is a good substitute for an empty set.
 
     Args:
-        pos: particle poisition
-        vel: particle velocity
-        loc: location to search (path to solid)
-        bdg: building containing the solid
-        trans: set of transparent polygons (paths to polygons)
-        chk: set of solids that were already checked
+        pos: The starting position of the ray.
+        direction: The direction vector of the ray.
+        poly_pts: List of polygon vertices, where each element is an array defining a polygon.
+        poly_tri: List of polygon faces, corresponding to the poly_pts.
+        transparent_polygons: Set of indices for polygons to be considered transparent.
+        polygons_to_check: Set of indices for polygons to be checked for intersection.
 
-    Return:
-        path to the polygon that the particle is moving towards
+    Returns:
+        int: The index of the target surface (polygon) hit by the ray, or -1 if no surface is hit.
     """
-    logger.debug(
-        f"Called find_target({pos=}, {vel=}, {loc=}, {bdg=}, {trans=})"
-    )
-    trg_surf = ""
+    for pn in polygons_to_check:
+        if pn in transparent_polygons:
+            continue
 
-    found = False
-    path = split_path(loc)
-    assert len(path) == 3, f"Incorrect path length ({len(path)}). Should be 3."
+        if is_point_inside_projection(
+            pos, direction, poly_pts[pn], poly_tri[pn], fwd_only=True, atol=atol
+        ):
+            return pn
 
-    bname, zname, sname = path
-    assert bname == bdg.name, "Building names do not match"
-
-    z = bdg.zones[zname]
-    s = z.solids[sname]
-    logger.debug(f"{loc=}")
-
-    for w in s.walls.values():
-        for p in w.polygons.values():
-            logger.debug(f"Checking {p=}")
-
-            if is_point_inside_projection(ptest=pos, v=vel, pts=p.pts, tri=p.tri, fwd_only=True):
-                poly_path = PATH_SEP.join((bname, z.name, s.name, w.name, p.name))
-                logger.debug(f"Particle will hit this polygon: {poly_path}")
-
-                if poly_path in trans:
-                    # Recursively search adjacent solids
-                    logger.debug("Polygon is transparent. Need to look into adjacent solid.")
-
-                    adj_polygons = bdg.get_graph()[poly_path]
-                    assert len(adj_polygons) == 1, "If polygon is transparent, it must be true"
-
-                    adj_poly = adj_polygons[0]
-
-                    bname, adj_z, adj_s, _, _ = split_path(adj_poly)
-                    new_location = PATH_SEP.join((bname, adj_z, adj_s))
-
-                    if new_location not in chk:
-                        chk.add(loc)
-                        return find_target(pos, vel, new_location, bdg, trans, chk)
-
-                else:
-                    trg_surf = PATH_SEP.join((bname, z.name, s.name, w.name, p.name))
-                    found = True
-                    break
-        if found:
-            break
-
-    if not found:
-        raise RuntimeError(f"Particle isn't moving towards any surface: {pos=}, {vel=}")
-
-    assert len(trg_surf) > 0
-    assert isinstance(bdg.get(trg_surf), Polygon)
-
-    return trg_surf
+    return -1

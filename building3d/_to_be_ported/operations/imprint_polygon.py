@@ -1,9 +1,8 @@
-from building3d.util.roll_back import roll_back
-from building3d.geom.polygon import Polygon
 from building3d.geom.exceptions import GeometryError
-from building3d.geom.operations.stitch_solids import (
-    find_n_closest_points_between_2_polygons,
-)
+from building3d.geom.operations.stitch_solids import \
+    find_n_closest_points_between_2_polygons
+from building3d.geom.polygon import Polygon
+from building3d.util.roll_back import roll_back
 
 
 def imprint_polygon(poly_ext: Polygon, poly_int: Polygon) -> list[Polygon]:

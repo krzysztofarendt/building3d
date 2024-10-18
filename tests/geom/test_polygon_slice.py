@@ -1,23 +1,21 @@
 import numpy as np
 
-from building3d.geom.points import new_point, points_equal, roll_forward
-from building3d.geom.vectors import normal
-from building3d.geom.triangles import triangulate
+from building3d.geom.points import new_point
+from building3d.geom.points import points_equal
+from building3d.geom.points import roll_forward
 from building3d.geom.polygon import Polygon
 from building3d.geom.polygon.edges import polygon_edges
 from building3d.geom.polygon.slice import slice_polygon
-from building3d.geom.polygon.slice.locate_slicing_points import (
-    locate_slicing_points,
-)
-from building3d.geom.polygon.slice.remove_redundant_points import (
-    remove_redundant_points,
-)
-from building3d.geom.polygon.slice.constants import (
-    INTERIOR,
-    VERTEX,
-    EDGE,
-    INVALID_INDEX,
-)
+from building3d.geom.polygon.slice.constants import EDGE
+from building3d.geom.polygon.slice.constants import INTERIOR
+from building3d.geom.polygon.slice.constants import INVALID_INDEX
+from building3d.geom.polygon.slice.constants import VERTEX
+from building3d.geom.polygon.slice.locate_slicing_points import \
+    locate_slicing_points
+from building3d.geom.polygon.slice.remove_redundant_points import \
+    remove_redundant_points
+from building3d.geom.triangles import triangulate
+from building3d.geom.vectors import normal
 
 
 def test_slicing_point_location():

@@ -1,9 +1,11 @@
-from numba import njit
 import numpy as np
+from numba import njit
 
-from building3d.geom.types import PointType, IndexType, FLOAT
-from building3d.geom.triangles import triangle_centroid
 from building3d.geom.triangles import triangle_area
+from building3d.geom.triangles import triangle_centroid
+from building3d.geom.types import FLOAT
+from building3d.geom.types import IndexType
+from building3d.geom.types import PointType
 
 
 @njit

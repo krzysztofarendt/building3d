@@ -1,23 +1,22 @@
-from collections import defaultdict
 import logging
+from collections import defaultdict
 
 import numpy as np
 from scipy.spatial import Delaunay
 
-from building3d.mesh.exceptions import MeshError
+from building3d import random_within
+from building3d.config import MESH_DELTA
+from building3d.config import MESH_JOGGLE
+from building3d.config import TETRA_MAX_TRIES
 from building3d.geom.point import Point
 from building3d.geom.solid import Solid
-from building3d.geom.tetrahedron import tetrahedron_volume
 from building3d.geom.tetrahedron import tetrahedron_centroid
+from building3d.geom.tetrahedron import tetrahedron_volume
+from building3d.mesh.exceptions import MeshError
+from building3d.mesh.quality.count_tetra_neighbors import count_tetra_neighbors
 from building3d.mesh.quality.min_tetra_volume import minimum_tetra_volume
 from building3d.mesh.quality.purge_mesh import purge_mesh
-from building3d.mesh.quality.count_tetra_neighbors import count_tetra_neighbors
 from building3d.mesh.triangulation import delaunay_triangulation
-from building3d import random_within
-from building3d.config import MESH_JOGGLE
-from building3d.config import MESH_DELTA
-from building3d.config import TETRA_MAX_TRIES
-
 
 logger = logging.getLogger(__name__)
 

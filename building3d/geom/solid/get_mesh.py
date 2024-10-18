@@ -1,6 +1,7 @@
-from building3d.geom.types import PointType, IndexType
-from building3d.geom.wall import Wall
 from building3d.geom.mesh import vstack_mesh
+from building3d.geom.types import IndexType
+from building3d.geom.types import PointType
+from building3d.geom.wall import Wall
 
 
 def get_mesh_from_walls(walls: list[Wall]) -> tuple[PointType, IndexType]:

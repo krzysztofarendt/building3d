@@ -3,24 +3,23 @@ import logging
 import numpy as np
 from scipy.spatial import Delaunay
 
+from building3d import random_within
+from building3d.config import GEOM_ATOL
+from building3d.config import MESH_DELTA
+from building3d.config import MESH_JOGGLE
+from building3d.config import MESH_REL_DIST_TO_POINTS
 from building3d.geom.cloud import are_points_in_set
-from building3d.geom.polygon import Polygon
-from building3d.mesh.exceptions import MeshError
-from building3d.geom.point import Point
-from building3d.geom.rotate import rotate_points_to_plane
-from building3d.geom.rotate import rotate_points_around_vector
-from building3d.geom.vector import length
-from building3d.geom.vector import normal
 from building3d.geom.line import create_points_between_list_of_points
+from building3d.geom.point import Point
+from building3d.geom.polygon import Polygon
+from building3d.geom.rotate import rotate_points_around_vector
+from building3d.geom.rotate import rotate_points_to_plane
 from building3d.geom.triangle import triangle_area
 from building3d.geom.triangle import triangle_centroid
+from building3d.geom.vector import length
+from building3d.geom.vector import normal
+from building3d.mesh.exceptions import MeshError
 from building3d.mesh.quality.min_triangle_area import minimum_triangle_area
-from building3d.config import GEOM_ATOL
-from building3d.config import MESH_JOGGLE
-from building3d.config import MESH_DELTA
-from building3d.config import MESH_REL_DIST_TO_POINTS
-from building3d import random_within
-
 
 logger = logging.getLogger(__name__)
 

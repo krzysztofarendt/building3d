@@ -1,19 +1,19 @@
-from numba import njit
 import numpy as np
+from numba import njit
 
-from building3d.geom.points import (
-    points_equal,
-    is_point_in_array,
-    list_pts_to_array,
-)
-from building3d.geom.types import PointType, IndexType
 from building3d.geom.exceptions import GeometryError
-from building3d.geom.vectors import normal
+from building3d.geom.points import is_point_in_array
+from building3d.geom.points import list_pts_to_array
+from building3d.geom.points import points_equal
 from building3d.geom.polygon.edges import polygon_edges
-from building3d.geom.polygon.slice.locate_slicing_points import (
-    locate_slicing_points,
-)
-from .constants import VERTEX, EDGE
+from building3d.geom.polygon.slice.locate_slicing_points import \
+    locate_slicing_points
+from building3d.geom.types import IndexType
+from building3d.geom.types import PointType
+from building3d.geom.vectors import normal
+
+from .constants import EDGE
+from .constants import VERTEX
 
 
 @njit
