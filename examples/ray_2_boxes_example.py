@@ -8,11 +8,11 @@ from building3d.geom.building import Building
 from building3d.geom.solid.box import box
 from building3d.geom.zone import Zone
 from building3d.io.b3d import write_b3d
-from building3d.simulators.rays.dump_buffers import dump_buffers
-from building3d.simulators.rays.dump_buffers import read_buffers
-from building3d.simulators.rays.movie_from_buffer import make_movie_from_buffer
-from building3d.simulators.rays.ray_buff_plotter import RayBuffPlotter
-from building3d.simulators.rays.simulation import Simulation
+from building3d.sim.rays.dump_buffers import dump_buffers
+from building3d.sim.rays.dump_buffers import read_buffers
+from building3d.sim.rays.movie_from_buffer import make_movie_from_buffer
+from building3d.sim.rays.ray_buff_plotter import RayBuffPlotter
+from building3d.sim.rays.simulation import Simulation
 
 if __name__ == "__main__":
     # Parameters

@@ -1,4 +1,4 @@
-from building3d.simulators.rays.find_transparent import find_transparent
+from building3d.sim.rays.find_transparent import find_transparent
 from building3d.geom.building import Building
 from building3d.geom.polygon import Polygon
 from building3d.geom.solid.box import box

@@ -1,6 +1,6 @@
 import numpy as np
 
-from building3d.simulators.rays.voxel_grid import is_polygon_crossing_cube
+from building3d.sim.rays.voxel_grid import is_polygon_crossing_cube
 
 
 def test_is_polygon_crossing_cube():

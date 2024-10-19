@@ -2,8 +2,8 @@ from tempfile import TemporaryDirectory
 
 import numpy as np
 
-from building3d.simulators.rays.dump_buffers import dump_buffers
-from building3d.simulators.rays.dump_buffers import read_buffers
+from building3d.sim.rays.dump_buffers import dump_buffers
+from building3d.sim.rays.dump_buffers import read_buffers
 
 
 def test_dump_buffers():

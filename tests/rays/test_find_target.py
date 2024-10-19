@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from building3d.simulators.rays.find_target import find_target_surface
+from building3d.sim.rays.find_target import find_target_surface
 from building3d.geom.types import FLOAT
 
 from building3d.geom.polygon import Polygon

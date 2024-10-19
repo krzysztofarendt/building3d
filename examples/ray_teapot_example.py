@@ -7,9 +7,9 @@ from building3d.display.plot_objects import plot_objects
 from building3d.io.b3d import write_b3d
 from building3d.io.stl import read_stl
 from building3d.logger import init_logger
-from building3d.simulators.rays.movie_from_buffer import make_movie_from_buffer
-from building3d.simulators.rays.ray_buff_plotter import RayBuffPlotter
-from building3d.simulators.rays.simulation import Simulation
+from building3d.sim.rays.movie_from_buffer import make_movie_from_buffer
+from building3d.sim.rays.ray_buff_plotter import RayBuffPlotter
+from building3d.sim.rays.simulation import Simulation
 
 if __name__ == "__main__":
     # Parameters
