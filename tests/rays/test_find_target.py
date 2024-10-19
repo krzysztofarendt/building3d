@@ -1,10 +1,10 @@
 import numpy as np
 import pytest
 
-from building3d.sim.rays.find_target import find_target_surface
-from building3d.geom.types import FLOAT
-
 from building3d.geom.polygon import Polygon
+from building3d.geom.types import FLOAT
+from building3d.sim.rays.find_target import find_target_surface
+
 
 
 @pytest.mark.parametrize("x, y, ray_pos, ray_dir, expected_target", [
@@ -17,7 +17,7 @@ from building3d.geom.polygon import Polygon
     (0.001, 0.001, [0, 0, 1], [0, 0, -1], 0),
     (1000, 0.00001, [1000, 0, 1], [0, 0, -1], 0),
     (0.001, 1, [0.001, 0, 1], [0, 0, -1], 0),
-    # (0.0001, 1, [0.001, 0, 1], [0, 0, -1], 0),  # This one fails, insufficient precision
+    # (0.0001, 1, [0.001, 0, 1], [0, 0, -1], 0),  # TODO: This one fails, insufficient precision
 ])
 def test_find_target(x, y, ray_pos, ray_dir, expected_target):
     pts = np.array([

@@ -1,7 +1,6 @@
 import numpy as np
 from numba import njit
 
-from building3d.geom.types import FLOAT
 from building3d.geom.types import INT
 from building3d.geom.types import IndexType
 from building3d.geom.types import PointType
@@ -13,7 +12,6 @@ def make_voxel_grid(
     min_xyz: tuple[float, float, float],
     max_xyz: tuple[float, float, float],
     poly_pts: list[PointType],
-    poly_tri: list[IndexType],
     step: float = 1.0,
     eps: float = 1e-4,
 ) -> dict[tuple[int, int, int], IndexType]:
@@ -70,6 +68,7 @@ def make_voxel_grid(
     # TODO: https://github.com/krzysztofarendt/building3d/issues/73
     #       Cannot use numba.prange() due to error "double free or corruption (!prev)"
     #       I don't know what causes this error. It happens only fromt time to time.
+    #       Anyway, this function is now pretty fast, so it is not needed.
     print("Total number of voxels:", len(keys))
     for ki in range(len(keys)):
         if ki % 100 == 0:
@@ -102,7 +101,8 @@ def make_voxel_grid(
                 added_polygons[pn] = True
         grid[key] = polynums[:counter]  # Only keep the valid polygon numbers
 
-    assert np.all(added_polygons), "Not all polygons added to the voxel grid"
+    if not np.all(added_polygons):
+        raise ValueError("Not all polygons added to the voxel grid")
 
     print("Voxels created")
     return grid

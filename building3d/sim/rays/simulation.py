@@ -182,7 +182,6 @@ def simulation_loop(
         min_xyz=(min_x, min_y, min_z),
         max_xyz=(max_x, max_y, max_z),
         poly_pts=poly_pts,
-        poly_tri=poly_tri,
         step=grid_step,
     )
 

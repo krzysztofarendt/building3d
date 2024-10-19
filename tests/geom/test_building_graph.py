@@ -52,21 +52,21 @@ def gz_all(bdg):
 
 
 def test_graph_polygon(g_def, g_fac, g_ove, gz_all):
-    assert set(g_def["b/z0/s0/wall-1/wall-1"]) == set(["b/z0/s2/wall-3/wall-3"])
-    assert set(g_def["b/z0/s2/wall-3/wall-3"]) == set(
-        ["b/z0/s0/wall-1/wall-1", "b/z0/s1/wall-1/wall-1"]
+    assert set(g_def["b/z0/s0/wall_1/poly_1"]) == set(["b/z0/s2/wall_3/poly_3"])
+    assert set(g_def["b/z0/s2/wall_3/poly_3"]) == set(
+        ["b/z0/s0/wall_1/poly_1", "b/z0/s1/wall_1/poly_1"]
     )
-    assert set(g_def["b/z0/s0/wall-2/wall-2"]) == set(["b/z0/s1/wall-0/wall-0"])
-    assert set(g_def["b/z0/s1/wall-0/wall-0"]) == set(["b/z0/s0/wall-2/wall-2"])
-    assert set(g_def["b/z0/s1/wall-1/wall-1"]) == set(["b/z0/s2/wall-3/wall-3"])
+    assert set(g_def["b/z0/s0/wall_2/poly_2"]) == set(["b/z0/s1/wall_0/poly_0"])
+    assert set(g_def["b/z0/s1/wall_0/poly_0"]) == set(["b/z0/s0/wall_2/poly_2"])
+    assert set(g_def["b/z0/s1/wall_1/poly_1"]) == set(["b/z0/s2/wall_3/poly_3"])
 
-    assert set(g_fac["b/z0/s0/wall-2/wall-2"]) == set(["b/z0/s1/wall-0/wall-0"])
-    assert set(g_fac["b/z0/s1/wall-0/wall-0"]) == set(["b/z0/s0/wall-2/wall-2"])
+    assert set(g_fac["b/z0/s0/wall_2/poly_2"]) == set(["b/z0/s1/wall_0/poly_0"])
+    assert set(g_fac["b/z0/s1/wall_0/poly_0"]) == set(["b/z0/s0/wall_2/poly_2"])
 
-    assert set(g_ove["b/z0/s0/wall-1/wall-1"]) == set(["b/z0/s2/wall-3/wall-3"])
-    assert set(g_ove["b/z0/s1/wall-1/wall-1"]) == set(["b/z0/s2/wall-3/wall-3"])
-    assert set(g_ove["b/z0/s2/wall-3/wall-3"]) == set(
-        ["b/z0/s0/wall-1/wall-1", "b/z0/s1/wall-1/wall-1"]
+    assert set(g_ove["b/z0/s0/wall_1/poly_1"]) == set(["b/z0/s2/wall_3/poly_3"])
+    assert set(g_ove["b/z0/s1/wall_1/poly_1"]) == set(["b/z0/s2/wall_3/poly_3"])
+    assert set(g_ove["b/z0/s2/wall_3/poly_3"]) == set(
+        ["b/z0/s0/wall_1/poly_1", "b/z0/s1/wall_1/poly_1"]
     )
 
     assert gz_all["b/z1"] == ["b/z0"]
@@ -113,5 +113,5 @@ def test_graph_method_caching(bdg):
 
     assert "b/z0" in gz
     assert "b/z0/s0" in gs
-    assert "b/z0/s0/wall-0" in gw
-    assert "b/z0/s0/wall-0/wall-0" in gp
+    assert "b/z0/s0/wall_0" in gw
+    assert "b/z0/s0/wall_0/poly_0" in gp
