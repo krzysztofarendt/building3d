@@ -8,7 +8,7 @@ from building3d.config import POINT_NUM_DEC
 from building3d.geom.exceptions import GeometryError
 from building3d.geom.exceptions import TriangulationError
 from building3d.geom.points import are_points_collinear
-from building3d.geom.points import is_point_inside_bbox
+from building3d.geom.bboxes import is_point_inside_bbox
 from building3d.geom.types import INT
 from building3d.geom.types import IndexType
 from building3d.geom.types import PointType

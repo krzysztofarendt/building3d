@@ -5,7 +5,7 @@ from building3d import random_id
 from building3d.geom.exceptions import GeometryError
 from building3d.geom.paths import PATH_SEP
 from building3d.geom.paths.validate_name import validate_name
-from building3d.geom.points import bounding_box
+from building3d.geom.bboxes import bounding_box
 from building3d.geom.solid import Solid
 from building3d.geom.types import IndexType
 from building3d.geom.types import PointType

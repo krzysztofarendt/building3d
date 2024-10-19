@@ -4,6 +4,7 @@ import numpy as np
 
 from building3d.geom.paths import PATH_SEP
 from building3d.geom.polygon import Polygon
+from building3d.geom.polygon.facing import are_bboxes_overlapping
 from building3d.geom.solid import Solid
 from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
@@ -40,6 +41,9 @@ def graph_polygon(
                     g[pl1.path] = []
                 if pl2.path not in g:
                     g[pl2.path] = []
+
+                # TODO: Pre-check based on are_bboxes_overlapping()
+                ...
 
                 cond = []
                 if facing:

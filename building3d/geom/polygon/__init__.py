@@ -7,7 +7,7 @@ from building3d.config import GEOM_ATOL
 from building3d.geom.paths import PATH_SEP
 from building3d.geom.paths.validate_name import validate_name
 from building3d.geom.points import are_points_coplanar
-from building3d.geom.points import bounding_box
+from building3d.geom.bboxes import bounding_box
 from building3d.geom.polygon.area import polygon_area
 from building3d.geom.polygon.centroid import polygon_centroid
 from building3d.geom.polygon.crossing import are_polygons_crossing

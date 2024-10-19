@@ -2,7 +2,8 @@ import numpy as np
 from numba import njit
 
 from building3d.config import GEOM_RTOL
-from building3d.geom.points import bounding_box
+from building3d.geom.bboxes import are_bboxes_overlapping
+from building3d.geom.bboxes import bounding_box
 from building3d.geom.points import points_equal
 from building3d.geom.polygon.area import polygon_area
 from building3d.geom.types import PointType
@@ -62,28 +63,3 @@ def are_polygons_facing(
         if np.isclose(polygon_area(pts1, vn1), polygon_area(pts2, vn2)):
             return True
     return False
-
-
-@njit
-def are_bboxes_overlapping(
-    bbox1: tuple[PointType, PointType],
-    bbox2: tuple[PointType, PointType],
-) -> bool:
-    """Check if two bounding boxes are overlapping.
-
-    This function determines if two axis-aligned bounding boxes are overlapping
-    in any dimension.
-
-    Args:
-        bbox1 (tuple of points): First bounding box, represented as
-                                 [[min_x, min_y, min_z], [max_x, max_y, max_z]].
-        bbox2 (tuple of points): Second bounding box, represented as
-                                 [[min_x, min_y, min_z], [max_x, max_y, max_z]].
-
-    Returns:
-        bool: True if the bounding boxes overlap, False otherwise.
-    """
-    if (bbox1[1] < bbox2[0]).any() or (bbox1[0] > bbox2[1]).any():
-        return False
-    else:
-        return True

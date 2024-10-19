@@ -2,7 +2,7 @@ import numpy as np
 from numba import njit
 
 from building3d.geom.points import are_points_coplanar
-from building3d.geom.points import bounding_box
+from building3d.geom.bboxes import bounding_box
 from building3d.geom.points import new_point_between_2_points
 from building3d.geom.points import points_equal
 from building3d.geom.points.distance import distance_point_to_edge

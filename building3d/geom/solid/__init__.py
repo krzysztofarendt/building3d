@@ -7,7 +7,7 @@ from building3d import random_id
 from building3d.geom.exceptions import GeometryError
 from building3d.geom.paths import PATH_SEP
 from building3d.geom.paths.validate_name import validate_name
-from building3d.geom.points import bounding_box
+from building3d.geom.bboxes import bounding_box
 from building3d.geom.points import new_point
 from building3d.geom.polygon.crossing import are_polygons_crossing
 from building3d.geom.polygon.facing import are_polygons_facing
