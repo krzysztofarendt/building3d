@@ -6,7 +6,6 @@ from building3d.geom.types import IndexType
 from building3d.geom.types import PointType
 
 
-# TODO: Add unit test!
 @njit
 def make_voxel_grid(
     min_xyz: tuple[float, float, float],
@@ -24,7 +23,6 @@ def make_voxel_grid(
         min_xyz (tuple[float, float, float]): Minimum coordinates (x, y, z) of the bounding box.
         max_xyz (tuple[float, float, float]): Maximum coordinates (x, y, z) of the bounding box.
         poly_pts (list[PointType]): List of points for each polygon.
-        poly_tri (list[IndexType]): List of triangle indices for each polygon.
         step (float, optional): Size of each grid cell. Defaults to 1.0.
 
     Returns:

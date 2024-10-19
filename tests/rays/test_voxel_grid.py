@@ -35,7 +35,6 @@ def test_voxel_grid_large_step():
 def test_voxel_grid_small_step():
     s0 = box(1, 1, 1, (0, 0, 0), name="s0")
     s1 = box(1, 1, 1, (1, 0, 0), name="s1")
-    s2 = box(1, 1, 1, (2, 0, 0), name="s2")
     min_xyz = (0.0, 0.0, 0.0)
     max_xyz = (3.0, 1.0, 1.0)
     step = 0.2
