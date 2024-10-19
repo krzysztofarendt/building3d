@@ -1,9 +1,8 @@
 import numpy as np
 from numba import njit
 
-from building3d.geom.types import PointType, FLOAT
 from building3d.config import GEOM_ATOL
-
+from building3d.geom.types import PointType, FLOAT
 
 
 @njit
@@ -53,3 +52,104 @@ def are_bboxes_overlapping(
         return False
     else:
         return True
+
+
+@njit
+def cube_edges(
+    min_xyz: tuple[FLOAT, FLOAT, FLOAT],
+    max_xyz: tuple[FLOAT, FLOAT, FLOAT],
+) -> PointType:
+    """Generate the edges of a cube defined by its minimum and maximum coordinates.
+
+    Args:
+        min_xyz (tuple[FLOAT, FLOAT, FLOAT]): The minimum x, y, z coordinates of the cube.
+        max_xyz (tuple[FLOAT, FLOAT, FLOAT]): The maximum x, y, z coordinates of the cube.
+
+    Returns:
+        Array containing 12 edges of the cube, where each edge is represented
+        as two points (start_point, end_point), and each point has
+        three coordinates (x, y, z). Shape = (12, 2, 3).
+    """
+    p0 = min_xyz
+    p1 = max_xyz
+    edges = np.array(
+        (
+            # Bottom face
+            ((p0[0], p0[1], p0[2]), (p1[0], p0[1], p0[2])),  # Bottom front
+            ((p0[0], p0[1], p0[2]), (p0[0], p1[1], p0[2])),  # Bottom left
+            ((p0[0], p1[1], p0[2]), (p1[0], p1[1], p0[2])),  # Bottom back
+            ((p1[0], p0[1], p0[2]), (p1[0], p1[1], p0[2])),  # Bottom right
+            # Top face
+            ((p0[0], p0[1], p1[2]), (p1[0], p0[1], p1[2])),  # Top front
+            ((p0[0], p1[1], p1[2]), (p1[0], p1[1], p1[2])),  # Top back
+            ((p0[0], p0[1], p1[2]), (p0[0], p1[1], p1[2])),  # Top left
+            ((p1[0], p0[1], p1[2]), (p1[0], p1[1], p1[2])),  # Top right
+            # Vertical edges
+            ((p0[0], p0[1], p0[2]), (p0[0], p0[1], p1[2])),  # Front left vertical
+            ((p1[0], p0[1], p0[2]), (p1[0], p0[1], p1[2])),  # Front right vertical
+            ((p0[0], p1[1], p0[2]), (p0[0], p1[1], p1[2])),  # Back left vertical
+            ((p1[0], p1[1], p0[2]), (p1[0], p1[1], p1[2])),  # Back right vertical
+        )
+    )
+    return edges
+
+
+@njit
+def cube_polygons(
+    min_xyz: tuple[FLOAT, FLOAT, FLOAT],
+    max_xyz: tuple[FLOAT, FLOAT, FLOAT],
+) -> PointType:
+    """Generate the polygons of a cube defined by its minimum and maximum coordinates.
+
+    Args:
+        min_xyz (tuple[FLOAT, FLOAT, FLOAT]): The minimum x, y, z coordinates of the cube.
+        max_xyz (tuple[FLOAT, FLOAT, FLOAT]): The maximum x, y, z coordinates of the cube.
+
+    Returns:
+        Array containing 6 polygons of the cube, where each polygon is represented as a list
+        of four points, and each point has three coordinates (x, y, z).
+    """
+    p0 = min_xyz
+    p1 = max_xyz
+    polygons = np.array(
+        [
+            [  # Front polygon
+                (p0[0], p0[1], p0[2]),
+                (p1[0], p0[1], p0[2]),
+                (p1[0], p1[1], p0[2]),
+                (p0[0], p1[1], p0[2]),
+            ],
+            [  # Back polygon
+                (p0[0], p1[1], p1[2]),
+                (p1[0], p1[1], p1[2]),
+                (p1[0], p0[1], p1[2]),
+                (p0[0], p0[1], p1[2]),
+            ],
+            [  # Left polygon
+                (p0[0], p0[1], p0[2]),
+                (p0[0], p1[1], p0[2]),
+                (p0[0], p1[1], p1[2]),
+                (p0[0], p0[1], p1[2]),
+            ],
+            [  # Right polygon
+                (p1[0], p0[1], p0[2]),
+                (p1[0], p1[1], p0[2]),
+                (p1[0], p1[1], p1[2]),
+                (p1[0], p0[1], p1[2]),
+            ],
+            [  # Bottom polygon
+                (p0[0], p0[1], p0[2]),
+                (p1[0], p0[1], p0[2]),
+                (p1[0], p0[1], p1[2]),
+                (p0[0], p0[1], p1[2]),
+            ],
+            [  # Top polygon
+                (p0[0], p1[1], p0[2]),
+                (p1[0], p1[1], p0[2]),
+                (p1[0], p1[1], p1[2]),
+                (p0[0], p1[1], p1[2]),
+            ],
+        ],
+        dtype=FLOAT,
+    )
+    return polygons

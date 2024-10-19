@@ -1,7 +1,6 @@
 import numpy as np
 from numba import njit
 
-from building3d.geom.polygon.crossing import is_line_segment_crossing_polygon
 from building3d.geom.types import FLOAT
 from building3d.geom.types import INT
 from building3d.geom.types import IndexType
@@ -78,7 +77,7 @@ def make_voxel_grid(
         key = keys[ki]
         polynums = np.full(max_polygons_per_cell, -1, dtype=INT)
         counter = 0
-        for pn, (pts, tri) in enumerate(zip(poly_pts, poly_tri)):
+        for pn, pts in enumerate(poly_pts):
             min_xyz_cube = (key[0] * step, key[1] * step, key[2] * step)
             max_xyz_cube = (
                 min_xyz_cube[0] + step,
@@ -107,157 +106,3 @@ def make_voxel_grid(
 
     print("Voxels created")
     return grid
-
-
-# TODO: Function currently unused
-@njit
-def is_polygon_crossing_cube(pts, tri, min_xyz, max_xyz, eps: float = 1e-3) -> bool:
-    """Check if a polygon intersects with or is contained within a cube.
-
-    Args:
-        pts: List of points representing the polygon vertices.
-        tri: List of triangle indices defining the polygon's triangulation.
-        min_xyz (tuple): Minimum coordinates (x, y, z) of the cube.
-        max_xyz (tuple): Maximum coordinates (x, y, z) of the cube.
-        eps (float): Small number for comparison operations.
-
-    Returns:
-        bool: True if the polygon intersects with or is contained within the cube, False otherwise.
-    """
-    # Check if any polygon vertex is inside the cube
-    for pt in pts:
-        x, y, z = pt
-        max_x, max_y, max_z = max_xyz
-        min_x, min_y, min_z = min_xyz
-
-        if (
-            min_x - eps <= x <= max_x + eps
-            and min_y - eps <= y <= max_y + eps
-            and min_z - eps <= z <= max_z + eps
-        ):
-            return True
-
-    # Check if any of the polygon edges intersects with the cube
-    cube_faces = cube_polygons(min_xyz, max_xyz)
-    for i in range(len(tri)):
-        for j in range(3):  # Check all three edges of each triangle
-            edge_start = pts[tri[i][j]]
-            edge_end = pts[tri[i][(j + 1) % 3]]
-            for face in cube_faces:
-                if is_line_segment_crossing_polygon(
-                    edge_start,
-                    edge_end,
-                    face,
-                    np.array([[0, 1, 2], [0, 2, 3]], dtype=INT),
-                ):
-                    return True
-
-    # Check if any of the cube edges crosses the polygon
-    edges = cube_edges(min_xyz, max_xyz)
-    for edge in edges:
-        seg_start, seg_end = edge
-        if is_line_segment_crossing_polygon(seg_start, seg_end, pts, tri, 1e-10):
-            return True
-
-    return False
-
-
-@njit
-def cube_edges(
-    min_xyz: tuple[FLOAT, FLOAT, FLOAT],
-    max_xyz: tuple[FLOAT, FLOAT, FLOAT],
-) -> PointType:
-    """Generate the edges of a cube defined by its minimum and maximum coordinates.
-
-    Args:
-        min_xyz (tuple[FLOAT, FLOAT, FLOAT]): The minimum x, y, z coordinates of the cube.
-        max_xyz (tuple[FLOAT, FLOAT, FLOAT]): The maximum x, y, z coordinates of the cube.
-
-    Returns:
-        Array containing 12 edges of the cube, where each edge is represented
-        as two points (start_point, end_point), and each point has
-        three coordinates (x, y, z). Shape = (12, 2, 3).
-    """
-    p0 = min_xyz
-    p1 = max_xyz
-    edges = np.array(
-        (
-            # Bottom face
-            ((p0[0], p0[1], p0[2]), (p1[0], p0[1], p0[2])),  # Bottom front
-            ((p0[0], p0[1], p0[2]), (p0[0], p1[1], p0[2])),  # Bottom left
-            ((p0[0], p1[1], p0[2]), (p1[0], p1[1], p0[2])),  # Bottom back
-            ((p1[0], p0[1], p0[2]), (p1[0], p1[1], p0[2])),  # Bottom right
-            # Top face
-            ((p0[0], p0[1], p1[2]), (p1[0], p0[1], p1[2])),  # Top front
-            ((p0[0], p1[1], p1[2]), (p1[0], p1[1], p1[2])),  # Top back
-            ((p0[0], p0[1], p1[2]), (p0[0], p1[1], p1[2])),  # Top left
-            ((p1[0], p0[1], p1[2]), (p1[0], p1[1], p1[2])),  # Top right
-            # Vertical edges
-            ((p0[0], p0[1], p0[2]), (p0[0], p0[1], p1[2])),  # Front left vertical
-            ((p1[0], p0[1], p0[2]), (p1[0], p0[1], p1[2])),  # Front right vertical
-            ((p0[0], p1[1], p0[2]), (p0[0], p1[1], p1[2])),  # Back left vertical
-            ((p1[0], p1[1], p0[2]), (p1[0], p1[1], p1[2])),  # Back right vertical
-        )
-    )
-    return edges
-
-
-@njit
-def cube_polygons(
-    min_xyz: tuple[FLOAT, FLOAT, FLOAT],
-    max_xyz: tuple[FLOAT, FLOAT, FLOAT],
-) -> PointType:
-    """Generate the polygons of a cube defined by its minimum and maximum coordinates.
-
-    Args:
-        min_xyz (tuple[FLOAT, FLOAT, FLOAT]): The minimum x, y, z coordinates of the cube.
-        max_xyz (tuple[FLOAT, FLOAT, FLOAT]): The maximum x, y, z coordinates of the cube.
-
-    Returns:
-        Array containing 6 polygons of the cube, where each polygon is represented as a list
-        of four points, and each point has three coordinates (x, y, z).
-    """
-    p0 = min_xyz
-    p1 = max_xyz
-    polygons = np.array(
-        [
-            [  # Front polygon
-                (p0[0], p0[1], p0[2]),
-                (p1[0], p0[1], p0[2]),
-                (p1[0], p1[1], p0[2]),
-                (p0[0], p1[1], p0[2]),
-            ],
-            [  # Back polygon
-                (p0[0], p1[1], p1[2]),
-                (p1[0], p1[1], p1[2]),
-                (p1[0], p0[1], p1[2]),
-                (p0[0], p0[1], p1[2]),
-            ],
-            [  # Left polygon
-                (p0[0], p0[1], p0[2]),
-                (p0[0], p1[1], p0[2]),
-                (p0[0], p1[1], p1[2]),
-                (p0[0], p0[1], p1[2]),
-            ],
-            [  # Right polygon
-                (p1[0], p0[1], p0[2]),
-                (p1[0], p1[1], p0[2]),
-                (p1[0], p1[1], p1[2]),
-                (p1[0], p0[1], p1[2]),
-            ],
-            [  # Bottom polygon
-                (p0[0], p0[1], p0[2]),
-                (p1[0], p0[1], p0[2]),
-                (p1[0], p0[1], p1[2]),
-                (p0[0], p0[1], p1[2]),
-            ],
-            [  # Top polygon
-                (p0[0], p1[1], p0[2]),
-                (p1[0], p1[1], p0[2]),
-                (p1[0], p1[1], p1[2]),
-                (p0[0], p1[1], p1[2]),
-            ],
-        ],
-        dtype=FLOAT,
-    )
-    return polygons

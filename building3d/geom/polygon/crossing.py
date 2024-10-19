@@ -3,6 +3,9 @@ from numba import njit
 
 from building3d.geom.points import are_points_coplanar
 from building3d.geom.bboxes import bounding_box
+from building3d.geom.bboxes import are_bboxes_overlapping
+from building3d.geom.bboxes import cube_edges
+from building3d.geom.bboxes import cube_polygons
 from building3d.geom.points import new_point_between_2_points
 from building3d.geom.points import points_equal
 from building3d.geom.points.distance import distance_point_to_edge
@@ -11,6 +14,7 @@ from building3d.geom.polygon.edges import polygon_edges
 from building3d.geom.polygon.ispointinside import is_point_inside
 from building3d.geom.polygon.plane import plane_coefficients
 from building3d.geom.types import FLOAT
+from building3d.geom.types import INT
 from building3d.geom.types import IndexType
 from building3d.geom.types import PointType
 
@@ -60,14 +64,6 @@ def are_polygons_crossing(
 
 
 @njit
-def are_bboxes_overlapping(bbox1, bbox2):
-    if (bbox1[1] < bbox2[0]).any() or (bbox1[0] > bbox2[1]).any():
-        return False
-    else:
-        return True
-
-
-@njit
 def is_line_segment_crossing_polygon(
     seg_start: PointType,
     seg_end: PointType,
@@ -110,3 +106,55 @@ def is_line_segment_crossing_polygon(
 
     # Check if the intersection point is inside the polygon
     return is_point_inside(intersect_pt, pts, tri, boundary_in=True)
+
+
+@njit
+def is_polygon_crossing_cube(pts, tri, min_xyz, max_xyz, eps: float = 1e-3) -> bool:
+    """Check if a polygon intersects with or is contained within a cube.
+
+    Args:
+        pts: List of points representing the polygon vertices.
+        tri: List of triangle indices defining the polygon's triangulation.
+        min_xyz (tuple): Minimum coordinates (x, y, z) of the cube.
+        max_xyz (tuple): Maximum coordinates (x, y, z) of the cube.
+        eps (float): Small number for comparison operations.
+
+    Returns:
+        bool: True if the polygon intersects with or is contained within the cube, False otherwise.
+    """
+    # Check if any polygon vertex is inside the cube
+    for pt in pts:
+        x, y, z = pt
+        max_x, max_y, max_z = max_xyz
+        min_x, min_y, min_z = min_xyz
+
+        if (
+            min_x - eps <= x <= max_x + eps
+            and min_y - eps <= y <= max_y + eps
+            and min_z - eps <= z <= max_z + eps
+        ):
+            return True
+
+    # Check if any of the polygon edges intersects with the cube
+    cube_faces = cube_polygons(min_xyz, max_xyz)
+    for i in range(len(tri)):
+        for j in range(3):  # Check all three edges of each triangle
+            edge_start = pts[tri[i][j]]
+            edge_end = pts[tri[i][(j + 1) % 3]]
+            for face in cube_faces:
+                if is_line_segment_crossing_polygon(
+                    edge_start,
+                    edge_end,
+                    face,
+                    np.array([[0, 1, 2], [0, 2, 3]], dtype=INT),
+                ):
+                    return True
+
+    # Check if any of the cube edges crosses the polygon
+    edges = cube_edges(min_xyz, max_xyz)
+    for edge in edges:
+        seg_start, seg_end = edge
+        if is_line_segment_crossing_polygon(seg_start, seg_end, pts, tri, 1e-10):
+            return True
+
+    return False
