@@ -3,8 +3,6 @@ import tempfile
 import numpy as np
 
 from building3d.geom.building import Building
-from building3d.geom.points import new_point
-from building3d.geom.polygon import Polygon
 from building3d.geom.solid.box import box
 from building3d.geom.zone import Zone
 from building3d.io.b3d import read_b3d
