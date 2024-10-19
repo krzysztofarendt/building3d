@@ -4,25 +4,26 @@ from typing import Sequence
 import numpy as np
 
 from building3d import random_id
-from building3d.geom.paths import PATH_SEP
 from building3d.geom.exceptions import GeometryError
+from building3d.geom.paths import PATH_SEP
 from building3d.geom.paths.validate_name import validate_name
-from building3d.geom.wall import Wall
-from building3d.geom.types import PointType, IndexType
-from building3d.geom.points import bounding_box
+from building3d.geom.bboxes import bounding_box
 from building3d.geom.points import new_point
-from building3d.geom.polygon.ispointinside import is_point_inside_projection
 from building3d.geom.polygon.crossing import are_polygons_crossing
 from building3d.geom.polygon.facing import are_polygons_facing
-from building3d.geom.tetrahedrons import tetrahedron_volume
+from building3d.geom.polygon.ispointinside import is_point_inside_projection
 from building3d.geom.solid.get_mesh import get_mesh_from_walls
-
+from building3d.geom.tetrahedrons import tetrahedron_volume
+from building3d.geom.types import IndexType
+from building3d.geom.types import PointType
+from building3d.geom.wall import Wall
 
 logger = logging.getLogger(__name__)
 
 
 class Solid:
     """Solid is a space enclosed by polygons."""
+
     count: int = 0
 
     def __init__(

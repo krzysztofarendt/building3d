@@ -1,20 +1,28 @@
+from building3d.sim.rays.find_transparent import find_transparent
+from building3d.geom.building import Building
+from building3d.geom.polygon import Polygon
 from building3d.geom.solid.box import box
 from building3d.geom.zone import Zone
-from building3d.geom.building import Building
-from building3d.simulators.rays.find_transparent import find_transparent
 
 
 def test_find_transparent():
-    sld_0 = box(1, 1, 1, (0, 0, 0), name="s0")
-    sld_1 = box(1, 1, 1, (1, 0, 0), name="s1")
-    zon = Zone([sld_0, sld_1], name="z")
-    bdg = Building([zon], name="b")
+    """Tests if all transparent polygons in a building are found.
 
-    transp = find_transparent(bdg)
-    assert len(transp) == 2
-    assert "b/z/s0/wall-1/wall-1" in transp
-    assert "b/z/s1/wall-3/wall-3" in transp
+    Transparent polygons are those, which are facing each other within a single zone.
+    """
+    s0 = box(1.0, 1.0, 1.0, (0.0, 0.0, 0.0), name="s0")
+    s1 = box(1.0, 1.0, 1.0, (1.0, 0.0, 0.0), name="s1")
+    zone = Zone([s0, s1], name="z")
+    building = Building([zone], name="b")
 
+    # There should be only two adjacent polygons within a zone
+    transparent = find_transparent(building)
+    assert len(transparent) == 2
 
-if __name__ == "__main__":
-    test_find_transparent()
+    # These polygons should be facing
+    poly0 = building.get(transparent.pop())
+    poly1 = building.get(transparent.pop())
+    assert isinstance(poly0, Polygon)
+    assert isinstance(poly1, Polygon)
+    assert poly0.is_facing_polygon(poly1)
+    assert poly1.is_facing_polygon(poly0)

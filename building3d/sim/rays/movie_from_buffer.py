@@ -4,34 +4,28 @@ from pathlib import Path
 import numpy as np
 import pyvista as pv
 
-from building3d.io.b3d import read_b3d
-from .dumpreader import DumpReader
-from .config import (
-    RAY_OPACITY,
-    RAY_TRAIL_OPACITY,
-    RAY_POINT_SIZE,
-    BUILDING_OPACITY,
-    BUILDING_COLOR,
-    FPS,
-    CMAP,
-)
+from building3d.geom.building import Building
+from building3d.geom.types import FloatDataType
+from building3d.geom.types import PointType
 
+from .config import BUILDING_COLOR
+from .config import BUILDING_OPACITY
+from .config import CMAP
+from .config import FPS
+from .config import RAY_LINE_LEN
+from .config import RAY_OPACITY
+from .config import RAY_POINT_SIZE
+from .config import RAY_TRAIL_OPACITY
 
 logger = logging.getLogger(__name__)
 
 
-def make_movie(
-    output_file: str, state_dump_dir: str, building_file: str, num_steps: int = 0
+def make_movie_from_buffer(
+    output_file: str, building: Building, pos_buf: PointType, enr_buf: FloatDataType
 ):
-    """Generate movie from the saved states and building file (b3d).
-
-    Args:
-        output_file: path to the output movie file
-        state_dump_dir: path to the state dump directory
-        building_file: path to the saved building file (b3d)
-        num_steps: number of steps to use in the movie, take all if <= 0
-    """
-    logger.info(f"Start making movie: {output_file}")
+    """Generate movie."""
+    logger.info(f"Making movie: {output_file}")
+    print(f"Making movie: {output_file}")
 
     # Graphics settings
     ray_opacity = RAY_OPACITY
@@ -61,19 +55,21 @@ def make_movie(
 
     point_mesh = pv.PolyData()
     line_mesh = pv.PolyData()
-    building = read_b3d(building_file)
 
-    for i, state in enumerate(DumpReader(state_dump_dir)):
+    num_steps = pos_buf.shape[0]
+    assert num_steps == enr_buf.shape[0]
+
+    for i in range(1, num_steps):
         logger.info(f"Processing frame {i}")
-        position_buffer = state[
-            "position"
-        ]  # shape: (num_rays, 3, DumpReader.buffer_size)
-        energy_buffer = state["energy"]  # shape: (num_rays, DumpReader.buffer_size)
+        start = i - RAY_LINE_LEN
+        if start < 0:
+            start = 0
+        end = i
 
-        if num_steps > 0 and i == num_steps:
-            break
+        position = pos_buf[start:end, :, :]
+        energy = enr_buf[start:end, :]
 
-        if i == 0:
+        if i == 1:
 
             # Draw building
             bdg_verts, bdg_faces = building.get_mesh()
@@ -89,9 +85,9 @@ def make_movie(
             )
 
             # Draw points
-            varr = position_buffer[:, :, 0]
+            varr = position[-1, :, :]
             point_mesh = pv.PolyData(varr)
-            point_mesh["energy"] = energy_buffer[:, 0]
+            point_mesh["energy"] = energy[-1, :]
             point_mesh.set_active_scalars("energy")
             plotter.add_mesh(
                 point_mesh,
@@ -104,9 +100,9 @@ def make_movie(
             )
 
             # Draw trailing lines
-            line_varr, line_index = position_buffer_to_lines(position_buffer)
+            line_varr, line_index = position_buffer_to_lines(position)
             line_mesh = pv.PolyData(line_varr, lines=line_index)
-            line_mesh["energy"] = energy_buffer.flatten()
+            line_mesh["energy"] = energy.flatten()
             line_mesh.set_active_scalars("energy")
             plotter.add_mesh(
                 line_mesh,
@@ -120,13 +116,14 @@ def make_movie(
         else:
             # Draw next frame (update points and lines)
             # Update points
-            point_mesh.points = position_buffer[:, :, 0]
-            point_mesh["energy"] = energy_buffer[:, 0]
+            point_mesh.points = position[-1, :, :]
+            point_mesh["energy"] = energy[-1, :]
 
             # Update lines
-            line_varr, _ = position_buffer_to_lines(position_buffer)
+            line_varr, line_index = position_buffer_to_lines(position)
             line_mesh.points = line_varr
-            line_mesh["energy"] = energy_buffer.flatten()
+            line_mesh.lines = line_index
+            line_mesh["energy"] = energy.flatten()
 
             plotter.write_frame()
 
@@ -149,17 +146,16 @@ def position_buffer_to_lines(pb: np.ndarray) -> tuple[np.ndarray, list[int]]:
     Return:
         line points, line connectivity
     """
-    num_rays = pb.shape[0]
-    buf_len = pb.shape[2]  # == DumpReader.buffer_size
+    num_rays = pb.shape[1]
+    buf_len = pb.shape[0]
     line_varr = []
     line_index = []
     curr_index = 0
     for ray_i in range(num_rays):
         line_index.append(buf_len)
         for buf_i in range(buf_len):
-            line_varr.append(pb[ray_i, :, buf_i])
+            line_varr.append(pb[buf_i, ray_i, :])
             line_index.append(curr_index)
             curr_index += 1
     line_varr = np.array(line_varr)
     return line_varr, line_index
-

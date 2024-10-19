@@ -1,6 +1,6 @@
 from building3d.config import MESH_DELTA
-from building3d.geom.tetrahedron import tetrahedron_volume
 from building3d.geom.point import Point
+from building3d.geom.tetrahedron import tetrahedron_volume
 
 
 def minimum_tetra_volume(delta: float = MESH_DELTA) -> float:

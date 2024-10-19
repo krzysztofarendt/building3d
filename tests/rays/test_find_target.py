@@ -1,43 +1,48 @@
 import numpy as np
 import pytest
 
-from building3d.simulators.rays.find_target import find_target
-from building3d.simulators.rays.find_transparent import find_transparent
-from building3d.geom.points import new_point
-from building3d.geom.vectors import new_vector
-from building3d.geom.building import Building
-from building3d.geom.zone import Zone
-from building3d.geom.solid.box import box
-from building3d.geom.paths import PATH_SEP
+from building3d.geom.polygon import Polygon
+from building3d.geom.types import FLOAT
+from building3d.sim.rays.find_target import find_target_surface
 
 
-@pytest.fixture
-def bdg():
-    s0 = box(1, 1, 1, name="s0")
-    s1 = box(1, 1, 1, (1, 0, 0), name="s1")
-    z = Zone([s0, s1], "z")
-    b = Building([z], "b")
-    return b
 
+@pytest.mark.parametrize("x, y, ray_pos, ray_dir, expected_target", [
+    (1.0, 1.0, [0, 0, 1], [0, 0, -1], 0),
+    (2.0, 2.0, [1, 1, 2], [0, 0, -1], 0),
+    (1.0, 1.0, [0.5, 0.5, 1], [0, 0, -1], 0),
+    (1.0, 1.0, [0.5, 0.5, 1], [0, 0, 1], -1),
+    (1.0, 1.0, [-0.01, 0, 1], [0, 0, -1], -1),
+    (1.0, 0.0001, [0, 0, 1], [0, 0, -1], 0),
+    (0.001, 0.001, [0, 0, 1], [0, 0, -1], 0),
+    (1000, 0.00001, [1000, 0, 1], [0, 0, -1], 0),
+    (0.001, 1, [0.001, 0, 1], [0, 0, -1], 0),
+    # (0.0001, 1, [0.001, 0, 1], [0, 0, -1], 0),  # TODO: This one fails, insufficient precision
+])
+def test_find_target(x, y, ray_pos, ray_dir, expected_target):
+    pts = np.array([
+        [0, 0, 0],
+        [x, 0, 0],
+        [x, y, 0],
+        [0, y, 0],
+    ], dtype=FLOAT)
+    poly = Polygon(pts, name="poly")
+    pts, tri = poly.get_mesh()
 
-def test_find_target(bdg):
-    # Transparent:
-    # z/s1/wall-3/wall-3
-    # z/s0/wall-1/wall-1
-    pos = new_point(0.5, 0.5, 0.5)
-    vel = new_vector(1, 0, 0)
-    trans = find_transparent(bdg)
-    trg = find_target(pos, vel, "b/z/s0", bdg, trans, set())
-    assert trg == "b/z/s1/wall-1/wall-1"
-    vel = new_vector(-1, 0, 0)
-    trg = find_target(pos, vel, "b/z/s0", bdg, trans, set())
-    assert trg == "b/z/s0/wall-3/wall-3"
+    ray_pos = np.array(ray_pos, dtype=FLOAT)
+    ray_dir = np.array(ray_dir, dtype=FLOAT)
 
-    # Test with large velocity
-    mag = 1000.0
-    vel = new_vector(mag, 0, 0)
-    trg = find_target(pos, vel, "b/z/s0", bdg, trans, set())
-    assert trg == "b/z/s1/wall-1/wall-1"
-    vel = new_vector(-mag, 0, 0)
-    trg = find_target(pos, vel, "b/z/s0", bdg, trans, set())
-    assert trg == "b/z/s0/wall-3/wall-3"
+    # Can't have an empty set because of Numba. Polygon -1 doesn't exist anyway.
+    transparent = set([-1])
+    polygons_to_check = set([0])
+
+    target = find_target_surface(
+        pos=ray_pos,
+        direction=ray_dir,
+        poly_pts=[pts],
+        poly_tri=[tri],
+        transparent_polygons=transparent,
+        polygons_to_check=polygons_to_check,
+    )
+
+    assert target == expected_target

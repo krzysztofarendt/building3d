@@ -4,8 +4,10 @@ import numpy as np
 
 from building3d.geom.paths import PATH_SEP
 from building3d.geom.polygon import Polygon
-from building3d.geom.wall import Wall
+from building3d.geom.bboxes import bounding_box
+from building3d.geom.bboxes import are_bboxes_overlapping
 from building3d.geom.solid import Solid
+from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
 
 
@@ -41,6 +43,14 @@ def graph_polygon(
                 if pl2.path not in g:
                     g[pl2.path] = []
 
+                # Pre-check based on are_bboxes_overlapping()
+                # If they are not overlapping, they are totally disconnected
+                bbox1 = bounding_box(pl1.pts)
+                bbox2 = bounding_box(pl2.pts)
+                if not are_bboxes_overlapping(bbox1, bbox2):
+                    continue
+
+                # Checking for specific types of connections
                 cond = []
                 if facing:
                     cond.append(pl1.is_facing_polygon(pl2))
@@ -59,11 +69,7 @@ def graph_polygon(
 
 
 def graph_wall(
-    bdg,
-    facing=True,
-    overlapping=True,
-    touching=False,
-    g: dict | None = None
+    bdg, facing=True, overlapping=True, touching=False, g: dict | None = None
 ) -> dict[str, list[str]]:
     """Makes a building graph based on wall connections.
 
@@ -85,11 +91,7 @@ def graph_wall(
 
 
 def graph_solid(
-    bdg,
-    facing=True,
-    overlapping=True,
-    touching=False,
-    g: dict | None = None
+    bdg, facing=True, overlapping=True, touching=False, g: dict | None = None
 ) -> dict[str, list[str]]:
     """Makes a building graph based on solid connections.
 
@@ -111,11 +113,7 @@ def graph_solid(
 
 
 def graph_zone(
-    bdg,
-    facing=True,
-    overlapping=True,
-    touching=False,
-    g: dict | None = None
+    bdg, facing=True, overlapping=True, touching=False, g: dict | None = None
 ) -> dict[str, list[str]]:
     """Makes a building graph based on solid connections.
 
@@ -140,8 +138,7 @@ def strip_graph(
     g: dict[str, list[str]],
     n: int,
 ) -> dict[str, list[str]]:
-    """Removes `n` last components of all paths in the graph `g`.
-    """
+    """Removes `n` last components of all paths in the graph `g`."""
     gnew = {}
     for k, v in g.items():
         new_k = remove_last(k, n=n)
@@ -160,16 +157,14 @@ def strip_graph(
 
 
 def remove_last(path: str, n: int = 1) -> str:
-    """Removes `n` last components of of `path`.
-    """
+    """Removes `n` last components of of `path`."""
     for _ in range(n):
         path = PATH_SEP.join(path.split(PATH_SEP)[:-1])
     return path
 
 
 def iter_polygons(bdg) -> Iterable[Polygon]:
-    """Generator iterating over all polygons of the building.
-    """
+    """Generator iterating over all polygons of the building."""
     for _, zv in bdg.children.items():
         for _, sv in zv.children.items():
             for _, wv in sv.children.items():
@@ -178,8 +173,7 @@ def iter_polygons(bdg) -> Iterable[Polygon]:
 
 
 def iter_walls(bdg) -> Iterable[Wall]:
-    """Generator iterating over all walls of the building.
-    """
+    """Generator iterating over all walls of the building."""
     for _, zv in bdg.children.items():
         for _, sv in zv.children.items():
             for _, wv in sv.children.items():
@@ -187,15 +181,13 @@ def iter_walls(bdg) -> Iterable[Wall]:
 
 
 def iter_solids(bdg) -> Iterable[Solid]:
-    """Generator iterating over all solids of the building.
-    """
+    """Generator iterating over all solids of the building."""
     for _, zv in bdg.children.items():
         for _, sv in zv.children.items():
             yield sv
 
 
 def iter_zones(bdg) -> Iterable[Zone]:
-    """Generator iterating over all zones of the building.
-    """
+    """Generator iterating over all zones of the building."""
     for _, zv in bdg.children.items():
         yield zv

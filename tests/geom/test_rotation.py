@@ -1,6 +1,7 @@
 import numpy as np
 
-from building3d.geom.points import new_point, points_equal
+from building3d.geom.points import new_point
+from building3d.geom.points import points_equal
 from building3d.geom.rotation import rotate_points_around_vector
 from building3d.geom.rotation import rotate_points_to_plane
 from building3d.geom.vectors import normal

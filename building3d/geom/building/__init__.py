@@ -1,21 +1,22 @@
 from __future__ import annotations
+
 import logging
 from typing import Sequence
 
 from building3d import random_id
-from building3d.geom.exceptions import GeometryError
-from building3d.geom.paths.validate_name import validate_name
-from building3d.geom.paths import PATH_SEP
-from building3d.geom.points import bounding_box
-from building3d.geom.zone import Zone
-from building3d.geom.types import PointType, IndexType
 from building3d.geom.building.get_mesh import get_mesh_from_zones
 from building3d.geom.building.graph import graph_polygon
-from building3d.geom.building.graph import graph_wall
 from building3d.geom.building.graph import graph_solid
+from building3d.geom.building.graph import graph_wall
 from building3d.geom.building.graph import graph_zone
+from building3d.geom.exceptions import GeometryError
+from building3d.geom.paths import PATH_SEP
+from building3d.geom.paths.validate_name import validate_name
+from building3d.geom.bboxes import bounding_box
 from building3d.geom.solid.stitch import stitch_solids
-
+from building3d.geom.types import IndexType
+from building3d.geom.types import PointType
+from building3d.geom.zone import Zone
 
 logger = logging.getLogger(__name__)
 
@@ -23,8 +24,9 @@ logger = logging.getLogger(__name__)
 class Building:
     """Building is a collection of zones.
 
-    Zones do not have to be adjacent. They can even be separate buildings.
+    Zones do not need to touch one another.
     """
+
     count: int = 0
 
     def __init__(
@@ -120,7 +122,9 @@ class Building:
         else:
             raise ValueError(f"Incorrect absolute path: {abspath}")
 
-    def get_graph(self, new: bool = False, level: str = "polygon") -> dict[str, list[str]]:
+    def get_graph(
+        self, new: bool = False, level: str = "polygon"
+    ) -> dict[str, list[str]]:
         """Returns the graph of this building. Uses cached dict or makes new if requested.
 
         Assumes that connections are only when polygons are:
@@ -143,9 +147,15 @@ class Building:
             not_overlapping = False
             not_touching = False
             self.graph = graph_polygon(self, facing, not_overlapping, not_touching)
-            self.graph_wall = graph_wall(self, facing, not_overlapping, not_touching, self.graph)
-            self.graph_solid = graph_solid(self, facing, not_overlapping, not_touching, self.graph)
-            self.graph_zone = graph_zone(self, facing, not_overlapping, not_touching, self.graph)
+            self.graph_wall = graph_wall(
+                self, facing, not_overlapping, not_touching, self.graph
+            )
+            self.graph_solid = graph_solid(
+                self, facing, not_overlapping, not_touching, self.graph
+            )
+            self.graph_zone = graph_zone(
+                self, facing, not_overlapping, not_touching, self.graph
+            )
 
         if level == "polygon":
             return self.graph

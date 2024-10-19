@@ -1,11 +1,14 @@
 import numpy as np
 from numba import njit
 
-from building3d.geom.types import PointType, VectorType, FLOAT
+from building3d.geom.types import FLOAT
+from building3d.geom.types import PointType
+from building3d.geom.types import VectorType
 
 
 @njit
 def new_vector(x: float, y: float, z: float) -> VectorType:
+    """Create new vector and return it as a numpy array."""
     return np.array([x, y, z], dtype=FLOAT)
 
 

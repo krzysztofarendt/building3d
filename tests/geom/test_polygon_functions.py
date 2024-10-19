@@ -1,23 +1,24 @@
 import numpy as np
 
 from building3d.geom.points import new_point
-from building3d.geom.vectors import new_vector
-from building3d.geom.polygon.centroid import polygon_centroid
-from building3d.geom.polygon.edges import polygon_edges
 from building3d.geom.polygon.area import polygon_area
+from building3d.geom.polygon.centroid import polygon_centroid
+from building3d.geom.polygon.crossing import are_polygons_crossing
 from building3d.geom.polygon.distance import distance_point_to_polygon
-from building3d.geom.polygon.plane import projection_coefficients
-from building3d.geom.polygon.plane import plane_coefficients
+from building3d.geom.polygon.edges import polygon_edges
+from building3d.geom.polygon.facing import are_polygons_facing
 from building3d.geom.polygon.ispointinside import is_point_inside
 from building3d.geom.polygon.ispointinside import is_point_inside_margin
-from building3d.geom.polygon.ispointinside import is_point_inside_ortho_projection
+from building3d.geom.polygon.ispointinside import \
+    is_point_inside_ortho_projection
 from building3d.geom.polygon.ispointinside import is_point_inside_projection
-from building3d.geom.polygon.facing import are_polygons_facing
+from building3d.geom.polygon.plane import plane_coefficients
+from building3d.geom.polygon.plane import projection_coefficients
 from building3d.geom.polygon.touching import are_polygons_touching
-from building3d.geom.polygon.crossing import are_polygons_crossing
 from building3d.geom.triangles import triangulate
-from building3d.geom.vectors import normal
 from building3d.geom.types import INT
+from building3d.geom.vectors import new_vector
+from building3d.geom.vectors import normal
 
 
 def test_polygon_centroid_square():

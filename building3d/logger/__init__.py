@@ -1,7 +1,8 @@
 import logging
 from pathlib import Path
 
-from building3d.config import LOG_FILE, LOG_LEVEL
+from building3d.config import LOG_FILE
+from building3d.config import LOG_LEVEL
 
 
 def init_logger(logfile: None | str = None):

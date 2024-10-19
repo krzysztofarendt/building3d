@@ -2,13 +2,13 @@ import time
 
 import pytest
 
-from building3d.geom.solid.box import box
-from building3d.geom.zone import Zone
 from building3d.geom.building import Building
 from building3d.geom.building.graph import graph_polygon
-from building3d.geom.building.graph import graph_wall
 from building3d.geom.building.graph import graph_solid
+from building3d.geom.building.graph import graph_wall
 from building3d.geom.building.graph import graph_zone
+from building3d.geom.solid.box import box
+from building3d.geom.zone import Zone
 
 
 @pytest.fixture
@@ -52,21 +52,21 @@ def gz_all(bdg):
 
 
 def test_graph_polygon(g_def, g_fac, g_ove, gz_all):
-    assert set(g_def["b/z0/s0/wall-1/wall-1"]) == set(["b/z0/s2/wall-3/wall-3"])
-    assert set(g_def["b/z0/s2/wall-3/wall-3"]) == set(
-        ["b/z0/s0/wall-1/wall-1", "b/z0/s1/wall-1/wall-1"]
+    assert set(g_def["b/z0/s0/wall_1/poly_1"]) == set(["b/z0/s2/wall_3/poly_3"])
+    assert set(g_def["b/z0/s2/wall_3/poly_3"]) == set(
+        ["b/z0/s0/wall_1/poly_1", "b/z0/s1/wall_1/poly_1"]
     )
-    assert set(g_def["b/z0/s0/wall-2/wall-2"]) == set(["b/z0/s1/wall-0/wall-0"])
-    assert set(g_def["b/z0/s1/wall-0/wall-0"]) == set(["b/z0/s0/wall-2/wall-2"])
-    assert set(g_def["b/z0/s1/wall-1/wall-1"]) == set(["b/z0/s2/wall-3/wall-3"])
+    assert set(g_def["b/z0/s0/wall_2/poly_2"]) == set(["b/z0/s1/wall_0/poly_0"])
+    assert set(g_def["b/z0/s1/wall_0/poly_0"]) == set(["b/z0/s0/wall_2/poly_2"])
+    assert set(g_def["b/z0/s1/wall_1/poly_1"]) == set(["b/z0/s2/wall_3/poly_3"])
 
-    assert set(g_fac["b/z0/s0/wall-2/wall-2"]) == set(["b/z0/s1/wall-0/wall-0"])
-    assert set(g_fac["b/z0/s1/wall-0/wall-0"]) == set(["b/z0/s0/wall-2/wall-2"])
+    assert set(g_fac["b/z0/s0/wall_2/poly_2"]) == set(["b/z0/s1/wall_0/poly_0"])
+    assert set(g_fac["b/z0/s1/wall_0/poly_0"]) == set(["b/z0/s0/wall_2/poly_2"])
 
-    assert set(g_ove["b/z0/s0/wall-1/wall-1"]) == set(["b/z0/s2/wall-3/wall-3"])
-    assert set(g_ove["b/z0/s1/wall-1/wall-1"]) == set(["b/z0/s2/wall-3/wall-3"])
-    assert set(g_ove["b/z0/s2/wall-3/wall-3"]) == set(
-        ["b/z0/s0/wall-1/wall-1", "b/z0/s1/wall-1/wall-1"]
+    assert set(g_ove["b/z0/s0/wall_1/poly_1"]) == set(["b/z0/s2/wall_3/poly_3"])
+    assert set(g_ove["b/z0/s1/wall_1/poly_1"]) == set(["b/z0/s2/wall_3/poly_3"])
+    assert set(g_ove["b/z0/s2/wall_3/poly_3"]) == set(
+        ["b/z0/s0/wall_1/poly_1", "b/z0/s1/wall_1/poly_1"]
     )
 
     assert gz_all["b/z1"] == ["b/z0"]
@@ -75,15 +75,21 @@ def test_graph_polygon(g_def, g_fac, g_ove, gz_all):
 
 def test_graph_wall_solid_zone(bdg, g_def):
     gw = graph_wall(bdg, g=g_def)
-    assert len(list(gw.keys())) == len(list(g_def.keys()))  # Because each wall contains 1 polygon
+    assert len(list(gw.keys())) == len(
+        list(g_def.keys())
+    )  # Because each wall contains 1 polygon
 
     gs = graph_solid(bdg, g=g_def)
-    assert len(list(gs.keys())) < len(list(gw.keys()))  # Because there's less solids than walls
+    assert len(list(gs.keys())) < len(
+        list(gw.keys())
+    )  # Because there's less solids than walls
     assert "b/z0/s0" in gs["b/z0/s2"]
     assert "b/z0/s1" in gs["b/z0/s2"]
 
     gz = graph_zone(bdg, g=g_def)
-    assert len(list(gz.keys())) < len(list(gs.keys()))  # Because there's less zones than solids
+    assert len(list(gz.keys())) < len(
+        list(gs.keys())
+    )  # Because there's less zones than solids
     assert (gz["b/z0"] == []) and (gz["b/z1"] == [])  # Because they are only touching
 
 
@@ -107,5 +113,5 @@ def test_graph_method_caching(bdg):
 
     assert "b/z0" in gz
     assert "b/z0/s0" in gs
-    assert "b/z0/s0/wall-0" in gw
-    assert "b/z0/s0/wall-0/wall-0" in gp
+    assert "b/z0/s0/wall_0" in gw
+    assert "b/z0/s0/wall_0/poly_0" in gp

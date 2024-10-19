@@ -1,8 +1,10 @@
-from numba import njit
 import numpy as np
+from numba import njit
 
+from building3d.geom.types import FLOAT
+from building3d.geom.types import PointType
+from building3d.geom.types import VectorType
 from building3d.geom.vectors import normal
-from building3d.geom.types import PointType, VectorType, FLOAT
 
 
 @njit

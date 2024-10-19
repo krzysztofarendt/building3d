@@ -1,15 +1,15 @@
 from __future__ import annotations
+
 import logging
 
 import numpy as np
 
-from building3d.geom.polygon import Polygon
-from building3d.geom.point import Point
-from building3d.geom.triangle import triangle_area
-from building3d.mesh.triangulation import delaunay_triangulation
-from building3d.mesh.exceptions import MeshError
 from building3d.config import MESH_DELTA
-
+from building3d.geom.point import Point
+from building3d.geom.polygon import Polygon
+from building3d.geom.triangle import triangle_area
+from building3d.mesh.exceptions import MeshError
+from building3d.mesh.triangulation import delaunay_triangulation
 
 logger = logging.getLogger(__name__)
 

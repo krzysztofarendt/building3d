@@ -2,7 +2,9 @@ from numba import njit
 
 from building3d.config import GEOM_ATOL
 from building3d.geom.polygon.ispointinside import is_point_inside_projection
-from building3d.geom.types import PointType, VectorType, IndexType
+from building3d.geom.types import IndexType
+from building3d.geom.types import PointType
+from building3d.geom.types import VectorType
 
 
 @njit
@@ -23,6 +25,10 @@ def find_target_surface(
     Transparent polygons are ignored.
     The function checks only the polygons from the set `polygons_to_check`.
 
+    NOTE:
+        `transparent_polygons` and `polygons_to_check` cannot be empty sets if JIT is used.
+        `set([-1])` is a good substitute for an empty set.
+
     Args:
         pos: The starting position of the ray.
         direction: The direction vector of the ray.
@@ -39,12 +45,7 @@ def find_target_surface(
             continue
 
         if is_point_inside_projection(
-            pos,
-            direction,
-            poly_pts[pn],
-            poly_tri[pn],
-            fwd_only=True,
-            atol=atol
+            pos, direction, poly_pts[pn], poly_tri[pn], fwd_only=True, atol=atol
         ):
             return pn
 

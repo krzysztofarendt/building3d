@@ -1,10 +1,13 @@
 import numpy as np
 from numba import njit
 
-from building3d.config import GEOM_ATOL, EPSILON
+from building3d.config import EPSILON
+from building3d.config import GEOM_ATOL
 from building3d.config import POINT_NUM_DEC
-from building3d.geom.types import PointType, FLOAT
-from building3d.geom.vectors import normal, new_vector
+from building3d.geom.types import FLOAT
+from building3d.geom.types import PointType
+from building3d.geom.vectors import new_vector
+from building3d.geom.vectors import normal
 
 
 @njit
@@ -79,7 +82,9 @@ def points_equal(pt1: PointType, pt2: PointType, atol: float = GEOM_ATOL) -> boo
 
 
 # njit doesn't support tuple()
-def point_to_tuple(pt: PointType, decimals: int = POINT_NUM_DEC) -> tuple[float, float, float]:
+def point_to_tuple(
+    pt: PointType, decimals: int = POINT_NUM_DEC
+) -> tuple[float, float, float]:
     pt = np.round(pt, decimals=decimals)
     return tuple(pt)
 
@@ -88,28 +93,6 @@ def point_to_tuple(pt: PointType, decimals: int = POINT_NUM_DEC) -> tuple[float,
 def point_to_hash(pt: PointType, decimals: int = POINT_NUM_DEC) -> int:
     """Calculates a hash value for the point, assuming a chosen number of decimals."""
     return hash(point_to_tuple(pt, decimals))
-
-
-@njit
-def bounding_box(pts: PointType) -> tuple[PointType, PointType]:
-    """Returns bounding box `((xmin, ymin, zmin), (xmax, ymax, zmax))` for points `pts`."""
-    xmin, xmax = np.min(pts[:, 0]), np.max(pts[:, 0])
-    ymin, ymax = np.min(pts[:, 1]), np.max(pts[:, 1])
-    zmin, zmax = np.min(pts[:, 2]), np.max(pts[:, 2])
-    return (
-        np.array([xmin, ymin, zmin], dtype=FLOAT),
-        np.array([xmax, ymax, zmax], dtype=FLOAT),
-    )
-
-
-@njit
-def is_point_inside_bbox(ptest: PointType, pts: PointType, atol: float = GEOM_ATOL) -> bool:
-    """Checks whether a point is inside the bounding box for `pts`."""
-    bbox = bounding_box(pts)
-    if (ptest < bbox[0] - atol).any() or (ptest > bbox[1] + atol).any():
-        return False
-    else:
-        return True
 
 
 @njit
@@ -258,10 +241,8 @@ def many_new_points_between_2_points(
 
 @njit
 def is_point_on_segment(
-    ptest: PointType,
-    pt1: PointType,
-    pt2: PointType,
-    atol: float = GEOM_ATOL) -> bool:
+    ptest: PointType, pt1: PointType, pt2: PointType, atol: float = GEOM_ATOL
+) -> bool:
     """Checks if point p lies on the line segment defined by points pt1 and pt2.
 
     Args:
@@ -277,7 +258,9 @@ def is_point_on_segment(
         return True
 
     # Check collinearity using the cross product
-    if not np.allclose(np.cross(ptest - pt1, pt2 - pt1), np.zeros(3, dtype=FLOAT), atol=atol):
+    if not np.allclose(
+        np.cross(ptest - pt1, pt2 - pt1), np.zeros(3, dtype=FLOAT), atol=atol
+    ):
         return False
 
     # Check if the point lies within the segment bounds

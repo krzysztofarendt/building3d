@@ -2,7 +2,6 @@ import logging
 
 from building3d.geom.point import Point
 
-
 logger = logging.getLogger(__name__)
 
 

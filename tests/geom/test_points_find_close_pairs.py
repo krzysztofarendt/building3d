@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
 
-from building3d.geom.types import FLOAT
 from building3d.geom.points.find_close_pairs import find_close_pairs
+from building3d.geom.types import FLOAT
 
 
 def test_find_close_pairs():

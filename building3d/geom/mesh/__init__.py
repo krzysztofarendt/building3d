@@ -1,7 +1,10 @@
-from numba import njit
 import numpy as np
+from numba import njit
 
-from building3d.geom.types import PointType, IndexType, FLOAT, INT
+from building3d.geom.types import FLOAT
+from building3d.geom.types import INT
+from building3d.geom.types import IndexType
+from building3d.geom.types import PointType
 
 
 # @njit  # TODO: Fails with tuples of len > 1000

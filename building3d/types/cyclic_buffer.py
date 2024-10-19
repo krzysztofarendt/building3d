@@ -3,7 +3,9 @@ from numba import njit
 
 
 @njit
-def cyclic_buf(buffer: np.ndarray, head: int, tail: int, element: np.ndarray, buffer_size: int):
+def cyclic_buf(
+    buffer: np.ndarray, head: int, tail: int, element: np.ndarray, buffer_size: int
+):
     """
     Inserts an element into a cyclic (circular) buffer and updates the head and tail pointers.
 
@@ -79,7 +81,9 @@ def convert_to_contiguous(buffer, head, tail, buffer_size):
     """
     # Calculate the number of elements in the buffer
     if head == tail:
-        return np.zeros((0,) + buffer.shape[1:], dtype=buffer.dtype)  # Empty buffer case
+        return np.zeros(
+            (0,) + buffer.shape[1:], dtype=buffer.dtype
+        )  # Empty buffer case
 
     if head > tail:
         num_elements = head - tail

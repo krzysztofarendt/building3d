@@ -1,21 +1,27 @@
-from numba import njit
 import numpy as np
+from numba import njit
 
 from building3d.config import GEOM_ATOL
-from building3d.geom.types import PointType, VectorType, IndexType, FLOAT
 from building3d.geom.points import are_points_coplanar
-from building3d.geom.triangles import is_point_inside as is_point_inside_triangle
-from building3d.geom.polygon.edges import polygon_edges
-from building3d.geom.points.distance import distance_point_to_edge
+from building3d.geom.bboxes import is_point_inside_bbox
 from building3d.geom.points import is_point_on_segment
-from building3d.geom.points import is_point_inside_bbox
+from building3d.geom.points.distance import distance_point_to_edge
+from building3d.geom.polygon.edges import polygon_edges
 from building3d.geom.polygon.plane import plane_coefficients
 from building3d.geom.polygon.plane import projection_coefficients
+from building3d.geom.triangles import \
+    is_point_inside as is_point_inside_triangle
+from building3d.geom.types import FLOAT
+from building3d.geom.types import IndexType
+from building3d.geom.types import PointType
+from building3d.geom.types import VectorType
 from building3d.geom.vectors import normal
 
 
 @njit
-def is_point_at_boundary(ptest: PointType, pts: PointType, atol: float = GEOM_ATOL) -> bool:
+def is_point_at_boundary(
+    ptest: PointType, pts: PointType, atol: float = GEOM_ATOL
+) -> bool:
     """Checks if the point lays on any of the edges of `pts`."""
     edges = polygon_edges(pts)
     for pt1, pt2 in edges:
