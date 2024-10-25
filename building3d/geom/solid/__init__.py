@@ -24,8 +24,6 @@ logger = logging.getLogger(__name__)
 class Solid:
     """Solid is a space enclosed by polygons."""
 
-    count: int = 0
-
     def __init__(
         self,
         walls: Sequence[Wall] = (),
@@ -52,9 +50,6 @@ class Solid:
         self.walls: dict[str, Wall] = {}  # {Wall.name: Wall}
         for w in walls:
             self.add_wall(w)
-
-        self.num = Solid.count
-        Solid.count += 1
 
     @property
     def children(self) -> dict[str, Wall]:

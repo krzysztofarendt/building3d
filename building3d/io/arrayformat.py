@@ -46,25 +46,25 @@ def to_array_format(bdg: Building) -> tuple:
     solids = np.zeros(num_walls, dtype=int)
     zones = np.zeros(num_solids, dtype=int)
 
+    pn = 0
+    wn = 0
+    sn = 0
+    zn = 0
+
     pt_offset = 0
     face_offset = 0
     for z in bdg.zones.values():
-        # Sanity check
-        assert (
-            z.num <= num_zones
-        ), f"Zone number ({z.num}) higher than the tot. number of zones ({num_zones})?"
-
         for s in z.solids.values():
             # Map solids to zones
-            zones[s.num] = z.num
+            zones[sn] = zn
 
             for w in s.walls.values():
                 # Map walls to solids
-                solids[w.num] = s.num
+                solids[wn] = sn
 
                 for p in w.polygons.values():
                     # Map polygons to walls
-                    walls[p.num] = w.num
+                    walls[pn] = wn
 
                     # Add points
                     points[pt_offset : pt_offset + p.pts.shape[0]] = p.pts.copy()
@@ -76,10 +76,15 @@ def to_array_format(bdg: Building) -> tuple:
 
                     # Map faces to polygons
                     for fi in range(face_offset, face_offset + p.tri.shape[0]):
-                        polygons[fi] = p.num
+                        polygons[fi] = pn
 
                     pt_offset += p.pts.shape[0]
                     face_offset += p.tri.shape[0]
+
+                    pn += 1
+                wn += 1
+            sn += 1
+        zn += 1
 
     return points, faces, polygons, walls, solids, zones
 

@@ -17,8 +17,6 @@ class Wall:
     Polygons do not have to be coplanar.
     """
 
-    count: int = 0
-
     def __init__(
         self,
         polygons: Sequence[Polygon] = (),
@@ -48,9 +46,6 @@ class Wall:
 
         for poly in polygons:
             self.add_polygon(poly)
-
-        self.num = Wall.count
-        Wall.count += 1
 
     @property
     def children(self) -> dict[str, Polygon]:
