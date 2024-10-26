@@ -11,57 +11,6 @@ from building3d.geom.types import IndexType
 from building3d.geom.types import PointType
 from building3d.geom.types import VectorType
 
-# TODO:
-# Given this implementation and the provided coefficient calculation functions,
-# there are a couple of issues:
-#
-# 1. The distance calculation `np.abs(d - dp)` is not correct. This calculation
-# doesn't give the actual distance from the point to the plane.
-#
-# 2. The function doesn't take into account the direction of the normal vector
-# when determining if the point is in front of or behind the polygon.
-#
-# To fix these issues, we need to modify the distance calculation. Here's how
-# we can correct the implementation:
-#
-# building3d/geom/polygon/distance.py
-# Replace lines: 42-56
-# ```python
-#     # Calculate the signed distance from the point to the plane
-#     dist = (np.dot(vn, ptest) + d) / np.linalg.norm(vn)
-#
-#     if is_point_inside_ortho_projection(ptest, pts, tri):
-#         return np.abs(dist)
-#     else:
-#         # Return distance to the closest edge
-#         min_dist = np.inf
-#         for ed in polygon_edges(pts):
-#             edge_dist = distance_point_to_edge(ptest, ed[0], ed[1])
-#             if edge_dist < min_dist:
-#                 min_dist = edge_dist
-#         return float(min_dist)
-# ```
-#
-# These changes address the following:
-#
-# 1. The distance calculation is now correct. We use the formula for the signed
-# distance from a point to a plane: (Ax + By + Cz + D) / sqrt(A^2 + B^2 + C^2),
-# where (A, B, C) is the normal vector and D is the d coefficient.
-#
-# 2. We keep the signed distance when checking if the point is inside the
-# orthogonal projection. This allows us to determine if the point is in front
-# of or behind the polygon.
-#
-# 3. We take the absolute value of the distance only when returning it for
-# points inside the orthogonal projection.
-#
-# 4. We've simplified the edge distance calculation slightly by removing the
-# unnecessary reassignment of `dist`.
-#
-# With these changes, the `distance_point_to_polygon` function should now
-# correctly calculate the distance from a point to a polygon, taking into
-# account whether the point is in front of, behind, or to the side of the
-# polygon.
 @njit
 def distance_point_to_polygon(
     ptest: PointType,
