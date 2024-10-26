@@ -1,0 +1,12 @@
+- [x] `io.py`
+- [x] `floor_plan.py`
+- [x] `polygon.py`
+- [ ] `ray_2_boxes.py` - some rays stopping too early, also: https://github.com/krzysztofarendt/building3d/issues/82
+- [ ] `ray_3_boxes.py`
+- [ ] `ray_cylinder_example.py`
+- [ ] `ray_sphere_example.py`
+- [ ] `ray_teapot_example.py`
+- [ ] `read_teapot.py`
+- [ ] `solid_example.py`
+- [ ] `wall_example.py`
+- [ ] `zone_example.py`

@@ -3,8 +3,10 @@ from building3d.geom.building import Building
 from building3d.geom.solid.floor_plan import floor_plan
 from building3d.geom.zone import Zone
 
+if __name__ == "__main__":
+    print("This example shows how to use the floor_plan() function.")
+    print("It plots a 6-story U-shaped building.")
 
-def run():
     building = Building(name="FloorPlanExample")
 
     for floor_num in range(6):
@@ -59,7 +61,3 @@ def run():
         building.add_zone(zone)
 
     plot_objects((building,))
-
-
-if __name__ == "__main__":
-    run()
