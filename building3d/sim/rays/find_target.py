@@ -43,9 +43,9 @@ def find_target_surface(
     Returns:
         int: The index of the target surface (polygon) hit by the ray, or -1 if no surface is hit.
     """
-    # Index -> polygon number
+    # Key -> polygon number
     # Value -> polygon distance to ray's position (pos)
-    target_candidates = np.full(len(polygons_to_check), np.inf, dtype=np.float64)
+    target_candidates = {-1: np.inf}  # Initialize with dummy data for numba to know the types
     min_dist_index = -1
 
     for pn in polygons_to_check:

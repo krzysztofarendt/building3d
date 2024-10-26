@@ -54,16 +54,20 @@ def to_array_format(bdg: Building) -> tuple:
     pt_offset = 0
     face_offset = 0
     for z in bdg.zones.values():
+        z.num = zn  # Assign same number to the zone instance
         for s in z.solids.values():
             # Map solids to zones
+            s.num = sn  # Assign same number to the solid instance
             zones[sn] = zn
 
             for w in s.walls.values():
                 # Map walls to solids
+                w.num = wn  # Assign same number to the wall instance
                 solids[wn] = sn
 
                 for p in w.polygons.values():
                     # Map polygons to walls
+                    p.num = pn  # Assign same number to the polygon instance
                     walls[pn] = wn
 
                     # Add points

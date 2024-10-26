@@ -39,6 +39,7 @@ class Solid:
             uid: unique id of the solid, random if None
         """
         self._parent = parent
+        self.num: None | int = None  # Used as a counter in the array format
 
         if name is None:
             name = random_id()

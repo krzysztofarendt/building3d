@@ -188,14 +188,17 @@ def test_is_point_inside_projection_fwd_only():
     vec = np.array([1.0, 0.0, 0.0])
     fwd_only = False
     assert is_point_inside_projection(ptest, vec, pts, tri, fwd_only) is True
+    assert is_point_inside_projection(ptest, vec, np.flip(pts, axis=0), tri, fwd_only) is True
     ptest = new_point(2.0, 0.5, 0.5)
     vec = np.array([1.0, 0.0, 0.0])
     fwd_only = True
     assert is_point_inside_projection(ptest, vec, pts, tri, fwd_only) is False
+    assert is_point_inside_projection(ptest, vec, np.flip(pts, axis=0), tri, fwd_only) is False
     ptest = new_point(2.0, 0.5, 0.5)
     vec = np.array([0.0, 0.0, 1.0])
     fwd_only = False
     assert is_point_inside_projection(ptest, vec, pts, tri, fwd_only) is False
+    assert is_point_inside_projection(ptest, vec, np.flip(pts, axis=0), tri, fwd_only) is False
 
     ptest = new_point(1.0, 0.5, 0.5)  # This point is at the polygon's centroid
     vec = np.array([1.0, 0.0, 0.0])
@@ -208,6 +211,10 @@ def test_is_point_inside_projection_fwd_only():
         assert is_point_inside_projection(ptest, vec, pts, tri, fwd_only) is True
         fwd_only = False
         assert is_point_inside_projection(ptest, vec, pts, tri, fwd_only) is True
+        fwd_only = True
+        assert is_point_inside_projection(ptest, vec, np.flip(pts, axis=0), tri, fwd_only) is True
+        fwd_only = False
+        assert is_point_inside_projection(ptest, vec, np.flip(pts, axis=0), tri, fwd_only) is True
 
     ptest = new_point(1.0, 0.0, 0.0)  # This point is at the polygon's corner
     vec = np.array([1.0, 0.0, 0.0])

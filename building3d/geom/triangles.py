@@ -97,7 +97,8 @@ def is_point_inside(
     This function does not test if the point is coplanar with the triangle.
     """
     # Check if point is inside the bounding box
-    if not is_point_inside_bbox(ptest, np.vstack((pt1, pt2, pt3)), atol=atol):
+    # Large atol used to assure bbox surrounds the triangle
+    if not is_point_inside_bbox(ptest, np.vstack((pt1, pt2, pt3)), atol=1e-2):
         return False
 
     # Test if the point is at any of the three vertices
