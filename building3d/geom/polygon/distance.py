@@ -11,7 +11,6 @@ from building3d.geom.types import IndexType
 from building3d.geom.types import PointType
 from building3d.geom.types import VectorType
 
-
 @njit
 def distance_point_to_polygon(
     ptest: PointType,
@@ -42,15 +41,15 @@ def distance_point_to_polygon(
     # Distance (sign neglected!)
     # Negative distance -> point behind the polygon
     # Positive distance -> point in front of the polygon
-    dist = np.abs(d - dp)
+    dist = (np.dot(vn, ptest) + d) / np.linalg.norm(vn)
 
     if is_point_inside_ortho_projection(ptest, pts, tri):
-        return dist
+        return np.abs(dist)
     else:
         # Return distance to the closest edge
         min_dist = np.inf
         for ed in polygon_edges(pts):
-            dist = distance_point_to_edge(ptest, ed[0], ed[1])
-            if dist < min_dist:
-                min_dist = dist
+            edge_dist = distance_point_to_edge(ptest, ed[0], ed[1])
+            if edge_dist < min_dist:
+                min_dist = edge_dist
         return float(min_dist)

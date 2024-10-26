@@ -28,9 +28,16 @@ logger = logging.getLogger(__name__)
 
 
 class Polygon:
-    """Polygon represents an area defined by a collection of sequentially connected points."""
+    """Polygon represents an area defined by a collection of sequentially connected points.
 
-    count: int = 0
+    NOTE:
+    Polygon's normal vector is calculated using the first corner from `pts`,
+    i.e. using points with index -1, 0, and 1. If the first corner is
+    non-convex, the normal will be wrong and triangulation will fail. the first
+    corner can be non-convex only if the normal vector is provided (argument
+    `vn`). in such a case the points are rolled forward until the first corner
+    is convex.
+    """
 
     def __init__(
         self,
@@ -46,6 +53,7 @@ class Polygon:
         assert len(pts) >= 3, "Polygon needs at least 3 points"
 
         self._parent = parent
+        self.num: None | int = None  # Used as a counter in the array format
 
         # Attribute assignment
         if name is None:
@@ -59,9 +67,6 @@ class Polygon:
             self.uid = uid
 
         self.pts: PointType = pts
-
-        self.num = Polygon.count
-        Polygon.count += 1
 
         # Normal vector is calculated using the first corner from `pts`
         # If the first corner is non-convex, the normal will be wrong and triangulation will fail.

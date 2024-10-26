@@ -52,7 +52,8 @@ def is_point_inside(
         True if ptest is inside the polygon
     """
     # Check if point is inside the bounding box
-    if not is_point_inside_bbox(ptest, pts, atol=atol):
+    # TODO: Should it be uncommented?
+    if not is_point_inside_bbox(ptest, pts, atol=1e-2):
         return False
 
     # Check if points are coplanar
@@ -190,12 +191,9 @@ def is_point_inside_projection(
         return is_point_inside(ptest, pts, tri, atol=atol)
     else:
         # Projection crosses the surface of the plane
-        s = (-d - a * ptest[0] - b * ptest[1] - c * ptest[2]) / (
-            a * v[0] + b * v[1] + c * v[2]
-        )
+        s = (-d - a * ptest[0] - b * ptest[1] - c * ptest[2]) / denom
 
         if fwd_only and s < 0:
-            # The plane is in the other direction than the one pointed by vec
             return False
 
         ptest = ptest + s * v

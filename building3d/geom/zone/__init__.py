@@ -20,8 +20,6 @@ class Zone:
     Solids do not need to touch one another.
     """
 
-    count: int = 0
-
     def __init__(
         self,
         solids: Sequence[Solid] = (),
@@ -37,6 +35,7 @@ class Zone:
             uid: unique id of the zone, random if None
         """
         self._parent = parent
+        self.num: None | int = None  # Used as a counter in the array format
 
         if name is None:
             name = random_id()
@@ -49,9 +48,6 @@ class Zone:
 
         for sld in solids:
             self.add_solid(sld)
-
-        self.num = Zone.count
-        Zone.count += 1
 
         logger.info(f"Zone created: {self}")
 

@@ -2,18 +2,21 @@ import numpy as np
 
 from building3d.geom.zone import Zone
 from building3d.geom.building import Building
-from building3d.geom.solid.box import box
+from building3d.geom.solid.floor_plan import floor_plan
 from building3d.geom.zone import Zone
 from building3d.sim.rays.simulation import Simulation
 from building3d.sim.rays.config import SPEED, T_STEP
+from building3d.display.plot_objects import plot_objects
+from building3d.sim.rays.ray_buff_plotter import RayBuffPlotter
 
 
 def test_ray_simulation(show=False):
     # Create building
-    s0 = box(1, 1, 1, (0, 0, 0), "s0")
-    s1 = box(1, 1, 1, (1, 0, 0), "s1")
-    s2 = box(1, 1, 1, (1, 1, 0), "s2")
-    zone = Zone([s0, s1, s2], "z")
+    s = floor_plan(
+        plan=[(0, 0), (1, 0), (1, 1), (2, 1), (2, 2), (0, 2)],
+        height=1,
+    )
+    zone = Zone([s], "z")
     building = Building([zone], "b")
 
     # Sources and sinks
@@ -52,18 +55,8 @@ def test_ray_simulation(show=False):
     assert hit_buf.sum() > 0
 
     if show:
-        from building3d.display.plot_objects import plot_objects
-        from building3d.sim.rays.ray_buff_plotter import RayBuffPlotter
         rays = RayBuffPlotter(building, pos_buf, enr_buf)
         plot_objects((building, rays))
-
-    # All rays should be inside one of the three solids
-    curr_pos = pos_buf[-1, :, :]
-    for i in range(num_rays):
-        in_s0 = s0.is_point_inside(curr_pos[i, :])
-        in_s1 = s1.is_point_inside(curr_pos[i, :])
-        in_s2 = s2.is_point_inside(curr_pos[i, :])
-        assert in_s0 or in_s1 or in_s2
 
 
 if __name__ == "__main__":

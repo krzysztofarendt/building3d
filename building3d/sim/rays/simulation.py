@@ -63,16 +63,17 @@ class Simulation:
         else:
             trans_poly_paths = set()
 
+        # Convert building to the array format
+        logger.info("Converting the building to the array format")
+        points, faces, polygons, walls, _, _ = to_array_format(self.building)
+
         # Can't have an empty set because of Numba. Polygon -1 doesn't exist anyway.
         trans_poly_nums = set([-1])
         for poly_path in trans_poly_paths:
             poly = self.building.get(poly_path)
             assert isinstance(poly, Polygon)
+            assert poly.num is not None
             trans_poly_nums.add(poly.num)
-
-        # Convert building to the array format
-        logger.info("Converting the building to the array format")
-        points, faces, polygons, walls, _, _ = to_array_format(self.building)
 
         # Run simulation loop (JIT compiled)
         logger.info("Starting the simulation")
@@ -131,6 +132,9 @@ def simulation_loop(
             - hit_buf: buffer of ray absorber hits, shaped (num_steps + 1, num_rays)
     """
     print("Simulation loop started")
+    if len(transparent_polygons) > 1:
+        transparent_polygons.remove(-1)
+
     # Simulation parameters
     t_step = T_STEP
     absorption = ABSORB
@@ -233,9 +237,9 @@ def simulation_loop(
     # Move rays
     print("Entering the loop")
     for i in range(num_steps):
-        print("Step", i)
+        print("Step", i, "| total energy =", energy.sum())
         # Check absorbers
-        # TODO: This probably shouldn't be inside prange, because of the hits array
+        # This probably shouldn't be inside prange, because of the hits array
         for rn in range(num_rays):
             for sn in range(num_absorbers):
                 # TODO: Switch to squared distances to avoid calculating sqrt in each iteration
@@ -257,10 +261,8 @@ def simulation_loop(
                 energy[rn] = 0.0
 
             # If energy is null, the ray should not move
-            if energy[rn] <= 0.0:
+            if energy[rn] <= eps:
                 continue
-
-            pos[rn] += delta_pos[rn]
 
             # Check near polygons
             x = int(np.floor(pos[rn][0] / grid_step))
@@ -277,22 +279,23 @@ def simulation_loop(
                 poly_tri,
                 transparent_polygons,
                 polygons_to_check,
+                atol=1e-3,
             )
             pts = poly_pts[target_surfs[rn]]
             tri = poly_tri[target_surfs[rn]]
             vn = normal(pts[-1], pts[0], pts[1])
             dist = distance_point_to_polygon(pos[rn], pts, tri, vn)
 
-            while target_surfs[rn] >= 0 and dist < reflection_dist and energy[rn] > 0:
+            while target_surfs[rn] >= 0 and dist < reflection_dist and energy[rn] > eps:
                 # Reflect from the target polygon
+                energy[rn] -= absorption
+                if energy[rn] <= eps:
+                    energy[rn] = 0.0
+                    break
+
                 dot = np.dot(vn, velocity[rn])
                 velocity[rn] = velocity[rn] - 2 * dot * vn
                 delta_pos[rn] = velocity[rn] * t_step
-                energy[rn] -= absorption
-
-                if energy[rn] < 0:
-                    energy[rn] = 0.0
-                    break
 
                 # Get a set of nearby polygon indices to check if the ray
                 # is not going to move outside the building in the next step (after reflection).
@@ -306,11 +309,18 @@ def simulation_loop(
                     poly_tri,
                     transparent_polygons,
                     polygons_to_check,
+                    atol=1e-3,
                 )
+
                 pts = poly_pts[target_surfs[rn]]
                 tri = poly_tri[target_surfs[rn]]
                 vn = normal(pts[-1], pts[0], pts[1])
                 dist = distance_point_to_polygon(pos[rn], pts, tri, vn)
+
+            if energy[rn] > eps and dist > reflection_dist:
+                pos[rn] += delta_pos[rn]
+            else:
+                continue
 
         # Update cyclic buffers
         pos_buf, pos_head, pos_tail = cyclic_buf(

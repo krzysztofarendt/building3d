@@ -1,10 +1,7 @@
 import numpy as np
 
 from building3d.geom.building import Building
-from building3d.geom.polygon import Polygon
-from building3d.geom.solid import Solid
 from building3d.geom.solid.box import box
-from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
 from building3d.io.arrayformat import from_array_format
 from building3d.io.arrayformat import to_array_format
@@ -12,13 +9,6 @@ from building3d.io.arrayformat import to_array_format
 
 def test_arrayformat():
     """Checks if building volume is same before and after reconstruction."""
-
-    # Need to reset the counters before using the array format functions
-    Polygon.count = 0
-    Wall.count = 0
-    Solid.count = 0
-    Zone.count = 0
-    Building.count = 0
 
     zone = Zone(
         [
