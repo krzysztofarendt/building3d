@@ -15,6 +15,8 @@ from building3d.sim.rays.ray_buff_plotter import RayBuffPlotter
 from building3d.sim.rays.simulation import Simulation
 
 if __name__ == "__main__":
+    print("This example shows a ray simulation in a building with 2 solids.")
+
     # Parameters
     output_dir = "out/ray_2_boxes"
 
@@ -34,8 +36,8 @@ if __name__ == "__main__":
     )
 
     # Rays
-    num_rays = 1000
-    num_steps = 500
+    num_rays = 100
+    num_steps = 200
 
     sim = Simulation(building, source, sinks, num_rays, num_steps)
     t0 = time.time()
