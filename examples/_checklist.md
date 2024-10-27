@@ -1,8 +1,8 @@
 - [x] `io.py`
 - [x] `floor_plan.py`
 - [x] `polygon.py`
-- [ ] `ray_2_boxes.py` - need to check the buffer saving
-- [ ] `ray_3_boxes.py` - need to check the buffer saving
+- [x] `ray_2_boxes.py`
+- [x] `ray_3_boxes.py`
 - [ ] `ray_cylinder_example.py`
 - [ ] `ray_sphere_example.py`
 - [ ] `ray_teapot_example.py`
