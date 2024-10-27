@@ -15,15 +15,16 @@ from building3d.sim.rays.ray_buff_plotter import RayBuffPlotter
 from building3d.sim.rays.simulation import Simulation
 
 if __name__ == "__main__":
-    print("This example shows a ray simulation in a building with 2 solids.")
+    print("This example shows a ray simulation in a building with 3 solids.")
 
     # Parameters
-    output_dir = "out/ray_2_boxes"
+    output_dir = "out/ray_3_boxes"
 
     # Create building
     solid_0 = box(1, 1, 1, (0, 0, 0), "s0")
     solid_1 = box(1, 1, 1, (1, 0, 0), "s1")
-    zone = Zone([solid_0, solid_1], "z")
+    solid_2 = box(1, 1, 1, (1, 1, 0), "s2")
+    zone = Zone([solid_0, solid_1, solid_2], "z")
     building = Building([zone], "b")
 
     # Sources and sinks
@@ -36,8 +37,8 @@ if __name__ == "__main__":
     )
 
     # Rays
-    num_rays = 100
-    num_steps = 200
+    num_rays = 200
+    num_steps = 300
 
     sim = Simulation(building, source, sinks, num_rays, num_steps)
     t0 = time.time()

@@ -6,7 +6,7 @@ from numpy.typing import NDArray
 # numba does not like to make operations on mixed types, so a lot of manual casting
 # to float32 everywhere where possible was needed
 FLOAT = np.float64
-INT = np.uint32
+INT = np.int32
 
 PointType = NDArray[FLOAT]  # Shape (num_points, 3) or (3, )
 VectorType = NDArray[FLOAT]  # Shape (num_vectors, 3), or (3, )

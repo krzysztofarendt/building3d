@@ -312,10 +312,15 @@ def simulation_loop(
                     atol=1e-3,
                 )
 
-                pts = poly_pts[target_surfs[rn]]
-                tri = poly_tri[target_surfs[rn]]
-                vn = normal(pts[-1], pts[0], pts[1])
-                dist = distance_point_to_polygon(pos[rn], pts, tri, vn)
+                # If the next surface is known, calculate the distance to it.
+                # If not, assume infinity.
+                if target_surfs[rn] >= 0:
+                    pts = poly_pts[target_surfs[rn]]
+                    tri = poly_tri[target_surfs[rn]]
+                    vn = normal(pts[-1], pts[0], pts[1])
+                    dist = distance_point_to_polygon(pos[rn], pts, tri, vn)
+                else:
+                    dist = np.inf
 
             if energy[rn] > eps and dist > reflection_dist:
                 pos[rn] += delta_pos[rn]
