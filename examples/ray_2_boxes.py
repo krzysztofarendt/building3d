@@ -19,6 +19,7 @@ if __name__ == "__main__":
 
     # Parameters
     output_dir = "out/ray_2_boxes"
+    buffer_dir = os.path.join(output_dir, "buffer")
 
     # Create building
     solid_0 = box(1, 1, 1, (0, 0, 0), "s0")
@@ -50,9 +51,8 @@ if __name__ == "__main__":
     write_b3d(b3d_file, building)
 
     # Save and read buffers - if the video looks fine, these functions work OK
-    # TODO: https://github.com/krzysztofarendt/building3d/issues/74
-    # dump_buffers(pos_buf, vel_buf, enr_buf, hit_buf, "tmp")
-    # pos_buf, vel_buf, enr_buf, hit_buf = read_buffers("tmp")
+    dump_buffers(pos_buf, vel_buf, enr_buf, hit_buf, buffer_dir)
+    pos_buf, vel_buf, enr_buf, hit_buf = read_buffers(buffer_dir)
 
     # Show plot
     rays = RayBuffPlotter(building, pos_buf, enr_buf)

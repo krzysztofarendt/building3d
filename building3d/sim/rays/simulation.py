@@ -281,10 +281,16 @@ def simulation_loop(
                 polygons_to_check,
                 atol=1e-3,
             )
-            pts = poly_pts[target_surfs[rn]]
-            tri = poly_tri[target_surfs[rn]]
-            vn = normal(pts[-1], pts[0], pts[1])
-            dist = distance_point_to_polygon(pos[rn], pts, tri, vn)
+            # If the next surface is known, calculate the distance to it.
+            # If not, assume infinity.
+            if target_surfs[rn] >= 0:
+                pts = poly_pts[target_surfs[rn]]
+                tri = poly_tri[target_surfs[rn]]
+                vn = normal(pts[-1], pts[0], pts[1])
+                dist = distance_point_to_polygon(pos[rn], pts, tri, vn)
+            else:
+                vn = np.zeros(3, dtype=FLOAT)
+                dist = np.inf
 
             while target_surfs[rn] >= 0 and dist < reflection_dist and energy[rn] > eps:
                 # Reflect from the target polygon
@@ -293,6 +299,8 @@ def simulation_loop(
                     energy[rn] = 0.0
                     break
 
+                # Assert statement does not work with prange...
+                # assert np.linalg.norm(vn) > 0, "Normal vector cannot have zero length"
                 dot = np.dot(vn, velocity[rn])
                 velocity[rn] = velocity[rn] - 2 * dot * vn
                 delta_pos[rn] = velocity[rn] * t_step
@@ -311,7 +319,6 @@ def simulation_loop(
                     polygons_to_check,
                     atol=1e-3,
                 )
-
                 # If the next surface is known, calculate the distance to it.
                 # If not, assume infinity.
                 if target_surfs[rn] >= 0:
@@ -320,6 +327,7 @@ def simulation_loop(
                     vn = normal(pts[-1], pts[0], pts[1])
                     dist = distance_point_to_polygon(pos[rn], pts, tri, vn)
                 else:
+                    vn = np.zeros(3, dtype=FLOAT)
                     dist = np.inf
 
             if energy[rn] > eps and dist > reflection_dist:
