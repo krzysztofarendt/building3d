@@ -8,33 +8,31 @@ from building3d.geom.building import Building
 from building3d.geom.types import FloatDataType
 from building3d.geom.types import PointType
 
-from .config import BUILDING_COLOR
-from .config import BUILDING_OPACITY
-from .config import CMAP
-from .config import FPS
-from .config import RAY_LINE_LEN
-from .config import RAY_OPACITY
-from .config import RAY_POINT_SIZE
-from .config import RAY_TRAIL_OPACITY
+from .simulation_config import SimulationConfig
 
 logger = logging.getLogger(__name__)
 
 
 def make_movie_from_buffer(
-    output_file: str, building: Building, pos_buf: PointType, enr_buf: FloatDataType
+    output_file: str,
+    building: Building,
+    pos_buf: PointType,
+    enr_buf: FloatDataType,
+    sim_cfg: SimulationConfig = SimulationConfig(),
 ):
-    """Generate movie."""
+    """Generate movie from position and energy buffers."""
     logger.info(f"Making movie: {output_file}")
     print(f"Making movie: {output_file}")
 
     # Graphics settings
-    ray_opacity = RAY_OPACITY
-    ray_trail_opacity = RAY_TRAIL_OPACITY
-    ray_point_size = RAY_POINT_SIZE  # default 3, looks good if many rays
-    building_opacity = BUILDING_OPACITY
-    building_color = BUILDING_COLOR
-    fps = FPS
-    cmap = CMAP
+    ray_opacity = sim_cfg.visualization["ray_opacity"]
+    ray_trail_opacity = sim_cfg.visualization["ray_trail_opacity"]
+    ray_trail_length = sim_cfg.visualization["ray_trail_length"]
+    ray_point_size = sim_cfg.visualization["ray_point_size"]
+    building_opacity = sim_cfg.visualization["building_opacity"]
+    building_color = sim_cfg.visualization["building_color"]
+    fps = sim_cfg.visualization["movie_fps"]
+    cmap = sim_cfg.visualization["movie_colormap"]
 
     # Initialize plotter
     plotter = pv.Plotter(
@@ -61,7 +59,7 @@ def make_movie_from_buffer(
 
     for i in range(1, num_steps):
         logger.info(f"Processing frame {i}")
-        start = i - RAY_LINE_LEN
+        start = i - ray_trail_length
         if start < 0:
             start = 0
         end = i

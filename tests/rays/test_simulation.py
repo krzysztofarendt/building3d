@@ -5,7 +5,7 @@ from building3d.geom.building import Building
 from building3d.geom.solid.box import box
 from building3d.geom.zone import Zone
 from building3d.sim.rays.simulation import Simulation
-from building3d.sim.rays.config import SPEED, T_STEP
+from building3d.sim.rays.simulation_config import SimulationConfig
 
 
 def test_ray_simulation(show=False):
@@ -16,24 +16,29 @@ def test_ray_simulation(show=False):
     zone = Zone([s0, s1, s2], "z")
     building = Building([zone], "b")
 
-    # Sources and sinks
-    source = np.array([1.5, 1.5, 0.5])
-    sinks = np.array(
-        [
-            [0.0, 0.0, 0.0],
-            [0.1, 0.1, 0.6],
-            [1.3, 1.3, 0.3],  # Close to the source to assure some ray hits it
-        ]
-    )
+    # Simulation configuration
+    sim_cfg = SimulationConfig()
 
-    # Number of rays should be sufficient to almost always pass this test
+    # Overwrite defaults
     num_rays = 100
+    time_step = 1e-4
+    speed = 343.0
+    max_dist = 3.0  # Distance we want the rays to travel
+    num_steps = int(max_dist / speed / time_step)
 
-    # Number of steps should be sufficient to travel between solids
-    max_dist = 3.
-    num_steps = int(max_dist / SPEED / T_STEP)
+    sim_cfg.engine["time_step"] = time_step
+    sim_cfg.engine["num_steps"] = num_steps
+    sim_cfg.rays["ray_speed"] = speed
+    sim_cfg.rays["num_rays"] = num_rays
+    sim_cfg.rays["source"] = (1.5, 1.5, 0.5)
+    sim_cfg.rays["absorbers"] = [
+        (0.0, 0.0, 0.0),
+        (0.1, 0.1, 0.6),
+        (1.3, 1.3, 0.3),  # Close to the source to assure some ray hits it
+    ]
 
-    sim = Simulation(building, source, sinks, num_rays, num_steps)
+    # Run simulation
+    sim = Simulation(building, sim_cfg)
     pos_buf, vel_buf, enr_buf, hit_buf = sim.run()
 
     # At least some ray should be in solid_0

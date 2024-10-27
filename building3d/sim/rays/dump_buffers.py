@@ -9,10 +9,7 @@ from building3d.geom.types import PointType
 from building3d.geom.types import VectorType
 from building3d.paths.wildcardpath import WildcardPath
 
-from .config import ENERGY_FILE
-from .config import HITS_FILE
-from .config import POSITION_FILE
-from .config import VELOCITY_FILE
+from .simulation_config import SimulationConfig
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +20,7 @@ def dump_buffers(
     enr_buf: FloatDataType,
     hit_buf: FloatDataType,
     dump_dir: str,
+    sim_cfg: SimulationConfig = SimulationConfig(),
 ):
     """Saves buffer arrays to a chosen directory.
 
@@ -34,6 +32,7 @@ def dump_buffers(
         enr_buf: buffer of ray energy, shaped (num_steps, num_rays)
         hit_buf: buffer of ray absorber hits, shaped (num_steps, num_absorbers)
         dump_dir: path to the dump directory, will be created if doesn't exist
+        sim_cfg: simulation configuration
 
     Returns:
         None
@@ -48,10 +47,10 @@ def dump_buffers(
 
     while step < num_steps:
         for data, file in (
-            (pos_buf, POSITION_FILE),
-            (enr_buf, ENERGY_FILE),
-            (vel_buf, VELOCITY_FILE),
-            (hit_buf, HITS_FILE),
+            (pos_buf, sim_cfg.paths["position_file"]),
+            (enr_buf, sim_cfg.paths["energy_file"]),
+            (vel_buf, sim_cfg.paths["velocity_file"]),
+            (hit_buf, sim_cfg.paths["hits_file"]),
         ):
             path = WildcardPath(file).fill(parent=dump_dir, step=step)
             np.save(path, data[step])
@@ -61,19 +60,21 @@ def dump_buffers(
 
 def read_buffers(
     dump_dir: str,
+    sim_cfg: SimulationConfig = SimulationConfig(),
 ) -> tuple[PointType, VectorType, FloatDataType, FloatDataType]:
     """Read buffer arrays from a directory.
 
     Args:
         dump_dir: path to the dump directory
+        sim_cfg: simulation configuration
 
     Returns:
         (pos_buf, vel_buf, enr_buf, hit_buf)
     """
-    wpath_pos = WildcardPath(POSITION_FILE)
-    wpath_vel = WildcardPath(VELOCITY_FILE)
-    wpath_enr = WildcardPath(ENERGY_FILE)
-    wpath_hit = WildcardPath(HITS_FILE)
+    wpath_pos = WildcardPath(sim_cfg.paths["position_file"])
+    wpath_vel = WildcardPath(sim_cfg.paths["velocity_file"])
+    wpath_enr = WildcardPath(sim_cfg.paths["energy_file"])
+    wpath_hit = WildcardPath(sim_cfg.paths["hits_file"])
 
     dict_pos = wpath_pos.get_matching_paths_dict_values(parent=dump_dir)
     dict_vel = wpath_vel.get_matching_paths_dict_values(parent=dump_dir)
