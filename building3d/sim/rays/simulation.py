@@ -299,7 +299,8 @@ def simulation_loop(
                     energy[rn] = 0.0
                     break
 
-                assert np.linalg.norm(vn) > 0, "Normal vector cannot have zero length"
+                # Assert statement does not work with prange...
+                # assert np.linalg.norm(vn) > 0, "Normal vector cannot have zero length"
                 dot = np.dot(vn, velocity[rn])
                 velocity[rn] = velocity[rn] - 2 * dot * vn
                 delta_pos[rn] = velocity[rn] * t_step
