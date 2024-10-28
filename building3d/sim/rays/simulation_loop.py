@@ -133,12 +133,12 @@ def simulation_loop(
         pos[i, :] = source.copy()
 
     # Cyclic buffers
-    pos_buf = np.zeros((buffer_size, num_rays, 3), dtype=FLOAT)
+    pos_buf = np.zeros((buffer_size, num_rays, 3), dtype=np.float32)
     for _ in range(3):
         pos_buf[:, :, :] = source.copy()
-    vel_buf = np.zeros((buffer_size, num_rays, 3), dtype=FLOAT)
-    enr_buf = np.ones((buffer_size, num_rays), dtype=FLOAT)
-    hit_buf = np.zeros((buffer_size, len(absorbers)), dtype=FLOAT)
+    vel_buf = np.zeros((buffer_size, num_rays, 3), dtype=np.float32)
+    enr_buf = np.ones((buffer_size, num_rays), dtype=np.float32)
+    hit_buf = np.zeros((buffer_size, len(absorbers)), dtype=np.float32)
 
     pos_head, pos_tail = 0, 0
     vel_head, vel_tail = 0, 0
