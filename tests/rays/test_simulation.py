@@ -4,6 +4,7 @@ from building3d.geom.zone import Zone
 from building3d.geom.building import Building
 from building3d.geom.solid.box import box
 from building3d.geom.zone import Zone
+from building3d.geom.types import FLOAT
 from building3d.sim.rays.simulation import Simulation
 from building3d.sim.rays.simulation_config import SimulationConfig
 
@@ -63,7 +64,7 @@ def test_ray_simulation(show=False):
         plot_objects((building, rays))
 
     # All rays should be inside one of the three solids
-    curr_pos = pos_buf[-1, :, :]
+    curr_pos = pos_buf[-1, :, :].astype(FLOAT)  # Because buffer may have other float type
     for i in range(num_rays):
         in_s0 = s0.is_point_inside(curr_pos[i, :])
         in_s1 = s1.is_point_inside(curr_pos[i, :])
