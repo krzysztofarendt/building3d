@@ -175,6 +175,8 @@ def simulation_loop(
         # Check absorbers
         # This probably shouldn't be inside prange, because of the hits array
         for rn in range(num_rays):
+            if energy[rn] <= eps:
+                continue
             for sn in range(num_absorbers):
                 absorber_sq_dist[sn, rn] = np.sum((pos[rn] - absorbers[sn]) ** 2)
                 if absorber_sq_dist[sn, rn] < absorber_sq_radius:
@@ -182,6 +184,10 @@ def simulation_loop(
                     energy[rn] = 0.0
 
         for rn in prange(num_rays):
+            # If energy is null, the ray should not move
+            if energy[rn] <= eps:
+                continue
+
             # If the ray somehow left the building - set its energy to 0
             if energy[rn] > 0 and (
                 pos[rn][0] < min_x - eps
@@ -192,10 +198,6 @@ def simulation_loop(
                 or pos[rn][2] > max_z + eps
             ):
                 energy[rn] = 0.0
-
-            # If energy is null, the ray should not move
-            if energy[rn] <= eps:
-                continue
 
             # Check near polygons
             x = int(np.floor(pos[rn][0] / grid_step))
