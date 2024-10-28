@@ -72,6 +72,9 @@ def simulation_loop(
     if len(transparent_polygons) > 1:
         transparent_polygons.remove(-1)
 
+    # Absorber size as a squared radius (to avoid calculating sqrt for each ray and step)
+    absorber_sq_radius = absorber_radius ** 2
+
     # Initial ray energy and received energy
     energy = np.ones(num_rays, dtype=FLOAT)
     hits = np.zeros(len(absorbers), dtype=FLOAT)
@@ -156,9 +159,9 @@ def simulation_loop(
     # Distance to each absorber
     print("Calculating initial distance to each absorber")
     num_absorbers = absorbers.shape[0]
-    absorber_dist = np.zeros((num_absorbers, num_rays))
+    absorber_sq_dist = np.zeros((num_absorbers, num_rays))
     for sn in range(num_absorbers):
-        absorber_dist[sn, :] = np.sqrt(np.sum((pos - absorbers[sn]) ** 2, axis=1))
+        absorber_sq_dist[sn, :] = np.sum((pos - absorbers[sn]) ** 2, axis=1)
 
     # Target surfaces
     # If the index of the target is -1, it means that the target surface is unknown.
@@ -173,9 +176,8 @@ def simulation_loop(
         # This probably shouldn't be inside prange, because of the hits array
         for rn in range(num_rays):
             for sn in range(num_absorbers):
-                # TODO: Switch to squared distances to avoid calculating sqrt in each iteration
-                absorber_dist[sn, rn] = np.sqrt(np.sum((pos[rn] - absorbers[sn]) ** 2))
-                if absorber_dist[sn, rn] < absorber_radius:
+                absorber_sq_dist[sn, rn] = np.sum((pos[rn] - absorbers[sn]) ** 2)
+                if absorber_sq_dist[sn, rn] < absorber_sq_radius:
                     hits[sn] += energy[rn]  # This line shouldn't be inside prange
                     energy[rn] = 0.0
 
