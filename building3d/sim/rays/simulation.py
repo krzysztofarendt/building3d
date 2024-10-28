@@ -31,6 +31,9 @@ class Simulation:
         self.polygons = polygons
         self.walls = walls
 
+        # Verbosity (turns on prints in the JIT-compiled code)
+        self.verbose = sim_cfg.verbose
+
         # Engine parameters
         self.buffer_size: int = sim_cfg.engine["buffer_size"]
         self.time_step: float = sim_cfg.engine["time_step"]
@@ -101,6 +104,7 @@ class Simulation:
             transparent_polygons = trans_poly_nums,
             surf_absorption = self.surf_absorption,
             buffer_size = self.buffer_size,
+            verbose = self.verbose,
         )
         logger.info("Finished the simulation")
         return pos_buf, vel_buf, enr_buf, hit_buf

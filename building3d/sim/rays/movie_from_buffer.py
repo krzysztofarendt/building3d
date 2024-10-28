@@ -9,6 +9,7 @@ from building3d.geom.types import FloatDataType
 from building3d.geom.types import PointType
 
 from .simulation_config import SimulationConfig
+from .jit_print import jit_print
 
 logger = logging.getLogger(__name__)
 
@@ -19,10 +20,20 @@ def make_movie_from_buffer(
     pos_buf: PointType,
     enr_buf: FloatDataType,
     sim_cfg: SimulationConfig = SimulationConfig(),
+    verbose: bool = True,
 ):
-    """Generate movie from position and energy buffers."""
+    """Generate movie from position and energy buffers.
+
+    Args:
+        output_file: path to the output file.
+        building: Building instance.
+        pos_buf: Ray position buffer.
+        enr_buf: Ray energy buffer.
+        sim_cfg (optional): Simulation configuration.
+        verbose (optional): Prints progress if True.
+    """
     logger.info(f"Making movie: {output_file}")
-    print(f"Making movie: {output_file}")
+    jit_print(verbose, f"Making movie: {output_file}")
 
     # Graphics settings
     ray_opacity = sim_cfg.visualization["ray_opacity"]

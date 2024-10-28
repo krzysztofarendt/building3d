@@ -16,6 +16,7 @@ from building3d.types.cyclic_buffer import cyclic_buf
 from .find_nearby_polygons import find_nearby_polygons
 from .find_target import find_target_surface
 from .voxel_grid import make_voxel_grid
+from .jit_print import jit_print
 
 
 @njit(parallel=True)
@@ -35,6 +36,7 @@ def simulation_loop(
     transparent_polygons: set[int],
     surf_absorption: FloatDataType,
     buffer_size: int,
+    verbose: bool = True,
     eps: float = 1e-6,
 ) -> tuple[PointType, VectorType, FloatDataType, FloatDataType]:
     """Performs a simulation loop for ray tracing in a building environment.
@@ -59,6 +61,7 @@ def simulation_loop(
         surf_absorbtion (FloatDataType): Absorption coefficients for each polygon,
                                          shape (len(polygons), ).
         buffer_size (int): Size of buffers used to store part positions, energy, hits.
+        verbose (bool): Prints progress if True
         eps (float): Small number used in comparison operations.
 
     Returns:
@@ -68,7 +71,7 @@ def simulation_loop(
             - enr_buf: buffer of ray energy, shaped (num_steps + 1, num_rays)
             - hit_buf: buffer of ray absorber hits, shaped (num_steps + 1, num_rays)
     """
-    print("Simulation loop started")
+    jit_print(verbose, "Simulation loop started")
     if len(transparent_polygons) > 1:
         transparent_polygons.remove(-1)
 
@@ -89,7 +92,7 @@ def simulation_loop(
     reflection_dist = ray_speed * time_step * just_in_case_margin
 
     # Get polygon points and faces
-    print("Collecting polygon points and faces from the array format")
+    jit_print(verbose, "Collecting polygon points and faces from the array format")
     poly_pts = []
     poly_tri = []
     num_polys = len(walls)
@@ -99,8 +102,7 @@ def simulation_loop(
         poly_tri.append(tri)
 
     # Make voxel grid
-    print("Making the voxel grid")
-    grid_step = grid_step
+    jit_print(verbose, "Making the voxel grid")
     assert (
         grid_step > reflection_dist
     ), "Can't use grid smaller than reflection distance"
@@ -112,19 +114,20 @@ def simulation_loop(
     max_y = points[:, 1].max()
     max_z = points[:, 2].max()
 
-    print("X limits:", min_x, max_x)
-    print("Y limits:", min_y, max_y)
-    print("Z limits:", min_z, max_z)
+    jit_print(verbose, "X limits:", min_x, max_x)
+    jit_print(verbose, "Y limits:", min_y, max_y)
+    jit_print(verbose, "Z limits:", min_z, max_z)
 
     grid = make_voxel_grid(
         min_xyz=(min_x, min_y, min_z),
         max_xyz=(max_x, max_y, max_z),
         poly_pts=poly_pts,
         step=grid_step,
+        verbose=verbose,
     )
 
     # Initial position
-    print("Initializing arrays: position, velocity, energy, hits")
+    jit_print(verbose, "Initializing arrays: position, velocity, energy, hits")
     pos = np.zeros((num_rays, 3), dtype=FLOAT)
     for i in range(num_rays):
         pos[i, :] = source.copy()
@@ -157,7 +160,7 @@ def simulation_loop(
     )
 
     # Distance to each absorber
-    print("Calculating initial distance to each absorber")
+    jit_print(verbose, "Calculating initial distance to each absorber")
     num_absorbers = absorbers.shape[0]
     absorber_sq_dist = np.zeros((num_absorbers, num_rays))
     for sn in range(num_absorbers):
@@ -169,9 +172,9 @@ def simulation_loop(
     target_surfs = np.full(num_rays, -1, dtype=np.int32)
 
     # Move rays
-    print("Entering the loop")
+    jit_print(verbose, "Entering the loop")
     for i in range(num_steps):
-        print("Step", i, "| total energy =", energy.sum())
+        jit_print(verbose, "Step", i, "| total energy =", energy.sum())
         # Check absorbers
         # This probably shouldn't be inside prange, because of the hits array
         for rn in range(num_rays):
@@ -285,14 +288,14 @@ def simulation_loop(
             hit_buf, hit_head, hit_tail, hits, buffer_size
         )
 
-    print("Exiting the loop")
-    print("Converting buffers to contiguous arrays")
+    jit_print(verbose, "Exiting the loop")
+    jit_print(verbose, "Converting buffers to contiguous arrays")
     pos_buf = convert_to_contiguous(pos_buf, pos_head, pos_tail, buffer_size)
     vel_buf = convert_to_contiguous(vel_buf, vel_head, vel_tail, buffer_size)
     enr_buf = convert_to_contiguous(enr_buf, enr_head, enr_tail, buffer_size)
     hit_buf = convert_to_contiguous(hit_buf, hit_head, hit_tail, buffer_size)
 
-    print("Exiting the function")
+    jit_print(verbose, "Exiting the function")
     # Shapes:
     # pos_buf: (num_steps + 1, num_rays, 3)
     # vel_buf: (num_steps + 1, num_rays, 3)

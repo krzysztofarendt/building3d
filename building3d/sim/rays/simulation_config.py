@@ -2,6 +2,10 @@ class SimulationConfig:
 
     def __init__(self):
 
+        # Verbosity (turns on prints in the JIT-compiled code)
+        self.verbose = True
+
+        # Simulation engine parameters
         self.engine = {
             "buffer_size": 200,
             "time_step": 1e-4,
@@ -10,6 +14,7 @@ class SimulationConfig:
             "search_transparent": True,
         }
 
+        # Ray configuration
         self.rays = {
             "num_rays": 100,
             "ray_speed": 343.0,
@@ -18,6 +23,7 @@ class SimulationConfig:
             "absorber_radius": 0.1,
         }
 
+        # Surface parameters
         self.surfaces = {
             "absorption": {
                 "default": 0.2,
@@ -27,6 +33,7 @@ class SimulationConfig:
             },
         }
 
+        # Visualization parameters (plots, movies)
         self.visualization = {
             "ray_opacity": 0.5,
             "ray_trail_length": 16,
@@ -38,7 +45,8 @@ class SimulationConfig:
             "movie_colormap": "RdPu",
         }
 
-        # All paths relative to the project output directory
+        # Path templates
+        # (all paths relative to the project output directory)
         self.paths = {
             "energy_file": "energy_<step>.npy",
             "position_file": "position_<step>.npy",

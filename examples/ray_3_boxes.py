@@ -1,8 +1,6 @@
 import os
 import time
 
-import numpy as np
-
 from building3d.display.plot_objects import plot_objects
 from building3d.geom.building import Building
 from building3d.geom.solid.box import box
