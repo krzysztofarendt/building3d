@@ -28,7 +28,7 @@ if __name__ == "__main__":
     building = Building([zone], "b")
 
     # Simulation configuration
-    sim_cfg = SimulationConfig()
+    sim_cfg = SimulationConfig(building)
 
     sim_cfg.engine["num_steps"] = 200
     sim_cfg.rays["num_rays"] = 100
@@ -49,8 +49,8 @@ if __name__ == "__main__":
     write_b3d(b3d_file, building)
 
     # Save and read buffers - if the video looks fine, these functions work OK
-    dump_buffers(pos_buf, vel_buf, enr_buf, hit_buf, buffer_dir)
-    pos_buf, vel_buf, enr_buf, hit_buf = read_buffers(buffer_dir)
+    dump_buffers(pos_buf, vel_buf, enr_buf, hit_buf, buffer_dir, sim_cfg)
+    pos_buf, vel_buf, enr_buf, hit_buf = read_buffers(buffer_dir, sim_cfg)
 
     # Show plot
     rays = RayBuffPlotter(building, pos_buf, enr_buf)

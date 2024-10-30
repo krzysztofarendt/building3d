@@ -20,7 +20,7 @@ def test_ray_simulation(show=False):
     building = Building([zone], "b")
 
     # Simulation configuration
-    sim_cfg = SimulationConfig()
+    sim_cfg = SimulationConfig(building)
 
     # Overwrite defaults
     num_rays = 100

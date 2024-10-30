@@ -20,7 +20,7 @@ def dump_buffers(
     enr_buf: FloatDataType,
     hit_buf: FloatDataType,
     dump_dir: str,
-    sim_cfg: SimulationConfig = SimulationConfig(),
+    sim_cfg: SimulationConfig,
 ):
     """Saves buffer arrays to a chosen directory.
 
@@ -60,7 +60,7 @@ def dump_buffers(
 
 def read_buffers(
     dump_dir: str,
-    sim_cfg: SimulationConfig = SimulationConfig(),
+    sim_cfg: SimulationConfig,
 ) -> tuple[PointType, VectorType, FloatDataType, FloatDataType]:
     """Read buffer arrays from a directory.
 

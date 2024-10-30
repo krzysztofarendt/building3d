@@ -81,7 +81,17 @@ class Building:
         logger.info(f"Zone {zone.name} added: {self}")
 
     def get(self, abspath: str):
-        """Get object by the absolute path."""
+        """Get object by the absolute path.
+
+        Args:
+            abspath: absolute path to an object, starting with the building name.
+
+        Returns:
+            object (Building, Zone, Solid, Wall, or Polygon).
+
+        Raises:
+            ValueError: If the path does not point to any existing object.
+        """
         obj = abspath.split(PATH_SEP)
         assert len(obj) >= 1
         building = obj[0]
@@ -116,6 +126,19 @@ class Building:
             return self[zone][solid][wall][polygon][index]
         else:
             raise ValueError(f"Incorrect absolute path: {abspath}")
+
+    def get_polygon_paths(self) -> list[str]:
+        """Returns a list of all paths to polygons belonging to this building."""
+        poly_paths = []
+        bn = self.name
+
+        for zn, z in self.zones.items():
+            for sn, s in z.solids.items():
+                for wn, w in s.walls.items():
+                    for pn, _ in w.polygons.items():
+                        path = PATH_SEP.join([bn, zn, sn, wn, pn])
+                        poly_paths.append(path)
+        return poly_paths
 
     def get_graph(
         self, new: bool = False, level: str = "polygon"

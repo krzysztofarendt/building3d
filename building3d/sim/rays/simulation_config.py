@@ -1,6 +1,24 @@
+from collections import defaultdict
+import logging
+
+from building3d.geom.types import FloatDataType
+from building3d.geom.building import Building
+from building3d.geom.zone import Zone
+from building3d.geom.solid import Solid
+from building3d.geom.wall import Wall
+from building3d.geom.polygon import Polygon
+
+from .jit_print import jit_print
+
+
+logger = logging.getLogger(__name__)
+
+
 class SimulationConfig:
 
-    def __init__(self):
+    def __init__(self, building: Building):
+
+        self.building = building
 
         # Verbosity (turns on prints in the JIT-compiled code)
         self.verbose = True
@@ -32,6 +50,7 @@ class SimulationConfig:
                 # "bname/zname/sname/wname/pname": 0.5,
             },
         }
+        self.set_default_surface_paths(self.building)
 
         # Visualization parameters (plots, movies)
         self.visualization = {
@@ -57,3 +76,78 @@ class SimulationConfig:
             "movie_file": "simulation.mp4",
             "b3d_file": "building.b3d",
         }
+
+    def set_default_surface_paths(self, building: Building):
+        """Add all polygon paths to surface parameters and fill them with default values."""
+        poly_paths = building.get_polygon_paths()
+        for key in self.surfaces.keys():
+            for path in poly_paths:
+                self.surfaces[key][path] = self.surfaces[key]["default"]
+
+    def set_surface_param(
+        self,
+        param_name: str,
+        surface_path: str,
+        value: float,
+        building: Building,
+    ) -> None:
+        """Sets the surface parameter value based on the surface path.
+
+        The surface paths can be complete or partial.
+        A complete path includes all objects from the building to the polygon, e.g.:
+        `bname/zname/sname/wname/pname`.
+
+        A partial path ends with a building, zone, solid, or wall.
+        It is assumed that all children of a given parent get the same value.
+        For example, if you set
+        `sim_cfg.set_surface_param("absorption", "bname/zname/sname", 0.1, bdg)`,
+        then all polygons within the solid `sname` will have `absoprtion` equal to 0.1.
+
+        Args:
+            param_name: Name of the parameter, e.g. "absorption".
+            surace_path: Path to polygons, can be complete or partial (see description above).
+            value: Value to assign.
+            building: Building instance, used only to assert that the path exists.
+
+        Returns:
+            None
+        """
+        try:
+            obj = building.get(surface_path)
+        except (ValueError, KeyError) as e:
+            err_msg = "Path does not point to any existing object in the building."
+            jit_print(self.verbose, err_msg)
+            logger.error(err_msg)
+            logger.error(str(e))
+            raise e
+
+        if isinstance(obj, Polygon):
+            self.surfaces[param_name][surface_path] = value
+        elif isinstance(obj, (Building, Zone, Solid, Wall)):
+            # Set the value to all polygons belonging to this object
+            polygon_paths = obj.get_polygon_paths()
+            for path in polygon_paths:
+                self.surfaces[param_name][path] = value
+        else:
+            raise TypeError(f"Incorrect type of object: {type(obj)}")
+
+    def surface_params_to_array(
+        self,
+        param_name: str,
+        building: Building,
+    ) -> FloatDataType:
+        """Converts a dict with surface parameter values to an array.
+
+        This array can be then passed to the `simulation_loop()` function.
+
+        Args:
+            param_name: Name of the parameter, e.g. "absorption".
+            building: Building instance, used to get the polygon numbers.
+
+        Returns:
+            Array shaped (len(polygons), ), each element's index corresponds to polygon.num.
+            Polygon numbers are assigned to polygon instances during the conversion to
+            the array format, so this method must be called when after the numbers are assigned.
+        """
+        ...
+
