@@ -46,9 +46,7 @@ class SimulationConfig:
         self.surfaces = {
             "absorption": {
                 "default": 0.2,
-                # Examples overwriting the default value for specific polygons
-                # "bname/zname": 0.1,
-                # "bname/zname/sname/wname/pname": 0.5,
+                # To add custom values to each polygon use self.set_surface_param()
             },
         }
         self.set_default_surface_paths(self.building)
