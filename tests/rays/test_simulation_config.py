@@ -1,7 +1,11 @@
+import pytest
+
 from building3d.geom.building import Building
+from building3d.geom.polygon import Polygon
 from building3d.geom.solid.box import box
 from building3d.geom.zone import Zone
 from building3d.sim.rays.simulation_config import SimulationConfig
+from building3d.io.arrayformat import to_array_format
 
 
 def test_simulation_config():
@@ -38,3 +42,19 @@ def test_simulation_config():
     assert sim_cfg.surfaces["absorption"]["b/z/s1/wall_2/poly_2"] == default_absorption
     assert sim_cfg.surfaces["absorption"]["b/z/s1/wall_3/poly_3"] == default_absorption
     assert sim_cfg.surfaces["absorption"]["b/z/s1/ceiling/ceiling"] == default_absorption
+
+    with pytest.raises(RuntimeError):
+        # Polygons are not numbered yet, because the building was not converted to the array format
+        # An exception should be raised
+        surf_vals = sim_cfg.surface_params_to_array("absorption", building)
+
+    # Convert the building to the array format to number the polygons
+    _ = to_array_format(building)
+
+    surf_vals = sim_cfg.surface_params_to_array("absorption", building)
+
+    polygon_paths = building.get_polygon_paths()
+    for pp in polygon_paths:
+        poly = building.get(pp)
+        assert isinstance(poly, Polygon)
+        assert surf_vals[poly.num] == sim_cfg.surfaces["absorption"][pp]

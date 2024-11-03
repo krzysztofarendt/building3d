@@ -58,7 +58,7 @@ def simulation_loop(
         polygons (IndexType): Array of polygon indices for the building geometry.
         walls (IndexType): Array of wall indices for the building geometry.
         transparent_polygons (set[int]): Set of indices for transparent polygons.
-        surf_absorbtion (FloatDataType): Absorption coefficients for each polygon,
+        surf_absorption (FloatDataType): Absorption coefficients for each polygon,
                                          shape (len(polygons), ).
         buffer_size (int): Size of buffers used to store part positions, energy, hits.
         verbose (bool): Prints progress if True

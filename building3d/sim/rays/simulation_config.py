@@ -1,7 +1,8 @@
-from collections import defaultdict
 import logging
 
-from building3d.geom.types import FloatDataType
+import numpy as np
+
+from building3d.geom.types import FloatDataType, FLOAT
 from building3d.geom.building import Building
 from building3d.geom.zone import Zone
 from building3d.geom.solid import Solid
@@ -138,7 +139,8 @@ class SimulationConfig:
     ) -> FloatDataType:
         """Converts a dict with surface parameter values to an array.
 
-        This array can be then passed to the `simulation_loop()` function.
+        This array can be then passed to the `simulation_loop()` function,
+        e.g. through the `surf_aborbtion` argument.
 
         Args:
             param_name: Name of the parameter, e.g. "absorption".
@@ -149,5 +151,23 @@ class SimulationConfig:
             Polygon numbers are assigned to polygon instances during the conversion to
             the array format, so this method must be called when after the numbers are assigned.
         """
-        ...
+        # Get all polygon paths
+        poly_paths = building.get_polygon_paths()
 
+        # Create an array of surface parameter values for all polygons
+        values = np.zeros(len(poly_paths), dtype=FLOAT)
+
+        for pp in poly_paths:
+            poly = building.get(pp)
+            assert isinstance(poly, Polygon)
+            if poly.num is None:
+                raise RuntimeError("Polygon not numbered by the array format converter yet.")
+            assert 0 <= poly.num < len(poly_paths), "The polygon is numbered incorrectly"
+
+            # Assign values to the return array
+            if pp in self.surfaces[param_name]:
+                values[poly.num] = self.surfaces[param_name][pp]
+            else:
+                values[poly.num] = self.surfaces[param_name]["default"]
+
+        return values
