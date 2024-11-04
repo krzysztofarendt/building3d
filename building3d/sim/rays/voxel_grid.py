@@ -75,7 +75,7 @@ def make_voxel_grid(
     jit_print(verbose, "Total number of voxels:", len(keys))
     for ki in range(len(keys)):
         if ki % 100 == 0:
-            jit_print(verbose, "Current voxel:", ki)
+            jit_print(verbose, "Current voxel:", ki, "/", len(keys))
         key = keys[ki]
         polynums = np.full(max_polygons_per_cell, -1, dtype=INT)
         counter = 0

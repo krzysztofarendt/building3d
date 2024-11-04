@@ -3,9 +3,9 @@
 - [x] `polygon.py`
 - [x] `ray_2_boxes.py`
 - [x] `ray_3_boxes.py`
-- [ ] `ray_cylinder_example.py`
-- [ ] `ray_sphere_example.py`
-- [ ] `ray_teapot_example.py`
+- [x] `ray_cylinder.py`
+- [x] `ray_sphere.py`
+- [x] `ray_teapot.py`
 - [ ] `read_teapot.py`
 - [ ] `solid_example.py`
 - [ ] `wall_example.py`
