@@ -1,3 +1,4 @@
+import logging
 from typing import Iterable
 
 import numpy as np
@@ -9,6 +10,9 @@ from building3d.geom.bboxes import are_bboxes_overlapping
 from building3d.geom.solid import Solid
 from building3d.geom.wall import Wall
 from building3d.geom.zone import Zone
+
+
+logger = logging.getLogger(__name__)
 
 
 def graph_polygon(
@@ -28,11 +32,18 @@ def graph_polygon(
     Retruns:
         graph dictionary
     """
+    logger.debug("Creating a building graph based on polygon connections.")
+
     g = {}
     checked = set()
 
+    num_checked = 0
     for pl1 in iter_polygons(bdg):
         for pl2 in iter_polygons(bdg):
+
+            num_checked += 1
+            if num_checked % 10000 == 0:
+                logger.debug(f"Number of checked polygon pairs = {num_checked}")
 
             if pl1 is pl2:
                 continue

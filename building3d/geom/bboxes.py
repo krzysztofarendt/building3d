@@ -48,6 +48,7 @@ def are_bboxes_overlapping(
     Returns:
         bool: True if the bounding boxes overlap, False otherwise.
     """
+    # Check if max1 < min2 or min1 > max2
     if (bbox1[1] < bbox2[0]).any() or (bbox1[0] > bbox2[1]).any():
         return False
     else:
