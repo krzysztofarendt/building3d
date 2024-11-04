@@ -37,6 +37,7 @@ if __name__ == "__main__":
         (0.1, 0.1, 0.6),
     ]
 
+    # Simulate
     sim = Simulation(building, sim_cfg)
     t0 = time.time()
     pos_buf, vel_buf, enr_buf, hit_buf = sim.run()
@@ -60,4 +61,5 @@ if __name__ == "__main__":
         building=building,
         pos_buf=pos_buf,
         enr_buf=enr_buf,
+        sim_cfg=sim_cfg,
     )

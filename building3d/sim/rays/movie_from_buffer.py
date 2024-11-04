@@ -19,7 +19,7 @@ def make_movie_from_buffer(
     building: Building,
     pos_buf: PointType,
     enr_buf: FloatDataType,
-    sim_cfg: SimulationConfig = SimulationConfig(),
+    sim_cfg: SimulationConfig,
     verbose: bool = True,
 ):
     """Generate movie from position and energy buffers.

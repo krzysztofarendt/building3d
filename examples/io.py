@@ -17,7 +17,7 @@ if __name__ == "__main__":
         "saves it to various formats and recovers back,\n"
         "each time plotting the building to confirm it looks the same."
     )
-    output_dir = "out/building_example"
+    output_dir = "out/io_example"
 
     zone = Zone(
         [
