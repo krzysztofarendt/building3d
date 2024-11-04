@@ -25,12 +25,12 @@ def box(
     The corner `(min(x), min(y), min(z))` will be located at `move`.
 
     The polygon and wall names are hardcoded:
-    - floor
-    - wall_0 (XZ at ymin)
-    - wall_1 (YZ at xmax)
-    - wall_2 (XZ at ymax)
-    - wall_3 (YZ at xmin)
-    - roof
+    - floor/floor
+    - wall_0/poly_0 (XZ at ymin)
+    - wall_1/poly_1 (YZ at xmax)
+    - wall_2/poly_2 (XZ at ymax)
+    - wall_3/poly_3 (YZ at xmin)
+    - ceiling/ceiling
 
     The solid will be named `name` (random if not given).
     """

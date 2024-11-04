@@ -5,6 +5,8 @@ from building3d.geom.types import INT
 from building3d.geom.types import IndexType
 from building3d.geom.types import PointType
 
+from .jit_print import jit_print
+
 
 @njit
 def make_voxel_grid(
@@ -13,6 +15,7 @@ def make_voxel_grid(
     poly_pts: list[PointType],
     step: float = 1.0,
     eps: float = 1e-4,
+    verbose: bool = True,
 ) -> dict[tuple[int, int, int], IndexType]:
     """Create a voxel grid for faster collision detection.
 
@@ -24,6 +27,8 @@ def make_voxel_grid(
         max_xyz (tuple[float, float, float]): Maximum coordinates (x, y, z) of the bounding box.
         poly_pts (list[PointType]): List of points for each polygon.
         step (float, optional): Size of each grid cell. Defaults to 1.0.
+        eps (float, optional): Small number used in comparison operations.
+        verbose (bool, optional): Prints progress if True
 
     Returns:
         dict[tuple[int, int, int], IndexType]: A dictionary where keys are grid
@@ -67,10 +72,10 @@ def make_voxel_grid(
     #       Cannot use numba.prange() due to error "double free or corruption (!prev)"
     #       I don't know what causes this error. It happens only fromt time to time.
     #       Anyway, this function is now pretty fast, so it is not needed.
-    print("Total number of voxels:", len(keys))
+    jit_print(verbose, "Total number of voxels:", len(keys))
     for ki in range(len(keys)):
         if ki % 100 == 0:
-            print("Current voxel:", ki)
+            jit_print(verbose, "Current voxel:", ki)
         key = keys[ki]
         polynums = np.full(max_polygons_per_cell, -1, dtype=INT)
         counter = 0
@@ -102,5 +107,5 @@ def make_voxel_grid(
     if not np.all(added_polygons):
         raise ValueError("Not all polygons added to the voxel grid")
 
-    print("Voxels created")
+    jit_print(verbose, "Voxels created")
     return grid

@@ -1,8 +1,6 @@
 import os
 import time
 
-import numpy as np
-
 from building3d.display.plot_objects import plot_objects
 from building3d.geom.building import Building
 from building3d.geom.solid.box import box
@@ -13,6 +11,7 @@ from building3d.sim.rays.dump_buffers import read_buffers
 from building3d.sim.rays.movie_from_buffer import make_movie_from_buffer
 from building3d.sim.rays.ray_buff_plotter import RayBuffPlotter
 from building3d.sim.rays.simulation import Simulation
+from building3d.sim.rays.simulation_config import SimulationConfig
 
 if __name__ == "__main__":
     print("This example shows a ray simulation in a building with 2 solids.")
@@ -27,20 +26,18 @@ if __name__ == "__main__":
     zone = Zone([solid_0, solid_1], "z")
     building = Building([zone], "b")
 
-    # Sources and sinks
-    source = np.array([0.3, 0.3, 0.3])
-    sinks = np.array(
-        [
-            [0.6, 0.6, 0.6],
-            [0.1, 0.1, 0.6],
-        ]
-    )
+    # Simulation configuration
+    sim_cfg = SimulationConfig(building)
 
-    # Rays
-    num_rays = 100
-    num_steps = 200
+    sim_cfg.engine["num_steps"] = 200
+    sim_cfg.rays["num_rays"] = 100
+    sim_cfg.rays["source"] = (0.3, 0.3, 0.3)
+    sim_cfg.rays["absorbers"] = [
+        (0.6, 0.6, 0.6),
+        (0.1, 0.1, 0.6),
+    ]
 
-    sim = Simulation(building, source, sinks, num_rays, num_steps)
+    sim = Simulation(building, sim_cfg)
     t0 = time.time()
     pos_buf, vel_buf, enr_buf, hit_buf = sim.run()
     tot_time = time.time() - t0
@@ -51,8 +48,8 @@ if __name__ == "__main__":
     write_b3d(b3d_file, building)
 
     # Save and read buffers - if the video looks fine, these functions work OK
-    dump_buffers(pos_buf, vel_buf, enr_buf, hit_buf, buffer_dir)
-    pos_buf, vel_buf, enr_buf, hit_buf = read_buffers(buffer_dir)
+    dump_buffers(pos_buf, vel_buf, enr_buf, hit_buf, buffer_dir, sim_cfg)
+    pos_buf, vel_buf, enr_buf, hit_buf = read_buffers(buffer_dir, sim_cfg)
 
     # Show plot
     rays = RayBuffPlotter(building, pos_buf, enr_buf)

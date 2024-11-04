@@ -93,6 +93,21 @@ class Zone:
         building = obj
         return building.get(abspath)
 
+    def get_polygon_paths(self) -> list[str]:
+        """Returns a list of all paths to polygons belonging to this zone."""
+        poly_paths = []
+        assert self.parent is not None  # Building
+        bn = self.parent.name
+        zn = self.name
+
+        for sn, s in self.solids.items():
+            for wn, w in s.walls.items():
+                for pn, _ in w.polygons.items():
+                    path = PATH_SEP.join([bn, zn, sn, wn, pn])
+                    poly_paths.append(path)
+
+        return poly_paths
+
     def bbox(self) -> tuple[PointType, PointType]:
         pts, _ = self.get_mesh()
         return bounding_box(pts)
