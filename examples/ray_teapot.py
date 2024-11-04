@@ -29,7 +29,7 @@ if __name__ == "__main__":
     sim_cfg.rays["source"] = (0.0, 0.0, 8.0)
     sim_cfg.rays["absorbers"] = [[0.0, 0.0, 4.0]]
     sim_cfg.surfaces["absorption"]["default"] = 0.1
-    sim_cfg.engine["voxel_size"] = 1.0
+    sim_cfg.engine["voxel_size"] = 0.25
     sim_cfg.engine["search_transparent"] = False  # Because it is very slow for this model
     sim_cfg.visualization["ray_opacity"] = 0.1
     sim_cfg.visualization["ray_trail_opacity"] = 0.1
