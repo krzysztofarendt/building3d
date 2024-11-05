@@ -25,7 +25,7 @@ if __name__ == "__main__":
 
     sim_cfg.engine["num_steps"] = 700
     sim_cfg.engine["buffer_size"] = 700
-    sim_cfg.rays["num_rays"] = 50000
+    sim_cfg.rays["num_rays"] = 5000  # It looks nice with 50k rays
     sim_cfg.rays["source"] = (0.0, 0.0, 8.0)
     sim_cfg.rays["absorbers"] = [[0.0, 0.0, 4.0]]
     sim_cfg.surfaces["absorption"]["default"] = 0.1
