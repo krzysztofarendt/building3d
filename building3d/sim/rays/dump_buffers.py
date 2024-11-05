@@ -6,7 +6,6 @@ import numpy as np
 from building3d.geom.types import FLOAT
 from building3d.geom.types import FloatDataType
 from building3d.geom.types import PointType
-from building3d.geom.types import VectorType
 from building3d.paths.wildcardpath import WildcardPath
 
 from .simulation_config import SimulationConfig
@@ -16,7 +15,6 @@ logger = logging.getLogger(__name__)
 
 def dump_buffers(
     pos_buf: PointType,
-    vel_buf: VectorType,
     enr_buf: FloatDataType,
     hit_buf: FloatDataType,
     dump_dir: str,
@@ -28,7 +26,6 @@ def dump_buffers(
 
     Args:
         pos_buf: buffer of ray positions, shaped (num_steps, num_rays, 3)
-        vel_buf: buffer of ray velocity, shaped (num_steps, num_rays, 3)
         enr_buf: buffer of ray energy, shaped (num_steps, num_rays)
         hit_buf: buffer of ray absorber hits, shaped (num_steps, num_absorbers)
         dump_dir: path to the dump directory, will be created if doesn't exist
@@ -49,7 +46,6 @@ def dump_buffers(
         for data, file in (
             (pos_buf, sim_cfg.paths["position_file"]),
             (enr_buf, sim_cfg.paths["energy_file"]),
-            (vel_buf, sim_cfg.paths["velocity_file"]),
             (hit_buf, sim_cfg.paths["hits_file"]),
         ):
             path = WildcardPath(file).fill(parent=dump_dir, step=step)
@@ -61,7 +57,7 @@ def dump_buffers(
 def read_buffers(
     dump_dir: str,
     sim_cfg: SimulationConfig,
-) -> tuple[PointType, VectorType, FloatDataType, FloatDataType]:
+) -> tuple[PointType, FloatDataType, FloatDataType]:
     """Read buffer arrays from a directory.
 
     Args:
@@ -69,40 +65,33 @@ def read_buffers(
         sim_cfg: simulation configuration
 
     Returns:
-        (pos_buf, vel_buf, enr_buf, hit_buf)
+        (pos_buf, enr_buf, hit_buf)
     """
     wpath_pos = WildcardPath(sim_cfg.paths["position_file"])
-    wpath_vel = WildcardPath(sim_cfg.paths["velocity_file"])
     wpath_enr = WildcardPath(sim_cfg.paths["energy_file"])
     wpath_hit = WildcardPath(sim_cfg.paths["hits_file"])
 
     dict_pos = wpath_pos.get_matching_paths_dict_values(parent=dump_dir)
-    dict_vel = wpath_vel.get_matching_paths_dict_values(parent=dump_dir)
     dict_enr = wpath_enr.get_matching_paths_dict_values(parent=dump_dir)
     dict_hit = wpath_hit.get_matching_paths_dict_values(parent=dump_dir)
 
     max_step_pos = max([d["step"] for d in dict_pos.values()]) + 1  # Because indexing starts at 0
-    max_step_vel = max([d["step"] for d in dict_vel.values()]) + 1
     max_step_enr = max([d["step"] for d in dict_enr.values()]) + 1
     max_step_hit = max([d["step"] for d in dict_hit.values()]) + 1
     assert (
-        max_step_pos == max_step_vel == max_step_enr == max_step_hit
+        max_step_pos == max_step_enr == max_step_hit
     ), "Different number of buffer steps in the dump dir?"
 
     max_step = max_step_pos
 
     # Initialize to avoid complaints from the linter about possibly unbound variables
     pos_buf = np.array([], dtype=FLOAT)
-    vel_buf = np.array([], dtype=FLOAT)
     enr_buf = np.array([], dtype=FLOAT)
     hit_buf = np.array([], dtype=FLOAT)
 
     for step_num in range(max_step):
         pos_path = wpath_pos.fill(parent=dump_dir, step=step_num)
         pos = np.load(pos_path)
-
-        vel_path = wpath_vel.fill(parent=dump_dir, step=step_num)
-        vel = np.load(vel_path)
 
         enr_path = wpath_enr.fill(parent=dump_dir, step=step_num)
         enr = np.load(enr_path)
@@ -115,13 +104,11 @@ def read_buffers(
 
         if step_num == 0:
             pos_buf = np.zeros((max_step, num_rays, 3), dtype=FLOAT)
-            vel_buf = np.zeros((max_step, num_rays, 3), dtype=FLOAT)
             enr_buf = np.zeros((max_step, num_rays), dtype=FLOAT)
             hit_buf = np.zeros((max_step, num_absorbers), dtype=FLOAT)
 
         pos_buf[step_num, 0:num_rays, 0:3] = pos
-        vel_buf[step_num, 0:num_rays, 0:3] = vel
         enr_buf[step_num, 0:num_rays] = enr
         hit_buf[step_num, 0:num_absorbers] = hit
 
-    return pos_buf, vel_buf, enr_buf, hit_buf
+    return pos_buf, enr_buf, hit_buf
