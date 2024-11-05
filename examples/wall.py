@@ -5,6 +5,8 @@ from building3d.geom.polygon import Polygon
 from building3d.geom.wall import Wall
 
 if __name__ == "__main__":
+    print("This example shows how to create a wall from a set of points.")
+
     pts0 = np.array(
         [
             [0.0, 0.0, 0.0],

@@ -5,8 +5,11 @@ from building3d.geom.points import new_point
 from building3d.geom.polygon import Polygon
 from building3d.geom.solid import Solid
 from building3d.geom.wall import Wall
+from building3d.geom.zone import Zone
 
 if __name__ == "__main__":
+    print("This example shows how to create a zone from a set of points.")
+
     size = 3
     stretch = [size, size, size]
     translate = [3.0, 3.0, 3.0]
@@ -19,12 +22,12 @@ if __name__ == "__main__":
     p6 = new_point(1.0, 1.0, 1.0) * stretch + translate
     p7 = new_point(0.0, 1.0, 1.5) * stretch + translate
 
-    poly_floor = Polygon(np.vstack((p0, p3, p2, p1)), name="floor")
-    poly_wall0 = Polygon(np.vstack((p0, p1, p5, p4)), name="w0")
-    poly_wall1 = Polygon(np.vstack((p1, p2, p6, p5)), name="w1")
-    poly_wall2 = Polygon(np.vstack((p3, p7, p6, p2)), name="w2")
-    poly_wall3 = Polygon(np.vstack((p0, p4, p7, p3)), name="w3")
-    poly_roof = Polygon(np.vstack((p4, p5, p6, p7)), name="roof")
+    poly_floor = Polygon(np.vstack((p0, p3, p2, p1)))
+    poly_wall0 = Polygon(np.vstack((p0, p1, p5, p4)))
+    poly_wall1 = Polygon(np.vstack((p1, p2, p6, p5)))
+    poly_wall2 = Polygon(np.vstack((p3, p7, p6, p2)))
+    poly_wall3 = Polygon(np.vstack((p0, p4, p7, p3)))
+    poly_roof = Polygon(np.vstack((p4, p5, p6, p7)))
 
     walls = Wall(name="walls")
     walls.add_polygon(poly_wall0)
@@ -32,14 +35,9 @@ if __name__ == "__main__":
     walls.add_polygon(poly_wall2)
     walls.add_polygon(poly_wall3)
 
-    floor = Wall(name="floor")
-    floor.add_polygon(poly_floor)
+    floor = Wall([poly_floor], "floor")
+    roof = Wall([poly_roof], "roof")
+    solid = Solid([walls, floor, roof], "room")
+    zone = Zone([solid], "zone")
 
-    roof = Wall(name="roof")
-    roof.add_polygon(poly_roof)
-
-    solid = Solid(name="room", walls=[walls, floor, roof])
-
-    plot_objects((solid,))
-    plot_objects((walls, floor, roof))
-    plot_objects((poly_floor, poly_wall0, poly_wall1, poly_wall2, poly_wall3, poly_roof))
+    plot_objects((zone,))
