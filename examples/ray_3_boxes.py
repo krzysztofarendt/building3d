@@ -41,7 +41,7 @@ if __name__ == "__main__":
     # Simulate
     sim = Simulation(building, sim_cfg)
     t0 = time.time()
-    pos_buf, vel_buf, enr_buf, hit_buf = sim.run()
+    pos_buf, enr_buf, hit_buf = sim.run()
     tot_time = time.time() - t0
     print(f"{tot_time=:.2f}")
 
@@ -50,8 +50,8 @@ if __name__ == "__main__":
     write_b3d(b3d_file, building)
 
     # Save and read buffers - if the video looks fine, these functions work OK
-    dump_buffers(pos_buf, vel_buf, enr_buf, hit_buf, buffer_dir, sim_cfg)
-    pos_buf, vel_buf, enr_buf, hit_buf = read_buffers(buffer_dir, sim_cfg)
+    dump_buffers(pos_buf, enr_buf, hit_buf, buffer_dir, sim_cfg)
+    pos_buf, enr_buf, hit_buf = read_buffers(buffer_dir, sim_cfg)
 
     # Show plot
     rays = RayBuffPlotter(building, pos_buf, enr_buf)

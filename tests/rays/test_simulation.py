@@ -1,5 +1,3 @@
-import numpy as np
-
 from building3d.geom.zone import Zone
 from building3d.geom.building import Building
 from building3d.geom.solid.box import box
@@ -40,7 +38,7 @@ def test_ray_simulation(show=False):
 
     # Run simulation
     sim = Simulation(building, sim_cfg)
-    pos_buf, vel_buf, enr_buf, hit_buf = sim.run()
+    pos_buf, enr_buf, hit_buf = sim.run()
 
     # At least some ray should be in solid_0
     assert (pos_buf[-1, :, 0] > 1).any()
@@ -50,9 +48,6 @@ def test_ray_simulation(show=False):
 
     # At least some ray should bounce off a surface
     assert (enr_buf[:, :] < 1).any()
-
-    # At least some ray should have different velocity at the beginning and the end
-    assert (~np.isclose(vel_buf[0, :, :], vel_buf[-1, :, :])).any()
 
     # At least some ray should hit an absorber
     assert hit_buf.sum() > 0

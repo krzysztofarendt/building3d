@@ -38,7 +38,7 @@ if __name__ == "__main__":
     # Simulate
     sim = Simulation(building, sim_cfg)
     t0 = time.time()
-    pos_buf, vel_buf, enr_buf, hit_buf = sim.run()
+    pos_buf, enr_buf, hit_buf = sim.run()
 
     tot_time = time.time() - t0
     print(f"{tot_time=:.2f}")

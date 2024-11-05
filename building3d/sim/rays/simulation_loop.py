@@ -38,7 +38,7 @@ def simulation_loop(
     buffer_size: int,
     verbose: bool = True,
     eps: float = 1e-6,
-) -> tuple[PointType, VectorType, FloatDataType, FloatDataType]:
+) -> tuple[PointType, FloatDataType, FloatDataType]:
     """Performs a simulation loop for ray tracing in a building environment.
 
     This function is compiled to machine code with Numba for improved performance. It simulates
@@ -67,7 +67,6 @@ def simulation_loop(
     Returns:
         tuple[PointType, PointType, PointType, IntDataType]: A tuple containing:
             - pos_buf: buffer of ray positions, shaped (num_steps + 1, num_rays, 3)
-            - vel_buf: buffer of ray velocity, shaped (num_steps + 1, num_rays, 3)
             - enr_buf: buffer of ray energy, shaped (num_steps + 1, num_rays)
             - hit_buf: buffer of ray absorber hits, shaped (num_steps + 1, num_rays)
     """
@@ -136,7 +135,6 @@ def simulation_loop(
     pos_buf = np.zeros((buffer_size, num_rays, 3), dtype=np.float32)
     for _ in range(3):
         pos_buf[:, :, :] = source.copy()
-    vel_buf = np.zeros((buffer_size, num_rays, 3), dtype=np.float32)
     enr_buf = np.ones((buffer_size, num_rays), dtype=np.float32)
     hit_buf = np.zeros((buffer_size, len(absorbers)), dtype=np.float32)
 
@@ -148,9 +146,6 @@ def simulation_loop(
     # Update cyclic buffers
     pos_buf, pos_head, pos_tail = cyclic_buf(
         pos_buf, pos_head, pos_tail, pos, buffer_size
-    )
-    vel_buf, vel_head, vel_tail = cyclic_buf(
-        vel_buf, vel_head, vel_tail, velocity, buffer_size
     )
     enr_buf, enr_head, enr_tail = cyclic_buf(
         enr_buf, enr_head, enr_tail, energy, buffer_size
@@ -278,9 +273,6 @@ def simulation_loop(
         pos_buf, pos_head, pos_tail = cyclic_buf(
             pos_buf, pos_head, pos_tail, pos, buffer_size
         )
-        vel_buf, vel_head, vel_tail = cyclic_buf(
-            vel_buf, vel_head, vel_tail, velocity, buffer_size
-        )
         enr_buf, enr_head, enr_tail = cyclic_buf(
             enr_buf, enr_head, enr_tail, energy, buffer_size
         )
@@ -291,15 +283,13 @@ def simulation_loop(
     jit_print(verbose, "Exiting the loop")
     jit_print(verbose, "Converting buffers to contiguous arrays")
     pos_buf = convert_to_contiguous(pos_buf, pos_head, pos_tail, buffer_size)
-    vel_buf = convert_to_contiguous(vel_buf, vel_head, vel_tail, buffer_size)
     enr_buf = convert_to_contiguous(enr_buf, enr_head, enr_tail, buffer_size)
     hit_buf = convert_to_contiguous(hit_buf, hit_head, hit_tail, buffer_size)
 
     jit_print(verbose, "Exiting the function")
     # Shapes:
     # pos_buf: (num_steps + 1, num_rays, 3)
-    # vel_buf: (num_steps + 1, num_rays, 3)
     # enr_buf: (num_steps + 1, num_rays)
     # enr_buf: (num_steps + 1, num_rays)
     # First shape is 1 larger than num_steps to include the initial state.
-    return pos_buf, vel_buf, enr_buf, hit_buf
+    return pos_buf, enr_buf, hit_buf

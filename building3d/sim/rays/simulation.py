@@ -88,7 +88,7 @@ class Simulation:
 
         # Run simulation loop (JIT compiled)
         logger.info("Starting the simulation")
-        pos_buf, vel_buf, enr_buf, hit_buf = simulation_loop(
+        pos_buf, enr_buf, hit_buf = simulation_loop(
             num_steps = self.num_steps,
             num_rays = self.num_rays,
             ray_speed = self.ray_speed,
@@ -107,4 +107,4 @@ class Simulation:
             verbose = self.verbose,
         )
         logger.info("Finished the simulation")
-        return pos_buf, vel_buf, enr_buf, hit_buf
+        return pos_buf, enr_buf, hit_buf
