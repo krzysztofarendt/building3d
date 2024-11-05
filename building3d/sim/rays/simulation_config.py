@@ -138,7 +138,7 @@ class SimulationConfig:
         """Converts a dict with surface parameter values to an array.
 
         This array can be then passed to the `simulation_loop()` function,
-        e.g. through the `surf_aborbtion` argument.
+        e.g. through the `surf_absorption` argument.
 
         Args:
             param_name: Name of the parameter, e.g. "absorption".
