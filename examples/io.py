@@ -2,14 +2,14 @@ from building3d.display.plot_objects import plot_objects
 from building3d.geom.building import Building
 from building3d.geom.solid.box import box
 from building3d.geom.zone import Zone
+from building3d.io.arrayformat import from_array_format
+from building3d.io.arrayformat import to_array_format
 from building3d.io.b3d import read_b3d
 from building3d.io.b3d import write_b3d
 from building3d.io.dotbim import read_dotbim
 from building3d.io.dotbim import write_dotbim
 from building3d.io.stl import read_stl
 from building3d.io.stl import write_stl
-from building3d.io.arrayformat import from_array_format
-from building3d.io.arrayformat import to_array_format
 
 if __name__ == "__main__":
     print(

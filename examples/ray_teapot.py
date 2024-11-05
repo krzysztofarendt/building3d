@@ -34,7 +34,6 @@ if __name__ == "__main__":
     sim_cfg.visualization["ray_opacity"] = 0.1
     sim_cfg.visualization["ray_trail_opacity"] = 0.1
 
-
     # Simulate
     sim = Simulation(building, sim_cfg)
     t0 = time.time()
