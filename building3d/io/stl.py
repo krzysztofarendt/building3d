@@ -26,7 +26,7 @@ from pathlib import Path
 
 import numpy as np
 
-from building3d import random_id
+from building3d.random import random_id
 from building3d.geom.building import Building
 from building3d.geom.polygon import Polygon
 from building3d.geom.solid import Solid

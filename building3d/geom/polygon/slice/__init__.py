@@ -1,6 +1,6 @@
 import numpy as np
 
-from building3d import random_id
+from building3d.random import random_id
 from building3d.config import GEOM_RTOL
 from building3d.geom.exceptions import GeometryError
 from building3d.geom.points import are_points_coplanar
