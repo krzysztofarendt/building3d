@@ -8,6 +8,9 @@ I'm not sure where this project is heading, so there is no documentation yet, bu
 
 [Sphere](https://github.com/user-attachments/assets/ad794a12-441b-4a4d-a580-1953599535ac)
 
+[Teapot](https://github.com/user-attachments/assets/3f305489-429d-47e7-977c-ca8724029371)
+
+
 # Summary
 
 - Polygon is a set of points
