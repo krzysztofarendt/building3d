@@ -1,7 +1,6 @@
 import numpy as np
-import pytest
 
-from building3d import random_id
+from building3d.random import random_id
 from building3d.geom.points import new_point
 from building3d.geom.polygon import Polygon
 from building3d.geom.wall import Wall

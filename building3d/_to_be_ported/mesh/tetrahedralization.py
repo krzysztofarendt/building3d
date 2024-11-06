@@ -4,7 +4,7 @@ from collections import defaultdict
 import numpy as np
 from scipy.spatial import Delaunay
 
-from building3d import random_within
+from building3d.random import random_within
 from building3d.config import MESH_DELTA
 from building3d.config import MESH_JOGGLE
 from building3d.config import TETRA_MAX_TRIES

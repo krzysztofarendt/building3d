@@ -2,7 +2,7 @@ import logging
 
 import numpy as np
 
-from building3d import random_id
+from building3d.random import random_id
 from building3d.config import GEOM_ATOL
 from building3d.geom.paths import PATH_SEP
 from building3d.geom.paths.validate_name import validate_name

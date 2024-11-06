@@ -3,7 +3,7 @@ import logging
 import numpy as np
 from scipy.spatial import Delaunay
 
-from building3d import random_within
+from building3d.random import random_within
 from building3d.config import GEOM_ATOL
 from building3d.config import MESH_DELTA
 from building3d.config import MESH_JOGGLE

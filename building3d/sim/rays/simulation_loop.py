@@ -7,7 +7,6 @@ from building3d.geom.types import FLOAT
 from building3d.geom.types import FloatDataType
 from building3d.geom.types import IndexType
 from building3d.geom.types import PointType
-from building3d.geom.types import VectorType
 from building3d.geom.vectors import normal
 from building3d.io.arrayformat import get_polygon_points_and_faces
 from building3d.types.cyclic_buffer import convert_to_contiguous

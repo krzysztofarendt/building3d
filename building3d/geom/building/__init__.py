@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from typing import Sequence
 
-from building3d import random_id
+from building3d.random import random_id
 from building3d.geom.building.get_mesh import get_mesh_from_zones
 from building3d.geom.building.graph import graph_polygon
 from building3d.geom.building.graph import graph_solid
