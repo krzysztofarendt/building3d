@@ -33,7 +33,8 @@ def next_adjacent_polygons(s1: Solid, s2: Solid) -> tuple[Polygon, Polygon] | No
     for _, p1 in get_walls_and_polygons(s1):
         for _, p2 in get_walls_and_polygons(s2):
             overlapping = p1.is_crossing_polygon(p2)
-            if overlapping:
+            within = p1.contains_polygon(p2) or p2.contains_polygon(p1)
+            if overlapping or within:
                 # These can be sliced
                 return p1, p2
     # There are no adjacent polygons anymore
