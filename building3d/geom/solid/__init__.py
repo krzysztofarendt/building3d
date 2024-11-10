@@ -202,6 +202,32 @@ class Solid:
                     return True
         return False
 
+    def has_correct_interface(self, sld) -> bool:
+        """Checks if this solid is adjacent to another solid and their polygons are stitched.
+
+        Args:
+            sld: other solid
+
+        Return:
+            True if the solids are adjacent and properly stitched
+        """
+        this_all_polys = [
+            p for w in self.children.values() for p in w.children.values()
+        ]
+        other_all_polys = [
+            p for w in sld.children.values() for p in w.children.values()
+        ]
+        for this_poly in this_all_polys:
+            for other_poly in other_all_polys:
+                pts1 = this_poly.pts
+                vn1 = this_poly.vn
+                pts2 = other_poly.pts
+                vn2 = other_poly.vn
+                if are_polygons_facing(pts1, vn1, pts2, vn2):
+                    return True
+
+        return False
+
     @property
     def volume(self) -> float:
         """Based on: http://chenlab.ece.cornell.edu/Publication/Cha/icip01_Cha.pdf"""
