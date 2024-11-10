@@ -155,10 +155,10 @@ class Polygon:
     def is_point_inside(self, pt: PointType, boundary_in: bool = True) -> bool:
         return is_point_inside(pt, self.pts, self.tri, boundary_in)
 
-    def contains_polygon(self, other) -> bool:
+    def contains_polygon(self, other, margin=GEOM_ATOL) -> bool:
         """Checks if the other polygon is completely inside this one."""
         for pt in other.pts:
-            if not is_point_inside_margin(pt, GEOM_ATOL, self.pts, self.tri):
+            if not is_point_inside_margin(pt, margin, self.pts, self.tri):
                 return False
         return True
 

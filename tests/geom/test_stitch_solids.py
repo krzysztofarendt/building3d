@@ -51,7 +51,7 @@ def test_stitch_solids(show=False):
     s3 = Solid(w3, "s3")
 
     w4 = get_walls(size=0.5, dx=0.25, dy=0.25, dz=1.0)
-    s4 = Solid(w4, "s4")
+    s4 = Solid(w4, "s4")  # On top of s0, smaller and in the middle
 
     w5 = get_walls(size=0.5, dx=-0.5, dy=0.5, dz=0.0)
     s5 = Solid(w5, "s5")
@@ -66,6 +66,14 @@ def test_stitch_solids(show=False):
     stitch_solids(s4, s0)
     stitch_solids(s0, s5)
     stitch_solids(s0, s6)
+
+    assert s0.has_correct_interface(s1)
+    assert s0.has_correct_interface(s3)
+    assert s1.has_correct_interface(s2)
+    assert s1.has_correct_interface(s3)
+    assert s4.has_correct_interface(s0)
+    assert s0.has_correct_interface(s5)
+    assert s0.has_correct_interface(s6)
 
     if show:
         return s0, s1, s2, s3, s4, s5, s6

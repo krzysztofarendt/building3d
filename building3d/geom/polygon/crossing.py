@@ -26,7 +26,13 @@ def are_polygons_crossing(
     pts2: PointType,
     tri2: IndexType,
 ) -> bool:
-    """Checks if two polygons are crossing (overlapping to some extent)."""
+    """Checks if two polygons are crossing (overlapping to some extent).
+
+    IMPORTANT! It returns False if:
+    - the polygons are exactly the same (same points, same normal vectors),
+    - the polygons are facing (same points, opposite normal vectors),
+    - one polygon is completely inside the other,
+    """
     bbox1 = bounding_box(pts1)
     bbox2 = bounding_box(pts2)
     if not are_bboxes_overlapping(bbox1, bbox2):

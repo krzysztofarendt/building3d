@@ -14,7 +14,7 @@ from building3d.geom.wall import Wall
 
 
 def stitch_solids(s1: Solid, s2: Solid) -> None:
-    """Slice adjacent polygons of two solids so that they share vertices and edges."""
+    """Recursively slices adjacent polygons of two solids so that they share vertices and edges."""
     # Find next tuple of adjacent polygons
     adj = next_adjacent_polygons(s1, s2)
 
@@ -33,7 +33,8 @@ def next_adjacent_polygons(s1: Solid, s2: Solid) -> tuple[Polygon, Polygon] | No
     for _, p1 in get_walls_and_polygons(s1):
         for _, p2 in get_walls_and_polygons(s2):
             overlapping = p1.is_crossing_polygon(p2)
-            if overlapping:
+            within = p1.contains_polygon(p2) or p2.contains_polygon(p1)
+            if overlapping or within:
                 # These can be sliced
                 return p1, p2
     # There are no adjacent polygons anymore
@@ -44,6 +45,8 @@ def slice_both_and_replace(s1: Solid, p1: Polygon, s2: Solid, p2: Polygon) -> No
     """Slices polygons `p1` and `p2` and replaces them in solids `s1` and `s2` (in-place)."""
     p2_in_p1 = p1.contains_polygon(p2)
     p1_in_p2 = p2.contains_polygon(p1)
+    p2_in_p1_with_bnd = p1.contains_polygon(p2, margin=-1e6)  # Includes boundary
+    p1_in_p2_with_bnd = p2.contains_polygon(p1, margin=-1e6)  # Includes boundary
 
     if p2_in_p1 or p1_in_p2:
         # One polygon is completely inside the other
@@ -73,8 +76,16 @@ def slice_both_and_replace(s1: Solid, p1: Polygon, s2: Solid, p2: Polygon) -> No
         else:
             raise RuntimeError("Should not happen")
 
+    elif p1_in_p2_with_bnd:
+        # Need to slice only p2
+        _, _ = slice_one_and_replace(s2, p2, p1.pts)
+
+    elif p2_in_p1_with_bnd:
+        # Need to slice only p1
+        _, _ = slice_one_and_replace(s1, p1, p2.pts)
+
     else:
-        # The polygons are overlapping
+        # The polygons are overlapping. Need to slice both.
         _, _ = slice_one_and_replace(s1, p1, p2.pts)
         _, _ = slice_one_and_replace(s2, p2, p1.pts)
 

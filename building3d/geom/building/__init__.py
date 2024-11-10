@@ -141,11 +141,16 @@ class Building:
         return poly_paths
 
     def get_graph(
-        self, new: bool = False, level: str = "polygon"
+        self,
+        new: bool = False,
+        level: str = "polygon",
+        facing: bool = True,
+        overlapping: bool = False,
+        touching: bool = False,
     ) -> dict[str, list[str]]:
         """Returns the graph of this building. Uses cached dict or makes new if requested.
 
-        Assumes that connections are only when polygons are:
+        By default, assumes that connections are only when polygons are:
         - facing
         - not overlapping
         - not touching
@@ -161,18 +166,15 @@ class Building:
             new = True
 
         if new is True:
-            facing = True
-            not_overlapping = False
-            not_touching = False
-            self.graph = graph_polygon(self, facing, not_overlapping, not_touching)
+            self.graph = graph_polygon(self, facing, overlapping, touching)
             self.graph_wall = graph_wall(
-                self, facing, not_overlapping, not_touching, self.graph
+                self, facing, overlapping, touching, self.graph
             )
             self.graph_solid = graph_solid(
-                self, facing, not_overlapping, not_touching, self.graph
+                self, facing, overlapping, touching, self.graph
             )
             self.graph_zone = graph_zone(
-                self, facing, not_overlapping, not_touching, self.graph
+                self, facing, overlapping, touching, self.graph
             )
 
         if level == "polygon":
@@ -191,13 +193,13 @@ class Building:
         logger.info(f"Stitching solids in building {self}")
 
         # Find adjacent solids
-        adj_solids = self.get_graph(new=False, level="solid")
+        adj_solids = self.get_graph(new=False, level="solid", facing=True, overlapping=True)
         done = []
 
         for s_path in adj_solids.keys():
             for adj_s_path in adj_solids[s_path]:
-                z1_name, s_name = s_path.split(PATH_SEP)
-                z2_name, adj_s_name = adj_s_path.split(PATH_SEP)
+                _, z1_name, s_name = s_path.split(PATH_SEP)
+                _, z2_name, adj_s_name = adj_s_path.split(PATH_SEP)
 
                 if set([s_name, adj_s_name]) not in done:
                     stitch_solids(
