@@ -14,7 +14,7 @@ from building3d.geom.wall import Wall
 
 
 def stitch_solids(s1: Solid, s2: Solid) -> None:
-    """Slice adjacent polygons of two solids so that they share vertices and edges."""
+    """Recursively slices adjacent polygons of two solids so that they share vertices and edges."""
     # Find next tuple of adjacent polygons
     adj = next_adjacent_polygons(s1, s2)
 
