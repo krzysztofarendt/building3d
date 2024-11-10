@@ -31,12 +31,16 @@ if __name__ == "__main__":
     # Slice adjacent polygons to make interfaces between adjacent solids
     building.stitch_solids()
 
+    # Plot the building to verify its geometry
+    plot_objects((building, ))
+
     # Simulation configuration
     sim_cfg = SimulationConfig(building)
 
-    sim_cfg.engine["num_steps"] = 200
-    sim_cfg.rays["num_rays"] = 1000
-    sim_cfg.engine["buffer_size"] = 1000
+    sim_cfg.engine["voxel_size"] = 0.3
+    sim_cfg.engine["num_steps"] = 20000
+    sim_cfg.rays["num_rays"] = 10000
+    sim_cfg.surfaces["absorption"]["default"] = 0.05   # Smooth concrete, painted
     sim_cfg.rays["source"] = (1.0, 1.0, H / 2)
     sim_cfg.rays["absorbers"] = [
         (0.5, 0.5, H / 2),  # Close to the source
@@ -58,14 +62,15 @@ if __name__ == "__main__":
     dump_buffers(pos_buf, enr_buf, hit_buf, buffer_dir, sim_cfg)
     pos_buf, enr_buf, hit_buf = read_buffers(buffer_dir, sim_cfg)
 
-    # Show plot
-    rays = RayBuffPlotter(building, pos_buf, enr_buf)
-    plot_objects((building, rays))
+    # Show plot - plotting rays takes a lot of memory!
+    # rays = RayBuffPlotter(building, pos_buf, enr_buf)
+    # plot_objects((building, rays))
 
-    make_movie_from_buffer(
-        output_file=f"{output_dir}/movie.mp4",
-        building=building,
-        pos_buf=pos_buf,
-        enr_buf=enr_buf,
-        sim_cfg=sim_cfg,
-    )
+    # Render a movie - takes a lot of time and memory!
+    # make_movie_from_buffer(
+    #     output_file=f"{output_dir}/movie.mp4",
+    #     building=building,
+    #     pos_buf=pos_buf,
+    #     enr_buf=enr_buf,
+    #     sim_cfg=sim_cfg,
+    # )
