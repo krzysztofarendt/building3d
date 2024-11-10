@@ -22,6 +22,11 @@ def test_building_stitch_solids(show=False):
     # Slice adjacent polygons to make interfaces between adjacent solids
     building.stitch_solids()
 
+    assert building.zones["z"].solids["s0"].has_correct_interface(building.zones["z"].solids["s1"])
+    assert building.zones["z"].solids["s1"].has_correct_interface(building.zones["z"].solids["s0"])
+    assert building.zones["z"].solids["s1"].has_correct_interface(building.zones["z"].solids["s2"])
+    assert building.zones["z"].solids["s2"].has_correct_interface(building.zones["z"].solids["s1"])
+
     if show:
         print("After stitching...")
         plot_objects((building, ))
