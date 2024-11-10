@@ -1,7 +1,6 @@
 from building3d.display.plot_objects import plot_objects
 from building3d.geom.building import Building
 from building3d.geom.solid.box import box
-from building3d.geom.solid.stitch import stitch_solids
 from building3d.geom.zone import Zone
 
 
