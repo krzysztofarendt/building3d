@@ -45,6 +45,8 @@ def slice_both_and_replace(s1: Solid, p1: Polygon, s2: Solid, p2: Polygon) -> No
     """Slices polygons `p1` and `p2` and replaces them in solids `s1` and `s2` (in-place)."""
     p2_in_p1 = p1.contains_polygon(p2)
     p1_in_p2 = p2.contains_polygon(p1)
+    p2_in_p1_with_bnd = p1.contains_polygon(p2, margin=-1e6)  # Includes boundary
+    p1_in_p2_with_bnd = p2.contains_polygon(p1, margin=-1e6)  # Includes boundary
 
     if p2_in_p1 or p1_in_p2:
         # One polygon is completely inside the other
@@ -74,8 +76,16 @@ def slice_both_and_replace(s1: Solid, p1: Polygon, s2: Solid, p2: Polygon) -> No
         else:
             raise RuntimeError("Should not happen")
 
+    elif p1_in_p2_with_bnd:
+        # Need to slice only p2
+        _, _ = slice_one_and_replace(s2, p2, p1.pts)
+
+    elif p2_in_p1_with_bnd:
+        # Need to slice only p1
+        _, _ = slice_one_and_replace(s1, p1, p2.pts)
+
     else:
-        # The polygons are overlapping
+        # The polygons are overlapping. Need to slice both.
         _, _ = slice_one_and_replace(s1, p1, p2.pts)
         _, _ = slice_one_and_replace(s2, p2, p1.pts)
 
