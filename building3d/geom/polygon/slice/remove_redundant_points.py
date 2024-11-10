@@ -29,7 +29,7 @@ def remove_redundant_points(
 
     Removes:
     - points outside the polygon
-    - points touching the polygon vertices or edges except thos needed to define the slice
+    - points touching the polygon vertices or edges except those needed to define the slice
 
     This function is useful if the slicing points come from another polygon.
     The second polygon might be overlapping with this one, so some of its vertices
@@ -60,7 +60,33 @@ def remove_redundant_points(
             )
 
     num_interior = sum([1 for loc, _ in sploc if loc == INTERIOR])
+    num_at_vertex = sum([1 for loc, _ in sploc if loc == VERTEX])
+    num_at_edge = sum([1 for loc, _ in sploc if loc == EDGE])
 
+    # Special cases
+    if len(slicing_pts) == 4 and len(pts) == 4:
+        if num_at_vertex == 2 and num_at_edge == 2:
+            # This is the only case that does not work with the remaining code,
+            # so I need to detect it early and return :/
+            # Let's keep only the edge points
+            new_points = []
+            for i in range(len(slicing_pts)):
+                this_pt = slicing_pts[i]
+                this_loc_type, this_loc_ix = sploc[i]
+
+                if this_loc_type == EDGE:
+                    new_points.append(this_pt)
+
+            # Convert list of points to an array
+            # (done this way to keep it compatible with numba)
+            new_pts_arr = np.zeros((len(new_points), 3), dtype=FLOAT)
+            for i in range(len(new_points)):
+                new_pts_arr[i] = new_points[i]
+
+            return new_pts_arr
+
+
+    # Standard cases
     new_points = []
     for i in range(len(slicing_pts)):
         # Collect information:
@@ -108,7 +134,7 @@ def remove_redundant_points(
             new_points.append(this_pt)
             break
 
-        elif this_loc_type == VERTEX and next_loc_type == VERTEX:
+        elif this_loc_type == VERTEX and next_loc_type == VERTEX and prev_loc_type != EDGE:
             if num_interior == 0 and this_loc_ix != next_loc_ix:
                 # Include it, because there are no interior points
                 # and it is a slice from vertex to vertex
@@ -118,7 +144,7 @@ def remove_redundant_points(
                 # (the segment from this to next point is along the edge)
                 continue
 
-        elif this_loc_type == VERTEX and prev_loc_type == VERTEX:
+        elif this_loc_type == VERTEX and prev_loc_type == VERTEX and next_loc_type != EDGE:
             if num_interior == 0 and this_loc_ix != prev_loc_ix:
                 # Include it, because there are no interior points
                 # and it is a slice from vertex to vertex
@@ -145,6 +171,8 @@ def remove_redundant_points(
                 # and it is a slice from edge to edge
                 # (same case as the previous one, but the other end of the slice)
                 new_points.append(this_pt)
+                # This is the last needed point
+                break
             else:
                 # Don't include it, because it is not crossing the polygon
                 # (the segment from this to next point is along the edge)

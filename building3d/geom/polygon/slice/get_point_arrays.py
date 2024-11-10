@@ -22,7 +22,7 @@ def get_point_arrays(
     tri: IndexType,
     slicing_pts: PointType,
 ):
-    """Slices a polygon into two parts.
+    """Slices a polygon into two parts and returns the points of new subpolygons.
 
     Slicing procedure:
     - find and keep relevant slicing points:
@@ -38,7 +38,7 @@ def get_point_arrays(
     1) slicing points start and end at two different edges
     2) slicing points start and end at the same edge
     3) slicing points start at a vertex and end at some edge (or vice versa)
-    4) Slicing points start and end at two different vertices
+    4) slicing points start and end at two different vertices
 
     Args:
         pts: polygon points
@@ -62,8 +62,8 @@ def get_point_arrays(
     num_at_vertex = sum([1 for loc, _ in sploc if loc == VERTEX])
     num_at_edge = sum([1 for loc, _ in sploc if loc == EDGE])
 
-    sl_edges = set([index for loc, index in sploc if loc == EDGE])
-    sl_vertices = set([index for loc, index in sploc if loc == VERTEX])
+    sl_edges = set([index for loc, index in sploc if loc == EDGE])  # Slicing points at edges
+    sl_vertices = set([index for loc, index in sploc if loc == VERTEX])  # Slicing pts at vertices
 
     case = None
     if num_at_edge == 2 and len(sl_edges) == 2 and num_at_vertex == 0:
@@ -76,10 +76,10 @@ def get_point_arrays(
         # 3) slicing points start at a vertex and end at some edge (or vice versa)
         case = 3
     elif num_at_vertex == 2 and len(sl_vertices) == 2 and num_at_edge == 0:
-        # 4) Slicing points start and end at two different vertices
+        # 4) slicing points start and end at two different vertices
         case = 4
     else:
-        raise NotImplementedError("Case not implemented? Debugging needed.")
+        raise NotImplementedError("Case not implemented. Debugging needed.")
 
     # Create two polygons through slicing
     if case == 1:
