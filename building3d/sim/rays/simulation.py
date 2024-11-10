@@ -35,11 +35,14 @@ class Simulation:
         self.verbose = sim_cfg.verbose
 
         # Engine parameters
-        self.buffer_size: int = sim_cfg.engine["buffer_size"]
-        self.time_step: float = sim_cfg.engine["time_step"]
+        self.buffer_size: int | None = sim_cfg.engine["buffer_size"]
         self.num_steps: int = sim_cfg.engine["num_steps"]
+        self.time_step: float = sim_cfg.engine["time_step"]
         self.voxel_size: float = sim_cfg.engine["voxel_size"]
         self.search_transparent: bool = sim_cfg.engine["search_transparent"]
+
+        if self.buffer_size is None:
+            self.buffer_size = self.num_steps
 
         # Ray parameters
         self.num_rays: int = sim_cfg.rays["num_rays"]
