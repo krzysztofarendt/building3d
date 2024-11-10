@@ -138,7 +138,6 @@ def simulation_loop(
     hit_buf = np.zeros((buffer_size, len(absorbers)), dtype=np.float32)
 
     pos_head, pos_tail = 0, 0
-    vel_head, vel_tail = 0, 0
     enr_head, enr_tail = 0, 0
     hit_head, hit_tail = 0, 0
 
