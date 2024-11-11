@@ -68,12 +68,7 @@ class SimulationConfig:
         self.paths = {
             "energy_file": "energy_<step>.npy",
             "position_file": "position_<step>.npy",
-            "velocity_file": "velocity_<step>.npy",
             "hits_file": "hits_<step>.npy",
-            "state_dir": "state",
-            "main_log_file": "main.log",
-            "movie_file": "simulation.mp4",
-            "b3d_file": "building.b3d",
         }
 
     def set_default_surface_paths(self, building: Building):

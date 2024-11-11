@@ -7,7 +7,7 @@ name = "building3d"
 authors = [
     {name = "Krzysztof Arendt", email = "16005748+krzysztofarendt@users.noreply.github.com"},
 ]
-description = "Towards 3D building physics modeling"
+description = "Towards let's see where it goes..."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
@@ -16,6 +16,8 @@ dependencies = [
     "numba",
     "pandas",
     "scipy",
+    "soundfile",
+    "librosa",
     # File export
     "dotbimpy",
     # Visualization
