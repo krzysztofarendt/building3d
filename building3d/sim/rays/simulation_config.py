@@ -26,8 +26,8 @@ class SimulationConfig:
 
         # Simulation engine parameters
         self.engine = {
-            "buffer_size": 200,
-            "time_step": 1e-4,
+            "buffer_size": None,  # If None, will use num_steps
+            "time_step": 2.5e-5,  # Max. freq. = 1 / (2 * dt) = 20 kHz
             "num_steps": 100,
             "voxel_size": 0.1,
             "search_transparent": True,
@@ -68,12 +68,7 @@ class SimulationConfig:
         self.paths = {
             "energy_file": "energy_<step>.npy",
             "position_file": "position_<step>.npy",
-            "velocity_file": "velocity_<step>.npy",
             "hits_file": "hits_<step>.npy",
-            "state_dir": "state",
-            "main_log_file": "main.log",
-            "movie_file": "simulation.mp4",
-            "b3d_file": "building.b3d",
         }
 
     def set_default_surface_paths(self, building: Building):

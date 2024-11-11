@@ -20,7 +20,7 @@ if __name__ == "__main__":
     init_logger(main_logfile)
 
     # Create building
-    building = read_stl("resources/cylinder.stl")
+    building = read_stl("resources/stl/cylinder.stl")
 
     # Simulation configuration
     sim_cfg = SimulationConfig(building)
