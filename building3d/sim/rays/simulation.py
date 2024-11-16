@@ -52,8 +52,6 @@ class Simulation:
         self.absorber_radius: float = sim_cfg.rays["absorber_radius"]
 
         # Surface parameters
-        # TODO: surface absorption should be an array of floats, shape (num_polygons, )
-        # TODO: Add a possibility to overwrite the default value for selected polygons
         default_absorption = sim_cfg.surfaces["absorption"]["default"]
         self.surf_absorption: FloatDataType = np.full(len(self.polygons), default_absorption)
 
