@@ -91,6 +91,9 @@ class Simulation:
 
         # Run simulation loop (JIT compiled)
         logger.info("Starting the simulation")
+
+        assert self.buffer_size is not None
+
         pos_buf, enr_buf, hit_buf = simulation_loop(
             num_steps = self.num_steps,
             num_rays = self.num_rays,
