@@ -26,7 +26,6 @@ class SimulationConfig:
 
         # Simulation engine parameters
         self.engine = {
-            "buffer_size": None,  # If None, will use num_steps
             "time_step": 2.5e-5,  # Max. freq. = 1 / (2 * dt) = 20 kHz
             "num_steps": 100,
             "voxel_size": 0.1,

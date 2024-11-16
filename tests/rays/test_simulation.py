@@ -40,6 +40,9 @@ def test_ray_simulation(show=False):
     sim = Simulation(building, sim_cfg)
     pos_buf, enr_buf, hit_buf = sim.run()
 
+    # Resulting buffer size should be equal to num_steps
+    assert pos_buf.shape[0] == num_steps + 1  # + initial position
+
     # At least some ray should be in solid_0
     assert (pos_buf[-1, :, 0] > 1).any()
 

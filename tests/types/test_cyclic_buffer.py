@@ -1,6 +1,8 @@
 import numpy as np
+import pytest
 
 from building3d.types.cyclic_buffer import cyclic_buf
+from building3d.types.cyclic_buffer import convert_to_contiguous
 
 
 def test_cyclic_buf_basic():
@@ -67,3 +69,6 @@ def test_cyclic_buf_single_element():
     assert head == 0
     assert tail == 0
     np.testing.assert_array_equal(buffer[0], element2)
+
+# Tests for convert_to_contiguous()
+# TODO

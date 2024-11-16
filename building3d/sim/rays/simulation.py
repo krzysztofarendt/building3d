@@ -21,28 +21,24 @@ class Simulation:
         building: Building,
         sim_cfg: SimulationConfig,
     ):
-        self.building: Building = building
-
+        # REPRESENT GEOMETRY IN A NUMBA-FRIENDLY WAY ==========================
         # Convert building to the array format
         logger.info("Converting the building to the array format")
-        points, faces, polygons, walls, _, _ = to_array_format(self.building)
+        points, faces, polygons, walls, _, _ = to_array_format(building)
         self.points = points
         self.faces = faces
         self.polygons = polygons
         self.walls = walls
 
+        # READ CONFIGURATION ==================================================
         # Verbosity (turns on prints in the JIT-compiled code)
         self.verbose = sim_cfg.verbose
 
         # Engine parameters
-        self.buffer_size: int | None = sim_cfg.engine["buffer_size"]
         self.num_steps: int = sim_cfg.engine["num_steps"]
         self.time_step: float = sim_cfg.engine["time_step"]
         self.voxel_size: float = sim_cfg.engine["voxel_size"]
         self.search_transparent: bool = sim_cfg.engine["search_transparent"]
-
-        if self.buffer_size is None:
-            self.buffer_size = self.num_steps
 
         # Ray parameters
         self.num_rays: int = sim_cfg.rays["num_rays"]
@@ -66,49 +62,75 @@ class Simulation:
         self.movie_fps: int = sim_cfg.visualization["movie_fps"]
         self.movie_colormap: str = sim_cfg.visualization["movie_colormap"]
 
-    def run(self):
+        # FIND TRANSPARENT POLYGONS ===========================================
+        self.trans_poly_nums = set([-1])  # JIT function can't get an empty set
+        if self.search_transparent:
+            self.trans_poly_nums = self.get_transparent_polygon_numbers(building)
+
+    @staticmethod
+    def get_transparent_polygon_numbers(building):
         # Get transparent polygons
         logger.info("Finding transparent surfaces")
-        if self.search_transparent:
-            # TODO: Very slow if many polygons
-            # Complexity:
-            # - worst case scenario -> O(n^2),
-            # - best case scenario -> O(n),
-            # where n is the number of polygons.
-            trans_poly_paths = find_transparent(self.building)
-        else:
-            trans_poly_paths = set()
+        # TODO: Very slow if many polygons
+        # Complexity:
+        # - worst case scenario -> O(n^2),
+        # - best case scenario -> O(n),
+        # where n is the number of polygons.
+        trans_poly_paths = find_transparent(building)
 
         # Can't have an empty set because of Numba. Polygon -1 doesn't exist anyway.
         trans_poly_nums = set([-1])
         for poly_path in trans_poly_paths:
-            poly = self.building.get(poly_path)
+            poly = building.get(poly_path)
             assert isinstance(poly, Polygon)
             assert poly.num is not None
             trans_poly_nums.add(poly.num)
 
-        # Run simulation loop (JIT compiled)
+        return trans_poly_nums
+
+    def run(self):
         logger.info("Starting the simulation")
 
-        assert self.buffer_size is not None
+        # Get initial position of rays
+        position = np.zeros((self.num_rays, 3), dtype=FLOAT)
+        for i in range(self.num_rays):
+            position[i, :] = self.source
 
+        # Get initial velocity of rays
+        init_direction = np.random.rand(self.num_rays, 3) * 2.0 - 1.0
+        for i in range(self.num_rays):
+            init_direction[i] /= np.linalg.norm(init_direction[i])
+        velocity = init_direction * self.ray_speed
+
+        # Get initial energy and hits
+        energy = np.ones(self.num_rays, dtype=FLOAT)
+        num_absorbers = self.absorbers.shape[0]
+        hits = np.zeros(num_absorbers, dtype=FLOAT)
+
+        # Run simulation loop (JIT compiled)
+        # TODO: Run the simulation in batches, save buffers after each batch
         pos_buf, enr_buf, hit_buf = simulation_loop(
             num_steps = self.num_steps,
             num_rays = self.num_rays,
             ray_speed = self.ray_speed,
             time_step = self.time_step,
             grid_step = self.voxel_size,
-            source = self.source,
+            position = position,
+            velocity = velocity,
+            energy = energy,
+            hits = hits,
             absorbers = self.absorbers,
             absorber_radius = self.absorber_radius,
             points = self.points,
             faces = self.faces,
             polygons = self.polygons,
             walls = self.walls,
-            transparent_polygons = trans_poly_nums,
+            transparent_polygons = self.trans_poly_nums,
             surf_absorption = self.surf_absorption,
-            buffer_size = self.buffer_size,
             verbose = self.verbose,
         )
         logger.info("Finished the simulation")
         return pos_buf, enr_buf, hit_buf
+
+    def run_next_batch(self):
+        ...
