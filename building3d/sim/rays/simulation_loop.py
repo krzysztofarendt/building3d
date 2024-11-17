@@ -1,5 +1,6 @@
 import numpy as np
 from numba import njit
+
 from numba import prange
 
 from building3d.geom.polygon.distance import distance_point_to_polygon
@@ -13,17 +14,18 @@ from building3d.io.arrayformat import get_polygon_points_and_faces
 
 from .find_nearby_polygons import find_nearby_polygons
 from .find_target import find_target_surface
-from .voxel_grid import make_voxel_grid
 from .jit_print import jit_print
 
 
 @njit(parallel=True)
 def simulation_loop(
+    init_step: int,
     num_steps: int,
     num_rays: int,
     ray_speed: float,
     time_step: float,
     grid_step: float,
+    grid: dict[tuple[int, int, int], IndexType],
     position: PointType,
     velocity: VectorType,
     energy: FloatDataType,
@@ -45,6 +47,7 @@ def simulation_loop(
     the movement of rays through a building, handling reflections, absorptions, and hits on absorbers.
 
     Args:
+        init_step (int): Initial step number, used only for printing the progress
         num_steps (int): Number of simulation steps to perform.
         num_rays (int): Number of rays to simulate.
         ray_speed (float): Speed of rays in m/s.
@@ -71,8 +74,8 @@ def simulation_loop(
             - enr_buf: buffer of ray energy, shaped (num_steps + 1, num_rays)
             - hit_buf: buffer of ray absorber hits, shaped (num_steps + 1, num_rays)
     """
-    jit_print(verbose, "Simulation loop started")
-    if len(transparent_polygons) > 1:
+    jit_print(verbose, "Preparing for the simulation loop")
+    if (len(transparent_polygons) > 1) and (-1 in transparent_polygons):
         transparent_polygons.remove(-1)
 
     # Absorber size as a squared radius (to avoid calculating sqrt for each ray and step)
@@ -93,12 +96,7 @@ def simulation_loop(
         poly_pts.append(pts)
         poly_tri.append(tri)
 
-    # Make voxel grid
-    jit_print(verbose, "Making the voxel grid")
-    assert (
-        grid_step > reflection_dist
-    ), "Can't use grid smaller than reflection distance"
-
+    # Get bounding box
     min_x = points[:, 0].min()
     min_y = points[:, 1].min()
     min_z = points[:, 2].min()
@@ -106,20 +104,8 @@ def simulation_loop(
     max_y = points[:, 1].max()
     max_z = points[:, 2].max()
 
-    jit_print(verbose, "X limits:", min_x, max_x)
-    jit_print(verbose, "Y limits:", min_y, max_y)
-    jit_print(verbose, "Z limits:", min_z, max_z)
-
-    grid = make_voxel_grid(
-        min_xyz=(min_x, min_y, min_z),
-        max_xyz=(max_x, max_y, max_z),
-        poly_pts=poly_pts,
-        step=grid_step,
-        verbose=verbose,
-    )
-
     # Cyclic buffers
-    buffer_size = num_steps + 1
+    buffer_size = num_steps + 1  # One more to keep the initial state
     pos_buf = np.zeros((buffer_size, num_rays, 3), dtype=FLOAT)
     enr_buf = np.ones((buffer_size, num_rays), dtype=FLOAT)
     hit_buf = np.zeros((buffer_size, len(absorbers)), dtype=FLOAT)
@@ -142,9 +128,9 @@ def simulation_loop(
     target_surfs = np.full(num_rays, -1, dtype=np.int32)
 
     # Move rays
-    jit_print(verbose, "Entering the loop")
+    jit_print(verbose, "Entering the simulation loop")
     for i in range(num_steps):
-        jit_print(verbose, "Step", i, "| total energy =", energy.sum())
+        jit_print(verbose, "Step", init_step + i, "| total energy =", energy.sum())
 
         # Reset hits for each absorber
         hits[:] = 0.0
@@ -248,7 +234,7 @@ def simulation_loop(
             else:
                 continue
 
-        # Update cyclic buffers
+        # Add state to the buffers
         pos_buf[i+1, :, :] = position
         enr_buf[i+1, :] = energy
         hit_buf[i+1, :] = hits

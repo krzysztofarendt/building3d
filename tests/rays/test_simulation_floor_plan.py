@@ -31,6 +31,7 @@ def test_ray_simulation(show=False):
 
     sim_cfg.engine["time_step"] = time_step
     sim_cfg.engine["num_steps"] = num_steps
+    sim_cfg.engine["batch_size"] = num_steps
     sim_cfg.rays["ray_speed"] = speed
     sim_cfg.rays["num_rays"] = num_rays
     sim_cfg.rays["source"] = (1.5, 1.5, 0.5)
