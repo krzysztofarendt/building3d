@@ -34,16 +34,16 @@ if __name__ == "__main__":
     building.stitch_solids()
 
     # Plot the building to verify its geometry
-    # plot_objects((building, ))
+    plot_objects((building, ))
 
     # Simulation configuration
     sim_cfg = SimulationConfig(building)
 
-    sim_cfg.paths["project_dir"] = "out/auralize_3_boxes"
-    sim_cfg.paths["buffer_dir"] = "out/auralize_3_boxes/buffer"
+    sim_cfg.paths["project_dir"] = os.path.join("out", "auralize_3_boxes")
+    sim_cfg.paths["buffer_dir"] = os.path.join(sim_cfg.paths["project_dir"], "states")
     sim_cfg.engine["voxel_size"] = 0.3
     sim_cfg.engine["num_steps"] = 8000
-    sim_cfg.rays["num_rays"] = 300
+    sim_cfg.rays["num_rays"] = 5000
     sim_cfg.surfaces["absorption"]["default"] = 0.05   # Smooth concrete, painted
     sim_cfg.rays["source"] = (1.0, 1.0, H / 2)
     sim_cfg.rays["absorbers"] = [

@@ -57,11 +57,11 @@ if __name__ == "__main__":
     # Simulation configuration
     sim_cfg = SimulationConfig(building)
 
-    sim_cfg.paths["project_dir"] = "out/auralize_1_box"
-    sim_cfg.paths["buffer_dir"] = "out/auralize_1_box/buffer"
+    sim_cfg.paths["project_dir"] = os.path.join("out", "auralize_1_box")
+    sim_cfg.paths["buffer_dir"] = os.path.join(sim_cfg.paths["project_dir"], "states")
     sim_cfg.engine["voxel_size"] = 0.1
     sim_cfg.engine["num_steps"] = 3500
-    sim_cfg.rays["num_rays"] = 20000
+    sim_cfg.rays["num_rays"] = 3000
     sim_cfg.surfaces["absorption"]["default"] = 0.1   # Smooth concrete, painted
     sim_cfg.rays["source"] = (W / 2 - 1, L / 2, H / 2)
     sim_cfg.rays["absorbers"] = [(W / 2 + 1, L / 2, H / 2)]
