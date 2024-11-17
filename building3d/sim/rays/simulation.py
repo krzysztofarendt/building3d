@@ -86,13 +86,15 @@ class Simulation:
         self.make_dirs()
 
     def make_dirs(self):
-        if os.path.exists(self.project_dir):
-            raise RuntimeError(f"Project dir ({self.project_dir}) already exists!")
-        if os.path.exists(self.buffer_dir):
-            raise RuntimeError(f"Buffer dir ({self.buffer_dir}) already exists!")
-
-        os.makedirs(self.project_dir)
-        os.makedirs(self.buffer_dir)
+        # Create project directory
+        if not os.path.exists(self.project_dir):
+            os.makedirs(self.project_dir)
+        # Create buffer (state) directory, but raise error if it exists and is not empty
+        # because that's a commmon source of errors when some states are overwritten
+        if os.path.exists(self.buffer_dir) and len(os.listdir(self.buffer_dir)) > 0:
+            raise RuntimeError(f"Buffer dir ({self.buffer_dir}) already exists and is non-empty!")
+        else:
+            os.makedirs(self.buffer_dir)
 
     @staticmethod
     def get_transparent_polygon_numbers(building):

@@ -1,5 +1,4 @@
 import logging
-import os
 
 import numpy as np
 
@@ -37,9 +36,6 @@ def dump_buffers(
         None
     """
     logger.debug(f"Saving buffers to {dump_dir}")
-
-    if not os.path.exists(dump_dir):
-        os.makedirs(dump_dir)
 
     step = 0
     num_steps = pos_buf.shape[0]

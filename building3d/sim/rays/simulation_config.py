@@ -1,4 +1,5 @@
 import logging
+import os
 
 import numpy as np
 
@@ -67,7 +68,7 @@ class SimulationConfig:
         # (all paths relative to the project output directory)
         self.paths = {
             "project_dir": "out",
-            "buffer_dir": "out/buffer",
+            "buffer_dir": os.path.join("out", "states"),
             "energy_file": "energy_<step>.npy",
             "position_file": "position_<step>.npy",
             "hits_file": "hits_<step>.npy",
