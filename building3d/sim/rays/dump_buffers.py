@@ -1,5 +1,4 @@
 import logging
-import os
 
 import numpy as np
 
@@ -19,6 +18,7 @@ def dump_buffers(
     hit_buf: FloatDataType,
     dump_dir: str,
     sim_cfg: SimulationConfig,
+    init_step: int = 0,
 ):
     """Saves buffer arrays to a chosen directory.
 
@@ -30,14 +30,12 @@ def dump_buffers(
         hit_buf: buffer of ray absorber hits, shaped (num_steps, num_absorbers)
         dump_dir: path to the dump directory, will be created if doesn't exist
         sim_cfg: simulation configuration
+        init_step: optional initial step number (default 0)
 
     Returns:
         None
     """
     logger.debug(f"Saving buffers to {dump_dir}")
-
-    if not os.path.exists(dump_dir):
-        os.makedirs(dump_dir)
 
     step = 0
     num_steps = pos_buf.shape[0]
@@ -48,7 +46,7 @@ def dump_buffers(
             (enr_buf, sim_cfg.paths["energy_file"]),
             (hit_buf, sim_cfg.paths["hits_file"]),
         ):
-            path = WildcardPath(file).fill(parent=dump_dir, step=step)
+            path = WildcardPath(file).fill(parent=dump_dir, step=step + init_step)
             np.save(path, data[step])
 
         step += 1
@@ -74,6 +72,13 @@ def read_buffers(
     dict_pos = wpath_pos.get_matching_paths_dict_values(parent=dump_dir)
     dict_enr = wpath_enr.get_matching_paths_dict_values(parent=dump_dir)
     dict_hit = wpath_hit.get_matching_paths_dict_values(parent=dump_dir)
+
+    if len(dict_pos) == 0:
+        raise RuntimeError("Not position files found.")
+    if len(dict_enr) == 0:
+        raise RuntimeError("Not energy files found.")
+    if len(dict_hit) == 0:
+        raise RuntimeError("Not hit files found.")
 
     max_step_pos = max([d["step"] for d in dict_pos.values()]) + 1  # Because indexing starts at 0
     max_step_enr = max([d["step"] for d in dict_enr.values()]) + 1

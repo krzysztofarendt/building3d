@@ -1,5 +1,6 @@
 import numpy as np
 from numba import njit
+
 from numba import prange
 
 from building3d.geom.polygon.distance import distance_point_to_polygon
@@ -7,25 +8,28 @@ from building3d.geom.types import FLOAT
 from building3d.geom.types import FloatDataType
 from building3d.geom.types import IndexType
 from building3d.geom.types import PointType
+from building3d.geom.types import VectorType
 from building3d.geom.vectors import normal
 from building3d.io.arrayformat import get_polygon_points_and_faces
-from building3d.types.cyclic_buffer import convert_to_contiguous
-from building3d.types.cyclic_buffer import cyclic_buf
 
 from .find_nearby_polygons import find_nearby_polygons
 from .find_target import find_target_surface
-from .voxel_grid import make_voxel_grid
 from .jit_print import jit_print
 
 
 @njit(parallel=True)
 def simulation_loop(
+    init_step: int,
     num_steps: int,
     num_rays: int,
     ray_speed: float,
     time_step: float,
     grid_step: float,
-    source: PointType,
+    grid: dict[tuple[int, int, int], IndexType],
+    position: PointType,
+    velocity: VectorType,
+    energy: FloatDataType,
+    hits: FloatDataType,
     absorbers: PointType,
     absorber_radius: float,
     points: PointType,
@@ -34,7 +38,6 @@ def simulation_loop(
     walls: IndexType,
     transparent_polygons: set[int],
     surf_absorption: FloatDataType,
-    buffer_size: int,
     verbose: bool = True,
     eps: float = 1e-6,
 ) -> tuple[PointType, FloatDataType, FloatDataType]:
@@ -44,12 +47,15 @@ def simulation_loop(
     the movement of rays through a building, handling reflections, absorptions, and hits on absorbers.
 
     Args:
+        init_step (int): Initial step number, used only for printing the progress
         num_steps (int): Number of simulation steps to perform.
         num_rays (int): Number of rays to simulate.
         ray_speed (float): Speed of rays in m/s.
         time_step (float): Simulation time step in seconds.
         grid_step (float): Voxel grid step size.
         source (PointType): Starting point for all rays.
+        position (PointType): Current position of all rays.
+        velocity (VectorType): Current velocity of all rays.
         absorbers (PointType): Array of absorber positions.
         absorber_radius (float): Size of absorbers.
         points (PointType): Array of all points in the building geometry.
@@ -59,32 +65,23 @@ def simulation_loop(
         transparent_polygons (set[int]): Set of indices for transparent polygons.
         surf_absorption (FloatDataType): Absorption coefficients for each polygon,
                                          shape (len(polygons), ).
-        buffer_size (int): Size of buffers used to store part positions, energy, hits.
         verbose (bool): Prints progress if True
         eps (float): Small number used in comparison operations.
 
     Returns:
-        tuple[PointType, PointType, PointType, IntDataType]: A tuple containing:
+        tuple[PointType, FloatDataType, FloatDataType]: A tuple containing:
             - pos_buf: buffer of ray positions, shaped (num_steps + 1, num_rays, 3)
             - enr_buf: buffer of ray energy, shaped (num_steps + 1, num_rays)
             - hit_buf: buffer of ray absorber hits, shaped (num_steps + 1, num_rays)
     """
-    jit_print(verbose, "Simulation loop started")
-    if len(transparent_polygons) > 1:
+    jit_print(verbose, "Preparing for the simulation loop")
+    if (len(transparent_polygons) > 1) and (-1 in transparent_polygons):
         transparent_polygons.remove(-1)
 
     # Absorber size as a squared radius (to avoid calculating sqrt for each ray and step)
     absorber_sq_radius = absorber_radius ** 2
 
-    # Initial ray energy and received energy
-    energy = np.ones(num_rays, dtype=FLOAT)
-    hits = np.zeros(len(absorbers), dtype=FLOAT)
-
-    # Direction and velocity
-    init_direction = np.random.rand(num_rays, 3) * 2.0 - 1.0
-    for i in range(num_rays):
-        init_direction[i] /= np.linalg.norm(init_direction[i])
-    velocity = init_direction * ray_speed
+    # Assume refleciton distance
     delta_pos = velocity * time_step
     just_in_case_margin = 1.01
     reflection_dist = ray_speed * time_step * just_in_case_margin
@@ -99,12 +96,7 @@ def simulation_loop(
         poly_pts.append(pts)
         poly_tri.append(tri)
 
-    # Make voxel grid
-    jit_print(verbose, "Making the voxel grid")
-    assert (
-        grid_step > reflection_dist
-    ), "Can't use grid smaller than reflection distance"
-
+    # Get bounding box
     min_x = points[:, 0].min()
     min_y = points[:, 1].min()
     min_z = points[:, 2].min()
@@ -112,52 +104,23 @@ def simulation_loop(
     max_y = points[:, 1].max()
     max_z = points[:, 2].max()
 
-    jit_print(verbose, "X limits:", min_x, max_x)
-    jit_print(verbose, "Y limits:", min_y, max_y)
-    jit_print(verbose, "Z limits:", min_z, max_z)
-
-    grid = make_voxel_grid(
-        min_xyz=(min_x, min_y, min_z),
-        max_xyz=(max_x, max_y, max_z),
-        poly_pts=poly_pts,
-        step=grid_step,
-        verbose=verbose,
-    )
-
-    # Initial position
-    jit_print(verbose, "Initializing arrays: position, velocity, energy, hits")
-    pos = np.zeros((num_rays, 3), dtype=FLOAT)
-    for i in range(num_rays):
-        pos[i, :] = source.copy()
-
     # Cyclic buffers
-    pos_buf = np.zeros((buffer_size, num_rays, 3), dtype=np.float32)
-    for _ in range(3):
-        pos_buf[:, :, :] = source.copy()
-    enr_buf = np.ones((buffer_size, num_rays), dtype=np.float32)
-    hit_buf = np.zeros((buffer_size, len(absorbers)), dtype=np.float32)
+    buffer_size = num_steps + 1  # One more to keep the initial state
+    pos_buf = np.zeros((buffer_size, num_rays, 3), dtype=FLOAT)
+    enr_buf = np.ones((buffer_size, num_rays), dtype=FLOAT)
+    hit_buf = np.zeros((buffer_size, len(absorbers)), dtype=FLOAT)
 
-    pos_head, pos_tail = 0, 0
-    enr_head, enr_tail = 0, 0
-    hit_head, hit_tail = 0, 0
-
-    # Update cyclic buffers
-    pos_buf, pos_head, pos_tail = cyclic_buf(
-        pos_buf, pos_head, pos_tail, pos, buffer_size
-    )
-    enr_buf, enr_head, enr_tail = cyclic_buf(
-        enr_buf, enr_head, enr_tail, energy, buffer_size
-    )
-    hit_buf, hit_head, hit_tail = cyclic_buf(
-        hit_buf, hit_head, hit_tail, hits, buffer_size
-    )
+    # Fill buffers with initial values
+    pos_buf[0, :, :] = position
+    enr_buf[0, :] = energy
+    hit_buf[0, :] = hits
 
     # Distance to each absorber
     jit_print(verbose, "Calculating initial distance to each absorber")
     num_absorbers = absorbers.shape[0]
     absorber_sq_dist = np.zeros((num_absorbers, num_rays))
     for sn in range(num_absorbers):
-        absorber_sq_dist[sn, :] = np.sum((pos - absorbers[sn]) ** 2, axis=1)
+        absorber_sq_dist[sn, :] = np.sum((position - absorbers[sn]) ** 2, axis=1)
 
     # Target surfaces
     # If the index of the target is -1, it means that the target surface is unknown.
@@ -165,16 +128,20 @@ def simulation_loop(
     target_surfs = np.full(num_rays, -1, dtype=np.int32)
 
     # Move rays
-    jit_print(verbose, "Entering the loop")
+    jit_print(verbose, "Entering the simulation loop")
     for i in range(num_steps):
-        jit_print(verbose, "Step", i, "| total energy =", energy.sum())
+        jit_print(verbose, "Step", init_step + i, "| total energy =", energy.sum())
+
+        # Reset hits for each absorber
+        hits[:] = 0.0
+
         # Check absorbers
         # This probably shouldn't be inside prange, because of the hits array
         for rn in range(num_rays):
             if energy[rn] <= eps:
                 continue
             for sn in range(num_absorbers):
-                absorber_sq_dist[sn, rn] = np.sum((pos[rn] - absorbers[sn]) ** 2)
+                absorber_sq_dist[sn, rn] = np.sum((position[rn] - absorbers[sn]) ** 2)
                 if absorber_sq_dist[sn, rn] < absorber_sq_radius:
                     hits[sn] += energy[rn]  # This line shouldn't be inside prange
                     energy[rn] = 0.0
@@ -186,25 +153,25 @@ def simulation_loop(
 
             # If the ray somehow left the building - set its energy to 0
             if energy[rn] > 0 and (
-                pos[rn][0] < min_x - eps
-                or pos[rn][1] < min_y - eps
-                or pos[rn][2] < min_z - eps
-                or pos[rn][0] > max_x + eps
-                or pos[rn][1] > max_y + eps
-                or pos[rn][2] > max_z + eps
+                position[rn][0] < min_x - eps
+                or position[rn][1] < min_y - eps
+                or position[rn][2] < min_z - eps
+                or position[rn][0] > max_x + eps
+                or position[rn][1] > max_y + eps
+                or position[rn][2] > max_z + eps
             ):
                 energy[rn] = 0.0
 
             # Check near polygons
-            x = int(np.floor(pos[rn][0] / grid_step))
-            y = int(np.floor(pos[rn][1] / grid_step))
-            z = int(np.floor(pos[rn][2] / grid_step))
+            x = int(np.floor(position[rn][0] / grid_step))
+            y = int(np.floor(position[rn][1] / grid_step))
+            z = int(np.floor(position[rn][2] / grid_step))
 
             # Get a set of nearby polygon indices to check the ray distance to next wall
             polygons_to_check = find_nearby_polygons(x, y, z, grid)
 
             target_surfs[rn] = find_target_surface(
-                pos[rn],
+                position[rn],
                 velocity[rn],
                 poly_pts,
                 poly_tri,
@@ -218,7 +185,7 @@ def simulation_loop(
                 pts = poly_pts[target_surfs[rn]]
                 tri = poly_tri[target_surfs[rn]]
                 vn = normal(pts[-1], pts[0], pts[1])
-                dist = distance_point_to_polygon(pos[rn], pts, tri, vn)
+                dist = distance_point_to_polygon(position[rn], pts, tri, vn)
             else:
                 vn = np.zeros(3, dtype=FLOAT)
                 dist = np.inf
@@ -242,7 +209,7 @@ def simulation_loop(
                 polygons_to_check = find_nearby_polygons(x, y, z, grid)
 
                 target_surfs[rn] = find_target_surface(
-                    pos[rn],
+                    position[rn],
                     velocity[rn],
                     poly_pts,
                     poly_tri,
@@ -257,34 +224,23 @@ def simulation_loop(
                     pts = poly_pts[target_surfs[rn]]
                     tri = poly_tri[target_surfs[rn]]
                     vn = normal(pts[-1], pts[0], pts[1])
-                    dist = distance_point_to_polygon(pos[rn], pts, tri, vn)
+                    dist = distance_point_to_polygon(position[rn], pts, tri, vn)
                 else:
                     vn = np.zeros(3, dtype=FLOAT)
                     dist = np.inf
 
             if energy[rn] > eps and dist > reflection_dist:
-                pos[rn] += delta_pos[rn]
+                position[rn] += delta_pos[rn]
             else:
                 continue
 
-        # Update cyclic buffers
-        pos_buf, pos_head, pos_tail = cyclic_buf(
-            pos_buf, pos_head, pos_tail, pos, buffer_size
-        )
-        enr_buf, enr_head, enr_tail = cyclic_buf(
-            enr_buf, enr_head, enr_tail, energy, buffer_size
-        )
-        hit_buf, hit_head, hit_tail = cyclic_buf(
-            hit_buf, hit_head, hit_tail, hits, buffer_size
-        )
+        # Add state to the buffers
+        pos_buf[i+1, :, :] = position
+        enr_buf[i+1, :] = energy
+        hit_buf[i+1, :] = hits
 
-    jit_print(verbose, "Exiting the loop")
-    jit_print(verbose, "Converting buffers to contiguous arrays")
-    pos_buf = convert_to_contiguous(pos_buf, pos_head, pos_tail, buffer_size)
-    enr_buf = convert_to_contiguous(enr_buf, enr_head, enr_tail, buffer_size)
-    hit_buf = convert_to_contiguous(hit_buf, hit_head, hit_tail, buffer_size)
+    jit_print(verbose, "Exiting the simulation loop")
 
-    jit_print(verbose, "Exiting the function")
     # Shapes:
     # pos_buf: (num_steps + 1, num_rays, 3)
     # enr_buf: (num_steps + 1, num_rays)

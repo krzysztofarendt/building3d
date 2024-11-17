@@ -1,3 +1,25 @@
+"""
+It is the medium room from this analysis:
+https://reuk.github.io/wayverb/evaluation.html
+
+The Sabine's reverberation time formula states that:
+T60 = 0.161 * V / A
+
+where:
+- V is the room volume (m3)
+- A is the total absorption, calculated as below
+
+A = sum(Si * ai)
+
+where Si is the surface area of each material
+and ai is the absorption coefficient of that material.
+
+For this room T60 is as follows:
+V = 39.375
+a = 0.1
+S = 71.5
+T60 = 0.161 * 39.375 / (71.5 * 0.1) = 0.89 s
+"""
 import os
 import time
 
@@ -16,18 +38,14 @@ from building3d.sim.rays.simulation_config import SimulationConfig
 from building3d.sim.rays.impulse_response import impulse_response
 
 if __name__ == "__main__":
-    print("This example shows an auralization simulation in a building with 3 solids.")
-
-    # Parameters
-    output_dir = "out/auralize_3_boxes"
-    buffer_dir = os.path.join(output_dir, "buffer")
+    print("This example shows an auralization simulation in a building with 1 solid.")
 
     # Create a U-shaped building
-    H = 3.0
-    s0 = box(3, 8, H, (0, 0, 0), "s0")
-    s1 = box(6, 3, H, (3, 5, 0), "s1")
-    s2 = box(3, 5, H, (6, 0, 0), "s2")
-    zone = Zone([s0, s1, s2], "z")
+    W = 4.5
+    L = 2.5
+    H = 3.5
+    s = box(W, L, H, (0, 0, 0), "s")
+    zone = Zone([s], "z")
     building = Building([zone], "b")
 
     # Slice adjacent polygons to make interfaces between adjacent solids
@@ -39,17 +57,14 @@ if __name__ == "__main__":
     # Simulation configuration
     sim_cfg = SimulationConfig(building)
 
-    sim_cfg.paths["project_dir"] = os.path.join("out", "auralize_3_boxes")
+    sim_cfg.paths["project_dir"] = os.path.join("out", "auralize_1_box")
     sim_cfg.paths["buffer_dir"] = os.path.join(sim_cfg.paths["project_dir"], "states")
-    sim_cfg.engine["voxel_size"] = 0.3
-    sim_cfg.engine["num_steps"] = 8000
-    sim_cfg.rays["num_rays"] = 5000
-    sim_cfg.surfaces["absorption"]["default"] = 0.05   # Smooth concrete, painted
-    sim_cfg.rays["source"] = (1.0, 1.0, H / 2)
-    sim_cfg.rays["absorbers"] = [
-        (0.5, 0.5, H / 2),  # Close to the source
-        (7.0, 0.5, H / 2),  # Far from the source
-    ]
+    sim_cfg.engine["voxel_size"] = 0.1
+    sim_cfg.engine["num_steps"] = 3500
+    sim_cfg.rays["num_rays"] = 3000
+    sim_cfg.surfaces["absorption"]["default"] = 0.1   # Smooth concrete, painted
+    sim_cfg.rays["source"] = (W / 2 - 1, L / 2, H / 2)
+    sim_cfg.rays["absorbers"] = [(W / 2 + 1, L / 2, H / 2)]
 
     # Simulate
     sim = Simulation(building, sim_cfg)

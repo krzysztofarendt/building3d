@@ -1,4 +1,5 @@
 import logging
+import os
 
 import numpy as np
 
@@ -26,16 +27,16 @@ class SimulationConfig:
 
         # Simulation engine parameters
         self.engine = {
-            "buffer_size": None,  # If None, will use num_steps
             "time_step": 2.5e-5,  # Max. freq. = 1 / (2 * dt) = 20 kHz
-            "num_steps": 100,
+            "num_steps": 1000,    # Should be a multiple of batch_size
+            "batch_size": 100,
             "voxel_size": 0.1,
             "search_transparent": True,
         }
 
         # Ray configuration
         self.rays = {
-            "num_rays": 100,
+            "num_rays": 1000,
             "ray_speed": 343.0,
             "source": (0.0, 0.0, 0.0),
             "absorbers": [],  # list of tuples, shape (num_absorbers, 3)
@@ -63,9 +64,11 @@ class SimulationConfig:
             "movie_colormap": "RdPu",
         }
 
-        # Path templates
+        # Path
         # (all paths relative to the project output directory)
         self.paths = {
+            "project_dir": "out",
+            "buffer_dir": os.path.join("out", "states"),
             "energy_file": "energy_<step>.npy",
             "position_file": "position_<step>.npy",
             "hits_file": "hits_<step>.npy",
