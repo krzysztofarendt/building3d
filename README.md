@@ -33,7 +33,7 @@ types. This base could cover:
 - reusable template engines (e.g., for ray tracing or heat transfer through solids).
 
 For this base code to be adopted by others, the following supplementary goals must be met:
-- easy installation (ideally pip install),
+- easy installation (ideally `pip install`),
 - minimal dependencies.
 
 The goal I’ve set is too ambitious for one person. More realistically, I’ll
@@ -78,18 +78,19 @@ just looking pretty.
 
 Please check out the example scripts in `examples/`.
 
-Short script are better to be run without just-in-time compilation, e.g.:
+This projects heavily relies on Numba and most of the geometry functions
+are JIT-compiled, which takes up to 1-2 minutes, depending which example you run.
+
+Short scripts (everything without `ray` or `auralize` in its name) can be run
+without JIT:
 ```
 NUMBA_DISABLE_JIT=1 python examples/building_example.py
 ```
 
-However, simulations should be run with JIT (simply skip `NUMBA_DISABLE_JIT=1`).
-The compilation of all functions implemented in Numba may take up to 1-2 minutes.
-
 ## Installation
 
-Currently the package on PyPi is not kept up to date, so it's best
-to clone this repository and install with `pip`:
+Currently, the package on PyPi is not kept up to date (but I reserved the
+spot;), so it's best to clone this repository and install with `pip`:
 
 ```bash
 python3.10 -m venv venv
