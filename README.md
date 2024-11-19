@@ -2,6 +2,9 @@
 
 # Building3D
 
+A wannabe framework for 3D modeling and simulation of buildings—trying its best
+to unify sound, heat, light, and more under one roof (pun intended).
+
 ## About
 
 The long-term goal of this project is to develop a unified environment for the
