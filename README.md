@@ -4,56 +4,56 @@
 
 ## About
 
-The long-term goal for this project is to develop a unified environment for
+The long-term goal of this project is to develop a unified environment for the
 simulation of various phenomena in buildings, including:
 - sound propagation,
 - heat and mass transfer,
 - solar analysis,
 - lighting analysis.
 
-All of these simulation types require buildings to be represented as 3D polygons
+All these simulation types require buildings to be represented as 3D polygons,
 so why not have a single tool for all of them?
 
-I used to be working with some simulation software for these types of analyzes
-and my impression was that the landscape is very scattered. Some tools have a
-very inflexible design coming from their long history of development, some are
-focused only on one aspect (e.g. only lighting, only sound) despite having many
-things in common (e.g. both sound and lighting needs ray tracing). If these
-tools have GUIs, they are mostly very old-fashioned. If they don't have any
-GUI, you need to write the model in some very specific language/format you'll
-need to learn just for this tool. And if you find a software suite allowing for
-multiple types of analyzes, it probably means that other open source engines
-are glued together through some difficult to maintain interface. Finally, a lot
-of tools is proprietary.
+In the past, I worked with some simulation software for these kinds of
+analyses, and my impression was that the landscape is very fragmented. Some
+tools have a very inflexible design due to their long development histories,
+while others focus solely on one aspect (e.g., only lighting, only sound), even
+though many of these fields share common foundations (e.g., both sound and
+lighting require ray tracing). Tools with GUIs are often outdated, while those
+without a GUI force you to write models in some highly specific language or
+format you’ll need to learn just for that tool. If you come across a software
+suite that supports multiple types of analyses, it’s often a patchwork of
+open-source engines glued together through hard-to-maintain interfaces. On top
+of that, many tools are proprietary.
 
-I think it would be nice to have some common base code for these simulation types.
-This base could cover:
+I think it would be great to have a common base code for these simulation
+types. This base could cover:
 - geometry definition,
-- configuration format (setting simulation parameters),
-- some template engines (e.g. ray tracing, heat transfer through solids).
+- configuration formats (for setting simulation parameters),
+- reusable template engines (e.g., for ray tracing or heat transfer through solids).
 
-For this base code to be adopted by others the following supplementary goals must be met:
-- easy installation (basically `pip install`).
-- as few dependencies as possible.
+For this base code to be adopted by others, the following supplementary goals must be met:
+- easy installation (ideally pip install),
+- minimal dependencies.
 
-The goal I set is too ambitious for one person. More realistically, I will
-focus on building the foundation and develop some simple demos for each
+The goal I’ve set is too ambitious for one person. More realistically, I’ll
+focus on building the foundation and creating some simple demos for each
 simulation type.
 
 I chose Python because:
 - it facilitates fast development (fact),
-- as of 2024, it is the most popular programming language (fact),
-- it is one of the languages increasingly being used by non-software engineers (opinion),
-- it can be compiled to machine code and in many cases run as fast as C/C++ (fact),
+- as of 2024, it’s the most popular programming language (fact),
+- it’s increasingly used by non-software engineers (opinion),
+- it can be compiled to machine code and, in many cases, run as fast as C/C++ (fact),
 - I know it well (opinion).
 
-Please note that at the moment this is just my hobby project which I do in my
-limited free time. Given the scope I set, there are high chances it will never
-reach maturity. I will try to keep documented the modules I feel are already
-useful.
+Please note that, at the moment, this is just a hobby project that I work on in
+my limited free time. Given the scope I’ve outlined, there’s a high chance it
+may never reach full maturity. However, I’ll aim to document the modules I
+believe are already useful.
 
-Also, do not hesitate to contact me in case you have in mind some application
-in which this project could be useful.
+Lastly, feel free to contact me if you think of an application where this
+project could be useful.
 
 ## Status
 
@@ -75,6 +75,16 @@ just looking pretty.
 [Sphere](https://github.com/user-attachments/assets/ad794a12-441b-4a4d-a580-1953599535ac)
 
 [Teapot](https://github.com/user-attachments/assets/3f305489-429d-47e7-977c-ca8724029371)
+
+Please check out the example scripts in `examples/`.
+
+Short script are better to be run without just-in-time compilation, e.g.:
+```
+NUMBA_DISABLE_JIT=1 python examples/building_example.py
+```
+
+However, simulations should be run with JIT (simply skip `NUMBA_DISABLE_JIT=1`).
+The compilation of all functions implemented in Numba may take up to 1-2 minutes.
 
 ## Installation
 
@@ -136,16 +146,6 @@ At the moment the geometry can be defined by:
 - manual definition of points, polygons, walls, solids, zones,
 - through convenience functions like `box()` and `floor_plan()` to create solids
 - reading external geometry files (`STL`, `.bim`, `b3d`).
-
-Please check out the example scripts in `examples/`.
-
-Short script are better to be run without just-in-time compilation, e.g.:
-```
-NUMBA_DISABLE_JIT=1 python examples/building_example.py
-```
-
-However, simulations should be run with it (simply do not use `NUMBA_DISABLE_JIT=1`).
-The compilation of all functions implemented for Numba may take up to 1-2 minutes.
 
 ---------------------------------
 
