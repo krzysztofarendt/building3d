@@ -7,7 +7,7 @@ name = "building3d"
 authors = [
     {name = "Krzysztof Arendt", email = "16005748+krzysztofarendt@users.noreply.github.com"},
 ]
-description = "Towards let's see where it goes..."
+description = "Towards 3D building modeling and simulation"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
