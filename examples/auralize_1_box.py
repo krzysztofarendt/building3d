@@ -20,12 +20,13 @@ a = 0.1
 S = 71.5
 T60 = 0.161 * 39.375 / (71.5 * 0.1) = 0.89 s
 """
+
 import os
 import time
 
-from scipy.signal import fftconvolve
-import soundfile as sf
 import librosa
+import soundfile as sf
+from scipy.signal import fftconvolve
 
 from building3d.display.plot_objects import plot_objects
 from building3d.geom.building import Building
@@ -33,9 +34,9 @@ from building3d.geom.solid.box import box
 from building3d.geom.zone import Zone
 from building3d.io.b3d import write_b3d
 from building3d.sim.rays.dump_buffers import read_buffers
+from building3d.sim.rays.impulse_response import impulse_response
 from building3d.sim.rays.simulation import Simulation
 from building3d.sim.rays.simulation_config import SimulationConfig
-from building3d.sim.rays.impulse_response import impulse_response
 
 if __name__ == "__main__":
     print("This example shows an auralization simulation in a building with 1 solid.")
@@ -52,7 +53,7 @@ if __name__ == "__main__":
     building.stitch_solids()
 
     # Plot the building to verify its geometry
-    plot_objects((building, ))
+    plot_objects((building,))
 
     # Simulation configuration
     sim_cfg = SimulationConfig(building)
@@ -62,7 +63,7 @@ if __name__ == "__main__":
     sim_cfg.engine["voxel_size"] = 0.1
     sim_cfg.engine["num_steps"] = 3500
     sim_cfg.rays["num_rays"] = 3000
-    sim_cfg.surfaces["absorption"]["default"] = 0.1   # Smooth concrete, painted
+    sim_cfg.surfaces["absorption"]["default"] = 0.1  # Smooth concrete, painted
     sim_cfg.rays["source"] = (W / 2 - 1, L / 2, H / 2)
     sim_cfg.rays["absorbers"] = [(W / 2 + 1, L / 2, H / 2)]
 
@@ -88,7 +89,9 @@ if __name__ == "__main__":
     target_sr = int(1 / sim_cfg.engine["time_step"])
     audio, orig_sr = sf.read("resources/audio/p226_008_mic1.wav")
     audio = librosa.resample(audio, orig_sr=orig_sr, target_sr=target_sr)
-    sf.write(os.path.join(sim_cfg.paths["project_dir"], "original.wav"), data=audio, samplerate=target_sr)
+    sf.write(
+        os.path.join(sim_cfg.paths["project_dir"], "original.wav"), data=audio, samplerate=target_sr
+    )
 
     num_absorbers = len(ir_all.columns)
     for an in range(num_absorbers):
