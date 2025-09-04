@@ -36,7 +36,7 @@ types. This base could cover:
 - reusable template engines (e.g., for ray tracing or heat transfer through solids).
 
 For this base code to be adopted by others, the following supplementary goals must be met:
-- easy installation (ideally `pip install`),
+- easy installation (like `uv sync`),
 - minimal dependencies.
 
 The goal I’ve set is too ambitious for one person. More realistically, I’ll
@@ -93,17 +93,16 @@ NUMBA_DISABLE_JIT=1 python examples/building_example.py
 ## Installation
 
 Currently, the package on PyPi is not kept up to date (but I reserved the
-spot;), so it's best to clone this repository and install with `pip`:
+spot;), so it's best to clone this repository and install with `uv`:
 
 ```bash
-python3.10 -m venv venv
-source venv/bin/activate
-pip install -e .[dev]
+uv sync
 ```
 
-Optional dependencies:
+Optional dependency for source code line counting:
 ```
-sudo apt install cloc  # for source code line counting
+sudo dnf install cloc  # Fedora
+sudo apt install cloc  # Ubuntu
 ```
 
 ## Testing
@@ -112,12 +111,12 @@ Please note that the package has been tested only on Linux!
 
 Run unit tests:
 ```
-make test
+uv run make test
 ```
 
 Produce a coverage report:
 ```
-make coverage
+uv run make coverage
 ```
 
 ## Documentation
