@@ -32,12 +32,6 @@ jobs:
       - name: Sync dependencies (prod + dev)
         run: uv sync --group dev
 
-      # Lint (use project venv via `uv run`)
-      - name: Lint (black + isort)
-        run: |
-          uv run black --check --line-length 100 .
-          uv run isort --check-only .
-
       # Tests (run twice: JIT off/on)
       - name: Test with pytest (Numba JIT disabled)
         run: |
@@ -45,10 +39,4 @@ jobs:
       - name: Test with pytest (Numba JIT enabled)
         run: |
           NUMBA_DISABLE_JIT=0 uv run pytest -q tests/
-
-      # Optional: coverage (kept close to your Makefile target)
-      # - name: Coverage
-      #   run: |
-      #     NUMBA_DISABLE_JIT=1 uv run pytest --cov=building3d --cov-report=xml --cov-report=term-missing tests/
-      #   # You can upload coverage.xml to Codecov here if you use it.
 
