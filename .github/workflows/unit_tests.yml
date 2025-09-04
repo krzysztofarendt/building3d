@@ -26,7 +26,7 @@ jobs:
 
       # Headless display for PyVista
       - name: Setup headless display
-        uses: pyvista/setup-headless-display-action@v2
+        uses: pyvista/setup-headless-display-action@v3
 
       # Resolve + create project venv with dev deps
       - name: Sync dependencies (prod + dev)
